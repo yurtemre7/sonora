@@ -25,15 +25,4 @@ class VolumeService {
     }
   }
 
-  /// Opens the phone's native file explorer at the directory containing [filePath].
-  Future<bool> openFolder(String filePath) async {
-    try {
-      var result = await _channel.invokeMethod<bool>('openFolder', {'filePath': filePath});
-      return result ?? false;
-    } on PlatformException catch (_) {
-      return false;
-    } on MissingPluginException catch (_) {
-      return false;
-    }
-  }
 }

@@ -14,7 +14,6 @@ import 'package:sonora/screens/settings_screen.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/permission_service.dart';
-import 'package:sonora/services/volume_service.dart';
 import 'package:sonora/theme/app_theme.dart';
 
 class SonoraApp extends StatefulWidget {
@@ -232,18 +231,7 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> _showInFolder(Song song) async {
-    var volumeService = VolumeService();
-    var success = await volumeService.openFolder(song.filePath);
-    if (!success) {
-      _scaffoldMessengerKey.currentState?.showSnackBar(
-        const SnackBar(
-          content: Text('Could not open folder on this device.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
+
 
   Future<void> _resetApp() async {
     var appDir = await getApplicationDocumentsDirectory();
@@ -362,7 +350,6 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
                     onAddSongToPlaylist: _onAddSongToPlaylist,
                     onRemoveSongFromPlaylist: _onRemoveSongFromPlaylist,
                     onReorderPlaylistSongs: _onReorderPlaylistSongs,
-                    onShowInFolder: _showInFolder,
                     isSyncing: _isSyncing,
                   ),
                 ),

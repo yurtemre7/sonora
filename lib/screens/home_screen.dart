@@ -22,7 +22,6 @@ class HomeScreen extends StatefulWidget {
     required this.onAddSongToPlaylist,
     required this.onRemoveSongFromPlaylist,
     required this.onReorderPlaylistSongs,
-    required this.onShowInFolder,
     required this.isSyncing,
   });
 
@@ -38,7 +37,6 @@ class HomeScreen extends StatefulWidget {
   final Future<void> Function(String playlistId, int songId) onAddSongToPlaylist;
   final Future<void> Function(String playlistId, int songId) onRemoveSongFromPlaylist;
   final Future<void> Function(String playlistId, List<int> reorderedIds) onReorderPlaylistSongs;
-  final Future<void> Function(Song song) onShowInFolder;
   final bool isSyncing;
 
   @override
@@ -525,7 +523,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                         onTap: () => widget.playerProvider.playSong(song, filteredSongs),
                                         onPlayNext: () => widget.playerProvider.playNext(song),
                                         onAddToQueue: () => widget.playerProvider.addToQueue(song),
-                                        onShowInFolder: () => widget.onShowInFolder(song),
                                         onAddToPlaylist: () => _showAddToPlaylistDialog(song),
                                         onShowInfo: () => _showSongInfoBottomSheet(song),
                                         onToggleFavorite: () => widget.playerProvider.toggleFavorite(song.id),

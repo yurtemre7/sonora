@@ -200,10 +200,11 @@ class PlayerProvider extends ChangeNotifier {
   // ── Queue manipulation ────────────────────────────────────────────────────
 
   /// Removes the song at [index] from the queue.
-  void removeFromQueue(int index) {
+  Future<void> removeFromQueue(int index) async {
     if (index < 0 || index >= queue.length) return;
 
     queue.removeAt(index);
+    await audioHandler.removeQueueItemAt(index);
 
     // Adjust currentIndex if needed.
     if (index < currentIndex) {
@@ -219,7 +220,7 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   /// Moves a song in the queue from [oldIndex] to [newIndex].
-  void moveInQueue(int oldIndex, int newIndex) {
+  Future<void> moveInQueue(int oldIndex, int newIndex) async {
     if (oldIndex < 0 || oldIndex >= queue.length) return;
     if (newIndex < 0 || newIndex > queue.length) return;
 
@@ -228,6 +229,7 @@ class PlayerProvider extends ChangeNotifier {
 
     var song = queue.removeAt(oldIndex);
     queue.insert(newIndex, song);
+    await audioHandler.moveQueueItem(oldIndex, newIndex);
 
     // Keep currentIndex tracking the same song.
     if (oldIndex == currentIndex) {
@@ -242,19 +244,21 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   /// Appends [song] to the end of the queue.
-  void addToQueue(Song song) {
+  Future<void> addToQueue(Song song) async {
     queue.add(song);
+    await audioHandler.addQueueItem(_songToMediaItem(song));
     notifyListeners();
   }
 
   /// Inserts [song] immediately after the currently playing song.
-  void playNext(Song song) {
+  Future<void> playNext(Song song) async {
     var insertIndex = currentIndex + 1;
     if (insertIndex >= queue.length) {
       queue.add(song);
     } else {
       queue.insert(insertIndex, song);
     }
+    await audioHandler.insertQueueItemAt(insertIndex, _songToMediaItem(song));
     notifyListeners();
   }
 

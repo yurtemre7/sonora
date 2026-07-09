@@ -11,7 +11,6 @@ class SongTile extends StatelessWidget {
     this.onLongPress,
     this.onPlayNext,
     this.onAddToQueue,
-    this.onShowInFolder,
     this.onAddToPlaylist,
     this.onShowInfo,
     this.onToggleFavorite,
@@ -22,7 +21,6 @@ class SongTile extends StatelessWidget {
   final VoidCallback? onLongPress;
   final VoidCallback? onPlayNext;
   final VoidCallback? onAddToQueue;
-  final VoidCallback? onShowInFolder;
   final VoidCallback? onAddToPlaylist;
   final VoidCallback? onShowInfo;
   final VoidCallback? onToggleFavorite;
@@ -77,7 +75,7 @@ class SongTile extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            if (onPlayNext != null || onAddToQueue != null || onShowInFolder != null || onAddToPlaylist != null || onShowInfo != null || onToggleFavorite != null) ...[
+            if (onPlayNext != null || onAddToQueue != null || onAddToPlaylist != null || onShowInfo != null || onToggleFavorite != null) ...[
               const SizedBox(width: 4),
               PopupMenuButton<int>(
                 icon: Icon(
@@ -90,7 +88,6 @@ class SongTile extends StatelessWidget {
                 onSelected: (value) {
                   if (value == 1 && onPlayNext != null) onPlayNext!();
                   if (value == 2 && onAddToQueue != null) onAddToQueue!();
-                  if (value == 3 && onShowInFolder != null) onShowInFolder!();
                   if (value == 4 && onAddToPlaylist != null) onAddToPlaylist!();
                   if (value == 5 && onShowInfo != null) onShowInfo!();
                   if (value == 6 && onToggleFavorite != null) onToggleFavorite!();
@@ -115,17 +112,6 @@ class SongTile extends StatelessWidget {
                           Icon(Icons.queue_music_rounded, size: 20),
                           SizedBox(width: 8),
                           Text('Add to Queue'),
-                        ],
-                      ),
-                    ),
-                  if (onShowInFolder != null)
-                    const PopupMenuItem(
-                      value: 3,
-                      child: Row(
-                        children: [
-                          Icon(Icons.folder_open_rounded, size: 20),
-                          SizedBox(width: 8),
-                          Text('Show in folder'),
                         ],
                       ),
                     ),
