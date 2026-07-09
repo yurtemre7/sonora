@@ -290,7 +290,13 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
           darkTheme: AppTheme.darkTheme,
           themeMode: _themeProvider.themeMode,
           debugShowCheckedModeBanner: false,
-      home: _isLoading
+          builder: (context, child) {
+            return GestureDetector(
+              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+              child: child,
+            );
+          },
+          home: _isLoading
           ? const Scaffold(
               body: Center(
                 child: CircularProgressIndicator(),
