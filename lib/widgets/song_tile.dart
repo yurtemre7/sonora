@@ -14,6 +14,8 @@ class SongTile extends StatelessWidget {
     this.onAddToPlaylist,
     this.onShowInfo,
     this.onToggleFavorite,
+    this.isCurrent = false,
+    this.showHighlightBackground = true,
   });
 
   final Song song;
@@ -24,57 +26,77 @@ class SongTile extends StatelessWidget {
   final VoidCallback? onAddToPlaylist;
   final VoidCallback? onShowInfo;
   final VoidCallback? onToggleFavorite;
+  final bool isCurrent;
+  final bool showHighlightBackground;
 
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
 
-    return InkWell(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          children: [
-            AlbumArt(
-              artworkPath: song.artworkPath,
-              size: 48,
-              borderRadius: 10,
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    song.title,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    song.artist,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+    return Container(
+      decoration: BoxDecoration(
+        color: isCurrent && showHighlightBackground
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
+            : Colors.transparent,
+        border: Border(
+          left: BorderSide(
+            color: isCurrent && showHighlightBackground ? theme.colorScheme.primary : Colors.transparent,
+            width: 3.5,
+          ),
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            children: [
+              AlbumArt(
+                artworkPath: song.artworkPath,
+                size: 48,
+                borderRadius: 10,
               ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              song.durationFormatted,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      song.title,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isCurrent ? theme.colorScheme.primary : null,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      song.artist,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isCurrent
+                            ? theme.colorScheme.primary.withValues(alpha: 0.7)
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Text(
+                song.durationFormatted,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: isCurrent
+                      ? theme.colorScheme.primary.withValues(alpha: 0.7)
+                      : theme.colorScheme.onSurfaceVariant,
+                  fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
             if (onPlayNext != null || onAddToQueue != null || onAddToPlaylist != null || onShowInfo != null || onToggleFavorite != null) ...[
               const SizedBox(width: 4),
               PopupMenuButton<int>(
@@ -158,6 +180,7 @@ class SongTile extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

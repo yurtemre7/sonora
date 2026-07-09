@@ -100,97 +100,102 @@ class _QueueScreenState extends State<QueueScreen> {
                   : 'Queue',
             ),
           ),
-          body: ReorderableListView.builder(
-            scrollController: _scrollController,
-            itemCount: queue.length,
-            // ignore: deprecated_member_use
-            onReorder: widget.playerProvider.moveInQueue,
-            padding: const EdgeInsets.only(bottom: 24, top: 8),
-            itemBuilder: (context, index) {
-              var song = queue[index];
-              var isCurrent = current != null && song.id == current.id && index == currentIndex;
-              var isOld = index < currentIndex;
+          body: Scrollbar(
+            controller: _scrollController,
+            child: ReorderableListView.builder(
+              scrollController: _scrollController,
+              itemCount: queue.length,
+              // ignore: deprecated_member_use
+              onReorder: widget.playerProvider.moveInQueue,
+              padding: const EdgeInsets.only(bottom: 24, top: 8),
+              itemBuilder: (context, index) {
+                var song = queue[index];
+                var isCurrent = current != null && song.id == current.id && index == currentIndex;
+                var isOld = index < currentIndex;
 
-              return Dismissible(
-                key: ValueKey<String>('${song.id}_$index'),
-                direction: DismissDirection.endToStart,
-                background: Container(
-                  color: theme.colorScheme.errorContainer,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 24.0),
-                  child: Icon(
-                    Icons.delete_sweep_rounded,
-                    color: theme.colorScheme.onErrorContainer,
-                  ),
-                ),
-                onDismissed: (_) {
-                  widget.playerProvider.removeFromQueue(index);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Removed "${song.title}" from queue'),
-                      duration: const Duration(seconds: 2),
-                      behavior: SnackBarBehavior.floating,
+                return Dismissible(
+                  key: ValueKey<String>('${song.id}_$index'),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: theme.colorScheme.errorContainer,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 24.0),
+                    child: Icon(
+                      Icons.delete_sweep_rounded,
+                      color: theme.colorScheme.onErrorContainer,
                     ),
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isCurrent
-                        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
-                        : Colors.transparent,
-                    border: Border(
-                      left: BorderSide(
-                        color: isCurrent ? theme.colorScheme.primary : Colors.transparent,
-                        width: 3.5,
+                  ),
+                  onDismissed: (_) {
+                    widget.playerProvider.removeFromQueue(index);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Removed "${song.title}" from queue'),
+                        duration: const Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isCurrent
+                          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
+                          : Colors.transparent,
+                      border: Border(
+                        left: BorderSide(
+                          color: isCurrent ? theme.colorScheme.primary : Colors.transparent,
+                          width: 3.5,
+                        ),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Opacity(
+                      opacity: isOld ? 0.35 : 1.0,
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 8),
+                          ReorderableDragStartListener(
+                            index: index,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Icon(
+                                Icons.drag_handle_rounded,
+                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: isOld ? 0.25 : 0.5),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 36,
+                            child: Text(
+                              '${index + 1}',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: isCurrent
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: isOld ? 0.35 : 0.7),
+                                fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: SongTile(
+                              song: song,
+                              isCurrent: isCurrent,
+                              showHighlightBackground: false,
+                              onTap: () {
+                                if (!isCurrent) {
+                                  widget.playerProvider.audioHandler.skipToQueueItem(index);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: Opacity(
-                    opacity: isOld ? 0.35 : 1.0,
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 8),
-                        ReorderableDragStartListener(
-                          index: index,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Icon(
-                              Icons.drag_handle_rounded,
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: isOld ? 0.25 : 0.5),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 36,
-                          child: Text(
-                            '${index + 1}',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isCurrent
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: isOld ? 0.35 : 0.7),
-                              fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: SongTile(
-                            song: song,
-                            onTap: () {
-                              if (!isCurrent) {
-                                widget.playerProvider.audioHandler.skipToQueueItem(index);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         );
       },

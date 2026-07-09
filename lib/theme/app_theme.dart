@@ -113,6 +113,18 @@ class AppTheme {
         color: colorScheme.primary,
         linearTrackColor: Colors.transparent,
       ),
+      scrollbarTheme: ScrollbarThemeData(
+        thickness: WidgetStateProperty.all(8.0),
+        radius: const Radius.circular(8.0),
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.dragged) ||
+              states.contains(WidgetState.hovered)) {
+            return colorScheme.primary;
+          }
+          return colorScheme.primary.withValues(alpha: 0.5);
+        }),
+        interactive: true,
+      ),
     );
   }
 

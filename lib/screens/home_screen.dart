@@ -45,6 +45,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final _songsScrollController = ScrollController();
   var _searchQuery = '';
   var _sortBy = 'title';
   var _sortAscending = true;
@@ -297,6 +298,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void dispose() {
     _tabController.dispose();
+    _songsScrollController.dispose();
     super.dispose();
   }
 
@@ -512,21 +514,33 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                       ),
                                     ),
                                   )
-                                : ListView.builder(
-                                    padding: const EdgeInsets.only(bottom: 100),
-                                    itemCount: _getFilteredSongs().length,
-                                    itemBuilder: (context, index) {
+                                : ListenableBuilder(
+                                    listenable: widget.playerProvider,
+                                    builder: (context, _) {
                                       var filteredSongs = _getFilteredSongs();
-                                      var song = filteredSongs[index];
-                                      return SongTile(
-                                        song: song,
-                                        onTap: () => widget.playerProvider.playSong(song, filteredSongs),
-                                        onPlayNext: () => widget.playerProvider.playNext(song),
-                                        onAddToQueue: () => widget.playerProvider.addToQueue(song),
-                                        onAddToPlaylist: () => _showAddToPlaylistDialog(song),
-                                        onShowInfo: () => _showSongInfoBottomSheet(song),
-                                        onToggleFavorite: () => widget.playerProvider.toggleFavorite(song.id),
-                                      );
+                                      var currentSong = widget.playerProvider.currentSong;
+                                       return Scrollbar(
+                                         controller: _songsScrollController,
+                                         child: ListView.builder(
+                                           controller: _songsScrollController,
+                                           padding: const EdgeInsets.only(bottom: 100),
+                                           itemCount: filteredSongs.length,
+                                           itemBuilder: (context, index) {
+                                             var song = filteredSongs[index];
+                                             var isCurrent = currentSong != null && currentSong.id == song.id;
+                                             return SongTile(
+                                               song: song,
+                                               isCurrent: isCurrent,
+                                               onTap: () => widget.playerProvider.playSong(song, filteredSongs),
+                                               onPlayNext: () => widget.playerProvider.playNext(song),
+                                               onAddToQueue: () => widget.playerProvider.addToQueue(song),
+                                               onAddToPlaylist: () => _showAddToPlaylistDialog(song),
+                                               onShowInfo: () => _showSongInfoBottomSheet(song),
+                                               onToggleFavorite: () => widget.playerProvider.toggleFavorite(song.id),
+                                             );
+                                           },
+                                         ),
+                                       );
                                     },
                                   ),
                           ),

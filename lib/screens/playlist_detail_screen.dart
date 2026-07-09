@@ -29,11 +29,18 @@ class PlaylistDetailScreen extends StatefulWidget {
 
 class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
   late List<Song> _playlistSongs;
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _updatePlaylistSongs();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -93,50 +100,54 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                 ),
               ),
             )
-          : ReorderableListView.builder(
-              padding: const EdgeInsets.only(bottom: 100),
-              itemCount: _playlistSongs.length,
-              onReorderItem: (oldIndex, newIndex) async {
-                var updatedIds = List<int>.from(widget.playlist.songIds);
-                var songId = updatedIds.removeAt(oldIndex);
-                updatedIds.insert(newIndex, songId);
+          : Scrollbar(
+              controller: _scrollController,
+              child: ReorderableListView.builder(
+                scrollController: _scrollController,
+                padding: const EdgeInsets.only(bottom: 100),
+                itemCount: _playlistSongs.length,
+                onReorderItem: (oldIndex, newIndex) async {
+                  var updatedIds = List<int>.from(widget.playlist.songIds);
+                  var songId = updatedIds.removeAt(oldIndex);
+                  updatedIds.insert(newIndex, songId);
 
-                await widget.onReorderSongs(widget.playlist.id, updatedIds);
-              },
-              itemBuilder: (context, index) {
-                var song = _playlistSongs[index];
-                return Dismissible(
-                  key: ValueKey(song.id),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    color: theme.colorScheme.errorContainer,
-                    child: Icon(
-                      Icons.delete_outline_rounded,
-                      color: theme.colorScheme.onErrorContainer,
-                    ),
-                  ),
-                  onDismissed: (direction) async {
-                    await widget.onRemoveSong(widget.playlist.id, song.id);
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Removed "${song.title}" from playlist.'),
-                        behavior: SnackBarBehavior.floating,
+                  await widget.onReorderSongs(widget.playlist.id, updatedIds);
+                },
+                itemBuilder: (context, index) {
+                  var song = _playlistSongs[index];
+                  return Dismissible(
+                    key: ValueKey(song.id),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      color: theme.colorScheme.errorContainer,
+                      child: Icon(
+                        Icons.delete_outline_rounded,
+                        color: theme.colorScheme.onErrorContainer,
                       ),
-                    );
-                  },
-                  child: SongTile(
-                    song: song,
-                    onTap: () {
-                      widget.playerProvider.playSong(song, _playlistSongs);
+                    ),
+                    onDismissed: (direction) async {
+                      await widget.onRemoveSong(widget.playlist.id, song.id);
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Removed "${song.title}" from playlist.'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
                     },
-                    onPlayNext: () => widget.playerProvider.playNext(song),
-                    onAddToQueue: () => widget.playerProvider.addToQueue(song),
-                  ),
-                );
-              },
+                    child: SongTile(
+                      song: song,
+                      onTap: () {
+                        widget.playerProvider.playSong(song, _playlistSongs);
+                      },
+                      onPlayNext: () => widget.playerProvider.playNext(song),
+                      onAddToQueue: () => widget.playerProvider.addToQueue(song),
+                    ),
+                  );
+                },
+              ),
             ),
       floatingActionButton: _playlistSongs.isEmpty
           ? null
