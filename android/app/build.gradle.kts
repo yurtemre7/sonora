@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.sonora.sonora"
+    namespace = "de.yurtemre.sonora"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.sonora.sonora"
+        applicationId = "de.yurtemre.sonora"
         minSdk = 24
         targetSdk = 36
         versionCode = flutter.versionCode

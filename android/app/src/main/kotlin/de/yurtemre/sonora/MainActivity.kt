@@ -1,4 +1,4 @@
-package com.sonora.sonora
+package de.yurtemre.sonora
 
 import android.content.Context
 import android.media.AudioManager
