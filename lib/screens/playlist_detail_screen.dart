@@ -34,10 +34,12 @@ class PlaylistDetailScreen extends StatefulWidget {
 class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
   late List<Song> _playlistSongs;
   final _scrollController = ScrollController();
+  late Playlist _playlist;
 
   @override
   void initState() {
     super.initState();
+    _playlist = widget.playlist;
     _updatePlaylistSongs();
   }
 
@@ -50,13 +52,16 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
   @override
   void didUpdateWidget(covariant PlaylistDetailScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _playlist = widget.playlist;
     _updatePlaylistSongs();
   }
 
   void _updatePlaylistSongs() {
-    // Map song IDs to actual Song objects, filtering out any that no longer exist on disk
-    _playlistSongs = widget.songs
-        .where((s) => widget.playlist.songIds.contains(s.id))
+    // Map song IDs to actual Song objects preserving the exact order in the playlist
+    var songMap = {for (var s in widget.songs) s.id: s};
+    _playlistSongs = _playlist.songIds
+        .map((id) => songMap[id])
+        .whereType<Song>()
         .toList();
   }
 
@@ -220,11 +225,13 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                 padding: const EdgeInsets.only(bottom: 100),
                 itemCount: _playlistSongs.length,
                 onReorderItem: (oldIndex, newIndex) async {
-                  var updatedIds = List<int>.from(widget.playlist.songIds);
-                  var songId = updatedIds.removeAt(oldIndex);
-                  updatedIds.insert(newIndex, songId);
+                  setState(() {
+                    var songId = _playlist.songIds.removeAt(oldIndex);
+                    _playlist.songIds.insert(newIndex, songId);
+                    _updatePlaylistSongs();
+                  });
 
-                  await widget.onReorderSongs(widget.playlist.id, updatedIds);
+                  await widget.onReorderSongs(_playlist.id, _playlist.songIds);
                 },
                 itemBuilder: (context, index) {
                   var song = _playlistSongs[index];
@@ -241,7 +248,11 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                       ),
                     ),
                     onDismissed: (direction) async {
-                      await widget.onRemoveSong(widget.playlist.id, song.id);
+                      setState(() {
+                        _playlist.songIds.remove(song.id);
+                        _updatePlaylistSongs();
+                      });
+                      await widget.onRemoveSong(_playlist.id, song.id);
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
