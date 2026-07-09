@@ -16,7 +16,7 @@ class PermissionService {
     var audioGranted = false;
 
     try {
-      var sdkInt = await _getAndroidSdk();
+      var sdkInt = await getAndroidSdk();
       if (sdkInt >= 33) {
         // Android 13+ uses granular media permission
         var status = await Permission.audio.request();
@@ -45,7 +45,7 @@ class PermissionService {
     return audioGranted;
   }
 
-  Future<int> _getAndroidSdk() async {
+  Future<int> getAndroidSdk() async {
     try {
       var sdk = await _channel.invokeMethod<int>('getAndroidSdk');
       return sdk ?? 0;

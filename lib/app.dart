@@ -4,12 +4,14 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/screens/home_screen.dart';
 import 'package:sonora/screens/now_playing_screen.dart';
+import 'package:sonora/screens/onboarding_screen.dart';
 import 'package:sonora/screens/settings_screen.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
@@ -37,6 +39,7 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
   final _themeProvider = ThemeProvider();
   var _sortBy = 'title';
   var _sortAscending = true;
+  var _showOnboarding = false;
 
   @override
   void initState() {
@@ -76,6 +79,19 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
       _isLoading = true;
     });
 
+    // Check if onboarding is completed
+    var prefs = SharedPreferencesAsync();
+    var onboardingCompleted = await prefs.getBool('onboarding_completed') ?? false;
+
+    if (!onboardingCompleted) {
+      if (!mounted) return;
+      setState(() {
+        _showOnboarding = true;
+        _isLoading = false;
+      });
+      return;
+    }
+
     var permissionService = PermissionService();
     var granted = await permissionService.requestAllPermissions();
 
@@ -112,6 +128,50 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
 
     // Run directory background scan asynchronously after visual render
     _syncSongsSilently();
+  }
+
+  Future<void> _completeOnboarding(String? selectedFolder) async {
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('onboarding_completed', true);
+
+    if (!mounted) return;
+    setState(() {
+      _showOnboarding = false;
+    });
+
+    if (selectedFolder != null) {
+      setState(() {
+        _isLoading = true;
+      });
+      var scanner = MusicScanner();
+      await scanner.setScanFolder(selectedFolder);
+      var newSongs = await scanner.importFromFolder(selectedFolder);
+      var updatedSongs = await scanner.scanAllSongs();
+      var playlists = await scanner.getPlaylists();
+      
+      if (!mounted) return;
+      setState(() {
+        _scanFolder = selectedFolder;
+        _songs = updatedSongs;
+        _playlists = playlists;
+        _hasPermission = true;
+        _isLoading = false;
+      });
+      _playerProvider.updateSongs(updatedSongs);
+
+      _scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Text(
+            newSongs.isNotEmpty
+                ? 'Sync folder configured. Imported ${newSongs.length} new ${newSongs.length == 1 ? 'song' : 'songs'}!'
+                : 'Sync folder configured successfully!',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      _loadSongs();
+    }
   }
 
   Future<void> _syncSongsSilently() async {
@@ -253,11 +313,15 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
       playlistsFile.deleteSync();
     }
 
+    var prefs = SharedPreferencesAsync();
+    await prefs.remove('onboarding_completed');
+
     if (!mounted) return;
     setState(() {
       _scanFolder = null;
       _songs = [];
       _playlists = [];
+      _showOnboarding = true;
     });
     _playerProvider.updateSongs([]);
 
@@ -307,7 +371,9 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
                 child: CircularProgressIndicator(),
               ),
             )
-          : !_hasPermission
+          : _showOnboarding
+              ? OnboardingScreen(onComplete: _completeOnboarding)
+              : !_hasPermission
               ? Scaffold(
                   body: Center(
                     child: Padding(
