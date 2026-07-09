@@ -10,6 +10,8 @@ class Song {
   final int? bitrate;
   final int? samplerate;
   final bool isFavorite;
+  final int? lastModifiedMs;
+  final int? fileSize;
 
   Song({
     required this.id,
@@ -23,6 +25,8 @@ class Song {
     this.bitrate,
     this.samplerate,
     this.isFavorite = false,
+    this.lastModifiedMs,
+    this.fileSize,
   });
 
   String get durationFormatted {

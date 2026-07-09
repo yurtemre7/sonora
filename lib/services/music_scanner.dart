@@ -29,7 +29,7 @@ class MusicScanner {
   }
 
   /// Performs an asynchronous background scan of the sync folder, updating the metadata index.
-  /// Runs inside a background isolate to keep the UI thread completely free and responsive.
+  /// Runs inside a background isolate and checks file size/modification times to skip unchanged files.
   Future<List<Song>> syncLibrary() async {
     try {
       var folderPath = await getScanFolder();
@@ -52,7 +52,7 @@ class MusicScanner {
         return [];
       }
 
-      // Offload all directory scanning, metadata parsing, and artwork caching to background isolate
+      // Offload all directory scanning, metadata comparison, and parsing to background isolate
       var resultSongs = await Isolate.run<List<Song>>(() {
         var localCachedSongs = List<Song>.from(cachedSongs);
 
@@ -78,61 +78,43 @@ class MusicScanner {
         var foundPaths = foundFiles.map((f) => f.path).toSet();
         var verifiedSongs = localCachedSongs.where((s) => foundPaths.contains(s.filePath)).toList();
 
-        // Migrate existing songs that were cached with placeholders
-        for (var i = 0; i < verifiedSongs.length; i++) {
-          var song = verifiedSongs[i];
-          if (song.artist == 'Local Audio' || song.album == 'Synced Folder') {
+        // Create quick lookup maps of existing cache
+        var cacheMap = {for (var s in verifiedSongs) s.filePath: s};
+        var existingIds = {for (var s in verifiedSongs) s.filePath: s.id};
+        var existingFavoriteStatus = {for (var s in verifiedSongs) s.filePath: s.isFavorite};
+
+        var songsToKeep = <Song>[];
+        var filesToScan = <File>[];
+
+        // Check each file's size and mtime to decide if we need to re-parse it
+        for (var file in foundFiles) {
+          var cached = cacheMap[file.path];
+          if (cached != null) {
             try {
-              var meta = tags.readMetadata(song.filePath, true);
-              if (meta != null) {
-                var title = meta.title?.trim();
-                var artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
-                var album = meta.album?.trim();
-                var format = meta.format?.trim();
-                var bitrate = meta.bitrate;
-                var samplerate = meta.samplerate;
-                String? artworkPath;
+              var stat = file.statSync();
+              var mtime = stat.modified.millisecondsSinceEpoch;
+              var size = stat.size;
 
-                if (meta.pictureBytes != null && meta.pictureBytes!.isNotEmpty) {
-                  var artFile = File('$appDocsDirPath/artwork_${DateTime.now().millisecondsSinceEpoch}_${song.id}.jpg');
-                  artFile.writeAsBytesSync(meta.pictureBytes!);
-                  artworkPath = artFile.path;
-                }
-
-                var fileName = song.filePath.split(Platform.pathSeparator).last;
-                var extIndex = fileName.lastIndexOf('.');
-                var defaultTitle = extIndex != -1 ? fileName.substring(0, extIndex) : fileName;
-
-                verifiedSongs[i] = Song(
-                  id: song.id,
-                  title: (title == null || title.isEmpty) ? defaultTitle : title,
-                  artist: (artist == null || artist.isEmpty) ? 'Unknown Artist' : artist,
-                  album: (album == null || album.isEmpty) ? 'Unknown Album' : album,
-                  duration: song.duration,
-                  filePath: song.filePath,
-                  artworkPath: artworkPath ?? song.artworkPath,
-                  format: format,
-                  bitrate: bitrate,
-                  samplerate: samplerate,
-                );
+              if (cached.lastModifiedMs == mtime && cached.fileSize == size &&
+                  cached.artist != 'Local Audio' && cached.album != 'Synced Folder') {
+                // Completely unchanged, keep cached song model (fast paths)
+                songsToKeep.add(cached);
+                continue;
               }
             } catch (_) {}
           }
+          // File is either brand new or modified/replaced on disk
+          filesToScan.add(file);
         }
 
-        // Find files that are not yet in verified cache (new files)
-        var verifiedPaths = verifiedSongs.map((s) => s.filePath).toSet();
-        var newFiles = foundFiles.where((f) => !verifiedPaths.contains(f.path)).toList();
-
-        if (newFiles.isNotEmpty) {
+        if (filesToScan.isNotEmpty) {
           var idCounter = verifiedSongs.isEmpty
               ? 1
               : verifiedSongs.map((s) => s.id).reduce((a, b) => a > b ? a : b) + 1;
 
-          var newSongs = <Song>[];
-          for (var file in newFiles) {
+          for (var file in filesToScan) {
             try {
-              // Read metadata synchronously inside background isolate (includes duration parsed by lofty!)
+              // Read metadata synchronously inside background isolate
               var meta = tags.readMetadata(file.path, true);
               
               String? title;
@@ -143,6 +125,10 @@ class MusicScanner {
               int? bitrate;
               int? samplerate;
               var duration = Duration.zero;
+
+              var stat = file.statSync();
+              var mtime = stat.modified.millisecondsSinceEpoch;
+              var size = stat.size;
 
               if (meta != null) {
                 title = meta.title?.trim();
@@ -166,8 +152,12 @@ class MusicScanner {
               var extIndex = fileName.lastIndexOf('.');
               var defaultTitle = extIndex != -1 ? fileName.substring(0, extIndex) : fileName;
 
-              newSongs.add(Song(
-                id: idCounter++,
+              // Retain original ID and favorite status if the file was modified, otherwise allocate new
+              var songId = existingIds[file.path] ?? idCounter++;
+              var isFav = existingFavoriteStatus[file.path] ?? false;
+
+              songsToKeep.add(Song(
+                id: songId,
                 title: (title == null || title.isEmpty) ? defaultTitle : title,
                 artist: (artist == null || artist.isEmpty) ? 'Unknown Artist' : artist,
                 album: (album == null || album.isEmpty) ? 'Unknown Album' : album,
@@ -177,13 +167,15 @@ class MusicScanner {
                 format: format,
                 bitrate: bitrate,
                 samplerate: samplerate,
+                isFavorite: isFav,
+                lastModifiedMs: mtime,
+                fileSize: size,
               ));
             } catch (_) {}
           }
-          verifiedSongs.addAll(newSongs);
         }
 
-        return verifiedSongs;
+        return songsToKeep;
       });
 
       // Save updated index to JSON
@@ -359,6 +351,8 @@ class MusicScanner {
           bitrate: song.bitrate,
           samplerate: song.samplerate,
           isFavorite: newFavoriteStatus,
+          lastModifiedMs: song.lastModifiedMs,
+          fileSize: song.fileSize,
         );
         
         await _writeImportedSongsMetadata(songs);
@@ -454,6 +448,8 @@ class MusicScanner {
           bitrate: item['bitrate'] as int?,
           samplerate: item['samplerate'] as int?,
           isFavorite: item['is_favorite'] as bool? ?? false,
+          lastModifiedMs: item['last_modified_ms'] as int?,
+          fileSize: item['file_size'] as int?,
         );
       }).toList();
     } catch (_) {
@@ -478,6 +474,8 @@ class MusicScanner {
         'bitrate': s.bitrate,
         'samplerate': s.samplerate,
         'is_favorite': s.isFavorite,
+        'last_modified_ms': s.lastModifiedMs,
+        'file_size': s.fileSize,
       }).toList();
 
       await jsonFile.writeAsString(jsonEncode(jsonList));

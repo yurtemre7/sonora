@@ -294,6 +294,8 @@ class PlayerProvider extends ChangeNotifier {
           bitrate: song.bitrate,
           samplerate: song.samplerate,
           isFavorite: !song.isFavorite,
+          lastModifiedMs: song.lastModifiedMs,
+          fileSize: song.fileSize,
         );
       }
     }
@@ -314,6 +316,8 @@ class PlayerProvider extends ChangeNotifier {
           bitrate: song.bitrate,
           samplerate: song.samplerate,
           isFavorite: !song.isFavorite,
+          lastModifiedMs: song.lastModifiedMs,
+          fileSize: song.fileSize,
         );
       }
     }
