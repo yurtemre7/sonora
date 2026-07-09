@@ -5,12 +5,13 @@ import 'dart:typed_data';
 
 import 'package:audio_tags_lofty/audio_tags_lofty.dart' as tags;
 import 'package:path_provider/path_provider.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 
 /// Handles scanning, custom file references, and playlists for the application library.
 class MusicScanner {
+  final _prefs = SharedPreferencesAsync();
   /// Queries the cached list of songs from storage instantly.
   Future<List<Song>> scanAllSongs() async {
     var songs = <Song>[];
@@ -224,103 +225,65 @@ class MusicScanner {
     }
   }
 
-  /// Reads the configured scan folder path from settings.json.
+  /// Reads the configured scan folder path from shared preferences.
   Future<String?> getScanFolder() async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var settingsFile = File('${appDir.path}/settings.json');
-      if (!settingsFile.existsSync()) return null;
-
-      var content = await settingsFile.readAsString();
-      var json = jsonDecode(content) as Map<String, dynamic>;
-      return json['scan_folder_path'] as String?;
+      return await _prefs.getString('scan_folder_path');
     } catch (_) {
       return null;
     }
   }
 
-  /// Writes the configured scan folder path to settings.json.
+  /// Writes the configured scan folder path to shared preferences.
   Future<void> setScanFolder(String? path) async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var settingsFile = File('${appDir.path}/settings.json');
-      var json = <String, dynamic>{};
-      if (settingsFile.existsSync()) {
-        try {
-          var content = await settingsFile.readAsString();
-          json = Map<String, dynamic>.from(jsonDecode(content) as Map);
-        } catch (_) {}
+      if (path == null) {
+        await _prefs.remove('scan_folder_path');
+      } else {
+        await _prefs.setString('scan_folder_path', path);
       }
-      json['scan_folder_path'] = path;
-      await settingsFile.writeAsString(jsonEncode(json));
     } catch (_) {}
   }
 
-  /// Reads the last sync time from settings.json.
+  /// Reads the last sync time from shared preferences.
   Future<String?> getLastSyncTime() async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var settingsFile = File('${appDir.path}/settings.json');
-      if (!settingsFile.existsSync()) return null;
-
-      var content = await settingsFile.readAsString();
-      var json = jsonDecode(content) as Map<String, dynamic>;
-      return json['last_sync_time'] as String?;
+      return await _prefs.getString('last_sync_time');
     } catch (_) {
       return null;
     }
   }
 
-  /// Writes the last sync time to settings.json.
+  /// Writes the last sync time to shared preferences.
   Future<void> setLastSyncTime(String? timestamp) async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var settingsFile = File('${appDir.path}/settings.json');
-      var json = <String, dynamic>{};
-      if (settingsFile.existsSync()) {
-        try {
-          var content = await settingsFile.readAsString();
-          json = Map<String, dynamic>.from(jsonDecode(content) as Map);
-        } catch (_) {}
+      if (timestamp == null) {
+        await _prefs.remove('last_sync_time');
+      } else {
+        await _prefs.setString('last_sync_time', timestamp);
       }
-      json['last_sync_time'] = timestamp;
-      await settingsFile.writeAsString(jsonEncode(json));
     } catch (_) {}
   }
 
-  /// Reads the sorting configuration from settings.json.
+  /// Reads the sorting configuration from shared preferences.
   Future<Map<String, dynamic>> getSortSettings() async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var settingsFile = File('${appDir.path}/settings.json');
-      if (!settingsFile.existsSync()) return {'sortBy': 'title', 'sortAscending': true};
-
-      var content = await settingsFile.readAsString();
-      var json = jsonDecode(content) as Map<String, dynamic>;
+      var sortBy = await _prefs.getString('sort_by') ?? 'title';
+      var sortAscending = await _prefs.getBool('sort_ascending') ?? true;
       return {
-        'sortBy': json['sort_by'] as String? ?? 'title',
-        'sortAscending': json['sort_ascending'] as bool? ?? true,
+        'sortBy': sortBy,
+        'sortAscending': sortAscending,
       };
     } catch (_) {
       return {'sortBy': 'title', 'sortAscending': true};
     }
   }
 
-  /// Writes the sorting configuration to settings.json.
+  /// Writes the sorting configuration to shared preferences.
   Future<void> saveSortSettings(String sortBy, bool sortAscending) async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var settingsFile = File('${appDir.path}/settings.json');
-      var json = <String, dynamic>{};
-      if (settingsFile.existsSync()) {
-        try {
-          var content = await settingsFile.readAsString();
-          json = Map<String, dynamic>.from(jsonDecode(content) as Map);
-        } catch (_) {}
-      }
-      json['sort_by'] = sortBy;
-      json['sort_ascending'] = sortAscending;
-      await settingsFile.writeAsString(jsonEncode(json));
+      await _prefs.setString('sort_by', sortBy);
+      await _prefs.setBool('sort_ascending', sortAscending);
     } catch (_) {}
   }
 
