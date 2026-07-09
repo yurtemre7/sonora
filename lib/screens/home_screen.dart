@@ -601,7 +601,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                       ),
                                     ),
                                     title: Text(playlist.name),
-                                    subtitle: Text('$songCount song(s)'),
+                                    subtitle: Text('$songCount ${songCount == 1 ? 'song' : 'songs'}'),
                                     trailing: playlist.id == 'favorites'
                                         ? null
                                         : PopupMenuButton<int>(

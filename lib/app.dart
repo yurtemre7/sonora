@@ -40,13 +40,25 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _playerProvider = PlayerProvider(audioHandler: widget.audioHandler);
+    _playerProvider.addListener(_onPlayerProviderChanged);
     _loadSongs();
   }
 
   @override
   void dispose() {
+    _playerProvider.removeListener(_onPlayerProviderChanged);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  Future<void> _onPlayerProviderChanged() async {
+    var scanner = MusicScanner();
+    var playlists = await scanner.getPlaylists();
+    if (!mounted) return;
+    setState(() {
+      _playlists = playlists;
+      _songs = _playerProvider.allSongs;
+    });
   }
 
   @override
@@ -145,7 +157,7 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
         SnackBar(
           content: Text(
             newSongs.isNotEmpty
-                ? 'Sync folder configured. Imported ${newSongs.length} new song(s)!'
+                ? 'Sync folder configured. Imported ${newSongs.length} new ${newSongs.length == 1 ? 'song' : 'songs'}!'
                 : 'Sync folder configured successfully!',
           ),
           behavior: SnackBarBehavior.floating,
