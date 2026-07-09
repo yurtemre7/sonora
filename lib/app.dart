@@ -326,6 +326,7 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
       'last_sync_time',
       'sort_by',
       'sort_ascending',
+      'theme_mode',
     });
 
     if (!mounted) return;
