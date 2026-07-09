@@ -131,6 +131,10 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) => NowPlayingScreen(playerProvider: _playerProvider),
     );
   }

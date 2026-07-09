@@ -94,7 +94,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
               ),
             )
           : ReorderableListView.builder(
-              padding: const EdgeInsets.only(bottom: 160),
+              padding: const EdgeInsets.only(bottom: 100),
               itemCount: _playlistSongs.length,
               onReorderItem: (oldIndex, newIndex) async {
                 var updatedIds = List<int>.from(widget.playlist.songIds);
@@ -140,17 +140,14 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
             ),
       floatingActionButton: _playlistSongs.isEmpty
           ? null
-          : Container(
-              margin: const EdgeInsets.only(bottom: 80),
-              child: FloatingActionButton.extended(
-                onPressed: () {
-                  widget.playerProvider.quickShuffle(_playlistSongs);
-                },
-                icon: const Icon(Icons.shuffle_rounded),
-                label: const Text('Shuffle Play'),
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-              ),
+          : FloatingActionButton.extended(
+              onPressed: () {
+                widget.playerProvider.quickShuffle(_playlistSongs);
+              },
+              icon: const Icon(Icons.shuffle_rounded),
+              label: const Text('Shuffle Play'),
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
             ),
       bottomNavigationBar: ListenableBuilder(
         listenable: widget.playerProvider,
@@ -185,6 +182,10 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) => NowPlayingScreen(playerProvider: widget.playerProvider),
     );
   }

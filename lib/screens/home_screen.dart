@@ -514,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                         ),
                                       )
                                     : ListView.builder(
-                                        padding: const EdgeInsets.only(bottom: 160),
+                                        padding: const EdgeInsets.only(bottom: 100),
                                         itemCount: _getFilteredSongs().length,
                                         itemBuilder: (context, index) {
                                           var filteredSongs = _getFilteredSongs();
@@ -578,7 +578,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 ),
                               )
                             : ListView.builder(
-                                padding: const EdgeInsets.only(bottom: 160),
+                                padding: const EdgeInsets.only(bottom: 100),
                                 itemCount: widget.playlists.length,
                                 itemBuilder: (context, index) {
                                   var playlist = widget.playlists[index];
@@ -659,7 +659,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         if (widget.playlists.isNotEmpty)
                           Positioned(
                             right: 16,
-                            bottom: 100,
+                            bottom: 84,
                             child: FloatingActionButton(
                               onPressed: _showCreatePlaylistDialog,
                               child: const Icon(Icons.playlist_add_rounded),
