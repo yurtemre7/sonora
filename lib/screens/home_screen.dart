@@ -24,6 +24,9 @@ class HomeScreen extends StatefulWidget {
     required this.onRemoveSongFromPlaylist,
     required this.onReorderPlaylistSongs,
     required this.isSyncing,
+    required this.initialSortBy,
+    required this.initialSortAscending,
+    required this.onSortChanged,
   });
 
   final PlayerProvider playerProvider;
@@ -39,6 +42,9 @@ class HomeScreen extends StatefulWidget {
   final Future<void> Function(String playlistId, int songId) onRemoveSongFromPlaylist;
   final Future<void> Function(String playlistId, List<int> reorderedIds) onReorderPlaylistSongs;
   final bool isSyncing;
+  final String initialSortBy;
+  final bool initialSortAscending;
+  final void Function(String sortBy, bool sortAscending) onSortChanged;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -48,27 +54,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   late TabController _tabController;
   final _songsScrollController = ScrollController();
   var _searchQuery = '';
-  var _sortBy = 'title';
-  var _sortAscending = true;
+  late String _sortBy;
+  late bool _sortAscending;
 
   @override
   void initState() {
     super.initState();
+    _sortBy = widget.initialSortBy;
+    _sortAscending = widget.initialSortAscending;
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
-    _loadSavedSortSettings();
-  }
-
-  Future<void> _loadSavedSortSettings() async {
-    var settings = await MusicScanner().getSortSettings();
-    if (mounted) {
-      setState(() {
-        _sortBy = settings['sortBy'] as String;
-        _sortAscending = settings['sortAscending'] as bool;
-      });
-    }
   }
 
   List<Song> _getFilteredSongs() {
@@ -126,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       setState(() => _sortBy = val!);
                       setSheetState(() {});
                       MusicScanner().saveSortSettings(_sortBy, _sortAscending);
+                      widget.onSortChanged(_sortBy, _sortAscending);
                       Navigator.pop(context);
                     },
                     child: Column(
@@ -158,6 +156,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       setState(() => _sortAscending = val);
                       setSheetState(() {});
                       MusicScanner().saveSortSettings(_sortBy, _sortAscending);
+                      widget.onSortChanged(_sortBy, _sortAscending);
                     },
                   ),
                 ],

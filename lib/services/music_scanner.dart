@@ -23,8 +23,9 @@ class MusicScanner {
       // Return whatever is left on error
     }
 
-    // Sort songs by title alphabetically
-    songs.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+    // Load saved sort settings and pre-sort songs so they load instantly in correct order
+    var sortSettings = await getSortSettings();
+    sortSongs(songs, sortSettings['sortBy'] as String, sortSettings['sortAscending'] as bool);
 
     return songs;
   }
@@ -179,6 +180,10 @@ class MusicScanner {
         return songsToKeep;
       });
 
+      // Sort resultSongs by user's saved settings before writing to file
+      var sortSettings = await getSortSettings();
+      sortSongs(resultSongs, sortSettings['sortBy'] as String, sortSettings['sortAscending'] as bool);
+
       // Save updated index to JSON
       await _writeImportedSongsMetadata(resultSongs);
 
@@ -193,7 +198,6 @@ class MusicScanner {
       var formatted = '$month ${now.day}, ${now.year} at $hour:$minute:$second $ampm';
       await setLastSyncTime(formatted);
 
-      resultSongs.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
       return resultSongs;
     } catch (_) {
       return [];
@@ -421,6 +425,25 @@ class MusicScanner {
         break;
       }
     }
+  }
+
+  /// Helper to sort list of songs by specified sort configurations.
+  void sortSongs(List<Song> songs, String sortBy, bool sortAscending) {
+    songs.sort((a, b) {
+      int comparison;
+      if (sortBy == 'artist') {
+        comparison = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
+      } else if (sortBy == 'duration') {
+        comparison = a.duration.compareTo(b.duration);
+      } else if (sortBy == 'recent') {
+        var aTime = a.lastModifiedMs ?? 0;
+        var bTime = b.lastModifiedMs ?? 0;
+        comparison = bTime.compareTo(aTime);
+      } else {
+        comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+      }
+      return sortAscending ? comparison : -comparison;
+    });
   }
 
   // --- Private Helpers ---

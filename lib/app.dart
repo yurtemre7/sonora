@@ -35,6 +35,8 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
   var _isSyncing = false;
   List<Playlist> _playlists = [];
   final _themeProvider = ThemeProvider();
+  var _sortBy = 'title';
+  var _sortAscending = true;
 
   @override
   void initState() {
@@ -90,16 +92,19 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
 
     var scanner = MusicScanner();
     
-    // Instantly load cached library references and playlists
+    // Instantly load cached library references, playlists, and sort settings
     var folder = await scanner.getScanFolder();
     var scannedSongs = await scanner.scanAllSongs();
     var playlists = await scanner.getPlaylists();
+    var sortSettings = await scanner.getSortSettings();
     
     if (!mounted) return;
     setState(() {
       _scanFolder = folder;
       _songs = scannedSongs;
       _playlists = playlists;
+      _sortBy = sortSettings['sortBy'] as String;
+      _sortAscending = sortSettings['sortAscending'] as bool;
       _isLoading = false;
     });
     
@@ -347,6 +352,14 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
                     playerProvider: _playerProvider,
                     songs: _songs,
                     playlists: _playlists,
+                    initialSortBy: _sortBy,
+                    initialSortAscending: _sortAscending,
+                    onSortChanged: (sortBy, sortAscending) {
+                      setState(() {
+                        _sortBy = sortBy;
+                        _sortAscending = sortAscending;
+                      });
+                    },
                     onOpenNowPlaying: () => _openNowPlaying(context),
                     onOpenSettings: () => _openSettings(context),
                     scanFolder: _scanFolder,
