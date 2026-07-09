@@ -65,10 +65,12 @@ class PlayerProvider extends ChangeNotifier {
   ///
   /// Builds a new queue from [songList], locates [song] within it, loads the
   /// playlist into the audio handler, and begins playback.
-  Future<void> playSong(Song song, List<Song> songList) async {
+  Future<void> playSong(Song song, List<Song> songList, {bool resetShuffle = true}) async {
     queue = List<Song>.from(songList);
     _originalQueue = List<Song>.from(songList);
-    isShuffled = false;
+    if (resetShuffle) {
+      isShuffled = false;
+    }
 
     var index = queue.indexWhere((s) => s.id == song.id);
     currentIndex = index >= 0 ? index : 0;
@@ -168,12 +170,12 @@ class PlayerProvider extends ChangeNotifier {
     // Pick the first shuffled song as the starting track
     var startingSong = shuffled.first;
 
-    // Load and play the playlist
-    await playSong(startingSong, shuffled);
-
-    // Force isShuffled to true
+    // Force isShuffled to true immediately
     isShuffled = true;
     notifyListeners();
+
+    // Load and play the playlist without resetting shuffle status
+    await playSong(startingSong, shuffled, resetShuffle: false);
   }
 
   // ── Repeat ────────────────────────────────────────────────────────────────
