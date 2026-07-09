@@ -11,6 +11,10 @@ class MiniPlayer extends StatelessWidget {
     required this.onTap,
     required this.onPlayPause,
     required this.onNext,
+    this.onSwipeUp,
+    this.onSwipeDown,
+    this.onSwipeLeft,
+    this.onSwipeRight,
   });
 
   final Song currentSong;
@@ -19,6 +23,10 @@ class MiniPlayer extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onPlayPause;
   final VoidCallback onNext;
+  final VoidCallback? onSwipeUp;
+  final VoidCallback? onSwipeDown;
+  final VoidCallback? onSwipeLeft;
+  final VoidCallback? onSwipeRight;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +37,28 @@ class MiniPlayer extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: GestureDetector(
           onTap: onTap,
+          onVerticalDragEnd: (details) {
+            if (details.primaryVelocity != null) {
+              if (details.primaryVelocity! < -100) {
+                // Swipe Up
+                if (onSwipeUp != null) onSwipeUp!();
+              } else if (details.primaryVelocity! > 100) {
+                // Swipe Down
+                if (onSwipeDown != null) onSwipeDown!();
+              }
+            }
+          },
+          onHorizontalDragEnd: (details) {
+            if (details.primaryVelocity != null) {
+              if (details.primaryVelocity! < -100) {
+                // Swipe Left (previous track)
+                if (onSwipeLeft != null) onSwipeLeft!();
+              } else if (details.primaryVelocity! > 100) {
+                // Swipe Right (next track)
+                if (onSwipeRight != null) onSwipeRight!();
+              }
+            }
+          },
           child: Container(
             height: 72,
             decoration: BoxDecoration(

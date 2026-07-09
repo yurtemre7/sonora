@@ -698,6 +698,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       onTap: widget.onOpenNowPlaying,
                       onPlayPause: widget.playerProvider.playPause,
                       onNext: widget.playerProvider.next,
+                      onSwipeUp: widget.onOpenNowPlaying,
+                      onSwipeDown: widget.playerProvider.stop,
+                      onSwipeLeft: widget.playerProvider.previous,
+                      onSwipeRight: widget.playerProvider.next,
                     );
                   },
                 );

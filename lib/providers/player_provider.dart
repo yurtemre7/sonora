@@ -98,6 +98,15 @@ class PlayerProvider extends ChangeNotifier {
     await audioHandler.skipToPrevious();
   }
 
+  /// Stops playback, clears the queue, and resets the active song index.
+  Future<void> stop() async {
+    await audioHandler.stop();
+    queue = [];
+    _originalQueue = [];
+    currentIndex = -1;
+    notifyListeners();
+  }
+
   /// Seeks to [position] within the current track.
   Future<void> seek(Duration position) async {
     await audioHandler.seek(position);

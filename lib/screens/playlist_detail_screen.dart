@@ -169,6 +169,10 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                 onTap: () => _openNowPlaying(context),
                 onPlayPause: widget.playerProvider.playPause,
                 onNext: widget.playerProvider.next,
+                onSwipeUp: () => _openNowPlaying(context),
+                onSwipeDown: widget.playerProvider.stop,
+                onSwipeLeft: widget.playerProvider.previous,
+                onSwipeRight: widget.playerProvider.next,
               );
             },
           );
