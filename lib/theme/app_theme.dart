@@ -6,26 +6,26 @@ class AppTheme {
 
   static const _seedColor = Color(0xFF7C4DFF);
 
-  static ThemeData get darkTheme {
+  static TextTheme _buildTextTheme(Brightness brightness) {
+    var base = brightness == Brightness.dark
+        ? ThemeData.dark().textTheme
+        : ThemeData.light().textTheme;
+
     var colorScheme = ColorScheme.fromSeed(
       seedColor: _seedColor,
-      brightness: Brightness.dark,
+      brightness: brightness,
     );
 
-    var outfitTextTheme = GoogleFonts.outfitTextTheme(
-      ThemeData.dark().textTheme,
-    ).apply(
+    var outfitTextTheme = GoogleFonts.outfitTextTheme(base).apply(
       bodyColor: colorScheme.onSurface,
       displayColor: colorScheme.onSurface,
     );
-    var interTextTheme = GoogleFonts.interTextTheme(
-      ThemeData.dark().textTheme,
-    ).apply(
+    var interTextTheme = GoogleFonts.interTextTheme(base).apply(
       bodyColor: colorScheme.onSurface,
       displayColor: colorScheme.onSurface,
     );
 
-    var textTheme = TextTheme(
+    return TextTheme(
       displayLarge: outfitTextTheme.displayLarge,
       displayMedium: outfitTextTheme.displayMedium,
       displaySmall: outfitTextTheme.displaySmall,
@@ -42,10 +42,24 @@ class AppTheme {
       labelMedium: interTextTheme.labelMedium,
       labelSmall: interTextTheme.labelSmall,
     );
+  }
+
+  static ThemeData _buildTheme(Brightness brightness) {
+    var colorScheme = ColorScheme.fromSeed(
+      seedColor: _seedColor,
+      brightness: brightness,
+    );
+
+    var textTheme = _buildTextTheme(brightness);
+
+    var outfitTitleStyle = GoogleFonts.outfit(
+      fontWeight: FontWeight.w600,
+      color: colorScheme.onSurface,
+    );
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: brightness,
       colorScheme: colorScheme,
       textTheme: textTheme,
       scaffoldBackgroundColor: colorScheme.surface,
@@ -54,10 +68,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        titleTextStyle: outfitTextTheme.titleLarge?.copyWith(
-          color: colorScheme.onSurface,
-          fontWeight: FontWeight.w600,
-        ),
+        titleTextStyle: outfitTitleStyle.copyWith(fontSize: 22),
         iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       cardTheme: CardThemeData(
@@ -104,4 +115,8 @@ class AppTheme {
       ),
     );
   }
+
+  static ThemeData get darkTheme => _buildTheme(Brightness.dark);
+
+  static ThemeData get lightTheme => _buildTheme(Brightness.light);
 }

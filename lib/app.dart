@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/screens/home_screen.dart';
 import 'package:sonora/screens/now_playing_screen.dart';
 import 'package:sonora/screens/settings_screen.dart';
@@ -34,6 +35,7 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
   String? _scanFolder;
   var _isSyncing = false;
   List<Playlist> _playlists = [];
+  final _themeProvider = ThemeProvider();
 
   @override
   void initState() {
@@ -282,6 +284,7 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
           onConfigureFolder: _configureScanFolder,
           onResetApp: _resetApp,
           onRetriggerSync: _syncSongsSilently,
+          themeProvider: _themeProvider,
         ),
       ),
     );
@@ -289,11 +292,16 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      scaffoldMessengerKey: _scaffoldMessengerKey,
-      title: 'Sonora',
-      theme: AppTheme.darkTheme,
-      debugShowCheckedModeBanner: false,
+    return ListenableBuilder(
+      listenable: _themeProvider,
+      builder: (context, _) {
+        return MaterialApp(
+          scaffoldMessengerKey: _scaffoldMessengerKey,
+          title: 'Sonora',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: _themeProvider.themeMode,
+          debugShowCheckedModeBanner: false,
       home: _isLoading
           ? const Scaffold(
               body: Center(
@@ -358,6 +366,7 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
                     isSyncing: _isSyncing,
                   ),
                 ),
-    );
+      );
+    });
   }
 }
