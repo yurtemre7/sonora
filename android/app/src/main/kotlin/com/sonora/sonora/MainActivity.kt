@@ -47,16 +47,60 @@ class MainActivity : AudioServiceActivity() {
             val parentDir = file.parentFile ?: file
             if (!parentDir.exists()) return false
 
-            val builder = android.os.StrictMode.VmPolicy.Builder()
-            android.os.StrictMode.setVmPolicy(builder.build())
+            // Try using the system file manager with the document URI
+            val uri = androidx.core.content.FileProvider.getUriForFile(
+                this,
+                "$packageName.fileprovider",
+                parentDir
+            )
 
-            val uri = android.net.Uri.fromFile(parentDir)
+            // Strategy 1: Try ACTION_VIEW with DocumentsContract
             val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "*/*")
+                setDataAndType(uri, "resource/folder")
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
+                return true
+            }
+
+            // Strategy 2: Try with vnd.android.document/directory mime type
+            val intent2 = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "vnd.android.document/directory")
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            if (intent2.resolveActivity(packageManager) != null) {
+                startActivity(intent2)
+                return true
+            }
+
+            // Strategy 3: Fallback — just open any file manager
+            val fallbackIntent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                data = android.net.Uri.parse("content://com.android.externalstorage.documents/document/primary:${parentDir.absolutePath.removePrefix("/storage/emulated/0/")}")
                 addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            startActivity(intent)
-            true
+
+            try {
+                startActivity(fallbackIntent)
+                true
+            } catch (e: Exception) {
+                // Final fallback — show chooser
+                val chooserIntent = android.content.Intent.createChooser(
+                    android.content.Intent(android.content.Intent.ACTION_GET_CONTENT).apply {
+                        type = "*/*"
+                        addCategory(android.content.Intent.CATEGORY_OPENABLE)
+                    },
+                    "Open folder: ${parentDir.name}"
+                ).apply {
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(chooserIntent)
+                true
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             false
