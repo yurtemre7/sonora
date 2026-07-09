@@ -126,17 +126,17 @@ class NowPlayingScreen extends StatelessWidget {
                   ),
                 ),
 
-              // Solid dark overlay gradient
+              // Solid overlay gradient (theme-aware)
               Positioned.fill(
                 child: Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black54,
-                        Colors.black87,
+                        theme.colorScheme.surface.withValues(alpha: 0.6),
+                        theme.colorScheme.surface.withValues(alpha: 0.92),
                       ],
                     ),
                   ),
