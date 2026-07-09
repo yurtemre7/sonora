@@ -313,8 +313,20 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
       playlistsFile.deleteSync();
     }
 
+    var themePrefsFile = File('${appDir.path}/theme_prefs.json');
+    if (themePrefsFile.existsSync()) {
+      themePrefsFile.deleteSync();
+    }
+    await _themeProvider.setThemeMode(ThemeMode.system);
+
     var prefs = SharedPreferencesAsync();
-    await prefs.remove('onboarding_completed');
+    await prefs.clear(allowList: <String>{
+      'onboarding_completed',
+      'scan_folder_path',
+      'last_sync_time',
+      'sort_by',
+      'sort_ascending',
+    });
 
     if (!mounted) return;
     setState(() {
