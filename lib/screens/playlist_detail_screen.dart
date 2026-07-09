@@ -252,7 +252,11 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                         _playlist.songIds.remove(song.id);
                         _updatePlaylistSongs();
                       });
-                      await widget.onRemoveSong(_playlist.id, song.id);
+                      if (_playlist.id == 'favorites') {
+                        await widget.playerProvider.toggleFavorite(song.id);
+                      } else {
+                        await widget.onRemoveSong(_playlist.id, song.id);
+                      }
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -272,7 +276,12 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                       onShowInfo: () => _showSongInfoBottomSheet(song),
                       onToggleFavorite: () async {
                         await widget.playerProvider.toggleFavorite(song.id);
-                        setState(() => _updatePlaylistSongs());
+                        setState(() {
+                          if (_playlist.id == 'favorites') {
+                            _playlist.songIds.remove(song.id);
+                          }
+                          _updatePlaylistSongs();
+                        });
                       },
                     ),
                   );
