@@ -1,0 +1,40 @@
+name: sonora
+description: "A local music player for Android with Material 3 Expressive design."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Audio playback engine
+  just_audio: ^0.10.6
+
+  # Background playback + media notifications
+  audio_service: ^0.18.19
+
+  # Audio session management (focus, interruptions)
+  audio_session: ^0.2.4
+
+  # File and directory selection
+  file_picker: ^12.0.0-beta.7
+
+  # Runtime permission handling
+  permission_handler: ^12.0.3
+
+  # Google Fonts for M3 Expressive typography
+  google_fonts: ^8.1.0
+
+  # Path provider for caching artwork
+  path_provider: ^2.1.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
