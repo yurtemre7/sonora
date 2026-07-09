@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:audiotags/audiotags.dart' as tags;
+import 'package:audio_tags_lofty/audio_tags_lofty.dart' as tags;
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -95,17 +95,16 @@ class MusicScanner {
             String? artworkPath;
 
             try {
-              var tag = await tags.AudioTags.read(file.path);
-              if (tag != null) {
-                title = tag.title?.trim();
-                artist = tag.trackArtist?.trim() ?? tag.albumArtist?.trim();
-                album = tag.album?.trim();
+              var meta = await tags.readMetadataAsync(file.path, true);
+              if (meta != null) {
+                title = meta.title?.trim();
+                artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
+                album = meta.album?.trim();
 
-                if (tag.pictures.isNotEmpty) {
-                  var pic = tag.pictures.first;
+                if (meta.pictureBytes != null && meta.pictureBytes!.isNotEmpty) {
                   var appDir = await getApplicationDocumentsDirectory();
                   var artFile = File('${appDir.path}/artwork_${DateTime.now().millisecondsSinceEpoch}_$idCounter.jpg');
-                  await artFile.writeAsBytes(pic.bytes);
+                  await artFile.writeAsBytes(meta.pictureBytes!);
                   artworkPath = artFile.path;
                 }
               }
