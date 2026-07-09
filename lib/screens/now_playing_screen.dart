@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -45,12 +46,12 @@ class NowPlayingScreen extends StatelessWidget {
           body: Stack(
             children: [
               // Blurred background artwork
-              if (song.artworkBytes != null)
+              if (song.artworkPath != null && File(song.artworkPath!).existsSync())
                 Positioned.fill(
                   child: ImageFiltered(
                     imageFilter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
-                    child: Image.memory(
-                      song.artworkBytes!,
+                    child: Image.file(
+                      File(song.artworkPath!),
                       fit: BoxFit.cover,
                       opacity: const AlwaysStoppedAnimation(0.2),
                     ),
@@ -99,7 +100,7 @@ class NowPlayingScreen extends StatelessWidget {
 
                       // Animated Vinyl disk
                       AnimatedVinyl(
-                        artworkBytes: song.artworkBytes,
+                        artworkPath: song.artworkPath,
                         isPlaying: playerProvider.isPlaying,
                         size: MediaQuery.sizeOf(context).width * 0.72,
                       ),

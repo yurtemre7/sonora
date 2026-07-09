@@ -7,7 +7,7 @@ class Song {
   final String album;
   final Duration duration;
   final String filePath;
-  Uint8List? artworkBytes;
+  final String? artworkPath;
 
   Song({
     required this.id,
@@ -16,7 +16,7 @@ class Song {
     required this.album,
     required this.duration,
     required this.filePath,
-    this.artworkBytes,
+    this.artworkPath,
   });
 
   String get durationFormatted {

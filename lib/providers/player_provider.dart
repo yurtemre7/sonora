@@ -231,25 +231,6 @@ class PlayerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Updates a specific song's artwork and notifies listeners.
-  void updateSongArtwork(int songId, Uint8List artwork) {
-    var allSongsIndex = allSongs.indexWhere((s) => s.id == songId);
-    if (allSongsIndex >= 0) {
-      allSongs[allSongsIndex].artworkBytes = artwork;
-    }
-    var queueIndex = queue.indexWhere((s) => s.id == songId);
-    if (queueIndex >= 0) {
-      queue[queueIndex].artworkBytes = artwork;
-    }
-    var originalQueueIndex = _originalQueue.indexWhere((s) => s.id == songId);
-    if (originalQueueIndex >= 0) {
-      _originalQueue[originalQueueIndex].artworkBytes = artwork;
-    }
-    notifyListeners();
-  }
-
-  // ── Internal helpers ──────────────────────────────────────────────────────
-
   /// Converts a [Song] to a [MediaItem] for the audio handler.
   MediaItem _songToMediaItem(Song song) {
     return MediaItem(
@@ -258,6 +239,7 @@ class PlayerProvider extends ChangeNotifier {
       artist: song.artist,
       album: song.album,
       duration: song.duration,
+      artUri: song.artworkPath != null ? Uri.file(song.artworkPath!) : null,
     );
   }
 

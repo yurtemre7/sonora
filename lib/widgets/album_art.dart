@@ -1,22 +1,23 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
 class AlbumArt extends StatelessWidget {
   const AlbumArt({
     super.key,
-    required this.artworkBytes,
+    required this.artworkPath,
     required this.size,
     this.borderRadius = 16,
   });
 
-  final Uint8List? artworkBytes;
+  final String? artworkPath;
   final double size;
   final double borderRadius;
 
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    var hasArtworkFile = artworkPath != null && File(artworkPath!).existsSync();
 
     return Container(
       width: size,
@@ -33,9 +34,9 @@ class AlbumArt extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
-        child: artworkBytes != null
-            ? Image.memory(
-                artworkBytes!,
+        child: hasArtworkFile
+            ? Image.file(
+                File(artworkPath!),
                 width: size,
                 height: size,
                 fit: BoxFit.cover,

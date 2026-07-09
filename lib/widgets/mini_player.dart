@@ -70,7 +70,7 @@ class MiniPlayer extends StatelessWidget {
                       children: [
                         // Album art thumbnail
                         AlbumArt(
-                          artworkBytes: currentSong.artworkBytes,
+                          artworkPath: currentSong.artworkPath,
                           size: 44,
                           borderRadius: 8,
                         ),

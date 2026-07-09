@@ -30,6 +30,7 @@ dependencies:
 
   # Path provider for caching artwork
   path_provider: ^2.1.5
+  audiotags: ^1.4.5
 
 dev_dependencies:
   flutter_test:

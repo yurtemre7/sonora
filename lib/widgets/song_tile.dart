@@ -36,7 +36,7 @@ class SongTile extends StatelessWidget {
         child: Row(
           children: [
             AlbumArt(
-              artworkBytes: song.artworkBytes,
+              artworkPath: song.artworkPath,
               size: 48,
               borderRadius: 10,
             ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:audiotags/audiotags.dart' as tags;
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -86,17 +87,42 @@ class MusicScanner {
           try {
             // Lazy load durations in background sequentially
             var duration = await player.setAudioSource(AudioSource.file(file.path));
+            
+            // Read metadata tags (title, artist, album, embedded artwork)
+            String? title;
+            String? artist;
+            String? album;
+            String? artworkPath;
+
+            try {
+              var tag = await tags.AudioTags.read(file.path);
+              if (tag != null) {
+                title = tag.title?.trim();
+                artist = tag.trackArtist?.trim() ?? tag.albumArtist?.trim();
+                album = tag.album?.trim();
+
+                if (tag.pictures != null && tag.pictures!.isNotEmpty) {
+                  var pic = tag.pictures!.first;
+                  var appDir = await getApplicationDocumentsDirectory();
+                  var artFile = File('${appDir.path}/artwork_${DateTime.now().millisecondsSinceEpoch}_${idCounter}.jpg');
+                  await artFile.writeAsBytes(pic.bytes);
+                  artworkPath = artFile.path;
+                }
+              }
+            } catch (_) {}
+
             var fileName = file.path.split(Platform.pathSeparator).last;
             var extIndex = fileName.lastIndexOf('.');
-            var title = extIndex != -1 ? fileName.substring(0, extIndex) : fileName;
+            var defaultTitle = extIndex != -1 ? fileName.substring(0, extIndex) : fileName;
 
             newSongs.add(Song(
               id: idCounter++,
-              title: title,
-              artist: 'Local Audio',
-              album: 'Synced Folder',
+              title: (title == null || title.isEmpty) ? defaultTitle : title,
+              artist: (artist == null || artist.isEmpty) ? 'Unknown Artist' : artist,
+              album: (album == null || album.isEmpty) ? 'Unknown Album' : album,
               duration: duration ?? Duration.zero,
               filePath: file.path,
+              artworkPath: artworkPath,
             ));
           } catch (_) {}
         }
@@ -305,6 +331,7 @@ class MusicScanner {
           album: item['album'] as String,
           duration: Duration(milliseconds: item['duration_ms'] as int),
           filePath: item['file_path'] as String,
+          artworkPath: item['artwork_path'] as String?,
         );
       }).toList();
     } catch (_) {
@@ -324,6 +351,7 @@ class MusicScanner {
         'album': s.album,
         'duration_ms': s.duration.inMilliseconds,
         'file_path': s.filePath,
+        'artwork_path': s.artworkPath,
       }).toList();
 
       await jsonFile.writeAsString(jsonEncode(jsonList));

@@ -7,12 +7,12 @@ import 'package:sonora/widgets/album_art.dart';
 class AnimatedVinyl extends StatefulWidget {
   const AnimatedVinyl({
     super.key,
-    required this.artworkBytes,
+    required this.artworkPath,
     required this.isPlaying,
     required this.size,
   });
 
-  final Uint8List? artworkBytes;
+  final String? artworkPath;
   final bool isPlaying;
   final double size;
 
@@ -102,7 +102,7 @@ class _AnimatedVinylState extends State<AnimatedVinyl>
                 ),
                 child: ClipOval(
                   child: AlbumArt(
-                    artworkBytes: widget.artworkBytes,
+                    artworkPath: widget.artworkPath,
                     size: widget.size * 0.45,
                     borderRadius: widget.size * 0.45 / 2,
                   ),
