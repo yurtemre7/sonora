@@ -41,30 +41,12 @@ fun configureNamespace(proj: Project) {
     }
 }
 
-fun forceCompileSdk(proj: Project) {
-    val android = proj.extensions.findByName("android")
-    if (android != null) {
-        try {
-            // Force compileSdkVersion to 36 for AGP compilation compatibility across all plugins
-            val setCompileSdkVersion = android.javaClass.methods.firstOrNull { 
-                it.name == "setCompileSdkVersion" && it.parameterTypes.size == 1 && 
-                (it.parameterTypes[0] == Int::class.javaPrimitiveType || it.parameterTypes[0] == Integer::class.java)
-            }
-            setCompileSdkVersion?.invoke(android, 36)
-        } catch (e: Exception) {
-            // Ignore
-        }
-    }
-}
-
 subprojects {
     if (project.state.executed) {
         configureNamespace(project)
-        forceCompileSdk(project)
     } else {
         project.afterEvaluate {
             configureNamespace(this)
-            forceCompileSdk(this)
         }
     }
 }
