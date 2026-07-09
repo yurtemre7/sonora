@@ -15,6 +15,8 @@ class PlaylistDetailScreen extends StatefulWidget {
     required this.playerProvider,
     required this.onRemoveSong,
     required this.onReorderSongs,
+    required this.playlists,
+    required this.onAddSongToPlaylist,
   });
 
   final Playlist playlist;
@@ -22,6 +24,8 @@ class PlaylistDetailScreen extends StatefulWidget {
   final PlayerProvider playerProvider;
   final Future<void> Function(String playlistId, int songId) onRemoveSong;
   final Future<void> Function(String playlistId, List<int> reorderedIds) onReorderSongs;
+  final List<Playlist> playlists;
+  final Future<void> Function(String playlistId, int songId) onAddSongToPlaylist;
 
   @override
   State<PlaylistDetailScreen> createState() => _PlaylistDetailScreenState();
@@ -54,6 +58,115 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
     _playlistSongs = widget.songs
         .where((s) => widget.playlist.songIds.contains(s.id))
         .toList();
+  }
+
+  void _showAddToPlaylistDialog(Song song) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Add to Playlist'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: widget.playlists.length,
+            itemBuilder: (context, index) {
+              var playlist = widget.playlists[index];
+              if (playlist.id == 'favorites') return const SizedBox.shrink();
+              return ListTile(
+                leading: const Icon(Icons.playlist_add_rounded),
+                title: Text(playlist.name),
+                onTap: () async {
+                  await widget.onAddSongToPlaylist(playlist.id, song.id);
+                  if (dialogContext.mounted) {
+                    Navigator.pop(dialogContext);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Added "${song.title}" to ${playlist.name}.'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSongInfoBottomSheet(Song song) {
+    var theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Song Information',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildInfoRow('Title', song.title, theme),
+              _buildInfoRow('Artist', song.artist, theme),
+              _buildInfoRow('Album', song.album, theme),
+              _buildInfoRow('Duration', song.durationFormatted, theme),
+              _buildInfoRow('File Path', song.filePath, theme, isPath: true),
+              if (song.format != null) _buildInfoRow('Format', song.format!.toUpperCase(), theme),
+              if (song.bitrate != null) _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
+              if (song.samplerate != null) _buildInfoRow('Sample Rate', '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz', theme),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, ThemeData theme, {bool isPath = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontFamily: isPath ? 'monospace' : null,
+                fontSize: isPath ? 12 : null,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -144,6 +257,12 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                       },
                       onPlayNext: () => widget.playerProvider.playNext(song),
                       onAddToQueue: () => widget.playerProvider.addToQueue(song),
+                      onAddToPlaylist: () => _showAddToPlaylistDialog(song),
+                      onShowInfo: () => _showSongInfoBottomSheet(song),
+                      onToggleFavorite: () async {
+                        await widget.playerProvider.toggleFavorite(song.id);
+                        setState(() => _updatePlaylistSongs());
+                      },
                     ),
                   );
                 },

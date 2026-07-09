@@ -667,6 +667,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                     playerProvider: widget.playerProvider,
                                     onRemoveSong: widget.onRemoveSongFromPlaylist,
                                     onReorderSongs: widget.onReorderPlaylistSongs,
+                                    playlists: widget.playlists,
+                                    onAddSongToPlaylist: widget.onAddSongToPlaylist,
                                   ),
                                 ),
                               );
