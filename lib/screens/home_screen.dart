@@ -514,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                         ),
                                       )
                                     : ListView.builder(
-                                        padding: const EdgeInsets.only(bottom: 100),
+                                        padding: const EdgeInsets.only(bottom: 160),
                                         itemCount: _getFilteredSongs().length,
                                         itemBuilder: (context, index) {
                                           var filteredSongs = _getFilteredSongs();
@@ -578,7 +578,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 ),
                               )
                             : ListView.builder(
-                                padding: const EdgeInsets.only(bottom: 100),
+                                padding: const EdgeInsets.only(bottom: 160),
                                 itemCount: widget.playlists.length,
                                 itemBuilder: (context, index) {
                                   var playlist = widget.playlists[index];

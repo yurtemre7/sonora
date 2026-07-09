@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/screens/now_playing_screen.dart';
+import 'package:sonora/widgets/mini_player.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
 class PlaylistDetailScreen extends StatefulWidget {
@@ -92,7 +94,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
               ),
             )
           : ReorderableListView.builder(
-              padding: const EdgeInsets.only(bottom: 100),
+              padding: const EdgeInsets.only(bottom: 160),
               itemCount: _playlistSongs.length,
               onReorderItem: (oldIndex, newIndex) async {
                 var updatedIds = List<int>.from(widget.playlist.songIds);
@@ -115,7 +117,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                       color: theme.colorScheme.onErrorContainer,
                     ),
                   ),
-                  onDismissed: (_) async {
+                  onDismissed: (direction) async {
                     await widget.onRemoveSong(widget.playlist.id, song.id);
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -138,15 +140,52 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
             ),
       floatingActionButton: _playlistSongs.isEmpty
           ? null
-          : FloatingActionButton.extended(
-              onPressed: () {
-                widget.playerProvider.quickShuffle(_playlistSongs);
-              },
-              icon: const Icon(Icons.shuffle_rounded),
-              label: const Text('Shuffle Play'),
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
+          : Container(
+              margin: const EdgeInsets.only(bottom: 80),
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  widget.playerProvider.quickShuffle(_playlistSongs);
+                },
+                icon: const Icon(Icons.shuffle_rounded),
+                label: const Text('Shuffle Play'),
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+              ),
             ),
+      bottomNavigationBar: ListenableBuilder(
+        listenable: widget.playerProvider,
+        builder: (context, child) {
+          var currentSong = widget.playerProvider.currentSong;
+          if (currentSong == null) return const SizedBox.shrink();
+
+          return StreamBuilder<Duration>(
+            stream: widget.playerProvider.audioHandler.player.positionStream,
+            builder: (context, snapshot) {
+              var position = snapshot.data ?? Duration.zero;
+              var totalMs = currentSong.duration.inMilliseconds;
+              var progress = totalMs > 0 ? position.inMilliseconds / totalMs : 0.0;
+
+              return MiniPlayer(
+                currentSong: currentSong,
+                isPlaying: widget.playerProvider.audioHandler.player.playing,
+                progress: progress,
+                onTap: () => _openNowPlaying(context),
+                onPlayPause: widget.playerProvider.playPause,
+                onNext: widget.playerProvider.next,
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  void _openNowPlaying(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (context) => NowPlayingScreen(playerProvider: widget.playerProvider),
     );
   }
 }
