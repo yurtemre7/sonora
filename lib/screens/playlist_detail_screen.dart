@@ -136,6 +136,17 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                 );
               },
             ),
+      floatingActionButton: _playlistSongs.isEmpty
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () {
+                widget.playerProvider.quickShuffle(_playlistSongs);
+              },
+              icon: const Icon(Icons.shuffle_rounded),
+              label: const Text('Shuffle Play'),
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+            ),
     );
   }
 }

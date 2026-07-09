@@ -11,6 +11,8 @@ import 'package:just_audio/just_audio.dart';
 /// system media session (notification, lock screen, Bluetooth metadata).
 class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   final player = AudioPlayer();
+  // ignore: deprecated_member_use
+  final _playlist = ConcatenatingAudioSource(children: []);
 
 
   SonoraAudioHandler() {
@@ -102,17 +104,18 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     List<MediaItem> items, {
     int initialIndex = 0,
   }) async {
-    // Build audio sources from each MediaItem.
-    var sources = items.map<AudioSource>((item) {
-      return AudioSource.uri(
+    // Clear and build the playlist source.
+    await _playlist.clear();
+    for (var item in items) {
+      await _playlist.add(AudioSource.uri(
         Uri.parse(item.id),
         tag: item,
-      );
-    }).toList();
+      ));
+    }
 
     // Set the playlist on the player and seek to the initial track.
-    await player.setAudioSources(
-      sources,
+    await player.setAudioSource(
+      _playlist,
       initialIndex: initialIndex,
       initialPosition: Duration.zero,
     );
@@ -190,5 +193,28 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         await player.setLoopMode(LoopMode.all);
         break;
     }
+  }
+
+  /// Updates the playlist source dynamically after the currently playing index.
+  Future<void> updatePlaylistAfter(int index, List<MediaItem> remainingItems) async {
+    // Remove all sources after current index
+    while (_playlist.length > index + 1) {
+      await _playlist.removeAt(index + 1);
+    }
+    // Append the new remaining sources
+    for (var item in remainingItems) {
+      await _playlist.add(AudioSource.uri(
+        Uri.parse(item.id),
+        tag: item,
+      ));
+    }
+    
+    // Synchronize audio service queue broadcast stream
+    var fullQueue = List<MediaItem>.from(queue.value);
+    if (fullQueue.length > index + 1) {
+      fullQueue = fullQueue.sublist(0, index + 1);
+    }
+    fullQueue.addAll(remainingItems);
+    queue.add(fullQueue);
   }
 }

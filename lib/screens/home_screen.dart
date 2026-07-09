@@ -266,6 +266,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
               const SizedBox(width: 8),
               IconButton.filledTonal(
+                icon: const Icon(Icons.shuffle_rounded),
+                onPressed: () {
+                  widget.playerProvider.quickShuffle(_getFilteredSongs());
+                },
+                tooltip: 'Shuffle Play',
+              ),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
                 icon: const Icon(Icons.sort_rounded),
                 onPressed: _showSortBottomSheet,
                 tooltip: 'Sort Songs',

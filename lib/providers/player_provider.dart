@@ -107,38 +107,63 @@ class PlayerProvider extends ChangeNotifier {
 
   /// Toggles shuffle mode on/off.
   ///
-  /// When enabling shuffle, the queue is randomised but the currently playing
-  /// song is moved to the front. When disabling, the original queue order is
-  /// restored while keeping the same song playing.
+  /// Shuffles only the tracks after the currently playing song in the queue,
+  /// preserving seamless active track playback. Restores original order after
+  /// the current track when disabled.
   Future<void> toggleShuffle() async {
+    if (currentSong == null) return;
+    var current = currentSong!;
+
     if (isShuffled) {
-      // Restore original order.
-      var current = currentSong;
-      queue = List<Song>.from(_originalQueue);
-      if (current != null) {
-        currentIndex = queue.indexWhere((s) => s.id == current.id);
-        if (currentIndex < 0) currentIndex = 0;
+      // Restore original order after current index.
+      var origIndex = _originalQueue.indexWhere((s) => s.id == current.id);
+      if (origIndex >= 0) {
+        var newQueue = <Song>[];
+        // Keep current song at its current index
+        newQueue.addAll(queue.sublist(0, currentIndex + 1));
+        
+        // Find which songs from original queue are not yet in newQueue
+        var remainingOriginal = _originalQueue.where((s) => !newQueue.any((nq) => nq.id == s.id)).toList();
+        newQueue.addAll(remainingOriginal);
+        
+        queue = newQueue;
       }
-      await audioHandler.setShuffleMode(AudioServiceShuffleMode.none);
+      isShuffled = false;
     } else {
-      // Shuffle, keeping current song at front.
-      var current = currentSong;
-      queue.shuffle();
-      if (current != null) {
-        queue.remove(current);
-        queue.insert(0, current);
-        currentIndex = 0;
-      }
-      await audioHandler.setShuffleMode(AudioServiceShuffleMode.all);
+      // Shuffle only the songs after the current index.
+      var remaining = queue.sublist(currentIndex + 1);
+      remaining.shuffle();
+      
+      var newQueue = <Song>[];
+      newQueue.addAll(queue.sublist(0, currentIndex + 1));
+      newQueue.addAll(remaining);
+      
+      queue = newQueue;
+      isShuffled = true;
     }
 
-    isShuffled = !isShuffled;
+    // Update the audio handler's playlist source after current index
+    var remainingMediaItems = queue.sublist(currentIndex + 1).map(_songToMediaItem).toList();
+    await audioHandler.updatePlaylistAfter(currentIndex, remainingMediaItems);
 
-    // Reload the playlist with the new order.
-    var mediaItems = queue.map(_songToMediaItem).toList();
-    await audioHandler.loadPlaylist(mediaItems, initialIndex: currentIndex);
-    if (isPlaying) await audioHandler.play();
+    notifyListeners();
+  }
 
+  /// Plays a list of songs shuffled, picking a random track to start, and sets shuffle mode to enabled.
+  Future<void> quickShuffle(List<Song> songsList) async {
+    if (songsList.isEmpty) return;
+
+    // Clone the list and shuffle it
+    var shuffled = List<Song>.from(songsList)..shuffle();
+    
+    // Pick the first shuffled song as the starting track
+    var startingSong = shuffled.first;
+
+    // Load and play the playlist
+    await playSong(startingSong, shuffled);
+
+    // Force isShuffled to true
+    isShuffled = true;
     notifyListeners();
   }
 
