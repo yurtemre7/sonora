@@ -72,6 +72,47 @@ class MusicScanner {
       // Filter cache to keep only files that are still physically present
       var verifiedSongs = cachedSongs.where((s) => foundPaths.contains(s.filePath)).toList();
 
+      // Migrate existing songs that were cached with placeholders (Local Audio / Synced Folder)
+      for (var i = 0; i < verifiedSongs.length; i++) {
+        var song = verifiedSongs[i];
+        if (song.artist == 'Local Audio' || song.album == 'Synced Folder') {
+          try {
+            String? title;
+            String? artist;
+            String? album;
+            String? artworkPath;
+
+            var meta = await tags.readMetadataAsync(song.filePath, true);
+            if (meta != null) {
+              title = meta.title?.trim();
+              artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
+              album = meta.album?.trim();
+
+              if (meta.pictureBytes != null && meta.pictureBytes!.isNotEmpty) {
+                var appDir = await getApplicationDocumentsDirectory();
+                var artFile = File('${appDir.path}/artwork_${DateTime.now().millisecondsSinceEpoch}_${song.id}.jpg');
+                await artFile.writeAsBytes(meta.pictureBytes!);
+                artworkPath = artFile.path;
+              }
+            }
+
+            var fileName = song.filePath.split(Platform.pathSeparator).last;
+            var extIndex = fileName.lastIndexOf('.');
+            var defaultTitle = extIndex != -1 ? fileName.substring(0, extIndex) : fileName;
+
+            verifiedSongs[i] = Song(
+              id: song.id,
+              title: (title == null || title.isEmpty) ? defaultTitle : title,
+              artist: (artist == null || artist.isEmpty) ? 'Unknown Artist' : artist,
+              album: (album == null || album.isEmpty) ? 'Unknown Album' : album,
+              duration: song.duration,
+              filePath: song.filePath,
+              artworkPath: artworkPath ?? song.artworkPath,
+            );
+          } catch (_) {}
+        }
+      }
+
       // Find files that are not yet in verified cache (new files)
       var verifiedPaths = verifiedSongs.map((s) => s.filePath).toSet();
       var newFiles = foundFiles.where((f) => !verifiedPaths.contains(f.path)).toList();
