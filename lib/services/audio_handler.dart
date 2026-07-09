@@ -456,4 +456,10 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         break;
     }
   }
+
+  @override
+  Future<void> onTaskRemoved() async {
+    await player.stop();
+    await super.onTaskRemoved();
+  }
 }
