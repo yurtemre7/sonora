@@ -210,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               _buildInfoRow('Duration', song.durationFormatted, theme),
               _buildInfoRow('File Path', song.filePath, theme, isPath: true),
               if (song.format != null) _buildInfoRow('Format', song.format!.toUpperCase(), theme),
-              if (song.bitrate != null) _buildInfoRow('Bitrate', '${(song.bitrate! / 1000).toStringAsFixed(0)} kbps', theme),
+              if (song.bitrate != null) _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
               if (song.samplerate != null) _buildInfoRow('Sample Rate', '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz', theme),
               const SizedBox(height: 16),
             ],
