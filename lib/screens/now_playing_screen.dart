@@ -6,7 +6,7 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/queue_screen.dart';
 import 'package:sonora/services/music_scanner.dart';
-import 'package:sonora/widgets/animated_vinyl.dart';
+import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/player_controls.dart';
 import 'package:sonora/widgets/seek_bar.dart';
 
@@ -151,11 +151,19 @@ class NowPlayingScreen extends StatelessWidget {
                     children: [
                       const Spacer(),
 
-                      // Animated Vinyl disk
-                      AnimatedVinyl(
-                        artworkPath: song.artworkPath,
-                        isPlaying: playerProvider.isPlaying,
-                        size: MediaQuery.sizeOf(context).width * 0.72,
+                      // Album Art Card
+                      Card(
+                        elevation: 10,
+                        shadowColor: Colors.black.withValues(alpha: 0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: AlbumArt(
+                          artworkPath: song.artworkPath,
+                          size: MediaQuery.sizeOf(context).width * 0.80,
+                          borderRadius: 28,
+                        ),
                       ),
 
                       const Spacer(),
