@@ -105,8 +105,7 @@ class _QueueScreenState extends State<QueueScreen> {
             child: ReorderableListView.builder(
               scrollController: _scrollController,
               itemCount: queue.length,
-              // ignore: deprecated_member_use
-              onReorder: widget.playerProvider.moveInQueue,
+              onReorderItem: widget.playerProvider.reorderQueue,
               padding: const EdgeInsets.only(bottom: 24, top: 8),
               itemBuilder: (context, index) {
                 var song = queue[index];

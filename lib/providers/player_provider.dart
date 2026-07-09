@@ -219,13 +219,10 @@ class PlayerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Moves a song in the queue from [oldIndex] to [newIndex].
-  Future<void> moveInQueue(int oldIndex, int newIndex) async {
+  /// Reorders a song in the queue from [oldIndex] to [newIndex].
+  Future<void> reorderQueue(int oldIndex, int newIndex) async {
     if (oldIndex < 0 || oldIndex >= queue.length) return;
-    if (newIndex < 0 || newIndex > queue.length) return;
-
-    // Adjust for the standard ReorderableListView offset.
-    if (newIndex > oldIndex) newIndex--;
+    if (newIndex < 0 || newIndex >= queue.length) return;
 
     var song = queue.removeAt(oldIndex);
     queue.insert(newIndex, song);

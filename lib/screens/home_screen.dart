@@ -108,57 +108,34 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // ignore: deprecated_member_use
-                  RadioListTile<String>(
-                    title: const Text('Title'),
-                    value: 'title',
-                    // ignore: deprecated_member_use
+                  RadioGroup<String>(
                     groupValue: _sortBy,
-                    // ignore: deprecated_member_use
                     onChanged: (val) {
                       setState(() => _sortBy = val!);
                       setSheetState(() {});
                       Navigator.pop(context);
                     },
-                  ),
-                  // ignore: deprecated_member_use
-                  RadioListTile<String>(
-                    title: const Text('Artist'),
-                    value: 'artist',
-                    // ignore: deprecated_member_use
-                    groupValue: _sortBy,
-                    // ignore: deprecated_member_use
-                    onChanged: (val) {
-                      setState(() => _sortBy = val!);
-                      setSheetState(() {});
-                      Navigator.pop(context);
-                    },
-                  ),
-                  // ignore: deprecated_member_use
-                  RadioListTile<String>(
-                    title: const Text('Duration'),
-                    value: 'duration',
-                    // ignore: deprecated_member_use
-                    groupValue: _sortBy,
-                    // ignore: deprecated_member_use
-                    onChanged: (val) {
-                      setState(() => _sortBy = val!);
-                      setSheetState(() {});
-                      Navigator.pop(context);
-                    },
-                  ),
-                  // ignore: deprecated_member_use
-                  RadioListTile<String>(
-                    title: const Text('Recently Added'),
-                    value: 'recent',
-                    // ignore: deprecated_member_use
-                    groupValue: _sortBy,
-                    // ignore: deprecated_member_use
-                    onChanged: (val) {
-                      setState(() => _sortBy = val!);
-                      setSheetState(() {});
-                      Navigator.pop(context);
-                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        RadioListTile<String>(
+                          title: Text('Title'),
+                          value: 'title',
+                        ),
+                        RadioListTile<String>(
+                          title: Text('Artist'),
+                          value: 'artist',
+                        ),
+                        RadioListTile<String>(
+                          title: Text('Duration'),
+                          value: 'duration',
+                        ),
+                        RadioListTile<String>(
+                          title: Text('Recently Added'),
+                          value: 'recent',
+                        ),
+                      ],
+                    ),
                   ),
                   const Divider(),
                   SwitchListTile(
