@@ -14,6 +14,7 @@ class SongTile extends StatelessWidget {
     this.onShowInFolder,
     this.onAddToPlaylist,
     this.onShowInfo,
+    this.onToggleFavorite,
   });
 
   final Song song;
@@ -24,6 +25,7 @@ class SongTile extends StatelessWidget {
   final VoidCallback? onShowInFolder;
   final VoidCallback? onAddToPlaylist;
   final VoidCallback? onShowInfo;
+  final VoidCallback? onToggleFavorite;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +77,7 @@ class SongTile extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            if (onPlayNext != null || onAddToQueue != null || onShowInFolder != null || onAddToPlaylist != null || onShowInfo != null) ...[
+            if (onPlayNext != null || onAddToQueue != null || onShowInFolder != null || onAddToPlaylist != null || onShowInfo != null || onToggleFavorite != null) ...[
               const SizedBox(width: 4),
               PopupMenuButton<int>(
                 icon: Icon(
@@ -91,6 +93,7 @@ class SongTile extends StatelessWidget {
                   if (value == 3 && onShowInFolder != null) onShowInFolder!();
                   if (value == 4 && onAddToPlaylist != null) onAddToPlaylist!();
                   if (value == 5 && onShowInfo != null) onShowInfo!();
+                  if (value == 6 && onToggleFavorite != null) onToggleFavorite!();
                 },
                 itemBuilder: (context) => [
                   if (onPlayNext != null)
@@ -145,6 +148,21 @@ class SongTile extends StatelessWidget {
                           Icon(Icons.info_outline_rounded, size: 20),
                           SizedBox(width: 8),
                           Text('Song Info'),
+                        ],
+                      ),
+                    ),
+                  if (onToggleFavorite != null)
+                    PopupMenuItem(
+                      value: 6,
+                      child: Row(
+                        children: [
+                          Icon(
+                            song.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                            size: 20,
+                            color: song.isFavorite ? Colors.red : null,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(song.isFavorite ? 'Remove Favorite' : 'Favorite Song'),
                         ],
                       ),
                     ),

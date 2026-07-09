@@ -236,6 +236,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildSearchAndFilterHeader(ThemeData theme) {
+    var count = _getFilteredSongs().length;
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 8),
       child: Column(
@@ -273,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 12),
           Text(
-            '${_getFilteredSongs().length} song(s) found',
+            '$count ${count == 1 ? 'song' : 'songs'} found',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
@@ -518,6 +519,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                             onShowInFolder: () => widget.onShowInFolder(song),
                                             onAddToPlaylist: () => _showAddToPlaylistDialog(song),
                                             onShowInfo: () => _showSongInfoBottomSheet(song),
+                                            onToggleFavorite: () => widget.playerProvider.toggleFavorite(song.id),
                                           );
                                         },
                                       ),
@@ -591,40 +593,44 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                           end: Alignment.bottomRight,
                                         ),
                                       ),
-                                      child: Icon(
-                                        Icons.music_note_rounded,
+                                       child: Icon(
+                                        playlist.id == 'favorites'
+                                            ? Icons.favorite_rounded
+                                            : Icons.music_note_rounded,
                                         color: theme.colorScheme.onPrimaryContainer,
                                       ),
                                     ),
                                     title: Text(playlist.name),
                                     subtitle: Text('$songCount song(s)'),
-                                    trailing: PopupMenuButton<int>(
-                                      icon: const Icon(Icons.more_vert_rounded),
-                                      onSelected: (val) async {
-                                        if (val == 1) {
-                                          await widget.onDeletePlaylist(playlist.id);
-                                          if (!context.mounted) return;
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('Playlist "${playlist.name}" deleted.'),
-                                              behavior: SnackBarBehavior.floating,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      itemBuilder: (context) => [
-                                        const PopupMenuItem(
-                                          value: 1,
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.delete_outline_rounded, color: Colors.red),
-                                              SizedBox(width: 8),
-                                              Text('Delete Playlist', style: TextStyle(color: Colors.red)),
+                                    trailing: playlist.id == 'favorites'
+                                        ? null
+                                        : PopupMenuButton<int>(
+                                            icon: const Icon(Icons.more_vert_rounded),
+                                            onSelected: (val) async {
+                                              if (val == 1) {
+                                                await widget.onDeletePlaylist(playlist.id);
+                                                if (!context.mounted) return;
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text('Playlist "${playlist.name}" deleted.'),
+                                                    behavior: SnackBarBehavior.floating,
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            itemBuilder: (context) => [
+                                              const PopupMenuItem(
+                                                value: 1,
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.delete_outline_rounded, color: Colors.red),
+                                                    SizedBox(width: 8),
+                                                    Text('Delete Playlist', style: TextStyle(color: Colors.red)),
+                                                  ],
+                                                ),
+                                              ),
                                             ],
                                           ),
-                                        ),
-                                      ],
-                                    ),
                                     onTap: () {
                                       Navigator.push(
                                         context,

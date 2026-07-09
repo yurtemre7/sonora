@@ -305,11 +305,24 @@ class MusicScanner {
     try {
       var appDir = await getApplicationDocumentsDirectory();
       var file = File('${appDir.path}/playlists.json');
-      if (!file.existsSync()) return [];
+      var list = <Playlist>[];
+      if (file.existsSync()) {
+        var content = await file.readAsString();
+        var jsonList = jsonDecode(content) as List<dynamic>;
+        list = jsonList.map((item) => Playlist.fromJson(item as Map<String, dynamic>)).toList();
+      }
 
-      var content = await file.readAsString();
-      var jsonList = jsonDecode(content) as List<dynamic>;
-      return jsonList.map((item) => Playlist.fromJson(item as Map<String, dynamic>)).toList();
+      var hasFavorites = list.any((p) => p.id == 'favorites');
+      if (!hasFavorites) {
+        var favoritesPlaylist = Playlist(
+          id: 'favorites',
+          name: 'Favorites',
+          songIds: [],
+        );
+        list.insert(0, favoritesPlaylist);
+        await savePlaylists(list);
+      }
+      return list;
     } catch (_) {
       return [];
     }
@@ -323,6 +336,55 @@ class MusicScanner {
       var jsonList = playlists.map((p) => p.toJson()).toList();
       await file.writeAsString(jsonEncode(jsonList));
     } catch (_) {}
+  }
+
+  /// Toggles a song's favorite status in the cache index and updates the default Favorites playlist.
+  Future<List<Song>> toggleFavoriteSong(int songId) async {
+    try {
+      var songs = await _readImportedSongsMetadata();
+      var playlists = await getPlaylists();
+      
+      var songIndex = songs.indexWhere((s) => s.id == songId);
+      if (songIndex >= 0) {
+        var song = songs[songIndex];
+        var newFavoriteStatus = !song.isFavorite;
+        
+        songs[songIndex] = Song(
+          id: song.id,
+          title: song.title,
+          artist: song.artist,
+          album: song.album,
+          duration: song.duration,
+          filePath: song.filePath,
+          artworkPath: song.artworkPath,
+          format: song.format,
+          bitrate: song.bitrate,
+          samplerate: song.samplerate,
+          isFavorite: newFavoriteStatus,
+        );
+        
+        await _writeImportedSongsMetadata(songs);
+        
+        // Update favorites playlist
+        var favoritesIndex = playlists.indexWhere((p) => p.id == 'favorites');
+        if (favoritesIndex >= 0) {
+          var favPlaylist = playlists[favoritesIndex];
+          if (newFavoriteStatus) {
+            if (!favPlaylist.songIds.contains(songId)) {
+              favPlaylist.songIds.add(songId);
+            }
+          } else {
+            favPlaylist.songIds.remove(songId);
+          }
+          await savePlaylists(playlists);
+        }
+      }
+      
+      songs.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+      return songs;
+    } catch (_) {
+      return [];
+    }
   }
 
   /// Creates a new empty playlist.
@@ -393,6 +455,7 @@ class MusicScanner {
           format: item['format'] as String?,
           bitrate: item['bitrate'] as int?,
           samplerate: item['samplerate'] as int?,
+          isFavorite: item['is_favorite'] as bool? ?? false,
         );
       }).toList();
     } catch (_) {
@@ -416,6 +479,7 @@ class MusicScanner {
         'format': s.format,
         'bitrate': s.bitrate,
         'samplerate': s.samplerate,
+        'is_favorite': s.isFavorite,
       }).toList();
 
       await jsonFile.writeAsString(jsonEncode(jsonList));

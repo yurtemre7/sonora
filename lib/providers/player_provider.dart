@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/audio_handler.dart';
+import 'package:sonora/services/music_scanner.dart';
 
 /// Repeat mode for playlist playback.
 enum RepeatMode { off, all, one }
@@ -228,6 +229,57 @@ class PlayerProvider extends ChangeNotifier {
     allSongs = List<Song>.from(songs);
     queue = List<Song>.from(songs);
     _originalQueue = List<Song>.from(songs);
+    notifyListeners();
+  }
+
+  /// Toggles a song's favorite status in the cache index and favorite playlist.
+  Future<void> toggleFavorite(int songId) async {
+    var scanner = MusicScanner();
+    var updatedSongs = await scanner.toggleFavoriteSong(songId);
+    
+    // Update local state arrays keeping references
+    allSongs = List<Song>.from(updatedSongs);
+    
+    // Update queue songs matching songId
+    for (var i = 0; i < queue.length; i++) {
+      if (queue[i].id == songId) {
+        var song = queue[i];
+        queue[i] = Song(
+          id: song.id,
+          title: song.title,
+          artist: song.artist,
+          album: song.album,
+          duration: song.duration,
+          filePath: song.filePath,
+          artworkPath: song.artworkPath,
+          format: song.format,
+          bitrate: song.bitrate,
+          samplerate: song.samplerate,
+          isFavorite: !song.isFavorite,
+        );
+      }
+    }
+    
+    // Update original queue matching songId
+    for (var i = 0; i < _originalQueue.length; i++) {
+      if (_originalQueue[i].id == songId) {
+        var song = _originalQueue[i];
+        _originalQueue[i] = Song(
+          id: song.id,
+          title: song.title,
+          artist: song.artist,
+          album: song.album,
+          duration: song.duration,
+          filePath: song.filePath,
+          artworkPath: song.artworkPath,
+          format: song.format,
+          bitrate: song.bitrate,
+          samplerate: song.samplerate,
+          isFavorite: !song.isFavorite,
+        );
+      }
+    }
+
     notifyListeners();
   }
 

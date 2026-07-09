@@ -9,6 +9,7 @@ class Song {
   final String? format;
   final int? bitrate;
   final int? samplerate;
+  final bool isFavorite;
 
   Song({
     required this.id,
@@ -21,6 +22,7 @@ class Song {
     this.format,
     this.bitrate,
     this.samplerate,
+    this.isFavorite = false,
   });
 
   String get durationFormatted {
