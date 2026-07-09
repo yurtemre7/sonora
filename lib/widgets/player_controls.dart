@@ -34,7 +34,9 @@ class PlayerControls extends StatelessWidget {
         // Shuffle
         IconButton(
           onPressed: onShuffle,
-          icon: const Icon(Icons.shuffle_rounded),
+          icon: Icon(
+            isShuffled ? Icons.shuffle_on_rounded : Icons.shuffle_rounded,
+          ),
           iconSize: 24,
           color: isShuffled
               ? theme.colorScheme.primary
@@ -101,8 +103,10 @@ class PlayerControls extends StatelessWidget {
           onPressed: onRepeat,
           icon: Icon(
             repeatMode == RepeatMode.one
-                ? Icons.repeat_one_rounded
-                : Icons.repeat_rounded,
+                ? Icons.repeat_one_on_rounded
+                : (repeatMode == RepeatMode.all
+                    ? Icons.repeat_on_rounded
+                    : Icons.repeat_rounded),
           ),
           iconSize: 24,
           color: repeatMode != RepeatMode.off
