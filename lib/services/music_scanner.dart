@@ -81,12 +81,18 @@ class MusicScanner {
             String? artist;
             String? album;
             String? artworkPath;
+            String? format;
+            int? bitrate;
+            int? samplerate;
 
             var meta = await tags.readMetadataAsync(song.filePath, true);
             if (meta != null) {
               title = meta.title?.trim();
               artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
               album = meta.album?.trim();
+              format = meta.format?.trim();
+              bitrate = meta.bitrate;
+              samplerate = meta.samplerate;
 
               if (meta.pictureBytes != null && meta.pictureBytes!.isNotEmpty) {
                 var appDir = await getApplicationDocumentsDirectory();
@@ -108,6 +114,9 @@ class MusicScanner {
               duration: song.duration,
               filePath: song.filePath,
               artworkPath: artworkPath ?? song.artworkPath,
+              format: format,
+              bitrate: bitrate,
+              samplerate: samplerate,
             );
           } catch (_) {}
         }
@@ -134,6 +143,9 @@ class MusicScanner {
             String? artist;
             String? album;
             String? artworkPath;
+            String? format;
+            int? bitrate;
+            int? samplerate;
 
             try {
               var meta = await tags.readMetadataAsync(file.path, true);
@@ -141,6 +153,9 @@ class MusicScanner {
                 title = meta.title?.trim();
                 artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
                 album = meta.album?.trim();
+                format = meta.format?.trim();
+                bitrate = meta.bitrate;
+                samplerate = meta.samplerate;
 
                 if (meta.pictureBytes != null && meta.pictureBytes!.isNotEmpty) {
                   var appDir = await getApplicationDocumentsDirectory();
@@ -163,6 +178,9 @@ class MusicScanner {
               duration: duration ?? Duration.zero,
               filePath: file.path,
               artworkPath: artworkPath,
+              format: format,
+              bitrate: bitrate,
+              samplerate: samplerate,
             ));
           } catch (_) {}
         }
@@ -372,6 +390,9 @@ class MusicScanner {
           duration: Duration(milliseconds: item['duration_ms'] as int),
           filePath: item['file_path'] as String,
           artworkPath: item['artwork_path'] as String?,
+          format: item['format'] as String?,
+          bitrate: item['bitrate'] as int?,
+          samplerate: item['samplerate'] as int?,
         );
       }).toList();
     } catch (_) {
@@ -392,6 +413,9 @@ class MusicScanner {
         'duration_ms': s.duration.inMilliseconds,
         'file_path': s.filePath,
         'artwork_path': s.artworkPath,
+        'format': s.format,
+        'bitrate': s.bitrate,
+        'samplerate': s.samplerate,
       }).toList();
 
       await jsonFile.writeAsString(jsonEncode(jsonList));

@@ -13,6 +13,7 @@ class SongTile extends StatelessWidget {
     this.onAddToQueue,
     this.onShowInFolder,
     this.onAddToPlaylist,
+    this.onShowInfo,
   });
 
   final Song song;
@@ -22,6 +23,7 @@ class SongTile extends StatelessWidget {
   final VoidCallback? onAddToQueue;
   final VoidCallback? onShowInFolder;
   final VoidCallback? onAddToPlaylist;
+  final VoidCallback? onShowInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +75,7 @@ class SongTile extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            if (onPlayNext != null || onAddToQueue != null || onShowInFolder != null || onAddToPlaylist != null) ...[
+            if (onPlayNext != null || onAddToQueue != null || onShowInFolder != null || onAddToPlaylist != null || onShowInfo != null) ...[
               const SizedBox(width: 4),
               PopupMenuButton<int>(
                 icon: Icon(
@@ -88,6 +90,7 @@ class SongTile extends StatelessWidget {
                   if (value == 2 && onAddToQueue != null) onAddToQueue!();
                   if (value == 3 && onShowInFolder != null) onShowInFolder!();
                   if (value == 4 && onAddToPlaylist != null) onAddToPlaylist!();
+                  if (value == 5 && onShowInfo != null) onShowInfo!();
                 },
                 itemBuilder: (context) => [
                   if (onPlayNext != null)
@@ -131,6 +134,17 @@ class SongTile extends StatelessWidget {
                           Icon(Icons.playlist_add_rounded, size: 20),
                           SizedBox(width: 8),
                           Text('Add to playlist'),
+                        ],
+                      ),
+                    ),
+                  if (onShowInfo != null)
+                    const PopupMenuItem(
+                      value: 5,
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline_rounded, size: 20),
+                          SizedBox(width: 8),
+                          Text('Song Info'),
                         ],
                       ),
                     ),

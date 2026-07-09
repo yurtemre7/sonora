@@ -339,6 +339,7 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
                     onRemoveSongFromPlaylist: _onRemoveSongFromPlaylist,
                     onReorderPlaylistSongs: _onReorderPlaylistSongs,
                     onShowInFolder: _showInFolder,
+                    isSyncing: _isSyncing,
                   ),
                 ),
     );

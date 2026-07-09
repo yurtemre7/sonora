@@ -23,6 +23,7 @@ class HomeScreen extends StatefulWidget {
     required this.onRemoveSongFromPlaylist,
     required this.onReorderPlaylistSongs,
     required this.onShowInFolder,
+    required this.isSyncing,
   });
 
   final PlayerProvider playerProvider;
@@ -38,6 +39,7 @@ class HomeScreen extends StatefulWidget {
   final Future<void> Function(String playlistId, int songId) onRemoveSongFromPlaylist;
   final Future<void> Function(String playlistId, List<int> reorderedIds) onReorderPlaylistSongs;
   final Future<void> Function(Song song) onShowInFolder;
+  final bool isSyncing;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -45,11 +47,241 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  var _searchQuery = '';
+  var _sortBy = 'title';
+  var _sortAscending = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+  }
+
+  List<Song> _getFilteredSongs() {
+    var filtered = widget.songs.where((song) {
+      if (_searchQuery.isEmpty) return true;
+      var query = _searchQuery.toLowerCase();
+      return song.title.toLowerCase().contains(query) ||
+          song.artist.toLowerCase().contains(query) ||
+          song.album.toLowerCase().contains(query);
+    }).toList();
+
+    filtered.sort((a, b) {
+      int comparison;
+      if (_sortBy == 'artist') {
+        comparison = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
+      } else if (_sortBy == 'duration') {
+        comparison = a.duration.compareTo(b.duration);
+      } else {
+        comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+      }
+      return _sortAscending ? comparison : -comparison;
+    });
+
+    return filtered;
+  }
+
+  void _showSortBottomSheet() {
+    var theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sort Songs By',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // ignore: deprecated_member_use
+                  RadioListTile<String>(
+                    title: const Text('Title'),
+                    value: 'title',
+                    // ignore: deprecated_member_use
+                    groupValue: _sortBy,
+                    // ignore: deprecated_member_use
+                    onChanged: (val) {
+                      setState(() => _sortBy = val!);
+                      setSheetState(() {});
+                      Navigator.pop(context);
+                    },
+                  ),
+                  // ignore: deprecated_member_use
+                  RadioListTile<String>(
+                    title: const Text('Artist'),
+                    value: 'artist',
+                    // ignore: deprecated_member_use
+                    groupValue: _sortBy,
+                    // ignore: deprecated_member_use
+                    onChanged: (val) {
+                      setState(() => _sortBy = val!);
+                      setSheetState(() {});
+                      Navigator.pop(context);
+                    },
+                  ),
+                  // ignore: deprecated_member_use
+                  RadioListTile<String>(
+                    title: const Text('Duration'),
+                    value: 'duration',
+                    // ignore: deprecated_member_use
+                    groupValue: _sortBy,
+                    // ignore: deprecated_member_use
+                    onChanged: (val) {
+                      setState(() => _sortBy = val!);
+                      setSheetState(() {});
+                      Navigator.pop(context);
+                    },
+                  ),
+                  const Divider(),
+                  SwitchListTile(
+                    title: const Text('Sort Ascending'),
+                    value: _sortAscending,
+                    onChanged: (val) {
+                      setState(() => _sortAscending = val);
+                      setSheetState(() {});
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showSongInfoBottomSheet(Song song) {
+    var theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHigh,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Song Information',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildInfoRow('Title', song.title, theme),
+              _buildInfoRow('Artist', song.artist, theme),
+              _buildInfoRow('Album', song.album, theme),
+              _buildInfoRow('Duration', song.durationFormatted, theme),
+              _buildInfoRow('File Path', song.filePath, theme, isPath: true),
+              if (song.format != null) _buildInfoRow('Format', song.format!.toUpperCase(), theme),
+              if (song.bitrate != null) _buildInfoRow('Bitrate', '${(song.bitrate! / 1000).toStringAsFixed(0)} kbps', theme),
+              if (song.samplerate != null) _buildInfoRow('Sample Rate', '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz', theme),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, ThemeData theme, {bool isPath = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              fontFamily: isPath ? 'monospace' : null,
+              fontSize: isPath ? 12 : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilterHeader(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  onChanged: (val) {
+                    setState(() {
+                      _searchQuery = val.trim();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Search songs, artists...',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHigh,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                icon: const Icon(Icons.sort_rounded),
+                onPressed: _showSortBottomSheet,
+                tooltip: 'Sort Songs',
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '${_getFilteredSongs().length} song(s) found',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -189,12 +421,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     ),
                   ),
                 ),
-                bottom: TabBar(
-                  controller: _tabController,
-                  tabs: const [
-                    Tab(text: 'Songs'),
-                    Tab(text: 'Playlists'),
-                  ],
+                bottom: PreferredSize(
+                  preferredSize: Size.fromHeight(widget.isSyncing ? 50 : 48),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.isSyncing)
+                        const LinearProgressIndicator(minHeight: 2),
+                      TabBar(
+                        controller: _tabController,
+                        tabs: const [
+                          Tab(text: 'Songs'),
+                          Tab(text: 'Playlists'),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SliverFillRemaining(
@@ -249,20 +491,38 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               ),
                             ),
                           )
-                        : ListView.builder(
-                            padding: const EdgeInsets.only(bottom: 100),
-                            itemCount: widget.songs.length,
-                            itemBuilder: (context, index) {
-                              var song = widget.songs[index];
-                              return SongTile(
-                                song: song,
-                                onTap: () => widget.playerProvider.playSong(song, widget.songs),
-                                onPlayNext: () => widget.playerProvider.playNext(song),
-                                onAddToQueue: () => widget.playerProvider.addToQueue(song),
-                                onShowInFolder: () => widget.onShowInFolder(song),
-                                onAddToPlaylist: () => _showAddToPlaylistDialog(song),
-                              );
-                            },
+                        : Column(
+                            children: [
+                              _buildSearchAndFilterHeader(theme),
+                              Expanded(
+                                child: _getFilteredSongs().isEmpty
+                                    ? Center(
+                                        child: Text(
+                                          'No matching songs found',
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            color: theme.colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      )
+                                    : ListView.builder(
+                                        padding: const EdgeInsets.only(bottom: 100),
+                                        itemCount: _getFilteredSongs().length,
+                                        itemBuilder: (context, index) {
+                                          var filteredSongs = _getFilteredSongs();
+                                          var song = filteredSongs[index];
+                                          return SongTile(
+                                            song: song,
+                                            onTap: () => widget.playerProvider.playSong(song, filteredSongs),
+                                            onPlayNext: () => widget.playerProvider.playNext(song),
+                                            onAddToQueue: () => widget.playerProvider.addToQueue(song),
+                                            onShowInFolder: () => widget.onShowInFolder(song),
+                                            onAddToPlaylist: () => _showAddToPlaylistDialog(song),
+                                            onShowInfo: () => _showSongInfoBottomSheet(song),
+                                          );
+                                        },
+                                      ),
+                              ),
+                            ],
                           ),
 
                     // Tab 2: Playlists

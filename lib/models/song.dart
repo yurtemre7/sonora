@@ -6,6 +6,9 @@ class Song {
   final Duration duration;
   final String filePath;
   final String? artworkPath;
+  final String? format;
+  final int? bitrate;
+  final int? samplerate;
 
   Song({
     required this.id,
@@ -15,6 +18,9 @@ class Song {
     required this.duration,
     required this.filePath,
     this.artworkPath,
+    this.format,
+    this.bitrate,
+    this.samplerate,
   });
 
   String get durationFormatted {
