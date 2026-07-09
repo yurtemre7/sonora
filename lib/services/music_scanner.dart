@@ -101,10 +101,10 @@ class MusicScanner {
                 artist = tag.trackArtist?.trim() ?? tag.albumArtist?.trim();
                 album = tag.album?.trim();
 
-                if (tag.pictures != null && tag.pictures!.isNotEmpty) {
-                  var pic = tag.pictures!.first;
+                if (tag.pictures.isNotEmpty) {
+                  var pic = tag.pictures.first;
                   var appDir = await getApplicationDocumentsDirectory();
-                  var artFile = File('${appDir.path}/artwork_${DateTime.now().millisecondsSinceEpoch}_${idCounter}.jpg');
+                  var artFile = File('${appDir.path}/artwork_${DateTime.now().millisecondsSinceEpoch}_$idCounter.jpg');
                   await artFile.writeAsBytes(pic.bytes);
                   artworkPath = artFile.path;
                 }
