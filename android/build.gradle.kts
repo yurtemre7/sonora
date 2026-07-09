@@ -33,7 +33,7 @@ fun configureNamespace(proj: Project) {
                 val setNamespace = android.javaClass.methods.firstOrNull { 
                     it.name == "setNamespace" && it.parameterTypes.size == 1 && it.parameterTypes[0] == String::class.java 
                 }
-                setNamespace?.invoke(android, "com.sonora.fallback." + proj.name.replace("-", "_"))
+                setNamespace?.invoke(android, "de.yurtemre.sonora.fallback." + proj.name.replace("-", "_"))
             }
         } catch (e: Exception) {
             // Ignore

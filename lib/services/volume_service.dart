@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 /// checks whether the device's media volume is at zero and raises it to
 /// a reasonable default if so.
 class VolumeService {
-  static const _channel = MethodChannel('com.sonora/volume');
+  static const _channel = MethodChannel('de.yurtemre.sonora/volume');
 
   /// Ensures the device media volume is not zero.
   ///

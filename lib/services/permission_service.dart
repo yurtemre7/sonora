@@ -4,7 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 /// Handles runtime permissions for audio file access and notifications.
 class PermissionService {
-  static const _channel = MethodChannel('com.sonora/volume');
+  static const _channel = MethodChannel('de.yurtemre.sonora/volume');
 
   /// Requests all required permissions for the app to function.
   ///

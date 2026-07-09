@@ -14,7 +14,7 @@ Future<void> main() async {
   audioHandler = await AudioService.init(
     builder: () => SonoraAudioHandler(),
     config: const AudioServiceConfig(
-      androidNotificationChannelId: 'com.sonora.sonora.audio',
+      androidNotificationChannelId: 'de.yurtemre.sonora.audio',
       androidNotificationChannelName: 'Sonora Music',
       androidNotificationOngoing: true,
     ),
