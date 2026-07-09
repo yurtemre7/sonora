@@ -74,6 +74,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         comparison = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
       } else if (_sortBy == 'duration') {
         comparison = a.duration.compareTo(b.duration);
+      } else if (_sortBy == 'recent') {
+        var aTime = a.lastModifiedMs ?? 0;
+        var bTime = b.lastModifiedMs ?? 0;
+        // Compare b to a so that larger/newer timestamps come first when ascending is active
+        comparison = bTime.compareTo(aTime);
       } else {
         comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
       }
@@ -133,6 +138,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   RadioListTile<String>(
                     title: const Text('Duration'),
                     value: 'duration',
+                    // ignore: deprecated_member_use
+                    groupValue: _sortBy,
+                    // ignore: deprecated_member_use
+                    onChanged: (val) {
+                      setState(() => _sortBy = val!);
+                      setSheetState(() {});
+                      Navigator.pop(context);
+                    },
+                  ),
+                  // ignore: deprecated_member_use
+                  RadioListTile<String>(
+                    title: const Text('Recently Added'),
+                    value: 'recent',
                     // ignore: deprecated_member_use
                     groupValue: _sortBy,
                     // ignore: deprecated_member_use
