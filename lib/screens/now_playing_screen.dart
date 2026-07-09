@@ -28,9 +28,41 @@ class NowPlayingScreen extends StatelessWidget {
         var song = playerProvider.currentSong;
 
         if (song == null) {
-          return const Scaffold(
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                iconSize: 32,
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: const Text('Now Playing'),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+            ),
             body: Center(
-              child: Text('No song playing'),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.music_off_rounded,
+                    size: 64,
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No song playing',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.tonalIcon(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close_rounded),
+                    label: const Text('Close Player'),
+                  ),
+                ],
+              ),
             ),
           );
         }
