@@ -288,6 +288,42 @@ class MusicScanner {
     } catch (_) {}
   }
 
+  /// Reads the sorting configuration from settings.json.
+  Future<Map<String, dynamic>> getSortSettings() async {
+    try {
+      var appDir = await getApplicationDocumentsDirectory();
+      var settingsFile = File('${appDir.path}/settings.json');
+      if (!settingsFile.existsSync()) return {'sortBy': 'title', 'sortAscending': true};
+
+      var content = await settingsFile.readAsString();
+      var json = jsonDecode(content) as Map<String, dynamic>;
+      return {
+        'sortBy': json['sort_by'] as String? ?? 'title',
+        'sortAscending': json['sort_ascending'] as bool? ?? true,
+      };
+    } catch (_) {
+      return {'sortBy': 'title', 'sortAscending': true};
+    }
+  }
+
+  /// Writes the sorting configuration to settings.json.
+  Future<void> saveSortSettings(String sortBy, bool sortAscending) async {
+    try {
+      var appDir = await getApplicationDocumentsDirectory();
+      var settingsFile = File('${appDir.path}/settings.json');
+      var json = <String, dynamic>{};
+      if (settingsFile.existsSync()) {
+        try {
+          var content = await settingsFile.readAsString();
+          json = Map<String, dynamic>.from(jsonDecode(content) as Map);
+        } catch (_) {}
+      }
+      json['sort_by'] = sortBy;
+      json['sort_ascending'] = sortAscending;
+      await settingsFile.writeAsString(jsonEncode(json));
+    } catch (_) {}
+  }
+
   // --- Playlists API ---
 
   /// Reads the playlists list from playlists.json.

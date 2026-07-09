@@ -4,6 +4,7 @@ import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
+import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/mini_player.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -57,6 +58,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+    _loadSavedSortSettings();
+  }
+
+  Future<void> _loadSavedSortSettings() async {
+    var settings = await MusicScanner().getSortSettings();
+    if (mounted) {
+      setState(() {
+        _sortBy = settings['sortBy'] as String;
+        _sortAscending = settings['sortAscending'] as bool;
+      });
+    }
   }
 
   List<Song> _getFilteredSongs() {
@@ -113,6 +125,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     onChanged: (val) {
                       setState(() => _sortBy = val!);
                       setSheetState(() {});
+                      MusicScanner().saveSortSettings(_sortBy, _sortAscending);
                       Navigator.pop(context);
                     },
                     child: Column(
@@ -144,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     onChanged: (val) {
                       setState(() => _sortAscending = val);
                       setSheetState(() {});
+                      MusicScanner().saveSortSettings(_sortBy, _sortAscending);
                     },
                   ),
                 ],
