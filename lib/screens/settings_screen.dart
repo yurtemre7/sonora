@@ -333,6 +333,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icon(
                           Icons.folder_shared_rounded,
                           color: theme.colorScheme.primary,
+                          size: 26,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -358,6 +359,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ],
                           ),
+                        ),
+                        const SizedBox(width: 12),
+                        OutlinedButton(
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            await widget.onConfigureFolder();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          ),
+                          child: const Text('Change'),
                         ),
                       ],
                     ),
@@ -395,69 +410,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ],
                           ),
                         ),
-                        Row(
-                          children: [
-                            OutlinedButton(
-                              onPressed: () async {
-                                Navigator.pop(context);
-                                await widget.onConfigureFolder();
-                              },
-                              style: OutlinedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              ),
-                              child: const Text('Change'),
-                            ),
-                            if (_scanFolder != null) ...[
-                              const SizedBox(width: 8),
-                              FilledButton.tonalIcon(
-                                onPressed: _isSyncing
-                                    ? null
-                                    : () async {
-                                        setState(() {
-                                          _isSyncing = true;
-                                        });
-                                        try {
-                                          await widget.onRetriggerSync();
-                                          await _loadSettings();
-                                          if (!context.mounted) return;
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Library synchronization complete.'),
-                                              behavior: SnackBarBehavior.floating,
-                                            ),
-                                          );
-                                        } finally {
-                                          if (context.mounted) {
-                                            setState(() {
-                                              _isSyncing = false;
-                                            });
-                                          }
-                                        }
-                                      },
-                                style: FilledButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                ),
-                                icon: _isSyncing
-                                    ? SizedBox(
-                                        width: 14,
-                                        height: 14,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: theme.colorScheme.onSecondaryContainer,
+                        if (_scanFolder != null)
+                          FilledButton.tonalIcon(
+                            onPressed: _isSyncing
+                                ? null
+                                : () async {
+                                    setState(() {
+                                      _isSyncing = true;
+                                    });
+                                    try {
+                                      await widget.onRetriggerSync();
+                                      await _loadSettings();
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Library synchronization complete.'),
+                                          behavior: SnackBarBehavior.floating,
                                         ),
-                                      )
-                                    : const Icon(Icons.sync_rounded, size: 16),
-                                label: Text(_isSyncing ? 'Syncing...' : 'Sync'),
+                                      );
+                                    } finally {
+                                      if (context.mounted) {
+                                        setState(() {
+                                          _isSyncing = false;
+                                        });
+                                      }
+                                    }
+                                  },
+                            style: FilledButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ],
-                          ],
-                        ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            ),
+                            icon: _isSyncing
+                                ? SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: theme.colorScheme.onSecondaryContainer,
+                                    ),
+                                  )
+                                : const Icon(Icons.sync_rounded, size: 16),
+                            label: Text(_isSyncing ? 'Syncing...' : 'Sync Now'),
+                          ),
                       ],
                     ),
                   ],
