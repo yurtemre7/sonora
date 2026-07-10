@@ -7,6 +7,11 @@ This file outlines project-specific rules and instructions for coding assistants
 ### Changelog Maintenance
 * **Rule:** Whenever you implement a new feature, refactor components, or resolve bugs, you must record these changes under the appropriate heading in the [CHANGELOG.md](file:///Users/yurtemre/Code/antigravity/kind-salk/CHANGELOG.md) file located in the project root.
 
+### Autogenerating the Changelog
+* **Instruction:** You can autogenerate or refresh the changelog based on commits between git tags by running the python script:
+  `python3 scripts/generate_changelog.py`
+  Always run this script after new tags have been fetched or pushed to sync git logs with the changelog.
+
 ### Automating Releases
 * **Rule:** Sonora uses GitHub Actions to compile and package production Android builds.
 * **Instruction:** To trigger a release tag build, perform the following:
