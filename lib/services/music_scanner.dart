@@ -97,10 +97,31 @@ class MusicScanner {
               var mtime = stat.modified.millisecondsSinceEpoch;
               var size = stat.size;
 
+              var lastDotLrc = file.path.lastIndexOf('.');
+              var hasLrc = lastDotLrc != -1 && File('${file.path.substring(0, lastDotLrc)}.lrc').existsSync();
+
               if (cached.lastModifiedMs == mtime && cached.fileSize == size &&
                   cached.artist != 'Local Audio' && cached.album != 'Synced Folder') {
-                // Completely unchanged, keep cached song model (fast paths)
-                songsToKeep.add(cached);
+                if (cached.hasLyrics != hasLrc) {
+                  songsToKeep.add(Song(
+                    id: cached.id,
+                    title: cached.title,
+                    artist: cached.artist,
+                    album: cached.album,
+                    duration: cached.duration,
+                    filePath: cached.filePath,
+                    artworkPath: cached.artworkPath,
+                    format: cached.format,
+                    bitrate: cached.bitrate,
+                    samplerate: cached.samplerate,
+                    isFavorite: cached.isFavorite,
+                    lastModifiedMs: cached.lastModifiedMs,
+                    fileSize: cached.fileSize,
+                    hasLyrics: hasLrc,
+                  ));
+                } else {
+                  songsToKeep.add(cached);
+                }
                 continue;
               }
             } catch (_) {}
