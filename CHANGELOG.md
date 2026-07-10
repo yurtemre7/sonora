@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.1.12] - 2026-07-10
+### Added
+* Add tap-to-seek lyrics navigation and restore large thumbnail size
+
 ## [1.1.11] - 2026-07-10
 ### Added
 * Seek to beginning on back button if song has played more than 3 seconds
