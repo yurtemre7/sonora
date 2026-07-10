@@ -526,18 +526,41 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ),
             bottom: PreferredSize(
-              preferredSize: Size.fromHeight(widget.isSyncing ? 50 : 48),
+              preferredSize: Size.fromHeight(widget.isSyncing ? 56 : 54),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (widget.isSyncing)
                     const LinearProgressIndicator(minHeight: 2),
-                  TabBar(
-                    controller: _tabController,
-                    tabs: const [
-                      Tab(text: 'Songs'),
-                      Tab(text: 'Playlists'),
-                    ],
+                  Container(
+                    height: 38,
+                    margin: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: TabBar(
+                      controller: _tabController,
+                      dividerColor: Colors.transparent,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicator: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      labelColor: theme.colorScheme.onPrimaryContainer,
+                      labelStyle: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+                      unselectedLabelStyle: theme.textTheme.labelLarge,
+                      tabs: const [
+                        Tab(text: 'Songs'),
+                        Tab(text: 'Playlists'),
+                      ],
+                    ),
                   ),
                 ],
               ),
