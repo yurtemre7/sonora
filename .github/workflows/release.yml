@@ -1,0 +1,138 @@
+name: 🚀 Flutter Release Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─────────────────────────────────────────
+  # 1. Extract version info (shared across build jobs)
+  # ─────────────────────────────────────────
+  version:
+    name: 🏷️ Resolve Version
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, 'release:')
+    outputs:
+      version_name: ${{ steps.ver.outputs.version_name }}
+      build_number: ${{ steps.ver.outputs.build_number }}
+      tag: ${{ steps.ver.outputs.tag }}
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 🔢 Extract version + commit count
+        id: ver
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1 | xargs)
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          TAG="v${VERSION}+${BUILD_NUMBER}"
+          echo "version_name=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "build_number=${BUILD_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "📌 Version: ${VERSION} | Build: ${BUILD_NUMBER} | Tag: ${TAG}"
+
+  # ─────────────────────────────────────────
+  # 2. Android APK build
+  # ─────────────────────────────────────────
+  build-apk:
+    name: 🤖 Build Android APK
+    runs-on: ubuntu-latest
+    needs: version
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.6'
+          channel: stable
+          cache: true
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 🗄️ Cache Gradle & Android SDK components
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: android-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: android-gradle-
+
+      - name: 🔑 Decode keystore
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          fi
+
+      - name: 📝 Write key.properties
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            cat > android/app/key.properties <<EOF
+            storeFile=keystore.jks
+            storePassword=${{ secrets.STORE_PASSWORD }}
+            keyAlias=upload
+            keyPassword=${{ secrets.KEY_PASSWORD }}
+            EOF
+          fi
+
+      - name: 📦 Get dependencies
+        run: flutter pub get
+
+      - name: 🔨 Build APK (release)
+        run: |
+          flutter build apk --release --split-per-abi \
+            --build-name=${{ needs.version.outputs.version_name }} \
+            --build-number=${{ needs.version.outputs.build_number }}
+          mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk sonora-armeabi-v7a.apk
+          mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk sonora-arm64-v8a.apk
+          mv build/app/outputs/flutter-apk/app-x86_64-release.apk sonora-x86_64.apk
+
+      - name: 📤 Upload APK artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: sonora-android-apk
+          path: sonora-*.apk
+          if-no-files-found: error
+
+  # ─────────────────────────────────────────
+  # 3. Create GitHub Release (build done)
+  # ─────────────────────────────────────────
+  release:
+    name: 🎉 Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [version, build-apk]
+    permissions:
+      contents: write
+    steps:
+      - name: 📥 Download all artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: dist/
+
+      - name: 🏷️ Create Release & Upload Assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: "Sonora ${{ needs.version.outputs.tag }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/sonora-android-apk/sonora-armeabi-v7a.apk
+            dist/sonora-android-apk/sonora-arm64-v8a.apk
+            dist/sonora-android-apk/sonora-x86_64.apk
