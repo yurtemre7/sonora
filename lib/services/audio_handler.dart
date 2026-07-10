@@ -183,7 +183,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       _isModifyingSources = true;
       try {
         await player.setAudioSources([]);
-      } finally {
+      } catch (_) {} finally {
         _isModifyingSources = false;
       }
       queue.add([]);
@@ -217,6 +217,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
       queue.add(windowItems);
       mediaItem.add(_rawPlaylist[initialIndex]);
+    } catch (_) {
+      // Just_audio throws 'Loading interrupted' when another load request overlaps.
+      // This is expected during rapid skips/taps, so we handle it silently.
     } finally {
       _isModifyingSources = false;
     }
