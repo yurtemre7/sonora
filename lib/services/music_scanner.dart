@@ -158,6 +158,12 @@ class MusicScanner {
               var songId = existingIds[file.path] ?? idCounter++;
               var isFav = existingFavoriteStatus[file.path] ?? false;
 
+              var hasLrc = false;
+              if (extIndex != -1) {
+                var lrcPath = '${file.path.substring(0, file.path.lastIndexOf('.'))}.lrc';
+                hasLrc = File(lrcPath).existsSync();
+              }
+
               songsToKeep.add(Song(
                 id: songId,
                 title: (title == null || title.isEmpty) ? defaultTitle : title,
@@ -172,6 +178,7 @@ class MusicScanner {
                 isFavorite: isFav,
                 lastModifiedMs: mtime,
                 fileSize: size,
+                hasLyrics: hasLrc,
               ));
             } catch (_) {}
           }
@@ -380,6 +387,7 @@ class MusicScanner {
           isFavorite: newFavoriteStatus,
           lastModifiedMs: song.lastModifiedMs,
           fileSize: song.fileSize,
+          hasLyrics: song.hasLyrics,
         );
         
         await _writeImportedSongsMetadata(songs);
@@ -496,6 +504,7 @@ class MusicScanner {
           isFavorite: item['is_favorite'] as bool? ?? false,
           lastModifiedMs: item['last_modified_ms'] as int?,
           fileSize: item['file_size'] as int?,
+          hasLyrics: item['has_lyrics'] as bool? ?? false,
         );
       }).toList();
     } catch (_) {
@@ -522,6 +531,7 @@ class MusicScanner {
         'is_favorite': s.isFavorite,
         'last_modified_ms': s.lastModifiedMs,
         'file_size': s.fileSize,
+        'has_lyrics': s.hasLyrics,
       }).toList();
 
       await jsonFile.writeAsString(jsonEncode(jsonList));

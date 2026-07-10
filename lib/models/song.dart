@@ -12,6 +12,7 @@ class Song {
   final bool isFavorite;
   final int? lastModifiedMs;
   final int? fileSize;
+  final bool hasLyrics;
 
   Song({
     required this.id,
@@ -27,6 +28,7 @@ class Song {
     this.isFavorite = false,
     this.lastModifiedMs,
     this.fileSize,
+    this.hasLyrics = false,
   });
 
   String get durationFormatted {

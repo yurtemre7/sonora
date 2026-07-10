@@ -295,6 +295,7 @@ class PlayerProvider extends ChangeNotifier {
           isFavorite: !song.isFavorite,
           lastModifiedMs: song.lastModifiedMs,
           fileSize: song.fileSize,
+          hasLyrics: song.hasLyrics,
         );
       }
     }
@@ -317,6 +318,7 @@ class PlayerProvider extends ChangeNotifier {
           isFavorite: !song.isFavorite,
           lastModifiedMs: song.lastModifiedMs,
           fileSize: song.fileSize,
+          hasLyrics: song.hasLyrics,
         );
       }
     }

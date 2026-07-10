@@ -80,6 +80,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
           );
         }
 
+        if (!song.hasLyrics && _showLyrics) {
+          _showLyrics = false;
+        }
+
         return Scaffold(
           extendBodyBehindAppBar: true,
           appBar: AppBar(
@@ -222,7 +226,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                   child: BackdropFilter(
                                     filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
                                     child: Container(
-                                      color: Colors.black.withValues(alpha: 0.65),
+                                      color: theme.brightness == Brightness.dark
+                                          ? Colors.black.withValues(alpha: 0.75)
+                                          : Colors.white.withValues(alpha: 0.80),
                                       child: SongLyricsOverlay(
                                         song: song,
                                         playerProvider: widget.playerProvider,
@@ -265,6 +271,19 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                             ),
                           ),
                           const SizedBox(width: 16),
+                          if (song.hasLyrics) ...[
+                            IconButton(
+                              icon: Icon(
+                                _showLyrics ? Icons.lyrics_rounded : Icons.lyrics_outlined,
+                                color: _showLyrics
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant,
+                                size: 28,
+                              ),
+                              onPressed: () => setState(() => _showLyrics = !_showLyrics),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
                           IconButton(
                             icon: Icon(
                               song.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
@@ -302,41 +321,21 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
                       const Spacer(),
 
-                      // Bottom actions (Lyrics Toggle & Queue screen buttons)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _showLyrics = !_showLyrics;
-                              });
-                            },
-                            icon: Icon(
-                              _showLyrics ? Icons.lyrics_rounded : Icons.lyrics_outlined,
+                      // Bottom actions (Queue screen button - restored to original centered layout)
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QueueScreen(
+                                playerProvider: widget.playerProvider,
+                              ),
                             ),
-                            iconSize: 28,
-                            color: _showLyrics
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 24),
-                          IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => QueueScreen(
-                                    playerProvider: widget.playerProvider,
-                                  ),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.queue_music_rounded),
-                            iconSize: 28,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ],
+                          );
+                        },
+                        icon: const Icon(Icons.queue_music_rounded),
+                        iconSize: 28,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -538,19 +537,49 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
       _lyrics = lyrics;
       _isLoading = false;
     });
+
+    _scrollToCurrentPosition(immediate: true);
   }
 
-  void _scrollToActiveIndex(int index, double viewportHeight) {
-    if (index < 0 || _lyrics == null || !_scrollController.hasClients) return;
+  void _scrollToCurrentPosition({bool immediate = false}) {
+    if (_lyrics == null || _lyrics!.isEmpty) return;
 
-    const itemHeight = 64.0;
-    var targetScroll = (index * itemHeight) - (viewportHeight / 2) + (itemHeight / 2);
-    
-    _scrollController.animateTo(
-      targetScroll.clamp(0.0, _scrollController.position.maxScrollExtent),
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeInOutCubic,
-    );
+    var position = widget.playerProvider.audioHandler.player.position;
+    var activeIndex = -1;
+    for (var i = 0; i < _lyrics!.length; i++) {
+      if (position >= _lyrics![i].time) {
+        activeIndex = i;
+      } else {
+        break;
+      }
+    }
+
+    if (activeIndex != -1) {
+      _activeIndex = activeIndex;
+      var viewportHeight = MediaQuery.sizeOf(context).width * 0.80;
+      _scrollToActiveIndex(activeIndex, viewportHeight, immediate: immediate);
+    }
+  }
+
+  void _scrollToActiveIndex(int index, double viewportHeight, {bool immediate = false}) {
+    if (index < 0 || _lyrics == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+
+      const itemHeight = 64.0;
+      var targetScroll = (index * itemHeight) - (viewportHeight / 2) + (itemHeight / 2);
+      
+      if (immediate) {
+        _scrollController.jumpTo(targetScroll.clamp(0.0, _scrollController.position.maxScrollExtent));
+      } else {
+        _scrollController.animateTo(
+          targetScroll.clamp(0.0, _scrollController.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOutCubic,
+        );
+      }
+    });
   }
 
   @override
@@ -622,6 +651,12 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
               });
             }
 
+            var isDark = theme.brightness == Brightness.dark;
+            var activeTextColor = isDark ? Colors.white : theme.colorScheme.onSurface;
+            var inactiveTextColor = isDark
+                ? Colors.white.withValues(alpha: 0.4)
+                : theme.colorScheme.onSurface.withValues(alpha: 0.4);
+
             return ListView.builder(
               controller: _scrollController,
               padding: EdgeInsets.symmetric(
@@ -640,12 +675,12 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
                       duration: const Duration(milliseconds: 250),
                       style: isCurrent
                           ? theme.textTheme.titleMedium!.copyWith(
-                              color: Colors.white,
+                              color: activeTextColor,
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                             )
                           : theme.textTheme.bodyMedium!.copyWith(
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: inactiveTextColor,
                               fontSize: 15,
                             ),
                       textAlign: TextAlign.center,
@@ -653,6 +688,7 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
                         line.text,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
