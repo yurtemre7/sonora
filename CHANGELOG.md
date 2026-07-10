@@ -2,8 +2,9 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.1.9] - 2026-07-10
+## [1.1.10] - 2026-07-10
 ### Fixed
+* Resolve placeholder sizing collapse when size is double.maxFinite
 * Catch just_audio loading interrupted exceptions during rapid track changes
 * Maintain AlbumArt placeholder dimensions when sizing is infinite
 * Check for lyrics file status change during fast-path cache validation
