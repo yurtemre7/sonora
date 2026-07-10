@@ -6,12 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/queue_screen.dart';
+import 'package:sonora/services/lyrics_service.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/player_controls.dart';
 import 'package:sonora/widgets/seek_bar.dart';
 
-class NowPlayingScreen extends StatelessWidget {
+class NowPlayingScreen extends StatefulWidget {
   const NowPlayingScreen({
     super.key,
     required this.playerProvider,
@@ -20,13 +21,20 @@ class NowPlayingScreen extends StatelessWidget {
   final PlayerProvider playerProvider;
 
   @override
+  State<NowPlayingScreen> createState() => _NowPlayingScreenState();
+}
+
+class _NowPlayingScreenState extends State<NowPlayingScreen> {
+  var _showLyrics = false;
+
+  @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
 
     return ListenableBuilder(
-      listenable: playerProvider,
+      listenable: widget.playerProvider,
       builder: (context, _) {
-        var song = playerProvider.currentSong;
+        var song = widget.playerProvider.currentSong;
 
         if (song == null) {
           return Scaffold(
@@ -62,10 +70,9 @@ class NowPlayingScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  FilledButton.tonalIcon(
+                  FilledButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close_rounded),
-                    label: const Text('Close Player'),
+                    child: const Text('Close Player'),
                   ),
                 ],
               ),
@@ -93,7 +100,7 @@ class NowPlayingScreen extends StatelessWidget {
                 onSelected: (value) {
                   if (value == 1) _showSongInfoBottomSheet(context, song);
                   if (value == 2) {
-                    playerProvider.addToQueue(song);
+                    widget.playerProvider.addToQueue(song);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Added to Queue.'),
@@ -109,7 +116,7 @@ class NowPlayingScreen extends StatelessWidget {
                     child: Row(
                       children: [
                         Icon(Icons.info_outline_rounded, size: 20),
-                        SizedBox(width: 8),
+                        SizedBox(width: 12),
                         Text('Song Info'),
                       ],
                     ),
@@ -118,8 +125,8 @@ class NowPlayingScreen extends StatelessWidget {
                     value: 2,
                     child: Row(
                       children: [
-                        Icon(Icons.queue_music_rounded, size: 20),
-                        SizedBox(width: 8),
+                        Icon(Icons.queue_play_next_rounded, size: 20),
+                        SizedBox(width: 12),
                         Text('Add to Queue'),
                       ],
                     ),
@@ -129,47 +136,45 @@ class NowPlayingScreen extends StatelessWidget {
                     child: Row(
                       children: [
                         Icon(Icons.playlist_add_rounded, size: 20),
-                        SizedBox(width: 8),
+                        SizedBox(width: 12),
                         Text('Add to Playlist'),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(width: 8),
             ],
           ),
           body: Stack(
             children: [
-              // Blurred background artwork
-              if (song.artworkPath != null && File(song.artworkPath!).existsSync())
-                Positioned.fill(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
-                    child: Image.file(
-                      File(song.artworkPath!),
-                      fit: BoxFit.cover,
-                      opacity: const AlwaysStoppedAnimation(0.2),
-                    ),
-                  ),
-                )
-              else
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          theme.colorScheme.surfaceContainerHighest,
-                          theme.colorScheme.surface,
-                        ],
+              // Blurred artwork background
+              Positioned.fill(
+                child: song.artworkPath != null
+                    ? ImageFiltered(
+                        imageFilter: ImageFilter.blur(sigmaX: 50.0, sigmaY: 50.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: FileImage(File(song.artworkPath!)),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              theme.colorScheme.primary.withValues(alpha: 0.2),
+                              theme.colorScheme.tertiary.withValues(alpha: 0.1),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-
-              // Solid overlay gradient (theme-aware)
+              ),
+              // Dark gradient overlay
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -177,16 +182,14 @@ class NowPlayingScreen extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.transparent,
-                        theme.colorScheme.surface.withValues(alpha: 0.6),
-                        theme.colorScheme.surface.withValues(alpha: 0.92),
+                        Colors.black.withValues(alpha: 0.4),
+                        Colors.black.withValues(alpha: 0.7),
                       ],
                     ),
                   ),
                 ),
               ),
-
-              // Player Content
+              // Main content
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -194,7 +197,7 @@ class NowPlayingScreen extends StatelessWidget {
                     children: [
                       const Spacer(),
 
-                      // Album Art Card
+                      // Album Art / Lyrics Stack Card
                       Card(
                         elevation: 10,
                         shadowColor: Colors.black.withValues(alpha: 0.4),
@@ -202,10 +205,33 @@ class NowPlayingScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(28),
                         ),
                         clipBehavior: Clip.antiAlias,
-                        child: AlbumArt(
-                          artworkPath: song.artworkPath,
-                          size: MediaQuery.sizeOf(context).width * 0.80,
-                          borderRadius: 28,
+                        child: SizedBox(
+                          width: MediaQuery.sizeOf(context).width * 0.80,
+                          height: MediaQuery.sizeOf(context).width * 0.80,
+                          child: Stack(
+                            children: [
+                              Positioned.fill(
+                                child: AlbumArt(
+                                  artworkPath: song.artworkPath,
+                                  size: MediaQuery.sizeOf(context).width * 0.80,
+                                  borderRadius: 28,
+                                ),
+                              ),
+                              if (_showLyrics)
+                                Positioned.fill(
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+                                    child: Container(
+                                      color: Colors.black.withValues(alpha: 0.65),
+                                      child: SongLyricsOverlay(
+                                        song: song,
+                                        playerProvider: widget.playerProvider,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
 
@@ -245,7 +271,7 @@ class NowPlayingScreen extends StatelessWidget {
                               color: song.isFavorite ? Colors.red : theme.colorScheme.onSurfaceVariant,
                               size: 28,
                             ),
-                            onPressed: () => playerProvider.toggleFavorite(song.id),
+                            onPressed: () => widget.playerProvider.toggleFavorite(song.id),
                           ),
                         ],
                       ),
@@ -254,43 +280,63 @@ class NowPlayingScreen extends StatelessWidget {
 
                       // Seek Bar
                       SeekBar(
-                        positionStream: playerProvider.positionStream,
+                        positionStream: widget.playerProvider.positionStream,
                         totalDuration: song.duration,
-                        onSeek: playerProvider.seek,
-                        isPlaying: playerProvider.isPlaying,
+                        onSeek: widget.playerProvider.seek,
+                        isPlaying: widget.playerProvider.isPlaying,
                       ),
 
                       const SizedBox(height: 24),
 
                       // Player Controls
                       PlayerControls(
-                        isPlaying: playerProvider.isPlaying,
-                        isShuffled: playerProvider.isShuffled,
-                        repeatMode: playerProvider.repeatMode,
-                        onPlayPause: playerProvider.playPause,
-                        onNext: playerProvider.next,
-                        onPrevious: playerProvider.previous,
-                        onShuffle: playerProvider.toggleShuffle,
-                        onRepeat: playerProvider.cycleRepeatMode,
+                        isPlaying: widget.playerProvider.isPlaying,
+                        isShuffled: widget.playerProvider.isShuffled,
+                        repeatMode: widget.playerProvider.repeatMode,
+                        onPlayPause: widget.playerProvider.playPause,
+                        onNext: widget.playerProvider.next,
+                        onPrevious: widget.playerProvider.previous,
+                        onShuffle: widget.playerProvider.toggleShuffle,
+                        onRepeat: widget.playerProvider.cycleRepeatMode,
                       ),
 
                       const Spacer(),
 
-                      // Bottom actions (Queue screen button)
-                      IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => QueueScreen(
-                                playerProvider: playerProvider,
-                              ),
+                      // Bottom actions (Lyrics Toggle & Queue screen buttons)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _showLyrics = !_showLyrics;
+                              });
+                            },
+                            icon: Icon(
+                              _showLyrics ? Icons.lyrics_rounded : Icons.lyrics_outlined,
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.queue_music_rounded),
-                        iconSize: 28,
-                        color: theme.colorScheme.onSurfaceVariant,
+                            iconSize: 28,
+                            color: _showLyrics
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 24),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => QueueScreen(
+                                    playerProvider: widget.playerProvider,
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.queue_music_rounded),
+                            iconSize: 28,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -433,6 +479,189 @@ class NowPlayingScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class SongLyricsOverlay extends StatefulWidget {
+  const SongLyricsOverlay({
+    super.key,
+    required this.song,
+    required this.playerProvider,
+  });
+
+  final Song song;
+  final PlayerProvider playerProvider;
+
+  @override
+  State<SongLyricsOverlay> createState() => _SongLyricsOverlayState();
+}
+
+class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
+  List<LyricLine>? _lyrics;
+  var _isLoading = false;
+  late ScrollController _scrollController;
+  var _activeIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _loadLyrics();
+  }
+
+  @override
+  void didUpdateWidget(SongLyricsOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.song.id != oldWidget.song.id) {
+      _loadLyrics();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadLyrics() async {
+    setState(() {
+      _isLoading = true;
+      _lyrics = null;
+      _activeIndex = -1;
+    });
+
+    var lyrics = await LyricsService.parseLyricsForSong(widget.song.filePath);
+
+    if (!mounted) return;
+    setState(() {
+      _lyrics = lyrics;
+      _isLoading = false;
+    });
+  }
+
+  void _scrollToActiveIndex(int index, double viewportHeight) {
+    if (index < 0 || _lyrics == null || !_scrollController.hasClients) return;
+
+    const itemHeight = 64.0;
+    var targetScroll = (index * itemHeight) - (viewportHeight / 2) + (itemHeight / 2);
+    
+    _scrollController.animateTo(
+      targetScroll.clamp(0.0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    var lyricsList = _lyrics;
+    if (lyricsList == null || lyricsList.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.lyrics_outlined,
+                size: 48,
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'No synchronized lyrics found',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Place a .lrc file with the same name next to the audio file to load lyrics.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        var viewportHeight = constraints.maxHeight;
+
+        return StreamBuilder<Duration>(
+          stream: widget.playerProvider.audioHandler.player.positionStream,
+          builder: (context, snapshot) {
+            var position = snapshot.data ?? Duration.zero;
+
+            var activeIndex = -1;
+            for (var i = 0; i < lyricsList.length; i++) {
+              if (position >= lyricsList[i].time) {
+                activeIndex = i;
+              } else {
+                break;
+              }
+            }
+
+            if (activeIndex != _activeIndex) {
+              _activeIndex = activeIndex;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _scrollToActiveIndex(activeIndex, viewportHeight);
+              });
+            }
+
+            return ListView.builder(
+              controller: _scrollController,
+              padding: EdgeInsets.symmetric(
+                vertical: viewportHeight / 2 - 32,
+                horizontal: 20,
+              ),
+              itemCount: lyricsList.length,
+              itemBuilder: (context, index) {
+                var isCurrent = index == activeIndex;
+                var line = lyricsList[index];
+
+                return SizedBox(
+                  height: 64.0,
+                  child: Center(
+                    child: AnimatedDefaultTextStyle(
+                      duration: const Duration(milliseconds: 250),
+                      style: isCurrent
+                          ? theme.textTheme.titleMedium!.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            )
+                          : theme.textTheme.bodyMedium!.copyWith(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              fontSize: 15,
+                            ),
+                      textAlign: TextAlign.center,
+                      child: Text(
+                        line.text,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 }
