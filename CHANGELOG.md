@@ -2,7 +2,9 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.1.10] - 2026-07-10
+## [1.1.11] - 2026-07-10
+### Added
+* Seek to beginning on back button if song has played more than 3 seconds
 ### Fixed
 * Resolve placeholder sizing collapse when size is double.maxFinite
 * Catch just_audio loading interrupted exceptions during rapid track changes
