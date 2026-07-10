@@ -130,7 +130,7 @@ jobs:
           name: "Sonora ${{ needs.version.outputs.tag }}"
           draft: false
           prerelease: false
-          generate_release_notes: true
+          body_path: CHANGELOG.md
           files: |
             dist/sonora-*.apk
             dist/*/sonora-*.apk
