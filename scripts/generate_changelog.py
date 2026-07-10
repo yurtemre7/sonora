@@ -39,6 +39,49 @@ def generate_changelog():
         "All notable changes to the Sonora music player project are documented in this file.\n"
     ]
     
+    if tags:
+        unreleased = get_commits_between(tags[0], "HEAD")
+        if unreleased:
+            added = []
+            fixed = []
+            changed = []
+            for commit in unreleased:
+                if any(x in commit.lower() for x in ["release: v", "bump version", "merge branch"]):
+                    continue
+                commit_type, msg = parse_commit(commit)
+                if msg:
+                    msg = msg[0].upper() + msg[1:]
+                if commit_type == 'feat':
+                    added.append(msg)
+                elif commit_type == 'fix':
+                    fixed.append(msg)
+                elif commit_type in ['refactor', 'style', 'perf', 'docs', 'chore']:
+                    changed.append(f"{commit_type.capitalize()}: {msg}")
+                else:
+                    msg_lower = msg.lower()
+                    if msg_lower.startswith('add') or 'implement' in msg_lower:
+                        added.append(msg)
+                    elif msg_lower.startswith('fix') or 'prevent' in msg_lower:
+                        fixed.append(msg)
+                    else:
+                        changed.append(msg)
+                        
+            if added or fixed or changed:
+                changelog_content.append("## [Unreleased]")
+                if added:
+                    changelog_content.append("### Added")
+                    for item in added:
+                        changelog_content.append(f"* {item}")
+                if fixed:
+                    changelog_content.append("### Fixed")
+                    for item in fixed:
+                        changelog_content.append(f"* {item}")
+                if changed:
+                    changelog_content.append("### Changed")
+                    for item in changed:
+                        changelog_content.append(f"* {item}")
+                changelog_content.append("")
+
     for i, tag in enumerate(tags):
         tag_date = get_tag_date(tag)
         version_clean = tag.lstrip('v').split('+')[0]

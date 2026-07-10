@@ -2,6 +2,12 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [Unreleased]
+### Added
+* Implement synchronized lrc lyrics overlay with auto-scrolling centering
+### Changed
+* Chore: Add generate_changelog.py helper script and document usage in AGENTS.md
+
 ## [1.1.2] - 2026-07-10
 ### Changed
 * Docs: Remove wavy progress bar mentions from CHANGELOG.md
