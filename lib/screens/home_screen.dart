@@ -27,6 +27,9 @@ class HomeScreen extends StatefulWidget {
     required this.initialSortBy,
     required this.initialSortAscending,
     required this.onSortChanged,
+    required this.showSyncPrompt,
+    required this.onResyncNow,
+    required this.onPostponeSync,
   });
 
   final PlayerProvider playerProvider;
@@ -45,6 +48,9 @@ class HomeScreen extends StatefulWidget {
   final String initialSortBy;
   final bool initialSortAscending;
   final void Function(String sortBy, bool sortAscending) onSortChanged;
+  final bool showSyncPrompt;
+  final VoidCallback onResyncNow;
+  final VoidCallback onPostponeSync;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -406,6 +412,86 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
+  Widget _buildSyncPromptBanner(ThemeData theme) {
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      elevation: 0,
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.25),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: theme.colorScheme.primary.withValues(alpha: 0.15),
+          width: 1.5,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.sync_problem_rounded,
+                    color: theme.colorScheme.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Sync Library Database?',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "It's been at least a month since your last library synchronization. Sonora runs offline—if you have loaded new music files into your device folder, run a sync now to discover and listen to them.",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: widget.onPostponeSync,
+                  child: Text(
+                    'Remind Next Month',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilledButton.tonal(
+                  onPressed: widget.onResyncNow,
+                  style: FilledButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Sync Now'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -511,6 +597,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       )
                     : Column(
                         children: [
+                          if (widget.showSyncPrompt) _buildSyncPromptBanner(theme),
                           _buildSearchAndFilterHeader(theme),
                           Expanded(
                             child: _getFilteredSongs().isEmpty

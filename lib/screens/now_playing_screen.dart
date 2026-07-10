@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/queue_screen.dart';
@@ -38,6 +39,11 @@ class NowPlayingScreen extends StatelessWidget {
               title: const Text('Now Playing'),
               backgroundColor: Colors.transparent,
               elevation: 0,
+              systemOverlayStyle: const SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness: Brightness.light,
+                statusBarBrightness: Brightness.dark, // iOS
+              ),
             ),
             body: Center(
               child: Column(
@@ -76,6 +82,11 @@ class NowPlayingScreen extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
             ),
             title: const Text('Now Playing'),
+            systemOverlayStyle: const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.light,
+              statusBarBrightness: Brightness.dark, // iOS
+            ),
             actions: [
               PopupMenuButton<int>(
                 icon: const Icon(Icons.more_vert_rounded),

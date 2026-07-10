@@ -197,6 +197,10 @@ class MusicScanner {
       var month = monthNames[now.month - 1];
       var formatted = '$month ${now.day}, ${now.year} at $hour:$minute:$second $ampm';
       await setLastSyncTime(formatted);
+      await setLastSyncTimestamp(now.millisecondsSinceEpoch);
+      try {
+        await _prefs.remove('postpone_sync_until');
+      } catch (_) {}
 
       return resultSongs;
     } catch (_) {
@@ -265,6 +269,26 @@ class MusicScanner {
         await _prefs.remove('last_sync_time');
       } else {
         await _prefs.setString('last_sync_time', timestamp);
+      }
+    } catch (_) {}
+  }
+
+  /// Reads the last sync epoch milliseconds timestamp.
+  Future<int?> getLastSyncTimestamp() async {
+    try {
+      return await _prefs.getInt('last_sync_timestamp');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Writes the last sync epoch milliseconds timestamp.
+  Future<void> setLastSyncTimestamp(int? timestamp) async {
+    try {
+      if (timestamp == null) {
+        await _prefs.remove('last_sync_timestamp');
+      } else {
+        await _prefs.setInt('last_sync_timestamp', timestamp);
       }
     } catch (_) {}
   }

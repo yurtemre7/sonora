@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
@@ -70,6 +71,15 @@ class AppTheme {
         centerTitle: true,
         titleTextStyle: outfitTitleStyle.copyWith(fontSize: 22),
         iconTheme: IconThemeData(color: colorScheme.onSurface),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: brightness == Brightness.light
+              ? Brightness.dark
+              : Brightness.light,
+          statusBarBrightness: brightness == Brightness.light
+              ? Brightness.light
+              : Brightness.dark, // iOS
+        ),
       ),
       cardTheme: CardThemeData(
         color: colorScheme.surfaceContainerHighest,

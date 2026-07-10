@@ -312,97 +312,159 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.folder_copy_rounded),
-            title: const Text('Sync Folder'),
-            subtitle: Text(
-              _scanFolder ?? 'Not configured',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () async {
-              Navigator.pop(context);
-              await widget.onConfigureFolder();
-            },
-          ),
-          if (_scanFolder != null) ...[
-            Padding(
-              padding: const EdgeInsets.only(left: 72.0, right: 20.0, bottom: 4.0),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.sync_rounded,
-                    size: 14,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      _lastSyncTime != null
-                          ? 'Last synced: $_lastSyncTime'
-                          : 'Never synced',
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+            child: Card(
+              elevation: 0,
+              color: theme.colorScheme.surfaceContainerLow,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.folder_shared_rounded,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Sync Folder Path',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _scanFolder ?? 'Not configured',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontFamily: 'monospace',
+                                  fontSize: 12,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Sonora plays your files locally and offline. When you copy new tracks into this folder, run a sync below to add them to your library.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                        height: 1.3,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 64.0, right: 20.0, bottom: 8.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: _isSyncing
-                      ? null
-                      : () async {
-                          setState(() {
-                            _isSyncing = true;
-                          });
-                          try {
-                            await widget.onRetriggerSync();
-                            await _loadSettings();
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Library synchronization complete.'),
-                                behavior: SnackBarBehavior.floating,
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Last Sync',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                                ),
                               ),
-                            );
-                          } finally {
-                            if (context.mounted) {
-                              setState(() {
-                                _isSyncing = false;
-                              });
-                            }
-                          }
-                        },
-                  icon: _isSyncing
-                      ? SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: theme.colorScheme.primary,
+                              const SizedBox(height: 2),
+                              Text(
+                                _lastSyncTime ?? 'Never synced',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
-                        )
-                      : const Icon(Icons.sync_rounded, size: 16),
-                  label: Text(_isSyncing ? 'Syncing...' : 'Sync Now'),
+                        ),
+                        Row(
+                          children: [
+                            OutlinedButton(
+                              onPressed: () async {
+                                Navigator.pop(context);
+                                await widget.onConfigureFolder();
+                              },
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                              child: const Text('Change'),
+                            ),
+                            if (_scanFolder != null) ...[
+                              const SizedBox(width: 8),
+                              FilledButton.tonalIcon(
+                                onPressed: _isSyncing
+                                    ? null
+                                    : () async {
+                                        setState(() {
+                                          _isSyncing = true;
+                                        });
+                                        try {
+                                          await widget.onRetriggerSync();
+                                          await _loadSettings();
+                                          if (!context.mounted) return;
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Library synchronization complete.'),
+                                              behavior: SnackBarBehavior.floating,
+                                            ),
+                                          );
+                                        } finally {
+                                          if (context.mounted) {
+                                            setState(() {
+                                              _isSyncing = false;
+                                            });
+                                          }
+                                        }
+                                      },
+                                style: FilledButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                ),
+                                icon: _isSyncing
+                                    ? SizedBox(
+                                        width: 14,
+                                        height: 14,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: theme.colorScheme.onSecondaryContainer,
+                                        ),
+                                      )
+                                    : const Icon(Icons.sync_rounded, size: 16),
+                                label: Text(_isSyncing ? 'Syncing...' : 'Sync'),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 72.0, right: 20.0, bottom: 8.0),
-              child: Text(
-                'New music files added to this folder will scan and sync automatically on app launch and resume.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                ),
-              ),
-            ),
-          ],
+          ),
 
           const Divider(height: 32),
 

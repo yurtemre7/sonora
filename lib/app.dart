@@ -27,7 +27,7 @@ class SonoraApp extends StatefulWidget {
   State<SonoraApp> createState() => _SonoraAppState();
 }
 
-class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
+class _SonoraAppState extends State<SonoraApp> {
   late final PlayerProvider _playerProvider;
   final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   List<Song> _songs = [];
@@ -40,11 +40,11 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
   var _sortBy = 'title';
   var _sortAscending = true;
   var _showOnboarding = false;
+  var _showSyncPrompt = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _playerProvider = PlayerProvider(audioHandler: widget.audioHandler);
     _playerProvider.addListener(_onPlayerProviderChanged);
     _loadSongs();
@@ -53,7 +53,6 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     _playerProvider.removeListener(_onPlayerProviderChanged);
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -65,13 +64,6 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
       _playlists = playlists;
       _songs = _playerProvider.allSongs;
     });
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _syncSongsSilently();
-    }
   }
 
   Future<void> _loadSongs() async {
@@ -114,6 +106,22 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
     var playlists = await scanner.getPlaylists();
     var sortSettings = await scanner.getSortSettings();
     
+    // Check if sync warning banner should be displayed
+    var showSyncPrompt = false;
+    if (folder != null) {
+      var lastSyncTs = await prefs.getInt('last_sync_timestamp');
+      var postponeUntil = await prefs.getInt('postpone_sync_until') ?? 0;
+      var nowMs = DateTime.now().millisecondsSinceEpoch;
+      
+      if (nowMs >= postponeUntil && lastSyncTs != null) {
+        var lastSyncDateTime = DateTime.fromMillisecondsSinceEpoch(lastSyncTs);
+        var oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
+        if (lastSyncDateTime.isBefore(oneMonthAgo)) {
+          showSyncPrompt = true;
+        }
+      }
+    }
+
     if (!mounted) return;
     setState(() {
       _scanFolder = folder;
@@ -121,13 +129,11 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
       _playlists = playlists;
       _sortBy = sortSettings['sortBy'] as String;
       _sortAscending = sortSettings['sortAscending'] as bool;
+      _showSyncPrompt = showSyncPrompt;
       _isLoading = false;
     });
     
     _playerProvider.updateSongs(scannedSongs);
-
-    // Run directory background scan asynchronously after visual render
-    _syncSongsSilently();
   }
 
   Future<void> _completeOnboarding(String? selectedFolder) async {
@@ -190,6 +196,31 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
     } finally {
       _isSyncing = false;
     }
+  }
+
+  Future<void> _onResyncNow() async {
+    setState(() {
+      _showSyncPrompt = false;
+    });
+    await _syncSongsSilently();
+  }
+
+  Future<void> _onPostponeSync() async {
+    var prefs = SharedPreferencesAsync();
+    var nextRemind = DateTime.now().add(const Duration(days: 30)).millisecondsSinceEpoch;
+    await prefs.setInt('postpone_sync_until', nextRemind);
+    
+    if (!mounted) return;
+    setState(() {
+      _showSyncPrompt = false;
+    });
+    
+    _scaffoldMessengerKey.currentState?.showSnackBar(
+      const SnackBar(
+        content: Text('Sync reminder postponed for 1 month.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   void _openNowPlaying(BuildContext context) {
@@ -327,6 +358,8 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
       'sort_by',
       'sort_ascending',
       'theme_mode',
+      'last_sync_timestamp',
+      'postpone_sync_until',
     });
 
     if (!mounted) return;
@@ -449,6 +482,9 @@ class _SonoraAppState extends State<SonoraApp> with WidgetsBindingObserver {
                     onRemoveSongFromPlaylist: _onRemoveSongFromPlaylist,
                     onReorderPlaylistSongs: _onReorderPlaylistSongs,
                     isSyncing: _isSyncing,
+                    showSyncPrompt: _showSyncPrompt,
+                    onResyncNow: _onResyncNow,
+                    onPostponeSync: _onPostponeSync,
                   ),
                 ),
       );
