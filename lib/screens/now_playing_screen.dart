@@ -257,6 +257,7 @@ class NowPlayingScreen extends StatelessWidget {
                         positionStream: playerProvider.positionStream,
                         totalDuration: song.duration,
                         onSeek: playerProvider.seek,
+                        isPlaying: playerProvider.isPlaying,
                       ),
 
                       const SizedBox(height: 24),
