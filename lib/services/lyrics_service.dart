@@ -45,6 +45,7 @@ class LyricsService {
         if (matches.isNotEmpty) {
           hasAnyTimestamp = true;
           var text = trimmed.replaceAll(regExp, '').trim();
+          if (text.isEmpty) continue;
           for (var match in matches) {
             var min = int.parse(match.group(1)!);
             var sec = int.parse(match.group(2)!);
@@ -75,8 +76,10 @@ class LyricsService {
         var plainLines = <LyricLine>[];
         for (var line in lines) {
           var trimmed = line.trim();
-          // Strip potential metadata tags like [ti:Title] from text logs
-          if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+          if (trimmed.isEmpty) continue;
+          // Only strip known LRC metadata tags ([ti:], [ar:], [al:], [by:], [offset:])
+          // but preserve section headers like [Verse 1], [Chorus], etc.
+          if (_isMetadataTag(trimmed)) {
             continue;
           }
           plainLines.add(LyricLine(time: Duration.zero, text: trimmed));
@@ -86,5 +89,13 @@ class LyricsService {
     } catch (_) {
       return null;
     }
+  }
+
+  static final _lrcMetadataTag = RegExp(r'^\[(ti|ar|al|by|offset|re|ve|length):');
+
+  /// Returns true for known LRC metadata tags (e.g. [ti:Title], [ar:Artist])
+  /// but preserves section headers like [Verse 1], [Chorus], [Bridge].
+  static bool _isMetadataTag(String line) {
+    return _lrcMetadataTag.hasMatch(line);
   }
 }

@@ -60,12 +60,8 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       }
     });
 
-    // Handle natural completion of the playlist.
-    player.processingStateStream.listen((state) {
-      if (state == ProcessingState.completed) {
-        stop();
-      }
-    });
+    // Playlist completion is handled by just_audio's internal loop mode.
+    // Do not override it here.
   }
 
   /// Maps [just_audio] playback events to the [audio_service] playback state.
@@ -304,15 +300,13 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     if (newGlobalIndex < 0 || newGlobalIndex > _rawPlaylist.length) return;
 
     var item = _rawPlaylist.removeAt(oldGlobalIndex);
-    var targetNewIndex = newGlobalIndex;
-    if (targetNewIndex > oldGlobalIndex) targetNewIndex--;
-    _rawPlaylist.insert(targetNewIndex, item);
+    _rawPlaylist.insert(newGlobalIndex, item);
 
     // If both old and new indices are within the native window
     if (oldGlobalIndex >= _windowStart && oldGlobalIndex < _windowEnd &&
-        targetNewIndex >= _windowStart && targetNewIndex < _windowEnd) {
+        newGlobalIndex >= _windowStart && newGlobalIndex < _windowEnd) {
       var localOld = oldGlobalIndex - _windowStart;
-      var localNew = targetNewIndex - _windowStart;
+      var localNew = newGlobalIndex - _windowStart;
       _isModifyingSources = true;
       try {
         await player.moveAudioSource(localOld, localNew);
@@ -409,6 +403,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       var nextIndex = _windowStart + (player.currentIndex ?? 0) + 1;
       await loadPlaylist(_rawPlaylist, initialIndex: nextIndex);
       await player.play();
+    } else {
+      // At the end of the playlist: restart the current song.
+      await player.seek(Duration.zero);
     }
   }
 

@@ -125,10 +125,14 @@ class _QueueScreenState extends State<QueueScreen> {
                     ),
                   ),
                   onDismissed: (_) {
-                    widget.playerProvider.removeFromQueue(index);
+                    var currentIndex = widget.playerProvider.queue.indexWhere((s) => s.id == song.id);
+                    if (currentIndex >= 0) {
+                      widget.playerProvider.removeFromQueue(currentIndex);
+                    }
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Removed "${song.title}" from queue'),
+                        content: Text('Removed "${song.displayTitle}" from queue'),
                         duration: const Duration(seconds: 2),
                         behavior: SnackBarBehavior.floating,
                       ),

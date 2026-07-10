@@ -36,4 +36,49 @@ class Song {
     var seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
+
+  Song copyWith({
+    int? id,
+    String? title,
+    String? artist,
+    String? album,
+    Duration? duration,
+    String? filePath,
+    String? artworkPath,
+    String? format,
+    int? bitrate,
+    int? samplerate,
+    bool? isFavorite,
+    int? lastModifiedMs,
+    int? fileSize,
+    bool? hasLyrics,
+  }) {
+    return Song(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      artist: artist ?? this.artist,
+      album: album ?? this.album,
+      duration: duration ?? this.duration,
+      filePath: filePath ?? this.filePath,
+      artworkPath: artworkPath ?? this.artworkPath,
+      format: format ?? this.format,
+      bitrate: bitrate ?? this.bitrate,
+      samplerate: samplerate ?? this.samplerate,
+      isFavorite: isFavorite ?? this.isFavorite,
+      lastModifiedMs: lastModifiedMs ?? this.lastModifiedMs,
+      fileSize: fileSize ?? this.fileSize,
+      hasLyrics: hasLyrics ?? this.hasLyrics,
+    );
+  }
+
+  String get displayTitle {
+    if (artist.isEmpty) return title;
+    var escaped = RegExp.escape(artist);
+    var cleaned = title.replaceFirst(RegExp(r'\s*[—–-]\s*' + escaped + r'\s*$'), '');
+    if (cleaned == title) {
+      cleaned = title.replaceFirst(RegExp(r'^\s*' + escaped + r'\s*[—–-]\s*'), '');
+    }
+    cleaned = cleaned.trim();
+    return cleaned.isEmpty ? title : cleaned;
+  }
 }

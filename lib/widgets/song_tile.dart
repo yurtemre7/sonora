@@ -65,7 +65,7 @@ class SongTile extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      song.title,
+                      song.displayTitle,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: isCurrent ? theme.colorScheme.primary : null,

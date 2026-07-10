@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -210,148 +211,157 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    children: [
-                      const Spacer(),
-
-                      // Album Art / Lyrics Stack Card
-                      Card(
-                        elevation: 10,
-                        shadowColor: Colors.black.withValues(alpha: 0.4),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: SizedBox(
-                          width: MediaQuery.sizeOf(context).width * 0.80,
-                          height: MediaQuery.sizeOf(context).width * 0.80,
-                          child: Stack(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Positioned.fill(
-                                child: AlbumArt(
-                                  artworkPath: song.artworkPath,
-                                  size: MediaQuery.sizeOf(context).width * 0.80,
-                                  borderRadius: 28,
+                              // Album Art / Lyrics Stack Card
+                              Card(
+                                elevation: 10,
+                                shadowColor: Colors.black.withValues(alpha: 0.4),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: SizedBox(
+                                  width: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
+                                  height: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
+                                  child: Stack(
+                                    children: [
+                                      Positioned.fill(
+                                        child: AlbumArt(
+                                          artworkPath: song.artworkPath,
+                                          size: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
+                                          borderRadius: 28,
+                                        ),
+                                      ),
+                                      if (_showLyrics)
+                                        Positioned.fill(
+                                          child: BackdropFilter(
+                                            filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+                                            child: Container(
+                                              color: theme.brightness == Brightness.dark
+                                                  ? Colors.black.withValues(alpha: 0.75)
+                                                  : Colors.white.withValues(alpha: 0.80),
+                                              child: SongLyricsOverlay(
+                                                song: song,
+                                                playerProvider: widget.playerProvider,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              if (_showLyrics)
-                                Positioned.fill(
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
-                                    child: Container(
-                                      color: theme.brightness == Brightness.dark
-                                          ? Colors.black.withValues(alpha: 0.75)
-                                          : Colors.white.withValues(alpha: 0.80),
-                                      child: SongLyricsOverlay(
-                                        song: song,
+
+                              const SizedBox(height: 32),
+
+                              // Song Info & Favorite Row
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          song.displayTitle,
+                                          style: theme.textTheme.headlineSmall?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${song.artist} • ${song.album}',
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            color: theme.colorScheme.onSurfaceVariant,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  if (song.hasLyrics) ...[
+                                    IconButton(
+                                      icon: Icon(
+                                        _showLyrics ? Icons.lyrics_rounded : Icons.lyrics_outlined,
+                                        color: _showLyrics
+                                            ? theme.colorScheme.primary
+                                            : theme.colorScheme.onSurfaceVariant,
+                                        size: 28,
+                                      ),
+                                      onPressed: () => setState(() => _showLyrics = !_showLyrics),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  IconButton(
+                                    icon: Icon(
+                                      song.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                      color: song.isFavorite ? Colors.red : theme.colorScheme.onSurfaceVariant,
+                                      size: 28,
+                                    ),
+                                    onPressed: () => widget.playerProvider.toggleFavorite(song.id),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 32),
+
+                              // Seek Bar
+                              SeekBar(
+                                positionStream: widget.playerProvider.positionStream,
+                                totalDuration: song.duration,
+                                onSeek: widget.playerProvider.seek,
+                                isPlaying: widget.playerProvider.isPlaying,
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Player Controls
+                              PlayerControls(
+                                isPlaying: widget.playerProvider.isPlaying,
+                                isShuffled: widget.playerProvider.isShuffled,
+                                repeatMode: widget.playerProvider.repeatMode,
+                                onPlayPause: widget.playerProvider.playPause,
+                                onNext: widget.playerProvider.next,
+                                onPrevious: widget.playerProvider.previous,
+                                onShuffle: widget.playerProvider.toggleShuffle,
+                                onRepeat: widget.playerProvider.cycleRepeatMode,
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Bottom actions (Queue screen button - restored to original centered layout)
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => QueueScreen(
                                         playerProvider: widget.playerProvider,
                                       ),
                                     ),
-                                  ),
-                                ),
+                                  );
+                                },
+                                icon: const Icon(Icons.queue_music_rounded),
+                                iconSize: 28,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(height: 16),
                             ],
                           ),
                         ),
-                      ),
-
-                      const Spacer(),
-
-                      // Song Info & Favorite Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  song.title,
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${song.artist} • ${song.album}',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          if (song.hasLyrics) ...[
-                            IconButton(
-                              icon: Icon(
-                                _showLyrics ? Icons.lyrics_rounded : Icons.lyrics_outlined,
-                                color: _showLyrics
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurfaceVariant,
-                                size: 28,
-                              ),
-                              onPressed: () => setState(() => _showLyrics = !_showLyrics),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                          IconButton(
-                            icon: Icon(
-                              song.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                              color: song.isFavorite ? Colors.red : theme.colorScheme.onSurfaceVariant,
-                              size: 28,
-                            ),
-                            onPressed: () => widget.playerProvider.toggleFavorite(song.id),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Seek Bar
-                      SeekBar(
-                        positionStream: widget.playerProvider.positionStream,
-                        totalDuration: song.duration,
-                        onSeek: widget.playerProvider.seek,
-                        isPlaying: widget.playerProvider.isPlaying,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Player Controls
-                      PlayerControls(
-                        isPlaying: widget.playerProvider.isPlaying,
-                        isShuffled: widget.playerProvider.isShuffled,
-                        repeatMode: widget.playerProvider.repeatMode,
-                        onPlayPause: widget.playerProvider.playPause,
-                        onNext: widget.playerProvider.next,
-                        onPrevious: widget.playerProvider.previous,
-                        onShuffle: widget.playerProvider.toggleShuffle,
-                        onRepeat: widget.playerProvider.cycleRepeatMode,
-                      ),
-
-                      const Spacer(),
-
-                      // Bottom actions (Queue screen button - restored to original centered layout)
-                      IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => QueueScreen(
-                                playerProvider: widget.playerProvider,
-                              ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.queue_music_rounded),
-                        iconSize: 28,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -370,7 +380,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Add "${song.title}" to:'),
+        title: Text('Add "${song.displayTitle}" to:'),
         content: playlists.isEmpty
             ? Text(
                 'No playlists found.',
@@ -452,7 +462,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildInfoRow('Title', song.title, theme),
+              _buildInfoRow('Title', song.displayTitle, theme),
               _buildInfoRow('Artist', song.artist, theme),
               _buildInfoRow('Album', song.album, theme),
               _buildInfoRow('Duration', song.durationFormatted, theme),
@@ -515,6 +525,7 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
   var _isLoading = false;
   late ScrollController _scrollController;
   var _activeIndex = -1;
+  DateTime? _lastUserScrollTime;
 
   @override
   void initState() {
@@ -555,30 +566,6 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
       }
       _isLoading = false;
     });
-
-    if (_isSynchronized) {
-      _scrollToCurrentPosition(immediate: true);
-    }
-  }
-
-  void _scrollToCurrentPosition({bool immediate = false}) {
-    if (_lyricsLines == null || _lyricsLines!.isEmpty) return;
-
-    var position = widget.playerProvider.audioHandler.player.position;
-    var activeIndex = -1;
-    for (var i = 0; i < _lyricsLines!.length; i++) {
-      if (position >= _lyricsLines![i].time) {
-        activeIndex = i;
-      } else {
-        break;
-      }
-    }
-
-    if (activeIndex != -1) {
-      _activeIndex = activeIndex;
-      var viewportHeight = MediaQuery.sizeOf(context).width * 0.80;
-      _scrollToActiveIndex(activeIndex, viewportHeight, immediate: immediate);
-    }
   }
 
   void _scrollToActiveIndex(int index, double viewportHeight, {bool immediate = false}) {
@@ -588,7 +575,7 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
       if (!_scrollController.hasClients) return;
 
       const itemHeight = 64.0;
-      var targetScroll = (index * itemHeight) - (viewportHeight / 2) + (itemHeight / 2);
+      var targetScroll = index * itemHeight;
       
       if (immediate) {
         _scrollController.jumpTo(targetScroll.clamp(0.0, _scrollController.position.maxScrollExtent));
@@ -695,57 +682,72 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
 
             if (activeIndex != _activeIndex) {
               _activeIndex = activeIndex;
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _scrollToActiveIndex(activeIndex, viewportHeight);
-              });
+              var allowAutoScroll = _lastUserScrollTime == null ||
+                  DateTime.now().difference(_lastUserScrollTime!) >
+                      const Duration(seconds: 4);
+              if (allowAutoScroll) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _scrollToActiveIndex(activeIndex, viewportHeight);
+                });
+              }
             }
 
             var inactiveTextColor = isDark
                 ? Colors.white.withValues(alpha: 0.4)
                 : theme.colorScheme.onSurface.withValues(alpha: 0.4);
 
-            return ListView.builder(
-              controller: _scrollController,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                vertical: viewportHeight / 2 - 32,
-                horizontal: 20,
-              ),
-              itemCount: lyricsList.length,
-              itemBuilder: (context, index) {
-                var isCurrent = index == activeIndex;
-                var line = lyricsList[index];
+            return NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification is UserScrollNotification) {
+                  _lastUserScrollTime = DateTime.now();
+                }
+                return false;
+              },
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: EdgeInsets.symmetric(
+                  vertical: viewportHeight / 2 - 32,
+                  horizontal: 20,
+                ),
+                itemCount: lyricsList.length,
+                itemBuilder: (context, index) {
+                  var isCurrent = index == activeIndex;
+                  var line = lyricsList[index];
 
-                return GestureDetector(
-                  onTap: () => widget.playerProvider.seek(line.time),
-                  behavior: HitTestBehavior.opaque,
-                  child: SizedBox(
-                    height: 64.0,
-                    child: Center(
-                      child: AnimatedDefaultTextStyle(
-                        duration: const Duration(milliseconds: 250),
-                        style: isCurrent
-                            ? theme.textTheme.titleMedium!.copyWith(
-                                color: activeTextColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              )
-                            : theme.textTheme.bodyMedium!.copyWith(
-                                color: inactiveTextColor,
-                                fontSize: 15,
-                              ),
-                        textAlign: TextAlign.center,
-                        child: Text(
-                          line.text,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                  return GestureDetector(
+                    onTap: () {
+                      _lastUserScrollTime = null;
+                      widget.playerProvider.seek(line.time);
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: SizedBox(
+                      height: 64.0,
+                      child: Center(
+                        child: AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 250),
+                          style: isCurrent
+                              ? theme.textTheme.titleMedium!.copyWith(
+                                  color: activeTextColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                )
+                              : theme.textTheme.bodyMedium!.copyWith(
+                                  color: inactiveTextColor,
+                                  fontSize: 15,
+                                ),
                           textAlign: TextAlign.center,
+                          child: Text(
+                            line.text,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             );
           },
         );

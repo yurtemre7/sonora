@@ -251,7 +251,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildWelcomeSlide(ThemeData theme, Size size) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32.0),
-      child: Column(
+      child: SingleChildScrollView(
+        child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Illustration Space
@@ -326,13 +327,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
         ],
       ),
+      ),
     );
   }
 
   Widget _buildSyncSlide(ThemeData theme, Size size) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32.0),
-      child: Column(
+      child: SingleChildScrollView(
+        child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // High performance Sync illustration
@@ -395,6 +398,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -403,7 +407,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32.0),
-      child: Column(
+      child: SingleChildScrollView(
+        child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Permissions card
@@ -471,13 +476,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
         ],
       ),
+      ),
     );
   }
 
   Widget _buildFolderSlide(ThemeData theme, Size size) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32.0),
-      child: Column(
+      child: SingleChildScrollView(
+        child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Directory Picker view
@@ -547,6 +554,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

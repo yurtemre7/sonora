@@ -11,6 +11,10 @@ import 'package:sonora/models/song.dart';
 
 /// Handles scanning, custom file references, and playlists for the application library.
 class MusicScanner {
+  MusicScanner._();
+  static final _instance = MusicScanner._();
+  factory MusicScanner() => _instance;
+
   final _prefs = SharedPreferencesAsync();
   /// Queries the cached list of songs from storage instantly.
   Future<List<Song>> scanAllSongs() async {
@@ -394,22 +398,7 @@ class MusicScanner {
         var song = songs[songIndex];
         var newFavoriteStatus = !song.isFavorite;
         
-        songs[songIndex] = Song(
-          id: song.id,
-          title: song.title,
-          artist: song.artist,
-          album: song.album,
-          duration: song.duration,
-          filePath: song.filePath,
-          artworkPath: song.artworkPath,
-          format: song.format,
-          bitrate: song.bitrate,
-          samplerate: song.samplerate,
-          isFavorite: newFavoriteStatus,
-          lastModifiedMs: song.lastModifiedMs,
-          fileSize: song.fileSize,
-          hasLyrics: song.hasLyrics,
-        );
+        songs[songIndex] = song.copyWith(isFavorite: newFavoriteStatus);
         
         await _writeImportedSongsMetadata(songs);
         
@@ -428,7 +417,6 @@ class MusicScanner {
         }
       }
       
-      songs.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
       return songs;
     } catch (_) {
       return [];

@@ -2,6 +2,19 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.1.16] - 2026-07-11
+### Added
+* Add `copyWith` method to Song model for immutable field updates
+* Add `displayTitle` getter to strip artist name duplication from song titles
+### Changed
+* Enable free scrolling on synchronized lyrics, pause auto-centering after manual scroll for 4 seconds
+* Tap lyric line now re-enables auto-scroll and centers the tapped line
+* Replace manual Song construction in toggleFavoriteSong with `copyWith`
+### Fixed
+* Fix lyrics auto-centering: correct scroll target formula accounts for ListView padding
+* Fix next button stopping playback with single song in repeat modes
+* Remove ProcessingState.completed handler that interfered with just_audio loop wrap
+
 ## [1.1.13] - 2026-07-10
 ### Added
 * Support both synchronized LRC and plain text TXT lyrics file loading

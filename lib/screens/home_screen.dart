@@ -187,7 +187,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             color: theme.colorScheme.surfaceContainerHigh,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
-          child: Column(
+          child: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -209,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
               ),
               const SizedBox(height: 16),
-              _buildInfoRow('Title', song.title, theme),
+              _buildInfoRow('Title', song.displayTitle, theme),
               _buildInfoRow('Artist', song.artist, theme),
               _buildInfoRow('Album', song.album, theme),
               _buildInfoRow('Duration', song.durationFormatted, theme),
@@ -219,6 +220,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               if (song.samplerate != null) _buildInfoRow('Sample Rate', '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz', theme),
               const SizedBox(height: 16),
             ],
+          ),
           ),
         );
       },
@@ -355,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Add "${song.title}" to:'),
+        title: Text('Add "${song.displayTitle}" to:'),
         content: widget.playlists.isEmpty
             ? Column(
                 mainAxisSize: MainAxisSize.min,

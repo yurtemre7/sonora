@@ -87,7 +87,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                     Navigator.pop(dialogContext);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Added "${song.title}" to ${playlist.name}.'),
+                        content: Text('Added "${song.displayTitle}" to ${playlist.name}.'),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
@@ -116,7 +116,8 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(24),
-          child: Column(
+          child: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -127,7 +128,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildInfoRow('Title', song.title, theme),
+              _buildInfoRow('Title', song.displayTitle, theme),
               _buildInfoRow('Artist', song.artist, theme),
               _buildInfoRow('Album', song.album, theme),
               _buildInfoRow('Duration', song.durationFormatted, theme),
@@ -137,6 +138,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
               if (song.samplerate != null) _buildInfoRow('Sample Rate', '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz', theme),
               const SizedBox(height: 16),
             ],
+          ),
           ),
         );
       },
@@ -260,7 +262,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Removed "${song.title}" from playlist.'),
+                          content: Text('Removed "${song.displayTitle}" from playlist.'),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );

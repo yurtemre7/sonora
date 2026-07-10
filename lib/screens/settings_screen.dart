@@ -152,7 +152,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
-          content: Column(
+          content: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
@@ -227,6 +228,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ],
+          ),
           ),
           actions: [
             TextButton(
@@ -363,7 +365,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const SizedBox(width: 12),
                         OutlinedButton(
                           onPressed: () async {
-                            Navigator.pop(context);
                             await widget.onConfigureFolder();
                           },
                           style: OutlinedButton.styleFrom(

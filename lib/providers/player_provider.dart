@@ -65,12 +65,10 @@ class PlayerProvider extends ChangeNotifier {
   ///
   /// Builds a new queue from [songList], locates [song] within it, loads the
   /// playlist into the audio handler, and begins playback.
-  Future<void> playSong(Song song, List<Song> songList, {bool resetShuffle = true}) async {
+  Future<void> playSong(Song song, List<Song> songList) async {
     queue = List<Song>.from(songList);
     _originalQueue = List<Song>.from(songList);
-    if (resetShuffle) {
-      isShuffled = false;
-    }
+    isShuffled = false;
 
     var index = queue.indexWhere((s) => s.id == song.id);
     currentIndex = index >= 0 ? index : 0;
@@ -170,12 +168,11 @@ class PlayerProvider extends ChangeNotifier {
     // Pick the first shuffled song as the starting track
     var startingSong = shuffled.first;
 
-    // Force isShuffled to true immediately
+    // Load and play the shuffled playlist. playSong resets isShuffled to false,
+    // so we set it to true afterward.
+    await playSong(startingSong, shuffled);
     isShuffled = true;
     notifyListeners();
-
-    // Load and play the playlist without resetting shuffle status
-    await playSong(startingSong, shuffled, resetShuffle: false);
   }
 
   // ── Repeat ────────────────────────────────────────────────────────────────
@@ -205,7 +202,9 @@ class PlayerProvider extends ChangeNotifier {
   Future<void> removeFromQueue(int index) async {
     if (index < 0 || index >= queue.length) return;
 
+    var removedId = queue[index].id;
     queue.removeAt(index);
+    _originalQueue.removeWhere((s) => s.id == removedId);
     await audioHandler.removeQueueItemAt(index);
 
     // Adjust currentIndex if needed.
@@ -273,53 +272,25 @@ class PlayerProvider extends ChangeNotifier {
   Future<void> toggleFavorite(int songId) async {
     var scanner = MusicScanner();
     var updatedSongs = await scanner.toggleFavoriteSong(songId);
-    
-    // Update local state arrays keeping references
+
+    // Find the updated song from scanner result
+    var updatedSong = updatedSongs.where((s) => s.id == songId).firstOrNull;
+
     allSongs = List<Song>.from(updatedSongs);
-    
-    // Update queue songs matching songId
-    for (var i = 0; i < queue.length; i++) {
-      if (queue[i].id == songId) {
-        var song = queue[i];
-        queue[i] = Song(
-          id: song.id,
-          title: song.title,
-          artist: song.artist,
-          album: song.album,
-          duration: song.duration,
-          filePath: song.filePath,
-          artworkPath: song.artworkPath,
-          format: song.format,
-          bitrate: song.bitrate,
-          samplerate: song.samplerate,
-          isFavorite: !song.isFavorite,
-          lastModifiedMs: song.lastModifiedMs,
-          fileSize: song.fileSize,
-          hasLyrics: song.hasLyrics,
-        );
+
+    if (updatedSong != null) {
+      // Update queue with the exact song from scanner
+      for (var i = 0; i < queue.length; i++) {
+        if (queue[i].id == songId) {
+          queue[i] = updatedSong;
+        }
       }
-    }
-    
-    // Update original queue matching songId
-    for (var i = 0; i < _originalQueue.length; i++) {
-      if (_originalQueue[i].id == songId) {
-        var song = _originalQueue[i];
-        _originalQueue[i] = Song(
-          id: song.id,
-          title: song.title,
-          artist: song.artist,
-          album: song.album,
-          duration: song.duration,
-          filePath: song.filePath,
-          artworkPath: song.artworkPath,
-          format: song.format,
-          bitrate: song.bitrate,
-          samplerate: song.samplerate,
-          isFavorite: !song.isFavorite,
-          lastModifiedMs: song.lastModifiedMs,
-          fileSize: song.fileSize,
-          hasLyrics: song.hasLyrics,
-        );
+
+      // Update original queue
+      for (var i = 0; i < _originalQueue.length; i++) {
+        if (_originalQueue[i].id == songId) {
+          _originalQueue[i] = updatedSong;
+        }
       }
     }
 
@@ -330,7 +301,7 @@ class PlayerProvider extends ChangeNotifier {
   MediaItem _songToMediaItem(Song song) {
     return MediaItem(
       id: Uri.file(song.filePath).toString(),
-      title: song.title,
+      title: song.displayTitle,
       artist: song.artist,
       album: song.album,
       duration: song.duration,
