@@ -6,6 +6,10 @@ All notable changes to the Sonora music player project are documented in this fi
 ### Added
 * Support both synchronized LRC and plain text TXT lyrics file loading
 * Add tap-to-seek lyrics navigation and restore large thumbnail size
+### Changed
+* Chore: Add GitHub auto-generated release notes to release tags
+* Chore: Revert build-apk runner back to ubuntu-latest
+* Chore: Switch build-apk runner to macos-latest for faster builds
 
 ## [1.1.11] - 2026-07-10
 ### Added

@@ -117,16 +117,16 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: 📥 Checkout (for CHANGELOG.md)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - name: 📥 Download APK artifacts
         uses: actions/download-artifact@v7
         with:
           name: sonora-android-apk
           path: dist/
-
-      - name: 📥 Checkout (for CHANGELOG.md)
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: 🏷️ Create Release & Upload Assets
         uses: softprops/action-gh-release@v3
