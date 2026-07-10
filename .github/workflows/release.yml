@@ -128,6 +128,11 @@ jobs:
           name: sonora-android-apk
           path: dist/
 
+      - name: 📝 Extract release notes for version
+        run: |
+          awk '/^## \[${{ needs.version.outputs.version_name }}\]/{found=1; next} found && /^## \[/{exit} found{print}' CHANGELOG.md > release_notes.md
+          cat release_notes.md
+
       - name: 🏷️ Create Release & Upload Assets
         uses: softprops/action-gh-release@v3
         with:
@@ -135,7 +140,7 @@ jobs:
           name: "Sonora ${{ needs.version.outputs.tag }}"
           draft: false
           prerelease: false
-          body_path: CHANGELOG.md
+          body_path: release_notes.md
           generate_release_notes: true
           files: |
             dist/sonora-*.apk
