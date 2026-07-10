@@ -19,38 +19,46 @@ class AlbumArt extends StatelessWidget {
     var theme = Theme.of(context);
     var hasArtworkFile = artworkPath != null && File(artworkPath!).existsSync();
 
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        var resolvedSize = size.isInfinite
+            ? (constraints.hasBoundedWidth ? constraints.maxWidth : 120.0)
+            : size;
+
+        return Container(
+          width: resolvedSize,
+          height: resolvedSize,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: hasArtworkFile
-            ? Image.file(
-                File(artworkPath!),
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => _buildPlaceholder(theme),
-              )
-            : _buildPlaceholder(theme),
-      ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: hasArtworkFile
+                ? Image.file(
+                    File(artworkPath!),
+                    width: resolvedSize,
+                    height: resolvedSize,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => _buildPlaceholder(theme, resolvedSize),
+                  )
+                : _buildPlaceholder(theme, resolvedSize),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildPlaceholder(ThemeData theme) {
+  Widget _buildPlaceholder(ThemeData theme, double resolvedSize) {
     return Container(
-      width: size,
-      height: size,
+      width: resolvedSize,
+      height: resolvedSize,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -63,7 +71,7 @@ class AlbumArt extends StatelessWidget {
       ),
       child: Icon(
         Icons.music_note_rounded,
-        size: size * 0.4,
+        size: resolvedSize * 0.4,
         color: Colors.white70,
       ),
     );
