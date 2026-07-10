@@ -2,8 +2,9 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.1.12] - 2026-07-10
+## [1.1.13] - 2026-07-10
 ### Added
+* Support both synchronized LRC and plain text TXT lyrics file loading
 * Add tap-to-seek lyrics navigation and restore large thumbnail size
 
 ## [1.1.11] - 2026-07-10
