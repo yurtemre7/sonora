@@ -47,10 +47,14 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
               title: const Text('Now Playing'),
               backgroundColor: Colors.transparent,
               elevation: 0,
-              systemOverlayStyle: const SystemUiOverlayStyle(
+              systemOverlayStyle: SystemUiOverlayStyle(
                 statusBarColor: Colors.transparent,
-                statusBarIconBrightness: Brightness.light,
-                statusBarBrightness: Brightness.dark, // iOS
+                statusBarIconBrightness: theme.brightness == Brightness.dark
+                    ? Brightness.light
+                    : Brightness.dark,
+                statusBarBrightness: theme.brightness == Brightness.dark
+                    ? Brightness.dark
+                    : Brightness.light,
               ),
             ),
             body: Center(
@@ -93,10 +97,14 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
               onPressed: () => Navigator.pop(context),
             ),
             title: const Text('Now Playing'),
-            systemOverlayStyle: const SystemUiOverlayStyle(
+            systemOverlayStyle: SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
-              statusBarIconBrightness: Brightness.light,
-              statusBarBrightness: Brightness.dark, // iOS
+              statusBarIconBrightness: theme.brightness == Brightness.dark
+                  ? Brightness.light
+                  : Brightness.dark,
+              statusBarBrightness: theme.brightness == Brightness.dark
+                  ? Brightness.dark
+                  : Brightness.light,
             ),
             actions: [
               PopupMenuButton<int>(
@@ -178,17 +186,22 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                         ),
                       ),
               ),
-              // Dark gradient overlay
+              // Theme-aware gradient overlay
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.4),
-                        Colors.black.withValues(alpha: 0.7),
-                      ],
+                      colors: theme.brightness == Brightness.dark
+                          ? [
+                              Colors.black.withValues(alpha: 0.45),
+                              Colors.black.withValues(alpha: 0.75),
+                            ]
+                          : [
+                              theme.colorScheme.surface.withValues(alpha: 0.45),
+                              theme.colorScheme.surface.withValues(alpha: 0.85),
+                            ],
                     ),
                   ),
                 ),
@@ -201,42 +214,51 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                     children: [
                       const Spacer(),
 
-                      // Album Art / Lyrics Stack Card
-                      Card(
-                        elevation: 10,
-                        shadowColor: Colors.black.withValues(alpha: 0.4),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: SizedBox(
-                          width: MediaQuery.sizeOf(context).width * 0.80,
-                          height: MediaQuery.sizeOf(context).width * 0.80,
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: AlbumArt(
-                                  artworkPath: song.artworkPath,
-                                  size: MediaQuery.sizeOf(context).width * 0.80,
-                                  borderRadius: 28,
+                      // Album Art / Lyrics Stack Card (Responsive constraints to prevent overflow)
+                      Expanded(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.sizeOf(context).width * 0.80,
+                              maxHeight: MediaQuery.sizeOf(context).width * 0.80,
+                            ),
+                            child: AspectRatio(
+                              aspectRatio: 1.0,
+                              child: Card(
+                                elevation: 8,
+                                shadowColor: Colors.black.withValues(alpha: 0.3),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28),
                                 ),
-                              ),
-                              if (_showLyrics)
-                                Positioned.fill(
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
-                                    child: Container(
-                                      color: theme.brightness == Brightness.dark
-                                          ? Colors.black.withValues(alpha: 0.75)
-                                          : Colors.white.withValues(alpha: 0.80),
-                                      child: SongLyricsOverlay(
-                                        song: song,
-                                        playerProvider: widget.playerProvider,
+                                clipBehavior: Clip.antiAlias,
+                                child: Stack(
+                                  children: [
+                                    Positioned.fill(
+                                      child: AlbumArt(
+                                        artworkPath: song.artworkPath,
+                                        size: double.maxFinite,
+                                        borderRadius: 28,
                                       ),
                                     ),
-                                  ),
+                                    if (_showLyrics)
+                                      Positioned.fill(
+                                        child: BackdropFilter(
+                                          filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+                                          child: Container(
+                                            color: theme.brightness == Brightness.dark
+                                                ? Colors.black.withValues(alpha: 0.75)
+                                                : Colors.white.withValues(alpha: 0.80),
+                                            child: SongLyricsOverlay(
+                                              song: song,
+                                              playerProvider: widget.playerProvider,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                            ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -659,6 +681,7 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
 
             return ListView.builder(
               controller: _scrollController,
+              physics: const NeverScrollableScrollPhysics(),
               padding: EdgeInsets.symmetric(
                 vertical: viewportHeight / 2 - 32,
                 horizontal: 20,
