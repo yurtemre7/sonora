@@ -31,6 +31,17 @@ def parse_commit(commit_msg):
         return commit_type, message
     return None, commit_msg
 
+def get_pubspec_version():
+    try:
+        with open('pubspec.yaml', 'r') as f:
+            for line in f:
+                if line.startswith('version:'):
+                    val = line.split(':')[1].strip()
+                    return val.split('+')[0]
+    except Exception:
+        pass
+    return "Unreleased"
+
 def generate_changelog():
     tags = get_tags()
     
@@ -67,7 +78,16 @@ def generate_changelog():
                         changed.append(msg)
                         
             if added or fixed or changed:
-                changelog_content.append("## [Unreleased]")
+                import datetime
+                pub_version = get_pubspec_version()
+                today = datetime.date.today().isoformat()
+                latest_tag_clean = tags[0].lstrip('v').split('+')[0] if tags else ""
+                
+                if pub_version == latest_tag_clean:
+                    changelog_content.append("## [Unreleased]")
+                else:
+                    changelog_content.append(f"## [{pub_version}] - {today}")
+
                 if added:
                     changelog_content.append("### Added")
                     for item in added:
