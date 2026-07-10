@@ -17,8 +17,11 @@ This file outlines project-specific rules and instructions for coding assistants
 ### APK Compilation Frequency
 * **Rule:** Do not run `fvm flutter build apk` or other heavy local compilation tasks for every single small change. Instead, use `fvm flutter analyze` for syntax validation during development, and reserve local release/debug APK compilations for final verification phases.
 
-### Minimal Changes Constraint
-* **Rule:** Keep changes minimal. Avoid unnecessary code churn, stylistic formatting rewrites, or modifying structures unrelated to the task. Keep diffs as tiny, precise, and targeted as possible.
+### Changelog Entry Format
+* **Rule:** Keep descriptions of changelog entries inside `CHANGELOG.md` minimal, clear, and concise.
+
+### Code Change Quality
+* **Rule:** Code modifications must be thorough, precise, and backed by detailed analysis. Do not make quick hacks; implement robust, complete solutions while avoiding unnecessary stylistic churn.
 
 ### Conventional Commits Format
 * **Rule:** Always use the Conventional Commits specification for git commit messages. Examples:
