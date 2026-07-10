@@ -414,13 +414,20 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   @override
   Future<void> skipToPrevious() async {
-    if (player.hasPrevious) {
-      await player.seekToPrevious();
-    } else if (_windowStart > 0) {
-      // Force loading previous window centered on previous index
-      var prevIndex = _windowStart + (player.currentIndex ?? 0) - 1;
-      await loadPlaylist(_rawPlaylist, initialIndex: prevIndex);
-      await player.play();
+    if (player.position > const Duration(seconds: 3)) {
+      await player.seek(Duration.zero);
+    } else {
+      if (player.hasPrevious) {
+        await player.seekToPrevious();
+      } else if (_windowStart > 0) {
+        // Force loading previous window centered on previous index
+        var prevIndex = _windowStart + (player.currentIndex ?? 0) - 1;
+        await loadPlaylist(_rawPlaylist, initialIndex: prevIndex);
+        await player.play();
+      } else {
+        // First song of the entire playlist, seek to 0
+        await player.seek(Duration.zero);
+      }
     }
   }
 
