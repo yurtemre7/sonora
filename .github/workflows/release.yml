@@ -123,6 +123,11 @@ jobs:
           name: sonora-android-apk
           path: dist/
 
+      - name: 📥 Checkout (for CHANGELOG.md)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - name: 🏷️ Create Release & Upload Assets
         uses: softprops/action-gh-release@v3
         with:
@@ -131,6 +136,7 @@ jobs:
           draft: false
           prerelease: false
           body_path: CHANGELOG.md
+          generate_release_notes: true
           files: |
             dist/sonora-*.apk
             dist/*/sonora-*.apk
