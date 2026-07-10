@@ -21,7 +21,7 @@ class AlbumArt extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        var resolvedSize = size.isInfinite
+        var resolvedSize = (size.isInfinite || size > 10000.0)
             ? (constraints.hasBoundedWidth ? constraints.maxWidth : 120.0)
             : size;
 
