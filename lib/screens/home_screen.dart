@@ -546,6 +546,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       controller: _tabController,
                       dividerColor: Colors.transparent,
                       indicatorSize: TabBarIndicatorSize.tab,
+                      splashBorderRadius: BorderRadius.circular(18),
                       indicator: BoxDecoration(
                         color: theme.colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(18),
