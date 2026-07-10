@@ -43,7 +43,7 @@ jobs:
   # ─────────────────────────────────────────
   build-apk:
     name: 🤖 Build Android APK
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: version
     steps:
       - name: 📥 Checkout
@@ -70,22 +70,20 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: android-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: android-gradle-
+            ~/Library/Android/sdk
+          key: android-gradle-macos-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: android-gradle-macos-
 
       - name: 🔑 Decode keystore
         run: |
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode -o android/app/keystore.jks
           fi
 
       - name: 📝 Write key.properties
         run: |
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "storeFile=keystore.jks" > android/app/key.properties
-            echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> android/app/key.properties
-            echo "keyAlias=upload" >> android/app/key.properties
-            echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/app/key.properties
+            printf 'storeFile=keystore.jks\nstorePassword=${{ secrets.STORE_PASSWORD }}\nkeyAlias=upload\nkeyPassword=${{ secrets.KEY_PASSWORD }}\n' > android/app/key.properties
           fi
 
       - name: 📦 Get dependencies
