@@ -82,12 +82,10 @@ jobs:
       - name: 📝 Write key.properties
         run: |
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            cat > android/app/key.properties <<EOF
-            storeFile=keystore.jks
-            storePassword=${{ secrets.STORE_PASSWORD }}
-            keyAlias=upload
-            keyPassword=${{ secrets.KEY_PASSWORD }}
-            EOF
+            echo "storeFile=keystore.jks" > android/app/key.properties
+            echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> android/app/key.properties
+            echo "keyAlias=upload" >> android/app/key.properties
+            echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/app/key.properties
           fi
 
       - name: 📦 Get dependencies
