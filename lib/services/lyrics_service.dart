@@ -7,60 +7,82 @@ class LyricLine {
   LyricLine({required this.time, required this.text});
 }
 
+class SongLyrics {
+  final List<LyricLine> lines;
+  final bool isSynchronized;
+
+  SongLyrics({required this.lines, required this.isSynchronized});
+}
+
 class LyricsService {
   LyricsService._();
 
-  static Future<List<LyricLine>?> parseLyricsForSong(String songFilePath) async {
+  static Future<SongLyrics?> parseLyricsForSong(String songFilePath) async {
     try {
       var lastDot = songFilePath.lastIndexOf('.');
       if (lastDot == -1) return null;
+      
       var lrcPath = '${songFilePath.substring(0, lastDot)}.lrc';
       var file = File(lrcPath);
       if (!file.existsSync()) {
-        return null;
+        var txtPath = '${songFilePath.substring(0, lastDot)}.txt';
+        file = File(txtPath);
+        if (!file.existsSync()) {
+          return null;
+        }
       }
 
       var lines = await file.readAsLines();
       var lyrics = <LyricLine>[];
-
-      // Regex matching time tags: [mm:ss.xx] or [mm:ss]
       var regExp = RegExp(r'\[(\d+):(\d+)(?:\.(\d+))?\]');
+      var hasAnyTimestamp = false;
 
       for (var line in lines) {
         var trimmed = line.trim();
         if (trimmed.isEmpty) continue;
 
         var matches = regExp.allMatches(trimmed);
-        if (matches.isEmpty) continue;
-
-        var text = trimmed.replaceAll(regExp, '').trim();
-
-        for (var match in matches) {
-          var min = int.parse(match.group(1)!);
-          var sec = int.parse(match.group(2)!);
-          
-          var ms = 0;
-          var msGroup = match.group(3);
-          if (msGroup != null) {
-            if (msGroup.length == 2) {
-              ms = int.parse(msGroup) * 10;
-            } else {
-              ms = int.parse(msGroup);
+        if (matches.isNotEmpty) {
+          hasAnyTimestamp = true;
+          var text = trimmed.replaceAll(regExp, '').trim();
+          for (var match in matches) {
+            var min = int.parse(match.group(1)!);
+            var sec = int.parse(match.group(2)!);
+            var ms = 0;
+            var msGroup = match.group(3);
+            if (msGroup != null) {
+              if (msGroup.length == 2) {
+                ms = int.parse(msGroup) * 10;
+              } else {
+                ms = int.parse(msGroup);
+              }
             }
+            var time = Duration(
+              minutes: min,
+              seconds: sec,
+              milliseconds: ms,
+            );
+            lyrics.add(LyricLine(time: time, text: text));
           }
-
-          var time = Duration(
-            minutes: min,
-            seconds: sec,
-            milliseconds: ms,
-          );
-
-          lyrics.add(LyricLine(time: time, text: text));
         }
       }
 
-      lyrics.sort((a, b) => a.time.compareTo(b.time));
-      return lyrics;
+      if (hasAnyTimestamp) {
+        lyrics.sort((a, b) => a.time.compareTo(b.time));
+        return SongLyrics(lines: lyrics, isSynchronized: true);
+      } else {
+        // Unsynchronized plain text lyrics: read all lines as text
+        var plainLines = <LyricLine>[];
+        for (var line in lines) {
+          var trimmed = line.trim();
+          // Strip potential metadata tags like [ti:Title] from text logs
+          if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+            continue;
+          }
+          plainLines.add(LyricLine(time: Duration.zero, text: trimmed));
+        }
+        return SongLyrics(lines: plainLines, isSynchronized: false);
+      }
     } catch (_) {
       return null;
     }

@@ -98,7 +98,7 @@ class MusicScanner {
               var size = stat.size;
 
               var lastDotLrc = file.path.lastIndexOf('.');
-              var hasLrc = lastDotLrc != -1 && File('${file.path.substring(0, lastDotLrc)}.lrc').existsSync();
+              var hasLrc = lastDotLrc != -1 && (File('${file.path.substring(0, lastDotLrc)}.lrc').existsSync() || File('${file.path.substring(0, lastDotLrc)}.txt').existsSync());
 
               if (cached.lastModifiedMs == mtime && cached.fileSize == size &&
                   cached.artist != 'Local Audio' && cached.album != 'Synced Folder') {
@@ -181,8 +181,8 @@ class MusicScanner {
 
               var hasLrc = false;
               if (extIndex != -1) {
-                var lrcPath = '${file.path.substring(0, file.path.lastIndexOf('.'))}.lrc';
-                hasLrc = File(lrcPath).existsSync();
+                var basePath = file.path.substring(0, extIndex);
+                hasLrc = File('$basePath.lrc').existsSync() || File('$basePath.txt').existsSync();
               }
 
               songsToKeep.add(Song(

@@ -510,7 +510,8 @@ class SongLyricsOverlay extends StatefulWidget {
 }
 
 class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
-  List<LyricLine>? _lyrics;
+  List<LyricLine>? _lyricsLines;
+  var _isSynchronized = false;
   var _isLoading = false;
   late ScrollController _scrollController;
   var _activeIndex = -1;
@@ -539,28 +540,34 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
   Future<void> _loadLyrics() async {
     setState(() {
       _isLoading = true;
-      _lyrics = null;
+      _lyricsLines = null;
+      _isSynchronized = false;
       _activeIndex = -1;
     });
 
-    var lyrics = await LyricsService.parseLyricsForSong(widget.song.filePath);
+    var lyricsResult = await LyricsService.parseLyricsForSong(widget.song.filePath);
 
     if (!mounted) return;
     setState(() {
-      _lyrics = lyrics;
+      if (lyricsResult != null) {
+        _lyricsLines = lyricsResult.lines;
+        _isSynchronized = lyricsResult.isSynchronized;
+      }
       _isLoading = false;
     });
 
-    _scrollToCurrentPosition(immediate: true);
+    if (_isSynchronized) {
+      _scrollToCurrentPosition(immediate: true);
+    }
   }
 
   void _scrollToCurrentPosition({bool immediate = false}) {
-    if (_lyrics == null || _lyrics!.isEmpty) return;
+    if (_lyricsLines == null || _lyricsLines!.isEmpty) return;
 
     var position = widget.playerProvider.audioHandler.player.position;
     var activeIndex = -1;
-    for (var i = 0; i < _lyrics!.length; i++) {
-      if (position >= _lyrics![i].time) {
+    for (var i = 0; i < _lyricsLines!.length; i++) {
+      if (position >= _lyricsLines![i].time) {
         activeIndex = i;
       } else {
         break;
@@ -575,7 +582,7 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
   }
 
   void _scrollToActiveIndex(int index, double viewportHeight, {bool immediate = false}) {
-    if (index < 0 || _lyrics == null) return;
+    if (index < 0 || _lyricsLines == null) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
@@ -605,7 +612,7 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
       );
     }
 
-    var lyricsList = _lyrics;
+    var lyricsList = _lyricsLines;
     if (lyricsList == null || lyricsList.isEmpty) {
       return Center(
         child: Padding(
@@ -620,14 +627,14 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
               ),
               const SizedBox(height: 12),
               Text(
-                'No synchronized lyrics found',
+                'No lyrics found',
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                'Place a .lrc file with the same name next to the audio file to load lyrics.',
+                'Place a .lrc or .txt file with the same name next to the audio file to load lyrics.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
@@ -639,6 +646,35 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
       );
     }
 
+    var isDark = theme.brightness == Brightness.dark;
+    var activeTextColor = isDark ? Colors.white : theme.colorScheme.onSurface;
+
+    if (!_isSynchronized) {
+      // Unsynchronized plain text lyrics: freely scrollable
+      return ListView.builder(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(24),
+        itemCount: lyricsList.length,
+        itemBuilder: (context, index) {
+          var line = lyricsList[index];
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              line.text,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: activeTextColor,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          );
+        },
+      );
+    }
+
+    // Synchronized lyrics: locked scroll centering
     return LayoutBuilder(
       builder: (context, constraints) {
         var viewportHeight = constraints.maxHeight;
@@ -664,8 +700,6 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
               });
             }
 
-            var isDark = theme.brightness == Brightness.dark;
-            var activeTextColor = isDark ? Colors.white : theme.colorScheme.onSurface;
             var inactiveTextColor = isDark
                 ? Colors.white.withValues(alpha: 0.4)
                 : theme.colorScheme.onSurface.withValues(alpha: 0.4);
