@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.1.5] - 2026-07-10
+### Added
+* Detect lyrics file existence during library sync to avoid UI thread I/O checks
+
 ## [1.1.4] - 2026-07-10
 ### Added
 * Implement synchronized lrc lyrics overlay with auto-scrolling centering
