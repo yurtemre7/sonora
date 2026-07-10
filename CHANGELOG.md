@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.1.6] - 2026-07-10
+### Fixed
+* Resolve light mode text legibility and prevent vertical layout overflow on small screens
+
 ## [1.1.5] - 2026-07-10
 ### Added
 * Detect lyrics file existence during library sync to avoid UI thread I/O checks
