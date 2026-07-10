@@ -214,51 +214,42 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                     children: [
                       const Spacer(),
 
-                      // Album Art / Lyrics Stack Card (Responsive constraints to prevent overflow)
-                      Expanded(
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.sizeOf(context).width * 0.80,
-                              maxHeight: MediaQuery.sizeOf(context).width * 0.80,
-                            ),
-                            child: AspectRatio(
-                              aspectRatio: 1.0,
-                              child: Card(
-                                elevation: 8,
-                                shadowColor: Colors.black.withValues(alpha: 0.3),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(28),
-                                ),
-                                clipBehavior: Clip.antiAlias,
-                                child: Stack(
-                                  children: [
-                                    Positioned.fill(
-                                      child: AlbumArt(
-                                        artworkPath: song.artworkPath,
-                                        size: double.maxFinite,
-                                        borderRadius: 28,
-                                      ),
-                                    ),
-                                    if (_showLyrics)
-                                      Positioned.fill(
-                                        child: BackdropFilter(
-                                          filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
-                                          child: Container(
-                                            color: theme.brightness == Brightness.dark
-                                                ? Colors.black.withValues(alpha: 0.75)
-                                                : Colors.white.withValues(alpha: 0.80),
-                                            child: SongLyricsOverlay(
-                                              song: song,
-                                              playerProvider: widget.playerProvider,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                  ],
+                      // Album Art / Lyrics Stack Card
+                      Card(
+                        elevation: 10,
+                        shadowColor: Colors.black.withValues(alpha: 0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: SizedBox(
+                          width: MediaQuery.sizeOf(context).width * 0.80,
+                          height: MediaQuery.sizeOf(context).width * 0.80,
+                          child: Stack(
+                            children: [
+                              Positioned.fill(
+                                child: AlbumArt(
+                                  artworkPath: song.artworkPath,
+                                  size: MediaQuery.sizeOf(context).width * 0.80,
+                                  borderRadius: 28,
                                 ),
                               ),
-                            ),
+                              if (_showLyrics)
+                                Positioned.fill(
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+                                    child: Container(
+                                      color: theme.brightness == Brightness.dark
+                                          ? Colors.black.withValues(alpha: 0.75)
+                                          : Colors.white.withValues(alpha: 0.80),
+                                      child: SongLyricsOverlay(
+                                        song: song,
+                                        playerProvider: widget.playerProvider,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
@@ -317,7 +308,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                         ],
                       ),
 
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 32),
 
                       // Seek Bar
                       SeekBar(
@@ -327,7 +318,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                         isPlaying: widget.playerProvider.isPlaying,
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
                       // Player Controls
                       PlayerControls(
@@ -691,27 +682,31 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
                 var isCurrent = index == activeIndex;
                 var line = lyricsList[index];
 
-                return SizedBox(
-                  height: 64.0,
-                  child: Center(
-                    child: AnimatedDefaultTextStyle(
-                      duration: const Duration(milliseconds: 250),
-                      style: isCurrent
-                          ? theme.textTheme.titleMedium!.copyWith(
-                              color: activeTextColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            )
-                          : theme.textTheme.bodyMedium!.copyWith(
-                              color: inactiveTextColor,
-                              fontSize: 15,
-                            ),
-                      textAlign: TextAlign.center,
-                      child: Text(
-                        line.text,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                return GestureDetector(
+                  onTap: () => widget.playerProvider.seek(line.time),
+                  behavior: HitTestBehavior.opaque,
+                  child: SizedBox(
+                    height: 64.0,
+                    child: Center(
+                      child: AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 250),
+                        style: isCurrent
+                            ? theme.textTheme.titleMedium!.copyWith(
+                                color: activeTextColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              )
+                            : theme.textTheme.bodyMedium!.copyWith(
+                                color: inactiveTextColor,
+                                fontSize: 15,
+                              ),
                         textAlign: TextAlign.center,
+                        child: Text(
+                          line.text,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ),
