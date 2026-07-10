@@ -19,9 +19,6 @@ All notable changes to the Sonora music player project are documented in this fi
 * Bind rounded `splashBorderRadius` on home custom tab selector ripples.
 * Setup automated release workflow for Android ABI-split APKs.
 
-### Removed
-* Revert wavy progress bar animation back to straight linear track.
-
 ## [1.0.0] - 2026-07-08
 ### Added
 * Replaced spinning vinyl animation with a high-resolution artwork card.
