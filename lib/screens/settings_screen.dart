@@ -162,81 +162,87 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           content: SingleChildScrollView(
             child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.primary,
-                      theme.colorScheme.tertiary,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Icon(
-                  Icons.music_note_rounded,
-                  size: 40,
-                  color: theme.colorScheme.onPrimary,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Sonora',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Version 1.0.0',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'A beautiful local music player for Android, built with Flutter and Material 3 Expressive design.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.code_rounded,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Made with ❤️ by yurtemre',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      colors: [
+                        theme.colorScheme.primary,
+                        theme.colorScheme.tertiary,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Flutter ${_getFlutterInfo()}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                  fontSize: 11,
+                  child: Icon(
+                    Icons.music_note_rounded,
+                    size: 40,
+                    color: theme.colorScheme.onPrimary,
+                  ),
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(height: 20),
+                Text(
+                  'Sonora',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Version 1.0.0',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'A beautiful local music player for Android, built with Flutter and Material 3 Expressive design.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                Divider(
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.code_rounded,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Made with ❤️ by yurtemre',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Flutter ${_getFlutterInfo()}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.6,
+                    ),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -286,7 +292,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           // ── Appearance ───────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 8.0,
+            ),
             child: Text(
               'Appearance',
               style: theme.textTheme.titleSmall?.copyWith(
@@ -313,7 +322,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // ── Playback ──────────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 8.0,
+            ),
             child: Text(
               'Playback',
               style: theme.textTheme.titleSmall?.copyWith(
@@ -325,7 +337,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SwitchListTile(
             secondary: const Icon(Icons.play_circle_outline_rounded),
             title: const Text('Keep playing on app close'),
-            subtitle: const Text('Keep playing music in the background when swiped away'),
+            subtitle: const Text(
+              'Keep playing music in the background when swiped away',
+            ),
             value: _keepPlayingOnClose,
             onChanged: (val) async {
               var prefs = SharedPreferencesAsync();
@@ -343,31 +357,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   SwitchListTile(
                     secondary: const Icon(Icons.color_lens_outlined),
                     title: const Text('Dynamic Theme (Material You)'),
-                    subtitle: const Text('Automatically theme the app using active album art'),
+                    subtitle: const Text(
+                      'Automatically theme the app using active album art',
+                    ),
                     value: widget.playerProvider.useDynamicTheme,
-                    onChanged: (val) => widget.playerProvider.toggleDynamicTheme(val),
+                    onChanged: (val) =>
+                        widget.playerProvider.toggleDynamicTheme(val),
                   ),
                   SwitchListTile(
                     secondary: const Icon(Icons.bar_chart_rounded),
                     title: const Text('Show Audio Visualizer'),
-                    subtitle: const Text('Animate audio wave visualizer inside player screen'),
+                    subtitle: const Text(
+                      'Animate audio wave visualizer inside player screen',
+                    ),
                     value: widget.playerProvider.showVisualizer,
-                    onChanged: (val) => widget.playerProvider.toggleVisualizer(val),
+                    onChanged: (val) =>
+                        widget.playerProvider.toggleVisualizer(val),
                   ),
                   ListTile(
                     leading: const Icon(Icons.timer_outlined),
                     title: const Text('Sleep Timer Extension'),
-                    subtitle: Text('Add ${widget.playerProvider.sleepTimerExtendMinutes} minutes on extend button press'),
+                    subtitle: Text(
+                      'Add ${widget.playerProvider.sleepTimerExtendMinutes} minutes on extend button press',
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Slider(
-                      value: widget.playerProvider.sleepTimerExtendMinutes.toDouble(),
+                      value: widget.playerProvider.sleepTimerExtendMinutes
+                          .toDouble(),
                       min: 1.0,
                       max: 30.0,
                       divisions: 29,
-                      label: '${widget.playerProvider.sleepTimerExtendMinutes} min',
-                      onChanged: (val) => widget.playerProvider.setSleepTimerExtendMinutes(val.toInt()),
+                      label:
+                          '${widget.playerProvider.sleepTimerExtendMinutes} min',
+                      onChanged: (val) => widget.playerProvider
+                          .setSleepTimerExtendMinutes(val.toInt()),
                     ),
                   ),
                 ],
@@ -379,7 +404,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // ── Library Sync ──────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 8.0,
+            ),
             child: Text(
               'Library Sync',
               style: theme.textTheme.titleSmall?.copyWith(
@@ -389,14 +417,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 4.0,
+            ),
             child: Card(
               elevation: 0,
               color: theme.colorScheme.surfaceContainerLow,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.5,
+                  ),
                 ),
               ),
               child: Padding(
@@ -445,7 +478,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
                           child: const Text('Change'),
                         ),
@@ -455,7 +491,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Text(
                       'Sonora plays your files locally and offline. When you copy new tracks into this folder, run a sync below to add them to your library.',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.8,
+                        ),
                         height: 1.3,
                       ),
                     ),
@@ -472,7 +510,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               Text(
                                 'Last Sync',
                                 style: theme.textTheme.labelMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                                  color: theme.colorScheme.onSurfaceVariant
+                                      .withValues(alpha: 0.7),
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -497,9 +536,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       await widget.onRetriggerSync();
                                       await _loadSettings();
                                       if (!context.mounted) return;
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         const SnackBar(
-                                          content: Text('Library synchronization complete.'),
+                                          content: Text(
+                                            'Library synchronization complete.',
+                                          ),
                                           behavior: SnackBarBehavior.floating,
                                         ),
                                       );
@@ -515,7 +558,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
                             ),
                             icon: _isSyncing
                                 ? SizedBox(
@@ -523,7 +569,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     height: 14,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: theme.colorScheme.onSecondaryContainer,
+                                      color: theme
+                                          .colorScheme
+                                          .onSecondaryContainer,
                                     ),
                                   )
                                 : const Icon(Icons.sync_rounded, size: 16),
@@ -541,7 +589,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // ── About ─────────────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 8.0,
+            ),
             child: Text(
               'About',
               style: theme.textTheme.titleSmall?.copyWith(
@@ -598,7 +649,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // ── Danger Zone ───────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 8.0,
+            ),
             child: Text(
               'Danger Zone',
               style: theme.textTheme.titleSmall?.copyWith(
@@ -608,7 +662,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.delete_forever_rounded, color: theme.colorScheme.error),
+            leading: Icon(
+              Icons.delete_forever_rounded,
+              color: theme.colorScheme.error,
+            ),
             title: Text(
               'Reset Application',
               style: TextStyle(color: theme.colorScheme.error),

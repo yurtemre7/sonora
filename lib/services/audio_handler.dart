@@ -21,7 +21,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   // Sliding window bounds in the raw playlist.
   var _windowStart = 0; // global index of native index 0
-  var _windowEnd = 0;   // global index after native index (native length - 1)
+  var _windowEnd = 0; // global index after native index (native length - 1)
 
   // Window sizing parameters.
   static const _prependBuffer = 10;
@@ -56,14 +56,16 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   Future<void> _init() async {
     // Configure the audio session for music playback.
     var session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration(
-      avAudioSessionCategory: AVAudioSessionCategory.playback,
-      avAudioSessionMode: AVAudioSessionMode.defaultMode,
-      androidAudioAttributes: AndroidAudioAttributes(
-        contentType: AndroidAudioContentType.music,
-        usage: AndroidAudioUsage.media,
+    await session.configure(
+      const AudioSessionConfiguration(
+        avAudioSessionCategory: AVAudioSessionCategory.playback,
+        avAudioSessionMode: AVAudioSessionMode.defaultMode,
+        androidAudioAttributes: AndroidAudioAttributes(
+          contentType: AndroidAudioContentType.music,
+          usage: AndroidAudioUsage.media,
+        ),
       ),
-    ));
+    );
 
     // Broadcast playback state changes from just_audio to audio_service.
     player.playbackEventStream.listen(_broadcastPlaybackState);
@@ -87,33 +89,35 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   /// Maps [just_audio] playback events to the [audio_service] playback state.
   void _broadcastPlaybackState(PlaybackEvent event) {
     var playing = player.playing;
-    playbackState.add(playbackState.value.copyWith(
-      controls: [
-        MediaControl.skipToPrevious,
-        if (playing) MediaControl.pause else MediaControl.play,
-        MediaControl.skipToNext,
-        if (sleepTimerActive)
-          MediaControl(
-            androidIcon: 'drawable/ic_menu_add',
-            label: sleepTimerExtendLabel,
-            action: MediaAction.custom,
-            customAction: const CustomMediaAction(
-              name: 'extendSleepTimer',
+    playbackState.add(
+      playbackState.value.copyWith(
+        controls: [
+          MediaControl.skipToPrevious,
+          if (playing) MediaControl.pause else MediaControl.play,
+          MediaControl.skipToNext,
+          if (sleepTimerActive)
+            MediaControl(
+              androidIcon: 'drawable/ic_menu_add',
+              label: sleepTimerExtendLabel,
+              action: MediaAction.custom,
+              customAction: const CustomMediaAction(name: 'extendSleepTimer'),
             ),
-          ),
-      ],
-      systemActions: const {
-        MediaAction.seek,
-        MediaAction.skipToPrevious,
-        MediaAction.skipToNext,
-      },
-      processingState: _mapProcessingState(player.processingState),
-      playing: playing,
-      updatePosition: player.position,
-      bufferedPosition: player.bufferedPosition,
-      speed: player.speed,
-      queueIndex: event.currentIndex != null ? _windowStart + event.currentIndex! : null,
-    ));
+        ],
+        systemActions: const {
+          MediaAction.seek,
+          MediaAction.skipToPrevious,
+          MediaAction.skipToNext,
+        },
+        processingState: _mapProcessingState(player.processingState),
+        playing: playing,
+        updatePosition: player.position,
+        bufferedPosition: player.bufferedPosition,
+        speed: player.speed,
+        queueIndex: event.currentIndex != null
+            ? _windowStart + event.currentIndex!
+            : null,
+      ),
+    );
   }
 
   /// Converts a [just_audio] [ProcessingState] to an [audio_service]
@@ -152,12 +156,14 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       _isModifyingSources = true;
       try {
         var chunkSize = min(20, _rawPlaylist.length - _windowEnd);
-        var appendItems = _rawPlaylist.sublist(_windowEnd, _windowEnd + chunkSize);
-        var sources = appendItems.map((item) => AudioSource.uri(
-          Uri.parse(item.id),
-          tag: item,
-        )).toList();
-        
+        var appendItems = _rawPlaylist.sublist(
+          _windowEnd,
+          _windowEnd + chunkSize,
+        );
+        var sources = appendItems
+            .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
+            .toList();
+
         await player.addAudioSources(sources);
         _windowEnd += chunkSize;
 
@@ -173,11 +179,13 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       _isModifyingSources = true;
       try {
         var chunkSize = min(15, _windowStart);
-        var prependItems = _rawPlaylist.sublist(_windowStart - chunkSize, _windowStart);
-        var sources = prependItems.map((item) => AudioSource.uri(
-          Uri.parse(item.id),
-          tag: item,
-        )).toList();
+        var prependItems = _rawPlaylist.sublist(
+          _windowStart - chunkSize,
+          _windowStart,
+        );
+        var sources = prependItems
+            .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
+            .toList();
 
         await player.insertAudioSources(0, sources);
         _windowStart -= chunkSize;
@@ -208,7 +216,8 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       _isModifyingSources = true;
       try {
         await player.setAudioSources([]);
-      } catch (_) {} finally {
+      } catch (_) {
+      } finally {
         _isModifyingSources = false;
       }
       queue.add([]);
@@ -218,7 +227,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
     // Clamp initialIndex to bounds
     if (initialIndex < 0) initialIndex = 0;
-    if (initialIndex >= _rawPlaylist.length) initialIndex = _rawPlaylist.length - 1;
+    if (initialIndex >= _rawPlaylist.length) {
+      initialIndex = _rawPlaylist.length - 1;
+    }
 
     // Calculate window bounds around initialIndex
     _windowStart = max(0, initialIndex - _prependBuffer);
@@ -227,10 +238,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     var windowItems = _rawPlaylist.sublist(_windowStart, _windowEnd);
     var initialNativeIndex = initialIndex - _windowStart;
 
-    var initialBatch = windowItems.map((item) => AudioSource.uri(
-      Uri.parse(item.id),
-      tag: item,
-    )).toList();
+    var initialBatch = windowItems
+        .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
+        .toList();
 
     _isModifyingSources = true;
     try {
@@ -252,13 +262,13 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   /// Updates the playlist source dynamically after the currently playing index.
   /// Used for shuffling/unshuffling remaining tracks.
-  Future<void> updatePlaylistAfter(int index, List<MediaItem> remainingItems) async {
+  Future<void> updatePlaylistAfter(
+    int index,
+    List<MediaItem> remainingItems,
+  ) async {
     // Update global playlist
     if (index >= 0 && index < _rawPlaylist.length) {
-      _rawPlaylist = [
-        ..._rawPlaylist.sublist(0, index + 1),
-        ...remainingItems,
-      ];
+      _rawPlaylist = [..._rawPlaylist.sublist(0, index + 1), ...remainingItems];
     } else {
       _rawPlaylist = List<MediaItem>.from(remainingItems);
     }
@@ -277,10 +287,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         // Add next batch of remaining items to native playlist
         var chunkSize = min(30, remainingItems.length);
         var appendItems = remainingItems.sublist(0, chunkSize);
-        var sources = appendItems.map((item) => AudioSource.uri(
-          Uri.parse(item.id),
-          tag: item,
-        )).toList();
+        var sources = appendItems
+            .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
+            .toList();
 
         await player.addAudioSources(sources);
         _windowEnd = _windowStart + localIndex + 1 + chunkSize;
@@ -332,8 +341,10 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     _rawPlaylist.insert(newGlobalIndex, item);
 
     // If both old and new indices are within the native window
-    if (oldGlobalIndex >= _windowStart && oldGlobalIndex < _windowEnd &&
-        newGlobalIndex >= _windowStart && newGlobalIndex < _windowEnd) {
+    if (oldGlobalIndex >= _windowStart &&
+        oldGlobalIndex < _windowEnd &&
+        newGlobalIndex >= _windowStart &&
+        newGlobalIndex < _windowEnd) {
       var localOld = oldGlobalIndex - _windowStart;
       var localNew = newGlobalIndex - _windowStart;
       _isModifyingSources = true;
@@ -359,14 +370,13 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   @override
   Future<void> addQueueItem(MediaItem item) async {
     _rawPlaylist.add(item);
-    
+
     if (_windowEnd == _rawPlaylist.length - 1) {
       _isModifyingSources = true;
       try {
-        await player.addAudioSource(AudioSource.uri(
-          Uri.parse(item.id),
-          tag: item,
-        ));
+        await player.addAudioSource(
+          AudioSource.uri(Uri.parse(item.id), tag: item),
+        );
         _windowEnd++;
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
       } finally {
@@ -384,10 +394,10 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       var localIndex = globalIndex - _windowStart;
       _isModifyingSources = true;
       try {
-        await player.insertAudioSource(localIndex, AudioSource.uri(
-          Uri.parse(item.id),
-          tag: item,
-        ));
+        await player.insertAudioSource(
+          localIndex,
+          AudioSource.uri(Uri.parse(item.id), tag: item),
+        );
         _windowEnd++;
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
       } finally {

@@ -16,6 +16,7 @@ class MusicScanner {
   factory MusicScanner() => _instance;
 
   final _prefs = SharedPreferencesAsync();
+
   /// Queries the cached list of songs from storage instantly.
   Future<List<Song>> scanAllSongs() async {
     var songs = <Song>[];
@@ -29,7 +30,11 @@ class MusicScanner {
 
     // Load saved sort settings and pre-sort songs so they load instantly in correct order
     var sortSettings = await getSortSettings();
-    sortSongs(songs, sortSettings['sortBy'] as String, sortSettings['sortAscending'] as bool);
+    sortSongs(
+      songs,
+      sortSettings['sortBy'] as String,
+      sortSettings['sortAscending'] as bool,
+    );
 
     return songs;
   }
@@ -46,7 +51,9 @@ class MusicScanner {
 
       if (folderPath == null) {
         // No sync folder configured. Filter existing cached references by physical existence.
-        var verified = cachedSongs.where((s) => File(s.filePath).existsSync()).toList();
+        var verified = cachedSongs
+            .where((s) => File(s.filePath).existsSync())
+            .toList();
         await _writeImportedSongsMetadata(verified);
         return verified;
       }
@@ -64,14 +71,30 @@ class MusicScanner {
 
         // Supports wide variety of standard audio formats
         var audioExtensions = {
-          'mp3', 'm4a', 'mp4', 'aac', 'flac', 'ogg', 'opus', 
-          'wav', 'wma', 'amr', '3gp', 'ts', 'mkv', 'mid', 'midi'
+          'mp3',
+          'm4a',
+          'mp4',
+          'aac',
+          'flac',
+          'ogg',
+          'opus',
+          'wav',
+          'wma',
+          'amr',
+          '3gp',
+          'ts',
+          'mkv',
+          'mid',
+          'midi',
         };
         var foundFiles = <File>[];
 
         try {
           var syncDir = Directory(folderPath);
-          for (var entity in syncDir.listSync(recursive: true, followLinks: false)) {
+          for (var entity in syncDir.listSync(
+            recursive: true,
+            followLinks: false,
+          )) {
             if (entity is File) {
               var ext = entity.path.split('.').last.toLowerCase();
               if (audioExtensions.contains(ext)) {
@@ -82,12 +105,16 @@ class MusicScanner {
         } catch (_) {}
 
         var foundPaths = foundFiles.map((f) => f.path).toSet();
-        var verifiedSongs = localCachedSongs.where((s) => foundPaths.contains(s.filePath)).toList();
+        var verifiedSongs = localCachedSongs
+            .where((s) => foundPaths.contains(s.filePath))
+            .toList();
 
         // Create quick lookup maps of existing cache
         var cacheMap = {for (var s in verifiedSongs) s.filePath: s};
         var existingIds = {for (var s in verifiedSongs) s.filePath: s.id};
-        var existingFavoriteStatus = {for (var s in verifiedSongs) s.filePath: s.isFavorite};
+        var existingFavoriteStatus = {
+          for (var s in verifiedSongs) s.filePath: s.isFavorite,
+        };
 
         var songsToKeep = <Song>[];
         var filesToScan = <File>[];
@@ -102,27 +129,38 @@ class MusicScanner {
               var size = stat.size;
 
               var lastDotLrc = file.path.lastIndexOf('.');
-              var hasLrc = lastDotLrc != -1 && (File('${file.path.substring(0, lastDotLrc)}.lrc').existsSync() || File('${file.path.substring(0, lastDotLrc)}.txt').existsSync());
+              var hasLrc =
+                  lastDotLrc != -1 &&
+                  (File(
+                        '${file.path.substring(0, lastDotLrc)}.lrc',
+                      ).existsSync() ||
+                      File(
+                        '${file.path.substring(0, lastDotLrc)}.txt',
+                      ).existsSync());
 
-              if (cached.lastModifiedMs == mtime && cached.fileSize == size &&
-                  cached.artist != 'Local Audio' && cached.album != 'Synced Folder') {
+              if (cached.lastModifiedMs == mtime &&
+                  cached.fileSize == size &&
+                  cached.artist != 'Local Audio' &&
+                  cached.album != 'Synced Folder') {
                 if (cached.hasLyrics != hasLrc) {
-                  songsToKeep.add(Song(
-                    id: cached.id,
-                    title: cached.title,
-                    artist: cached.artist,
-                    album: cached.album,
-                    duration: cached.duration,
-                    filePath: cached.filePath,
-                    artworkPath: cached.artworkPath,
-                    format: cached.format,
-                    bitrate: cached.bitrate,
-                    samplerate: cached.samplerate,
-                    isFavorite: cached.isFavorite,
-                    lastModifiedMs: cached.lastModifiedMs,
-                    fileSize: cached.fileSize,
-                    hasLyrics: hasLrc,
-                  ));
+                  songsToKeep.add(
+                    Song(
+                      id: cached.id,
+                      title: cached.title,
+                      artist: cached.artist,
+                      album: cached.album,
+                      duration: cached.duration,
+                      filePath: cached.filePath,
+                      artworkPath: cached.artworkPath,
+                      format: cached.format,
+                      bitrate: cached.bitrate,
+                      samplerate: cached.samplerate,
+                      isFavorite: cached.isFavorite,
+                      lastModifiedMs: cached.lastModifiedMs,
+                      fileSize: cached.fileSize,
+                      hasLyrics: hasLrc,
+                    ),
+                  );
                 } else {
                   songsToKeep.add(cached);
                 }
@@ -137,13 +175,14 @@ class MusicScanner {
         if (filesToScan.isNotEmpty) {
           var idCounter = verifiedSongs.isEmpty
               ? 1
-              : verifiedSongs.map((s) => s.id).reduce((a, b) => a > b ? a : b) + 1;
+              : verifiedSongs.map((s) => s.id).reduce((a, b) => a > b ? a : b) +
+                    1;
 
           for (var file in filesToScan) {
             try {
               // Read metadata synchronously inside background isolate
               var meta = tags.readMetadata(file.path, true);
-              
+
               String? title;
               String? artist;
               String? album;
@@ -168,8 +207,11 @@ class MusicScanner {
                   duration = meta.duration!;
                 }
 
-                if (meta.pictureBytes != null && meta.pictureBytes!.isNotEmpty) {
-                  var artFile = File('$appDocsDirPath/artwork_${DateTime.now().millisecondsSinceEpoch}_$idCounter.jpg');
+                if (meta.pictureBytes != null &&
+                    meta.pictureBytes!.isNotEmpty) {
+                  var artFile = File(
+                    '$appDocsDirPath/artwork_${DateTime.now().millisecondsSinceEpoch}_$idCounter.jpg',
+                  );
                   artFile.writeAsBytesSync(meta.pictureBytes!);
                   artworkPath = artFile.path;
                 }
@@ -177,7 +219,9 @@ class MusicScanner {
 
               var fileName = file.path.split(Platform.pathSeparator).last;
               var extIndex = fileName.lastIndexOf('.');
-              var defaultTitle = extIndex != -1 ? fileName.substring(0, extIndex) : fileName;
+              var defaultTitle = extIndex != -1
+                  ? fileName.substring(0, extIndex)
+                  : fileName;
 
               // Retain original ID and favorite status if the file was modified, otherwise allocate new
               var songId = existingIds[file.path] ?? idCounter++;
@@ -186,25 +230,35 @@ class MusicScanner {
               var hasLrc = false;
               if (extIndex != -1) {
                 var basePath = file.path.substring(0, extIndex);
-                hasLrc = File('$basePath.lrc').existsSync() || File('$basePath.txt').existsSync();
+                hasLrc =
+                    File('$basePath.lrc').existsSync() ||
+                    File('$basePath.txt').existsSync();
               }
 
-              songsToKeep.add(Song(
-                id: songId,
-                title: (title == null || title.isEmpty) ? defaultTitle : title,
-                artist: (artist == null || artist.isEmpty) ? 'Unknown Artist' : artist,
-                album: (album == null || album.isEmpty) ? 'Unknown Album' : album,
-                duration: duration,
-                filePath: file.path,
-                artworkPath: artworkPath,
-                format: format,
-                bitrate: bitrate,
-                samplerate: samplerate,
-                isFavorite: isFav,
-                lastModifiedMs: mtime,
-                fileSize: size,
-                hasLyrics: hasLrc,
-              ));
+              songsToKeep.add(
+                Song(
+                  id: songId,
+                  title: (title == null || title.isEmpty)
+                      ? defaultTitle
+                      : title,
+                  artist: (artist == null || artist.isEmpty)
+                      ? 'Unknown Artist'
+                      : artist,
+                  album: (album == null || album.isEmpty)
+                      ? 'Unknown Album'
+                      : album,
+                  duration: duration,
+                  filePath: file.path,
+                  artworkPath: artworkPath,
+                  format: format,
+                  bitrate: bitrate,
+                  samplerate: samplerate,
+                  isFavorite: isFav,
+                  lastModifiedMs: mtime,
+                  fileSize: size,
+                  hasLyrics: hasLrc,
+                ),
+              );
             } catch (_) {}
           }
         }
@@ -214,20 +268,40 @@ class MusicScanner {
 
       // Sort resultSongs by user's saved settings before writing to file
       var sortSettings = await getSortSettings();
-      sortSongs(resultSongs, sortSettings['sortBy'] as String, sortSettings['sortAscending'] as bool);
+      sortSongs(
+        resultSongs,
+        sortSettings['sortBy'] as String,
+        sortSettings['sortAscending'] as bool,
+      );
 
       // Save updated index to JSON
       await _writeImportedSongsMetadata(resultSongs);
 
       // Save formatted last sync time
       var now = DateTime.now();
-      var hour = now.hour > 12 ? now.hour - 12 : (now.hour == 0 ? 12 : now.hour);
+      var hour = now.hour > 12
+          ? now.hour - 12
+          : (now.hour == 0 ? 12 : now.hour);
       var ampm = now.hour >= 12 ? 'PM' : 'AM';
       var minute = now.minute.toString().padLeft(2, '0');
       var second = now.second.toString().padLeft(2, '0');
-      var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      var monthNames = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       var month = monthNames[now.month - 1];
-      var formatted = '$month ${now.day}, ${now.year} at $hour:$minute:$second $ampm';
+      var formatted =
+          '$month ${now.day}, ${now.year} at $hour:$minute:$second $ampm';
       await setLastSyncTime(formatted);
       await setLastSyncTimestamp(now.millisecondsSinceEpoch);
       try {
@@ -254,7 +328,7 @@ class MusicScanner {
   Future<bool> deleteSong(Song song) async {
     try {
       var savedSongs = await _readImportedSongsMetadata();
-      
+
       // Remove from metadata list
       savedSongs.removeWhere((s) => s.filePath == song.filePath);
       await _writeImportedSongsMetadata(savedSongs);
@@ -330,10 +404,7 @@ class MusicScanner {
     try {
       var sortBy = await _prefs.getString('sort_by') ?? 'title';
       var sortAscending = await _prefs.getBool('sort_ascending') ?? true;
-      return {
-        'sortBy': sortBy,
-        'sortAscending': sortAscending,
-      };
+      return {'sortBy': sortBy, 'sortAscending': sortAscending};
     } catch (_) {
       return {'sortBy': 'title', 'sortAscending': true};
     }
@@ -344,6 +415,34 @@ class MusicScanner {
     try {
       await _prefs.setString('sort_by', sortBy);
       await _prefs.setBool('sort_ascending', sortAscending);
+    } catch (_) {}
+  }
+
+  /// Reads per-tab sorting configuration from shared preferences.
+  Future<Map<String, dynamic>> getTabSortSettings(String tab) async {
+    try {
+      var defaultBy = tab == 'songs'
+          ? 'title'
+          : tab == 'albums'
+          ? 'name'
+          : 'name';
+      var sortBy = await _prefs.getString('sort_by_$tab') ?? defaultBy;
+      var sortAscending = await _prefs.getBool('sort_ascending_$tab') ?? true;
+      return {'sortBy': sortBy, 'sortAscending': sortAscending};
+    } catch (_) {
+      return {'sortBy': 'title', 'sortAscending': true};
+    }
+  }
+
+  /// Writes per-tab sorting configuration to shared preferences.
+  Future<void> saveTabSortSettings(
+    String tab,
+    String sortBy,
+    bool sortAscending,
+  ) async {
+    try {
+      await _prefs.setString('sort_by_$tab', sortBy);
+      await _prefs.setBool('sort_ascending_$tab', sortAscending);
     } catch (_) {}
   }
 
@@ -358,7 +457,9 @@ class MusicScanner {
       if (file.existsSync()) {
         var content = await file.readAsString();
         var jsonList = jsonDecode(content) as List<dynamic>;
-        list = jsonList.map((item) => Playlist.fromJson(item as Map<String, dynamic>)).toList();
+        list = jsonList
+            .map((item) => Playlist.fromJson(item as Map<String, dynamic>))
+            .toList();
       }
 
       var hasFavorites = list.any((p) => p.id == 'favorites');
@@ -392,16 +493,16 @@ class MusicScanner {
     try {
       var songs = await _readImportedSongsMetadata();
       var playlists = await getPlaylists();
-      
+
       var songIndex = songs.indexWhere((s) => s.id == songId);
       if (songIndex >= 0) {
         var song = songs[songIndex];
         var newFavoriteStatus = !song.isFavorite;
-        
+
         songs[songIndex] = song.copyWith(isFavorite: newFavoriteStatus);
-        
+
         await _writeImportedSongsMetadata(songs);
-        
+
         // Update favorites playlist
         var favoritesIndex = playlists.indexWhere((p) => p.id == 'favorites');
         if (favoritesIndex >= 0) {
@@ -416,7 +517,7 @@ class MusicScanner {
           await savePlaylists(playlists);
         }
       }
-      
+
       return songs;
     } catch (_) {
       return [];
@@ -526,22 +627,26 @@ class MusicScanner {
       var appDir = await getApplicationDocumentsDirectory();
       var jsonFile = File('${appDir.path}/imported_songs.json');
 
-      var jsonList = songs.map((s) => {
-        'id': s.id,
-        'title': s.title,
-        'artist': s.artist,
-        'album': s.album,
-        'duration_ms': s.duration.inMilliseconds,
-        'file_path': s.filePath,
-        'artwork_path': s.artworkPath,
-        'format': s.format,
-        'bitrate': s.bitrate,
-        'samplerate': s.samplerate,
-        'is_favorite': s.isFavorite,
-        'last_modified_ms': s.lastModifiedMs,
-        'file_size': s.fileSize,
-        'has_lyrics': s.hasLyrics,
-      }).toList();
+      var jsonList = songs
+          .map(
+            (s) => {
+              'id': s.id,
+              'title': s.title,
+              'artist': s.artist,
+              'album': s.album,
+              'duration_ms': s.duration.inMilliseconds,
+              'file_path': s.filePath,
+              'artwork_path': s.artworkPath,
+              'format': s.format,
+              'bitrate': s.bitrate,
+              'samplerate': s.samplerate,
+              'is_favorite': s.isFavorite,
+              'last_modified_ms': s.lastModifiedMs,
+              'file_size': s.fileSize,
+              'has_lyrics': s.hasLyrics,
+            },
+          )
+          .toList();
 
       await jsonFile.writeAsString(jsonEncode(jsonList));
     } catch (_) {}

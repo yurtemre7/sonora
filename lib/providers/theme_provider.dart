@@ -35,7 +35,7 @@ class ThemeProvider extends ChangeNotifier {
         if (legacyMode != null) {
           _themeMode = _parseThemeMode(legacyMode);
           notifyListeners();
-          
+
           // Migrate to SharedPreferencesAsync and delete legacy file
           await _prefs.setString('theme_mode', legacyMode);
         }

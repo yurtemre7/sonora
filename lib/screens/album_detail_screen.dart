@@ -41,7 +41,7 @@ class AlbumDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-          
+
           CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -106,18 +106,24 @@ class AlbumDetailScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Play/Shuffle actions bar
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 8.0,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
                         child: FilledButton.icon(
                           onPressed: () {
                             if (album.songs.isNotEmpty) {
-                              playerProvider.playSong(album.songs.first, album.songs);
+                              playerProvider.playSong(
+                                album.songs.first,
+                                album.songs,
+                              );
                             }
                           },
                           icon: const Icon(Icons.play_arrow_rounded),
@@ -129,7 +135,8 @@ class AlbumDetailScreen extends StatelessWidget {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             if (album.songs.isNotEmpty) {
-                              var shuffled = List<Song>.from(album.songs)..shuffle();
+                              var shuffled = List<Song>.from(album.songs)
+                                ..shuffle();
                               playerProvider.playSong(shuffled.first, shuffled);
                             }
                           },
@@ -150,18 +157,18 @@ class AlbumDetailScreen extends StatelessWidget {
                   builder: (context, _) {
                     var currentSong = playerProvider.currentSong;
                     return SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          var song = album.songs[index];
-                          var isCurrent = currentSong != null && currentSong.id == song.id;
-                          return SongTile(
-                            song: song,
-                            isCurrent: isCurrent,
-                            onTap: () => playerProvider.playSong(song, album.songs),
-                          );
-                        },
-                        childCount: album.songs.length,
-                      ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        var song = album.songs[index];
+                        var isCurrent =
+                            currentSong != null && currentSong.id == song.id;
+                        return SongTile(
+                          song: song,
+                          isCurrent: isCurrent,
+                          showDivider: index < album.songs.length - 1,
+                          onTap: () =>
+                              playerProvider.playSong(song, album.songs),
+                        );
+                      }, childCount: album.songs.length),
                     );
                   },
                 ),

@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/playlist.dart';
@@ -10,7 +7,6 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/screens/home_screen.dart';
-import 'package:sonora/screens/now_playing_screen.dart';
 import 'package:sonora/screens/onboarding_screen.dart';
 import 'package:sonora/screens/settings_screen.dart';
 import 'package:sonora/services/audio_handler.dart';
@@ -37,8 +33,6 @@ class _SonoraAppState extends State<SonoraApp> {
   var _isSyncing = false;
   List<Playlist> _playlists = [];
   final _themeProvider = ThemeProvider();
-  var _sortBy = 'title';
-  var _sortAscending = true;
   var _showOnboarding = false;
   var _showSyncPrompt = false;
 
@@ -73,9 +67,39 @@ class _SonoraAppState extends State<SonoraApp> {
 
     // Check if onboarding is completed
     var prefs = SharedPreferencesAsync();
-    var onboardingCompleted = await prefs.getBool('onboarding_completed') ?? false;
+    var onboardingComplete =
+        await prefs.getBool('onboarding_completed') ?? false;
+    if (!onboardingComplete) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _showOnboarding = true;
+      });
+      return;
+    }
 
-    if (!onboardingCompleted) {
+    var granted = await PermissionService().requestAllPermissions();
+    if (!mounted) return;
+
+    if (!granted) {
+      setState(() {
+        _isLoading = false;
+        _hasPermission = false;
+      });
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _hasPermission = true;
+    });
+
+    var scanner = MusicScanner();
+
+    // Check if the scan folder is configured
+    var folder = await scanner.getScanFolder();
+    if (folder == null) {
+      // No folder configured - show onboarding to select one
       if (!mounted) return;
       setState(() {
         _showOnboarding = true;
@@ -84,41 +108,25 @@ class _SonoraAppState extends State<SonoraApp> {
       return;
     }
 
-    var permissionService = PermissionService();
-    var granted = await permissionService.requestAllPermissions();
-
-    if (!mounted) return;
-    setState(() {
-      _hasPermission = granted;
-      if (!granted) {
-        _isLoading = false;
-        return;
-      }
-    });
-
     if (!granted) return;
 
-    var scanner = MusicScanner();
-    
+    var scanner2 = MusicScanner();
+
     // Instantly load cached library references, playlists, and sort settings
-    var folder = await scanner.getScanFolder();
-    var scannedSongs = await scanner.scanAllSongs();
-    var playlists = await scanner.getPlaylists();
-    var sortSettings = await scanner.getSortSettings();
-    
+    var scannedSongs = await scanner2.scanAllSongs();
+    var playlists = await scanner2.getPlaylists();
+
     // Check if sync warning banner should be displayed
     var showSyncPrompt = false;
-    if (folder != null) {
-      var lastSyncTs = await prefs.getInt('last_sync_timestamp');
-      var postponeUntil = await prefs.getInt('postpone_sync_until') ?? 0;
-      var nowMs = DateTime.now().millisecondsSinceEpoch;
-      
-      if (nowMs >= postponeUntil && lastSyncTs != null) {
-        var lastSyncDateTime = DateTime.fromMillisecondsSinceEpoch(lastSyncTs);
-        var oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
-        if (lastSyncDateTime.isBefore(oneMonthAgo)) {
-          showSyncPrompt = true;
-        }
+    var lastSyncTs = await prefs.getInt('last_sync_timestamp');
+    var postponeUntil = await prefs.getInt('postpone_sync_until') ?? 0;
+    var nowMs = DateTime.now().millisecondsSinceEpoch;
+
+    if (nowMs >= postponeUntil && lastSyncTs != null) {
+      var lastSyncDateTime = DateTime.fromMillisecondsSinceEpoch(lastSyncTs);
+      var oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
+      if (lastSyncDateTime.isBefore(oneMonthAgo)) {
+        showSyncPrompt = true;
       }
     }
 
@@ -127,12 +135,10 @@ class _SonoraAppState extends State<SonoraApp> {
       _scanFolder = folder;
       _songs = scannedSongs;
       _playlists = playlists;
-      _sortBy = sortSettings['sortBy'] as String;
-      _sortAscending = sortSettings['sortAscending'] as bool;
       _showSyncPrompt = showSyncPrompt;
       _isLoading = false;
     });
-    
+
     _playerProvider.updatePlaylists(playlists);
     _playerProvider.updateSongs(scannedSongs);
   }
@@ -155,7 +161,7 @@ class _SonoraAppState extends State<SonoraApp> {
       var newSongs = await scanner.importFromFolder(selectedFolder);
       var updatedSongs = await scanner.scanAllSongs();
       var playlists = await scanner.getPlaylists();
-      
+
       if (!mounted) return;
       setState(() {
         _scanFolder = selectedFolder;
@@ -177,8 +183,71 @@ class _SonoraAppState extends State<SonoraApp> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-    } else {
-      _loadSongs();
+    }
+  }
+
+  Future<void> _resetApp() async {
+    var prefs = SharedPreferencesAsync();
+    await prefs.clear();
+    if (!mounted) return;
+    setState(() {
+      _scanFolder = null;
+      _songs = [];
+      _playlists = [];
+      _showOnboarding = true;
+    });
+    _playerProvider.updateSongs([]);
+
+    _scaffoldMessengerKey.currentState?.showSnackBar(
+      const SnackBar(
+        content: Text('Library and settings cleared successfully!'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _openSettings(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SettingsScreen(
+          onConfigureFolder: _configureScanFolder,
+          onResetApp: _resetApp,
+          onRetriggerSync: _syncSongsSilently,
+          themeProvider: _themeProvider,
+          playerProvider: _playerProvider,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _configureScanFolder() async {
+    var scanner = MusicScanner();
+    var folderPath = await FilePicker.getDirectoryPath();
+    if (folderPath != null) {
+      await scanner.setScanFolder(folderPath);
+
+      var newSongs = await scanner.importFromFolder(folderPath);
+      var updatedSongs = await scanner.scanAllSongs();
+
+      if (!mounted) return;
+      setState(() {
+        _scanFolder = folderPath;
+        _songs = updatedSongs;
+        _hasPermission = true;
+      });
+      _playerProvider.updateSongs(updatedSongs);
+
+      _scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Text(
+            newSongs.isNotEmpty
+                ? 'Sync folder configured. Imported ${newSongs.length} new ${newSongs.length == 1 ? 'song' : 'songs'}!'
+                : 'Sync folder configured successfully!',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -209,64 +278,22 @@ class _SonoraAppState extends State<SonoraApp> {
 
   Future<void> _onPostponeSync() async {
     var prefs = SharedPreferencesAsync();
-    var nextRemind = DateTime.now().add(const Duration(days: 30)).millisecondsSinceEpoch;
+    var nextRemind = DateTime.now()
+        .add(const Duration(days: 30))
+        .millisecondsSinceEpoch;
     await prefs.setInt('postpone_sync_until', nextRemind);
-    
+
     if (!mounted) return;
     setState(() {
       _showSyncPrompt = false;
     });
-    
+
     _scaffoldMessengerKey.currentState?.showSnackBar(
       const SnackBar(
         content: Text('Sync reminder postponed for 1 month.'),
         behavior: SnackBarBehavior.floating,
       ),
     );
-  }
-
-  void _openNowPlaying(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      clipBehavior: Clip.antiAlias,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) => NowPlayingScreen(playerProvider: _playerProvider),
-    );
-  }
-
-  Future<void> _configureScanFolder() async {
-    var scanner = MusicScanner();
-    var folderPath = await FilePicker.getDirectoryPath();
-    if (folderPath != null) {
-      await scanner.setScanFolder(folderPath);
-      
-      // Run initial scan in place
-      var newSongs = await scanner.importFromFolder(folderPath);
-      var updatedSongs = await scanner.scanAllSongs();
-      
-      if (!mounted) return;
-      setState(() {
-        _scanFolder = folderPath;
-        _songs = updatedSongs;
-        _hasPermission = true;
-      });
-      _playerProvider.updateSongs(updatedSongs);
-
-      _scaffoldMessengerKey.currentState?.showSnackBar(
-        SnackBar(
-          content: Text(
-            newSongs.isNotEmpty
-                ? 'Sync folder configured. Imported ${newSongs.length} new ${newSongs.length == 1 ? 'song' : 'songs'}!'
-                : 'Sync folder configured successfully!',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
   }
 
   Future<void> _onCreatePlaylist(String name) async {
@@ -309,7 +336,10 @@ class _SonoraAppState extends State<SonoraApp> {
     });
   }
 
-  Future<void> _onReorderPlaylistSongs(String playlistId, List<int> reorderedIds) async {
+  Future<void> _onReorderPlaylistSongs(
+    String playlistId,
+    List<int> reorderedIds,
+  ) async {
     var scanner = MusicScanner();
     var playlists = await scanner.getPlaylists();
     for (var i = 0; i < playlists.length; i++) {
@@ -329,73 +359,6 @@ class _SonoraAppState extends State<SonoraApp> {
     });
   }
 
-
-
-  Future<void> _resetApp() async {
-    var appDir = await getApplicationDocumentsDirectory();
-    var jsonFile = File('${appDir.path}/imported_songs.json');
-    if (jsonFile.existsSync()) {
-      jsonFile.deleteSync();
-    }
-    var settingsFile = File('${appDir.path}/settings.json');
-    if (settingsFile.existsSync()) {
-      settingsFile.deleteSync();
-    }
-    var playlistsFile = File('${appDir.path}/playlists.json');
-    if (playlistsFile.existsSync()) {
-      playlistsFile.deleteSync();
-    }
-
-    var themePrefsFile = File('${appDir.path}/theme_prefs.json');
-    if (themePrefsFile.existsSync()) {
-      themePrefsFile.deleteSync();
-    }
-    await _themeProvider.setThemeMode(ThemeMode.system);
-
-    var prefs = SharedPreferencesAsync();
-    await prefs.clear(allowList: <String>{
-      'onboarding_completed',
-      'scan_folder_path',
-      'last_sync_time',
-      'sort_by',
-      'sort_ascending',
-      'theme_mode',
-      'last_sync_timestamp',
-      'postpone_sync_until',
-    });
-
-    if (!mounted) return;
-    setState(() {
-      _scanFolder = null;
-      _songs = [];
-      _playlists = [];
-      _showOnboarding = true;
-    });
-    _playerProvider.updateSongs([]);
-
-    _scaffoldMessengerKey.currentState?.showSnackBar(
-      const SnackBar(
-        content: Text('Library and settings cleared successfully!'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _openSettings(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SettingsScreen(
-          onConfigureFolder: _configureScanFolder,
-          onResetApp: _resetApp,
-          onRetriggerSync: _syncSongsSilently,
-          themeProvider: _themeProvider,
-          playerProvider: _playerProvider,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -408,92 +371,91 @@ class _SonoraAppState extends State<SonoraApp> {
             return MaterialApp(
               scaffoldMessengerKey: _scaffoldMessengerKey,
               title: 'Sonora',
-              theme: AppTheme.buildTheme(Brightness.light, seedColor: activeSeedColor),
-              darkTheme: AppTheme.buildTheme(Brightness.dark, seedColor: activeSeedColor),
+              theme: AppTheme.buildTheme(
+                Brightness.light,
+                seedColor: activeSeedColor,
+              ),
+              darkTheme: AppTheme.buildTheme(
+                Brightness.dark,
+                seedColor: activeSeedColor,
+              ),
               themeMode: _themeProvider.themeMode,
               debugShowCheckedModeBanner: false,
-          builder: (context, child) {
-            return GestureDetector(
-              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              child: child,
-            );
-          },
-          home: _isLoading
-          ? const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            )
-          : _showOnboarding
-              ? OnboardingScreen(onComplete: _completeOnboarding)
-              : !_hasPermission
-              ? Scaffold(
-                  body: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.audio_file_rounded,
-                            size: 80,
-                            color: Theme.of(context).colorScheme.primary,
+              builder: (context, child) {
+                return GestureDetector(
+                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                  child: child,
+                );
+              },
+              home: _isLoading
+                  ? const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    )
+                  : _showOnboarding
+                  ? OnboardingScreen(onComplete: _completeOnboarding)
+                  : !_hasPermission
+                  ? Scaffold(
+                      body: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.audio_file_rounded,
+                                size: 80,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(height: 24),
+                              Text(
+                                'Access to Music Files',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'To play local audio files, Sonora requires permission to access your device storage.',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 32),
+                              FilledButton.icon(
+                                onPressed: _loadSongs,
+                                icon: const Icon(Icons.security_rounded),
+                                label: const Text('Grant Permission'),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 24),
-                          Text(
-                            'Access to Music Files',
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'To play local audio files, Sonora requires permission to access your device storage.',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 32),
-                          FilledButton.icon(
-                            onPressed: _loadSongs,
-                            icon: const Icon(Icons.security_rounded),
-                            label: const Text('Grant Permission'),
-                          ),
-                        ],
+                        ),
+                      ),
+                    )
+                  : Builder(
+                      builder: (context) => HomeScreen(
+                        playerProvider: _playerProvider,
+                        songs: _songs,
+                        playlists: _playlists,
+                        onOpenSettings: () => _openSettings(context),
+                        scanFolder: _scanFolder,
+                        onConfigureFolder: _configureScanFolder,
+                        onCreatePlaylist: _onCreatePlaylist,
+                        onDeletePlaylist: _onDeletePlaylist,
+                        onAddSongToPlaylist: _onAddSongToPlaylist,
+                        onRemoveSongFromPlaylist: _onRemoveSongFromPlaylist,
+                        onReorderPlaylistSongs: _onReorderPlaylistSongs,
+                        isSyncing: _isSyncing,
+                        showSyncPrompt: _showSyncPrompt,
+                        onResyncNow: _onResyncNow,
+                        onPostponeSync: _onPostponeSync,
                       ),
                     ),
-                  ),
-                )
-              : Builder(
-                  builder: (context) => HomeScreen(
-                    playerProvider: _playerProvider,
-                    songs: _songs,
-                    playlists: _playlists,
-                    initialSortBy: _sortBy,
-                    initialSortAscending: _sortAscending,
-                    onSortChanged: (sortBy, sortAscending) {
-                      setState(() {
-                        _sortBy = sortBy;
-                        _sortAscending = sortAscending;
-                      });
-                    },
-                    onOpenNowPlaying: () => _openNowPlaying(context),
-                    onOpenSettings: () => _openSettings(context),
-                    scanFolder: _scanFolder,
-                    onConfigureFolder: _configureScanFolder,
-                    onCreatePlaylist: _onCreatePlaylist,
-                    onDeletePlaylist: _onDeletePlaylist,
-                    onAddSongToPlaylist: _onAddSongToPlaylist,
-                    onRemoveSongFromPlaylist: _onRemoveSongFromPlaylist,
-                    onReorderPlaylistSongs: _onReorderPlaylistSongs,
-                    isSyncing: _isSyncing,
-                    showSyncPrompt: _showSyncPrompt,
-                    onResyncNow: _onResyncNow,
-                    onPostponeSync: _onPostponeSync,
-                  ),
-                ),
             );
           },
         );

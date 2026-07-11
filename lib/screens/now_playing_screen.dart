@@ -17,10 +17,7 @@ import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/seek_bar.dart';
 
 class NowPlayingScreen extends StatefulWidget {
-  const NowPlayingScreen({
-    super.key,
-    required this.playerProvider,
-  });
+  const NowPlayingScreen({super.key, required this.playerProvider});
 
   final PlayerProvider playerProvider;
 
@@ -137,7 +134,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
               Positioned.fill(
                 child: song.artworkPath != null
                     ? ImageFiltered(
-                        imageFilter: ImageFilter.blur(sigmaX: 50.0, sigmaY: 50.0),
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: 50.0,
+                          sigmaY: 50.0,
+                        ),
                         child: Container(
                           decoration: BoxDecoration(
                             image: DecorationImage(
@@ -188,7 +188,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                     builder: (context, constraints) {
                       return SingleChildScrollView(
                         child: ConstrainedBox(
-                          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -198,39 +200,67 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                 alignment: Alignment.center,
                                 children: [
                                   AmbientGlow(
-                                    isPlaying: widget.playerProvider.audioHandler.player.playing,
+                                    isPlaying: widget
+                                        .playerProvider
+                                        .audioHandler
+                                        .player
+                                        .playing,
                                     color: theme.colorScheme.primary,
                                   ),
                                   Card(
                                     elevation: 10,
-                                    shadowColor: Colors.black.withValues(alpha: 0.4),
+                                    shadowColor: Colors.black.withValues(
+                                      alpha: 0.4,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(28),
                                     ),
                                     clipBehavior: Clip.antiAlias,
                                     child: SizedBox(
-                                      width: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
-                                      height: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
+                                      width: min(
+                                        MediaQuery.sizeOf(context).width * 0.80,
+                                        300.0,
+                                      ),
+                                      height: min(
+                                        MediaQuery.sizeOf(context).width * 0.80,
+                                        300.0,
+                                      ),
                                       child: Stack(
                                         children: [
                                           Positioned.fill(
                                             child: AlbumArt(
                                               artworkPath: song.artworkPath,
-                                              size: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
+                                              size: min(
+                                                MediaQuery.sizeOf(
+                                                      context,
+                                                    ).width *
+                                                    0.80,
+                                                300.0,
+                                              ),
                                               borderRadius: 28,
                                             ),
                                           ),
                                           if (_showLyrics)
                                             Positioned.fill(
                                               child: BackdropFilter(
-                                                filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+                                                filter: ImageFilter.blur(
+                                                  sigmaX: 18.0,
+                                                  sigmaY: 18.0,
+                                                ),
                                                 child: Container(
-                                                  color: theme.brightness == Brightness.dark
-                                                      ? Colors.black.withValues(alpha: 0.75)
-                                                      : Colors.white.withValues(alpha: 0.80),
+                                                  color:
+                                                      theme.brightness ==
+                                                          Brightness.dark
+                                                      ? Colors.black.withValues(
+                                                          alpha: 0.75,
+                                                        )
+                                                      : Colors.white.withValues(
+                                                          alpha: 0.80,
+                                                        ),
                                                   child: SongLyricsOverlay(
                                                     song: song,
-                                                    playerProvider: widget.playerProvider,
+                                                    playerProvider:
+                                                        widget.playerProvider,
                                                   ),
                                                 ),
                                               ),
@@ -249,30 +279,48 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         MarqueeText(
                                           text: song.displayTitle,
-                                          style: theme.textTheme.headlineSmall?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style: theme.textTheme.headlineSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                         const SizedBox(height: 4),
                                         MarqueeText(
-                                          text: '${song.artist} • ${song.album}',
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            color: theme.colorScheme.onSurfaceVariant,
-                                          ),
+                                          text:
+                                              '${song.artist} • ${song.album}',
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
                                         ),
-                                        if (widget.playerProvider.sleepTimerDuration != null) ...[
+                                        if (widget
+                                                .playerProvider
+                                                .sleepTimerDuration !=
+                                            null) ...[
                                           const SizedBox(height: 8),
                                           GestureDetector(
-                                            onTap: () => _showSleepTimerSheet(context),
+                                            onTap: () =>
+                                                _showSleepTimerSheet(context),
                                             child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 4,
+                                                  ),
                                               decoration: BoxDecoration(
-                                                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.15),
-                                                borderRadius: BorderRadius.circular(12),
+                                                color: theme
+                                                    .colorScheme
+                                                    .primaryContainer
+                                                    .withValues(alpha: 0.15),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
                                               ),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
@@ -280,15 +328,23 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                                   Icon(
                                                     Icons.timer_outlined,
                                                     size: 14,
-                                                    color: theme.colorScheme.primary,
+                                                    color: theme
+                                                        .colorScheme
+                                                        .primary,
                                                   ),
                                                   const SizedBox(width: 6),
                                                   Text(
                                                     'Stop in ${_formatDuration(widget.playerProvider.sleepTimerDuration!)}',
-                                                    style: theme.textTheme.labelMedium?.copyWith(
-                                                      color: theme.colorScheme.primary,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
+                                                    style: theme
+                                                        .textTheme
+                                                        .labelMedium
+                                                        ?.copyWith(
+                                                          color: theme
+                                                              .colorScheme
+                                                              .primary,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
                                                   ),
                                                 ],
                                               ),
@@ -302,23 +358,34 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                   if (song.hasLyrics) ...[
                                     IconButton(
                                       icon: Icon(
-                                        _showLyrics ? Icons.lyrics_rounded : Icons.lyrics_outlined,
+                                        _showLyrics
+                                            ? Icons.lyrics_rounded
+                                            : Icons.lyrics_outlined,
                                         color: _showLyrics
                                             ? theme.colorScheme.primary
-                                            : theme.colorScheme.onSurfaceVariant,
+                                            : theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
                                         size: 28,
                                       ),
-                                      onPressed: () => setState(() => _showLyrics = !_showLyrics),
+                                      onPressed: () => setState(
+                                        () => _showLyrics = !_showLyrics,
+                                      ),
                                     ),
                                     const SizedBox(width: 8),
                                   ],
                                   IconButton(
                                     icon: Icon(
-                                      song.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                                      color: song.isFavorite ? Colors.red : theme.colorScheme.onSurfaceVariant,
+                                      song.isFavorite
+                                          ? Icons.favorite_rounded
+                                          : Icons.favorite_border_rounded,
+                                      color: song.isFavorite
+                                          ? Colors.red
+                                          : theme.colorScheme.onSurfaceVariant,
                                       size: 28,
                                     ),
-                                    onPressed: () => widget.playerProvider.toggleFavorite(song.id),
+                                    onPressed: () => widget.playerProvider
+                                        .toggleFavorite(song.id),
                                   ),
                                 ],
                               ),
@@ -327,7 +394,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
                               // Seek Bar
                               SeekBar(
-                                positionStream: widget.playerProvider.positionStream,
+                                positionStream:
+                                    widget.playerProvider.positionStream,
                                 totalDuration: song.duration,
                                 onSeek: widget.playerProvider.seek,
                                 isPlaying: widget.playerProvider.isPlaying,
@@ -378,7 +446,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                   right: 0,
                   bottom: 0,
                   child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(32),
+                    ),
                     child: SizedBox(
                       height: 80.0,
                       child: AudioVisualizer(
@@ -423,7 +493,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.4,
+                    ),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -441,9 +513,16 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
               _buildInfoRow('Album', song.album, theme),
               _buildInfoRow('Duration', song.durationFormatted, theme),
               _buildInfoRow('File Path', song.filePath, theme, isPath: true),
-              if (song.format != null) _buildInfoRow('Format', song.format!.toUpperCase(), theme),
-              if (song.bitrate != null) _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
-              if (song.samplerate != null) _buildInfoRow('Sample Rate', '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz', theme),
+              if (song.format != null)
+                _buildInfoRow('Format', song.format!.toUpperCase(), theme),
+              if (song.bitrate != null)
+                _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
+              if (song.samplerate != null)
+                _buildInfoRow(
+                  'Sample Rate',
+                  '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
+                  theme,
+                ),
               const SizedBox(height: 16),
             ],
           ),
@@ -452,7 +531,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, ThemeData theme, {bool isPath = false}) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    ThemeData theme, {
+    bool isPath = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -492,7 +576,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       context: context,
       builder: (context) {
         return ListenableBuilder(
-          listenable: Listenable.merge([widget.playerProvider, selectedDuration]),
+          listenable: Listenable.merge([
+            widget.playerProvider,
+            selectedDuration,
+          ]),
           builder: (context, _) {
             var activeTimer = widget.playerProvider.sleepTimerDuration != null;
             var sel = selectedDuration.value;
@@ -515,7 +602,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                   const SizedBox(height: 20),
                   if (activeTimer) ...[
                     Card(
-                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+                      color: theme.colorScheme.primaryContainer.withValues(
+                        alpha: 0.2,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -531,7 +620,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              _formatDuration(widget.playerProvider.sleepTimerDuration!),
+                              _formatDuration(
+                                widget.playerProvider.sleepTimerDuration!,
+                              ),
                               style: theme.textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: theme.colorScheme.primary,
@@ -559,18 +650,26 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                           child: FilledButton(
                             onPressed: () {
                               widget.playerProvider.extendSleepTimer(
-                                Duration(minutes: widget.playerProvider.sleepTimerExtendMinutes),
+                                Duration(
+                                  minutes: widget
+                                      .playerProvider
+                                      .sleepTimerExtendMinutes,
+                                ),
                               );
                               Navigator.pop(context);
                             },
-                            child: Text('+${widget.playerProvider.sleepTimerExtendMinutes} min'),
+                            child: Text(
+                              '+${widget.playerProvider.sleepTimerExtendMinutes} min',
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ] else if (showConfirmation) ...[
                     Card(
-                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+                      color: theme.colorScheme.primaryContainer.withValues(
+                        alpha: 0.2,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -624,11 +723,46 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                       runSpacing: 12,
                       alignment: WrapAlignment.center,
                       children: [
-                        _buildPresetChip(context, '5 min', const Duration(minutes: 5), () => selectedDuration.value = const Duration(minutes: 5)),
-                        _buildPresetChip(context, '15 min', const Duration(minutes: 15), () => selectedDuration.value = const Duration(minutes: 15)),
-                        _buildPresetChip(context, '30 min', const Duration(minutes: 30), () => selectedDuration.value = const Duration(minutes: 30)),
-                        _buildPresetChip(context, '45 min', const Duration(minutes: 45), () => selectedDuration.value = const Duration(minutes: 45)),
-                        _buildPresetChip(context, '60 min', const Duration(minutes: 60), () => selectedDuration.value = const Duration(minutes: 60)),
+                        _buildPresetChip(
+                          context,
+                          '5 min',
+                          const Duration(minutes: 5),
+                          () => selectedDuration.value = const Duration(
+                            minutes: 5,
+                          ),
+                        ),
+                        _buildPresetChip(
+                          context,
+                          '15 min',
+                          const Duration(minutes: 15),
+                          () => selectedDuration.value = const Duration(
+                            minutes: 15,
+                          ),
+                        ),
+                        _buildPresetChip(
+                          context,
+                          '30 min',
+                          const Duration(minutes: 30),
+                          () => selectedDuration.value = const Duration(
+                            minutes: 30,
+                          ),
+                        ),
+                        _buildPresetChip(
+                          context,
+                          '45 min',
+                          const Duration(minutes: 45),
+                          () => selectedDuration.value = const Duration(
+                            minutes: 45,
+                          ),
+                        ),
+                        _buildPresetChip(
+                          context,
+                          '60 min',
+                          const Duration(minutes: 60),
+                          () => selectedDuration.value = const Duration(
+                            minutes: 60,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -653,7 +787,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     );
   }
 
-  Widget _buildPresetChip(BuildContext context, String label, Duration duration, VoidCallback onTap) {
+  Widget _buildPresetChip(
+    BuildContext context,
+    String label,
+    Duration duration,
+    VoidCallback onTap,
+  ) {
     var theme = Theme.of(context);
     return ActionChip(
       label: Text(label),
@@ -663,9 +802,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         color: theme.colorScheme.onSurface,
         fontWeight: FontWeight.bold,
       ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 
@@ -757,7 +894,9 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
       _activeIndex = -1;
     });
 
-    var lyricsResult = await LyricsService.parseLyricsForSong(widget.song.filePath);
+    var lyricsResult = await LyricsService.parseLyricsForSong(
+      widget.song.filePath,
+    );
 
     if (!mounted) return;
     setState(() {
@@ -769,7 +908,11 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
     });
   }
 
-  void _scrollToActiveIndex(int index, double viewportHeight, {bool immediate = false}) {
+  void _scrollToActiveIndex(
+    int index,
+    double viewportHeight, {
+    bool immediate = false,
+  }) {
     if (index < 0 || _lyricsLines == null) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -777,9 +920,11 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
 
       const itemHeight = 64.0;
       var targetScroll = index * itemHeight;
-      
+
       if (immediate) {
-        _scrollController.jumpTo(targetScroll.clamp(0.0, _scrollController.position.maxScrollExtent));
+        _scrollController.jumpTo(
+          targetScroll.clamp(0.0, _scrollController.position.maxScrollExtent),
+        );
       } else {
         _scrollController.animateTo(
           targetScroll.clamp(0.0, _scrollController.position.maxScrollExtent),
@@ -795,9 +940,7 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
     var theme = Theme.of(context);
 
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     var lyricsList = _lyricsLines;
@@ -811,7 +954,9 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
               Icon(
                 Icons.lyrics_outlined,
                 size: 48,
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.5,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
@@ -824,7 +969,9 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
               Text(
                 'Place a .lrc or .txt file with the same name next to the audio file to load lyrics.',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.7,
+                  ),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -883,7 +1030,8 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
 
             if (activeIndex != _activeIndex) {
               _activeIndex = activeIndex;
-              var allowAutoScroll = _lastUserScrollTime == null ||
+              var allowAutoScroll =
+                  _lastUserScrollTime == null ||
                   DateTime.now().difference(_lastUserScrollTime!) >
                       const Duration(seconds: 4);
               if (allowAutoScroll) {

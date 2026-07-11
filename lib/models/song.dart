@@ -74,9 +74,15 @@ class Song {
   String get displayTitle {
     if (artist.isEmpty) return title;
     var escaped = RegExp.escape(artist);
-    var cleaned = title.replaceFirst(RegExp(r'\s*[—–-]\s*' + escaped + r'\s*$'), '');
+    var cleaned = title.replaceFirst(
+      RegExp(r'\s*[—–-]\s*' + escaped + r'\s*$'),
+      '',
+    );
     if (cleaned == title) {
-      cleaned = title.replaceFirst(RegExp(r'^\s*' + escaped + r'\s*[—–-]\s*'), '');
+      cleaned = title.replaceFirst(
+        RegExp(r'^\s*' + escaped + r'\s*[—–-]\s*'),
+        '',
+      );
     }
     cleaned = cleaned.trim();
     return cleaned.isEmpty ? title : cleaned;

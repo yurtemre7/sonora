@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
-import 'package:sonora/screens/now_playing_screen.dart';
-import 'package:sonora/widgets/mini_player.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -24,9 +22,11 @@ class PlaylistDetailScreen extends StatefulWidget {
   final List<Song> songs;
   final PlayerProvider playerProvider;
   final Future<void> Function(String playlistId, int songId) onRemoveSong;
-  final Future<void> Function(String playlistId, List<int> reorderedIds) onReorderSongs;
+  final Future<void> Function(String playlistId, List<int> reorderedIds)
+  onReorderSongs;
   final List<Playlist> playlists;
-  final Future<void> Function(String playlistId, int songId) onAddSongToPlaylist;
+  final Future<void> Function(String playlistId, int songId)
+  onAddSongToPlaylist;
 
   @override
   State<PlaylistDetailScreen> createState() => _PlaylistDetailScreenState();
@@ -81,34 +81,46 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
           padding: const EdgeInsets.all(24),
           child: SingleChildScrollView(
             child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Song Information',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Song Information',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow('Title', song.displayTitle, theme),
-              _buildInfoRow('Artist', song.artist, theme),
-              _buildInfoRow('Album', song.album, theme),
-              _buildInfoRow('Duration', song.durationFormatted, theme),
-              _buildInfoRow('File Path', song.filePath, theme, isPath: true),
-              if (song.format != null) _buildInfoRow('Format', song.format!.toUpperCase(), theme),
-              if (song.bitrate != null) _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
-              if (song.samplerate != null) _buildInfoRow('Sample Rate', '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz', theme),
-              const SizedBox(height: 16),
-            ],
-          ),
+                const SizedBox(height: 16),
+                _buildInfoRow('Title', song.displayTitle, theme),
+                _buildInfoRow('Artist', song.artist, theme),
+                _buildInfoRow('Album', song.album, theme),
+                _buildInfoRow('Duration', song.durationFormatted, theme),
+                _buildInfoRow('File Path', song.filePath, theme, isPath: true),
+                if (song.format != null)
+                  _buildInfoRow('Format', song.format!.toUpperCase(), theme),
+                if (song.bitrate != null)
+                  _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
+                if (song.samplerate != null)
+                  _buildInfoRow(
+                    'Sample Rate',
+                    '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
+                    theme,
+                  ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildInfoRow(String label, String value, ThemeData theme, {bool isPath = false}) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    ThemeData theme, {
+    bool isPath = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -148,7 +160,9 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
       builder: (context, _) {
         // Sync with the latest playlists and songs state from the reactive provider
         var providerPlaylists = widget.playerProvider.playlists;
-        var matchingPlaylist = providerPlaylists.where((p) => p.id == widget.playlist.id).firstOrNull;
+        var matchingPlaylist = providerPlaylists
+            .where((p) => p.id == widget.playlist.id)
+            .firstOrNull;
         if (matchingPlaylist != null) {
           _playlist = matchingPlaylist;
         } else if (_playlist.id == 'favorites') {
@@ -183,7 +197,9 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                         Icon(
                           Icons.queue_music_rounded,
                           size: 64,
-                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                          color: theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.4,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -197,7 +213,8 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                         Text(
                           'Go to the Songs list and use the song menu to add music to this playlist.',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            color: theme.colorScheme.onSurfaceVariant
+                                .withValues(alpha: 0.7),
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -214,11 +231,15 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                     onReorderItem: (oldIndex, newIndex) async {
                       var songId = _playlist.songIds.removeAt(oldIndex);
                       _playlist.songIds.insert(newIndex, songId);
-                      await widget.onReorderSongs(_playlist.id, _playlist.songIds);
+                      await widget.onReorderSongs(
+                        _playlist.id,
+                        _playlist.songIds,
+                      );
                     },
                     itemBuilder: (context, index) {
                       var song = _playlistSongs[index];
-                      var isCurrent = widget.playerProvider.currentSong?.id == song.id;
+                      var isCurrent =
+                          widget.playerProvider.currentSong?.id == song.id;
 
                       return Dismissible(
                         key: ValueKey(song.id),
@@ -241,7 +262,9 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Removed "${song.displayTitle}" from playlist.'),
+                              content: Text(
+                                'Removed "${song.displayTitle}" from playlist.',
+                              ),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -249,28 +272,39 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                         child: SongTile(
                           song: song,
                           isCurrent: isCurrent,
+                          showDivider: index < _playlistSongs.length - 1,
                           onTap: () {
-                            widget.playerProvider.playSong(song, _playlistSongs);
+                            widget.playerProvider.playSong(
+                              song,
+                              _playlistSongs,
+                            );
                           },
-                          onPlayNext: () => widget.playerProvider.playNext(song),
-                          onAddToQueue: () => widget.playerProvider.addToQueue(song),
+                          onPlayNext: () =>
+                              widget.playerProvider.playNext(song),
+                          onAddToQueue: () =>
+                              widget.playerProvider.addToQueue(song),
                           onAddToPlaylist: () => _showAddToPlaylistDialog(song),
                           onRemoveFromPlaylist: () async {
                             if (_playlist.id == 'favorites') {
-                              await widget.playerProvider.toggleFavorite(song.id);
+                              await widget.playerProvider.toggleFavorite(
+                                song.id,
+                              );
                             } else {
                               await widget.onRemoveSong(_playlist.id, song.id);
                             }
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Removed "${song.displayTitle}" from playlist.'),
+                                content: Text(
+                                  'Removed "${song.displayTitle}" from playlist.',
+                                ),
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
                           },
                           onShowInfo: () => _showSongInfoBottomSheet(song),
-                          onToggleFavorite: () => widget.playerProvider.toggleFavorite(song.id),
+                          onToggleFavorite: () =>
+                              widget.playerProvider.toggleFavorite(song.id),
                         ),
                       );
                     },
@@ -287,50 +321,8 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                   backgroundColor: theme.colorScheme.primary,
                   foregroundColor: theme.colorScheme.onPrimary,
                 ),
-          bottomNavigationBar: ListenableBuilder(
-            listenable: widget.playerProvider,
-            builder: (context, child) {
-              var currentSong = widget.playerProvider.currentSong;
-              if (currentSong == null) return const SizedBox.shrink();
-
-              return StreamBuilder<Duration>(
-                stream: widget.playerProvider.audioHandler.player.positionStream,
-                builder: (context, snapshot) {
-                  var position = snapshot.data ?? Duration.zero;
-                  var totalMs = currentSong.duration.inMilliseconds;
-                  var progress = totalMs > 0 ? position.inMilliseconds / totalMs : 0.0;
-
-                  return MiniPlayer(
-                    currentSong: currentSong,
-                    isPlaying: widget.playerProvider.audioHandler.player.playing,
-                    progress: progress,
-                    onTap: () => _openNowPlaying(context),
-                    onPlayPause: widget.playerProvider.playPause,
-                    onNext: widget.playerProvider.next,
-                    onSwipeUp: () => _openNowPlaying(context),
-                    onSwipeDown: widget.playerProvider.stop,
-                    onSwipeLeft: widget.playerProvider.previous,
-                    onSwipeRight: widget.playerProvider.next,
-                  );
-                },
-              );
-            },
-          ),
         );
       },
-    );
-  }
-
-  void _openNowPlaying(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      clipBehavior: Clip.antiAlias,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) => NowPlayingScreen(playerProvider: widget.playerProvider),
     );
   }
 }

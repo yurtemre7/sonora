@@ -3,17 +3,13 @@ class Playlist {
   final String name;
   final List<int> songIds;
 
-  Playlist({
-    required this.id,
-    required this.name,
-    required this.songIds,
-  });
+  Playlist({required this.id, required this.name, required this.songIds});
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'song_ids': songIds,
-      };
+    'id': id,
+    'name': name,
+    'song_ids': songIds,
+  };
 
   factory Playlist.fromJson(Map<String, dynamic> json) {
     return Playlist(

@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AmbientGlow extends StatefulWidget {
-  const AmbientGlow({
-    super.key,
-    required this.isPlaying,
-    this.color,
-  });
+  const AmbientGlow({super.key, required this.isPlaying, this.color});
 
   final bool isPlaying;
   final Color? color;
@@ -14,7 +10,8 @@ class AmbientGlow extends StatefulWidget {
   State<AmbientGlow> createState() => _AmbientGlowState();
 }
 
-class _AmbientGlowState extends State<AmbientGlow> with SingleTickerProviderStateMixin {
+class _AmbientGlowState extends State<AmbientGlow>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -28,11 +25,17 @@ class _AmbientGlowState extends State<AmbientGlow> with SingleTickerProviderStat
 
     _scaleAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.15).chain(CurveTween(curve: Curves.easeInOut)),
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 1.15,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 50,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.15, end: 1.0).chain(CurveTween(curve: Curves.easeInOut)),
+        tween: Tween<double>(
+          begin: 1.15,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 50,
       ),
     ]).animate(_controller);

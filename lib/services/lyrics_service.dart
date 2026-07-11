@@ -21,7 +21,7 @@ class LyricsService {
     try {
       var lastDot = songFilePath.lastIndexOf('.');
       if (lastDot == -1) return null;
-      
+
       var lrcPath = '${songFilePath.substring(0, lastDot)}.lrc';
       var file = File(lrcPath);
       if (!file.existsSync()) {
@@ -58,11 +58,7 @@ class LyricsService {
                 ms = int.parse(msGroup);
               }
             }
-            var time = Duration(
-              minutes: min,
-              seconds: sec,
-              milliseconds: ms,
-            );
+            var time = Duration(minutes: min, seconds: sec, milliseconds: ms);
             lyrics.add(LyricLine(time: time, text: text));
           }
         }
@@ -91,7 +87,10 @@ class LyricsService {
     }
   }
 
-  static final _lrcMetadataTag = RegExp(r'^\[(ti|ar|al|by|offset|re|ve|length):', caseSensitive: false);
+  static final _lrcMetadataTag = RegExp(
+    r'^\[(ti|ar|al|by|offset|re|ve|length):',
+    caseSensitive: false,
+  );
 
   /// Returns true for known LRC metadata tags (e.g. [ti:Title], [ar:Artist])
   /// but preserves section headers like [Verse 1], [Chorus], [Bridge].

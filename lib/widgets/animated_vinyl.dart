@@ -81,9 +81,7 @@ class _AnimatedVinylState extends State<AnimatedVinyl>
               ),
             ],
             // Concentric vinyl grooves
-            border: Border.all(
-              color: Colors.grey.withValues(alpha: 0.1),
-            ),
+            border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
           ),
           child: Stack(
             alignment: Alignment.center,
@@ -115,9 +113,7 @@ class _AnimatedVinylState extends State<AnimatedVinyl>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: theme.colorScheme.surface,
-                  border: Border.all(
-                    width: 2,
-                  ),
+                  border: Border.all(width: 2),
                 ),
               ),
             ],

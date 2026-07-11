@@ -46,7 +46,8 @@ class AlbumArt extends StatelessWidget {
                     width: resolvedSize,
                     height: resolvedSize,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => _buildPlaceholder(theme, resolvedSize),
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildPlaceholder(theme, resolvedSize),
                   )
                 : _buildPlaceholder(theme, resolvedSize),
           ),
@@ -63,10 +64,7 @@ class AlbumArt extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.primary,
-            theme.colorScheme.tertiary,
-          ],
+          colors: [theme.colorScheme.primary, theme.colorScheme.tertiary],
         ),
       ),
       child: Icon(

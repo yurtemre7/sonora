@@ -155,11 +155,13 @@ class PlayerProvider extends ChangeNotifier {
         var newQueue = <Song>[];
         // Keep current song at its current index
         newQueue.addAll(queue.sublist(0, currentIndex + 1));
-        
+
         // Find which songs from original queue are not yet in newQueue
-        var remainingOriginal = _originalQueue.where((s) => !newQueue.any((nq) => nq.id == s.id)).toList();
+        var remainingOriginal = _originalQueue
+            .where((s) => !newQueue.any((nq) => nq.id == s.id))
+            .toList();
         newQueue.addAll(remainingOriginal);
-        
+
         queue = newQueue;
       }
       isShuffled = false;
@@ -167,17 +169,20 @@ class PlayerProvider extends ChangeNotifier {
       // Shuffle only the songs after the current index.
       var remaining = queue.sublist(currentIndex + 1);
       remaining.shuffle();
-      
+
       var newQueue = <Song>[];
       newQueue.addAll(queue.sublist(0, currentIndex + 1));
       newQueue.addAll(remaining);
-      
+
       queue = newQueue;
       isShuffled = true;
     }
 
     // Update the audio handler's playlist source after current index
-    var remainingMediaItems = queue.sublist(currentIndex + 1).map(_songToMediaItem).toList();
+    var remainingMediaItems = queue
+        .sublist(currentIndex + 1)
+        .map(_songToMediaItem)
+        .toList();
     await audioHandler.updatePlaylistAfter(currentIndex, remainingMediaItems);
 
     notifyListeners();
@@ -189,14 +194,16 @@ class PlayerProvider extends ChangeNotifier {
 
     // Clone the list and shuffle it
     var shuffled = List<Song>.from(songsList)..shuffle();
-    
+
     // Pick the first shuffled song as the starting track
     var startingSong = shuffled.first;
 
     // Load and play the shuffled playlist. playSong resets isShuffled to false,
     // so we set it to true afterward.
     await playSong(startingSong, shuffled);
-    _originalQueue = List<Song>.from(songsList); // Preserve original order for unshuffling!
+    _originalQueue = List<Song>.from(
+      songsList,
+    ); // Preserve original order for unshuffling!
     isShuffled = true;
     notifyListeners();
   }
@@ -409,7 +416,10 @@ class PlayerProvider extends ChangeNotifier {
     await loadPlaylists();
   }
 
-  Future<void> reorderPlaylistSongs(String playlistId, List<int> reorderedIds) async {
+  Future<void> reorderPlaylistSongs(
+    String playlistId,
+    List<int> reorderedIds,
+  ) async {
     var scanner = MusicScanner();
     var list = await scanner.getPlaylists();
     for (var i = 0; i < list.length; i++) {
@@ -433,8 +443,9 @@ class PlayerProvider extends ChangeNotifier {
     var prefs = SharedPreferencesAsync();
     useDynamicTheme = await prefs.getBool('use_dynamic_theme') ?? true;
     showVisualizer = await prefs.getBool('show_visualizer') ?? false;
-    sleepTimerExtendMinutes = await prefs.getInt('sleep_timer_extend_minutes') ?? 5;
-    
+    sleepTimerExtendMinutes =
+        await prefs.getInt('sleep_timer_extend_minutes') ?? 5;
+
     if (useDynamicTheme && currentSong != null) {
       _extractThemeColorForSong(currentSong!);
     }
@@ -542,7 +553,9 @@ class PlayerProvider extends ChangeNotifier {
             _originalVolumeBeforeFade = audioHandler.player.volume;
           }
           var fraction = remaining.inSeconds / 10.0;
-          await audioHandler.player.setVolume(_originalVolumeBeforeFade * fraction);
+          await audioHandler.player.setVolume(
+            _originalVolumeBeforeFade * fraction,
+          );
         }
 
         notifyListeners();
@@ -571,7 +584,8 @@ class PlayerProvider extends ChangeNotifier {
       return;
     }
     sleepTimerDuration = sleepTimerDuration! + extension;
-    sleepTimerOriginalDuration = (sleepTimerOriginalDuration ?? Duration.zero) + extension;
+    sleepTimerOriginalDuration =
+        (sleepTimerOriginalDuration ?? Duration.zero) + extension;
     if (_isFadingOut) {
       _isFadingOut = false;
       audioHandler.player.setVolume(_originalVolumeBeforeFade);

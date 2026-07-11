@@ -42,7 +42,7 @@ class ArtistDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-          
+
           CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -106,18 +106,24 @@ class ArtistDetailScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Play/Shuffle actions bar
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 8.0,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
                         child: FilledButton.icon(
                           onPressed: () {
                             if (artist.songs.isNotEmpty) {
-                              playerProvider.playSong(artist.songs.first, artist.songs);
+                              playerProvider.playSong(
+                                artist.songs.first,
+                                artist.songs,
+                              );
                             }
                           },
                           icon: const Icon(Icons.play_arrow_rounded),
@@ -129,7 +135,8 @@ class ArtistDetailScreen extends StatelessWidget {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             if (artist.songs.isNotEmpty) {
-                              var shuffled = List<Song>.from(artist.songs)..shuffle();
+                              var shuffled = List<Song>.from(artist.songs)
+                                ..shuffle();
                               playerProvider.playSong(shuffled.first, shuffled);
                             }
                           },
@@ -146,7 +153,12 @@ class ArtistDetailScreen extends StatelessWidget {
               if (artist.albums.isNotEmpty) ...[
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 8.0),
+                    padding: const EdgeInsets.only(
+                      left: 24.0,
+                      right: 24.0,
+                      top: 24.0,
+                      bottom: 8.0,
+                    ),
                     child: Text(
                       'Albums',
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -166,7 +178,7 @@ class ArtistDetailScreen extends StatelessWidget {
                       itemBuilder: (context, index) {
                         var album = artist.albums[index];
                         var albumArtSong = album.songs.first;
-                        
+
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: InkWell(
@@ -194,9 +206,8 @@ class ArtistDetailScreen extends StatelessWidget {
                                   width: 110,
                                   child: Text(
                                     album.name,
-                                    style: theme.textTheme.labelMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -225,7 +236,12 @@ class ArtistDetailScreen extends StatelessWidget {
               // Popular Tracks Header
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 8.0),
+                  padding: const EdgeInsets.only(
+                    left: 24.0,
+                    right: 24.0,
+                    top: 24.0,
+                    bottom: 8.0,
+                  ),
                   child: Text(
                     'Tracks',
                     style: theme.textTheme.titleMedium?.copyWith(
@@ -244,18 +260,18 @@ class ArtistDetailScreen extends StatelessWidget {
                   builder: (context, _) {
                     var currentSong = playerProvider.currentSong;
                     return SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          var song = artist.songs[index];
-                          var isCurrent = currentSong != null && currentSong.id == song.id;
-                          return SongTile(
-                            song: song,
-                            isCurrent: isCurrent,
-                            onTap: () => playerProvider.playSong(song, artist.songs),
-                          );
-                        },
-                        childCount: artist.songs.length,
-                      ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        var song = artist.songs[index];
+                        var isCurrent =
+                            currentSong != null && currentSong.id == song.id;
+                        return SongTile(
+                          song: song,
+                          isCurrent: isCurrent,
+                          showDivider: index < artist.songs.length - 1,
+                          onTap: () =>
+                              playerProvider.playSong(song, artist.songs),
+                        );
+                      }, childCount: artist.songs.length),
                     );
                   },
                 ),

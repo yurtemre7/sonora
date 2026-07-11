@@ -45,7 +45,10 @@ class AppTheme {
     );
   }
 
-  static ThemeData buildTheme(Brightness brightness, {Color seedColor = _seedColor}) {
+  static ThemeData buildTheme(
+    Brightness brightness, {
+    Color seedColor = _seedColor,
+  }) {
     var colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: brightness,
@@ -84,9 +87,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: colorScheme.surfaceContainerHighest,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         margin: EdgeInsets.zero,
       ),
       sliderTheme: SliderThemeData(
@@ -105,15 +106,11 @@ class AppTheme {
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          foregroundColor: colorScheme.onSurface,
-        ),
+        style: IconButton.styleFrom(foregroundColor: colorScheme.onSurface),
       ),
       listTileTheme: ListTileThemeData(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       dividerTheme: DividerThemeData(
         color: colorScheme.outlineVariant.withValues(alpha: 0.3),

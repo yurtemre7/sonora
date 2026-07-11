@@ -19,7 +19,8 @@ class AudioVisualizer extends StatefulWidget {
   State<AudioVisualizer> createState() => _AudioVisualizerState();
 }
 
-class _AudioVisualizerState extends State<AudioVisualizer> with TickerProviderStateMixin {
+class _AudioVisualizerState extends State<AudioVisualizer>
+    with TickerProviderStateMixin {
   late AnimationController _waveController;
   late AnimationController _amplitudeController;
 
@@ -118,7 +119,9 @@ class _VisualizerPainter extends CustomPainter {
         var rawSine2 = cos(animationValue * 2 * pi * 2.0 - offset * 1.4);
         var normalized = (rawSine + rawSine2 + 2.0) / 4.0;
         // Smoothly scale the active wave height using the amplitude factor
-        targetHeight = minHeight + (normalized * (size.height - minHeight)) * amplitudeFactor;
+        targetHeight =
+            minHeight +
+            (normalized * (size.height - minHeight)) * amplitudeFactor;
       } else {
         targetHeight = minHeight;
       }

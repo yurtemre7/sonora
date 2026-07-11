@@ -70,17 +70,13 @@ class PlayerControls extends StatelessWidget {
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
-            transitionBuilder: (child, animation) => ScaleTransition(
-              scale: animation,
-              child: child,
-            ),
+            transitionBuilder: (child, animation) =>
+                ScaleTransition(scale: animation, child: child),
             child: IconButton(
               key: ValueKey<bool>(isPlaying),
               onPressed: onPlayPause,
               icon: Icon(
-                isPlaying
-                    ? Icons.pause_rounded
-                    : Icons.play_arrow_rounded,
+                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
               ),
               iconSize: 36,
               color: theme.colorScheme.onPrimary,
@@ -105,8 +101,8 @@ class PlayerControls extends StatelessWidget {
             repeatMode == RepeatMode.one
                 ? Icons.repeat_one_on_rounded
                 : (repeatMode == RepeatMode.all
-                    ? Icons.repeat_on_rounded
-                    : Icons.repeat_rounded),
+                      ? Icons.repeat_on_rounded
+                      : Icons.repeat_rounded),
           ),
           iconSize: 24,
           color: repeatMode != RepeatMode.off

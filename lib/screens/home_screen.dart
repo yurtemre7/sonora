@@ -5,6 +5,7 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
+import 'package:sonora/screens/now_playing_screen.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/album_art.dart';
@@ -34,7 +35,6 @@ class HomeScreen extends StatefulWidget {
     required this.playerProvider,
     required this.songs,
     required this.playlists,
-    required this.onOpenNowPlaying,
     required this.onOpenSettings,
     required this.scanFolder,
     required this.onConfigureFolder,
@@ -44,9 +44,6 @@ class HomeScreen extends StatefulWidget {
     required this.onRemoveSongFromPlaylist,
     required this.onReorderPlaylistSongs,
     required this.isSyncing,
-    required this.initialSortBy,
-    required this.initialSortAscending,
-    required this.onSortChanged,
     required this.showSyncPrompt,
     required this.onResyncNow,
     required this.onPostponeSync,
@@ -55,19 +52,18 @@ class HomeScreen extends StatefulWidget {
   final PlayerProvider playerProvider;
   final List<Song> songs;
   final List<Playlist> playlists;
-  final VoidCallback onOpenNowPlaying;
   final VoidCallback onOpenSettings;
   final String? scanFolder;
   final VoidCallback onConfigureFolder;
   final Future<void> Function(String name) onCreatePlaylist;
   final Future<void> Function(String playlistId) onDeletePlaylist;
-  final Future<void> Function(String playlistId, int songId) onAddSongToPlaylist;
-  final Future<void> Function(String playlistId, int songId) onRemoveSongFromPlaylist;
-  final Future<void> Function(String playlistId, List<int> reorderedIds) onReorderPlaylistSongs;
+  final Future<void> Function(String playlistId, int songId)
+  onAddSongToPlaylist;
+  final Future<void> Function(String playlistId, int songId)
+  onRemoveSongFromPlaylist;
+  final Future<void> Function(String playlistId, List<int> reorderedIds)
+  onReorderPlaylistSongs;
   final bool isSyncing;
-  final String initialSortBy;
-  final bool initialSortAscending;
-  final void Function(String sortBy, bool sortAscending) onSortChanged;
   final bool showSyncPrompt;
   final VoidCallback onResyncNow;
   final VoidCallback onPostponeSync;
@@ -76,7 +72,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _songsScrollController = ScrollController();
   final _albumsScrollController = ScrollController();
@@ -85,18 +82,39 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
   var _searchQuery = '';
-  late String _sortBy;
-  late bool _sortAscending;
+  var _songSortBy = 'title';
+  var _songSortAscending = true;
+  var _albumSortBy = 'name';
+  var _albumSortAscending = true;
+  var _artistSortBy = 'name';
+  var _artistSortAscending = true;
+  var _playlistSortBy = 'name';
+  var _playlistSortAscending = true;
 
   @override
   void initState() {
     super.initState();
-    _sortBy = widget.initialSortBy;
-    _sortAscending = widget.initialSortAscending;
+    _loadSortSettings();
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+  }
+
+  Future<void> _loadSortSettings() async {
+    var scanner = MusicScanner();
+    var songsSettings = await scanner.getTabSortSettings('songs');
+    var albumsSettings = await scanner.getTabSortSettings('albums');
+    var artistsSettings = await scanner.getTabSortSettings('artists');
+    var playlistsSettings = await scanner.getTabSortSettings('playlists');
+    _songSortBy = songsSettings['sortBy'] as String;
+    _songSortAscending = songsSettings['sortAscending'] as bool;
+    _albumSortBy = albumsSettings['sortBy'] as String;
+    _albumSortAscending = albumsSettings['sortAscending'] as bool;
+    _artistSortBy = artistsSettings['sortBy'] as String;
+    _artistSortAscending = artistsSettings['sortAscending'] as bool;
+    _playlistSortBy = playlistsSettings['sortBy'] as String;
+    _playlistSortAscending = playlistsSettings['sortAscending'] as bool;
   }
 
   List<AlbumGroup> _getAlbums() {
@@ -134,14 +152,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   List<ArtistGroup> _getArtists() {
     var artistsMap = <String, List<Song>>{};
     for (var song in widget.songs) {
-      var artistName = song.artist.trim().isEmpty ? 'Unknown Artist' : song.artist;
+      var artistName = song.artist.trim().isEmpty
+          ? 'Unknown Artist'
+          : song.artist;
       artistsMap.putIfAbsent(artistName, () => []).add(song);
     }
 
     var albumsList = _getAlbums();
 
     var list = artistsMap.entries.map((entry) {
-      var artistAlbums = albumsList.where((a) => a.artist == entry.key).toList();
+      var artistAlbums = albumsList
+          .where((a) => a.artist == entry.key)
+          .toList();
       return ArtistGroup(
         name: entry.key,
         songs: entry.value,
@@ -164,19 +186,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
     filtered.sort((a, b) {
       int comparison;
-      if (_sortBy == 'artist') {
+      if (_songSortBy == 'artist') {
         comparison = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
-      } else if (_sortBy == 'duration') {
+      } else if (_songSortBy == 'duration') {
         comparison = a.duration.compareTo(b.duration);
-      } else if (_sortBy == 'recent') {
+      } else if (_songSortBy == 'recent') {
         var aTime = a.lastModifiedMs ?? 0;
         var bTime = b.lastModifiedMs ?? 0;
-        // Compare b to a so that larger/newer timestamps come first when ascending is active
         comparison = bTime.compareTo(aTime);
       } else {
         comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
       }
-      return _sortAscending ? comparison : -comparison;
+      return _songSortAscending ? comparison : -comparison;
     });
 
     return filtered;
@@ -186,21 +207,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     var albums = _getAlbums();
     if (_searchQuery.isNotEmpty) {
       var query = _searchQuery.toLowerCase();
-      albums = albums.where((a) =>
-        a.name.toLowerCase().contains(query) ||
-        a.artist.toLowerCase().contains(query)
-      ).toList();
+      albums = albums
+          .where(
+            (a) =>
+                a.name.toLowerCase().contains(query) ||
+                a.artist.toLowerCase().contains(query),
+          )
+          .toList();
     }
     albums.sort((a, b) {
       int cmp;
-      if (_sortBy == 'artist') {
+      if (_albumSortBy == 'artist') {
         cmp = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
-      } else if (_sortBy == 'tracks') {
+      } else if (_albumSortBy == 'tracks') {
         cmp = a.songs.length.compareTo(b.songs.length);
       } else {
         cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
       }
-      return _sortAscending ? cmp : -cmp;
+      return _albumSortAscending ? cmp : -cmp;
     });
     return albums;
   }
@@ -209,20 +233,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     var artists = _getArtists();
     if (_searchQuery.isNotEmpty) {
       var query = _searchQuery.toLowerCase();
-      artists = artists.where((a) =>
-        a.name.toLowerCase().contains(query)
-      ).toList();
+      artists = artists
+          .where((a) => a.name.toLowerCase().contains(query))
+          .toList();
     }
     artists.sort((a, b) {
       int cmp;
-      if (_sortBy == 'albums') {
+      if (_artistSortBy == 'albums') {
         cmp = a.albums.length.compareTo(b.albums.length);
-      } else if (_sortBy == 'songs') {
+      } else if (_artistSortBy == 'songs') {
         cmp = a.songs.length.compareTo(b.songs.length);
       } else {
         cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
       }
-      return _sortAscending ? cmp : -cmp;
+      return _artistSortAscending ? cmp : -cmp;
     });
     return artists;
   }
@@ -231,20 +255,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     var playlists = widget.playlists.toList();
     if (_searchQuery.isNotEmpty) {
       var query = _searchQuery.toLowerCase();
-      playlists = playlists.where((p) =>
-        p.name.toLowerCase().contains(query)
-      ).toList();
+      playlists = playlists
+          .where((p) => p.name.toLowerCase().contains(query))
+          .toList();
     }
     playlists.sort((a, b) {
       int cmp;
-      if (_sortBy == 'songs') {
+      if (_playlistSortBy == 'songs') {
         var aCount = widget.songs.where((s) => a.songIds.contains(s.id)).length;
         var bCount = widget.songs.where((s) => b.songIds.contains(s.id)).length;
         cmp = aCount.compareTo(bCount);
       } else {
         cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
       }
-      return _sortAscending ? cmp : -cmp;
+      return _playlistSortAscending ? cmp : -cmp;
     });
     return playlists;
   }
@@ -255,11 +279,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     String title;
     String subtitle;
     List<(String, String)> options;
+    String tabName;
 
     switch (tabIndex) {
       case 1:
         title = 'Sort Albums By';
-        subtitle = 'Albums will be sorted based on your selection.';
+        subtitle =
+            'Your sorting preference will be saved per tab and automatically applied on next startup.';
+        tabName = 'albums';
         options = [
           ('Album Name', 'name'),
           ('Artist', 'artist'),
@@ -267,7 +294,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ];
       case 2:
         title = 'Sort Artists By';
-        subtitle = 'Artists will be sorted based on your selection.';
+        subtitle =
+            'Your sorting preference will be saved per tab and automatically applied on next startup.';
+        tabName = 'artists';
         options = [
           ('Artist Name', 'name'),
           ('Album Count', 'albums'),
@@ -275,14 +304,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ];
       case 3:
         title = 'Sort Playlists By';
-        subtitle = 'Playlists will be sorted based on your selection.';
-        options = [
-          ('Playlist Name', 'name'),
-          ('Song Count', 'songs'),
-        ];
+        subtitle =
+            'Your sorting preference will be saved per tab and automatically applied on next startup.';
+        tabName = 'playlists';
+        options = [('Playlist Name', 'name'), ('Song Count', 'songs')];
       default:
         title = 'Sort Songs By';
-        subtitle = 'Your sorting preference will be saved and automatically applied on next startup.';
+        subtitle =
+            'Your sorting preference will be saved per tab and automatically applied on next startup.';
+        tabName = 'songs';
         options = [
           ('Title', 'title'),
           ('Artist', 'artist'),
@@ -317,12 +347,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 16),
                   RadioGroup<String>(
-                    groupValue: _sortBy,
+                    groupValue: _sortByForTab(tabIndex),
                     onChanged: (val) {
-                      setState(() => _sortBy = val!);
+                      setState(() => _setSortByForTab(tabIndex, val!));
                       setSheetState(() {});
-                      MusicScanner().saveSortSettings(_sortBy, _sortAscending);
-                      widget.onSortChanged(_sortBy, _sortAscending);
+                      MusicScanner().saveTabSortSettings(
+                        tabName,
+                        _sortByForTab(tabIndex),
+                        _sortAscendingForTab(tabIndex),
+                      );
                       Navigator.pop(context);
                     },
                     child: Column(
@@ -338,12 +371,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   const Divider(),
                   SwitchListTile(
                     title: const Text('Sort Ascending'),
-                    value: _sortAscending,
+                    value: _sortAscendingForTab(tabIndex),
                     onChanged: (val) {
-                      setState(() => _sortAscending = val);
+                      setState(() => _setSortAscendingForTab(tabIndex, val));
                       setSheetState(() {});
-                      MusicScanner().saveSortSettings(_sortBy, _sortAscending);
-                      widget.onSortChanged(_sortBy, _sortAscending);
+                      MusicScanner().saveTabSortSettings(
+                        tabName,
+                        _sortByForTab(tabIndex),
+                        _sortAscendingForTab(tabIndex),
+                      );
                     },
                   ),
                 ],
@@ -353,6 +389,64 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         );
       },
     );
+  }
+
+  String _sortByForTab(int tabIndex) {
+    switch (tabIndex) {
+      case 1:
+        return _albumSortBy;
+      case 2:
+        return _artistSortBy;
+      case 3:
+        return _playlistSortBy;
+      default:
+        return _songSortBy;
+    }
+  }
+
+  bool _sortAscendingForTab(int tabIndex) {
+    switch (tabIndex) {
+      case 1:
+        return _albumSortAscending;
+      case 2:
+        return _artistSortAscending;
+      case 3:
+        return _playlistSortAscending;
+      default:
+        return _songSortAscending;
+    }
+  }
+
+  void _setSortByForTab(int tabIndex, String val) {
+    switch (tabIndex) {
+      case 1:
+        _albumSortBy = val;
+        break;
+      case 2:
+        _artistSortBy = val;
+        break;
+      case 3:
+        _playlistSortBy = val;
+        break;
+      default:
+        _songSortBy = val;
+    }
+  }
+
+  void _setSortAscendingForTab(int tabIndex, bool val) {
+    switch (tabIndex) {
+      case 1:
+        _albumSortAscending = val;
+        break;
+      case 2:
+        _artistSortAscending = val;
+        break;
+      case 3:
+        _playlistSortAscending = val;
+        break;
+      default:
+        _songSortAscending = val;
+    }
   }
 
   void _showSongInfoBottomSheet(Song song) {
@@ -370,45 +464,59 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
           child: SingleChildScrollView(
             child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.4,
+                      ),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Song Information',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 24),
+                Text(
+                  'Song Information',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow('Title', song.displayTitle, theme),
-              _buildInfoRow('Artist', song.artist, theme),
-              _buildInfoRow('Album', song.album, theme),
-              _buildInfoRow('Duration', song.durationFormatted, theme),
-              _buildInfoRow('File Path', song.filePath, theme, isPath: true),
-              if (song.format != null) _buildInfoRow('Format', song.format!.toUpperCase(), theme),
-              if (song.bitrate != null) _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
-              if (song.samplerate != null) _buildInfoRow('Sample Rate', '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz', theme),
-              const SizedBox(height: 16),
-            ],
-          ),
+                const SizedBox(height: 16),
+                _buildInfoRow('Title', song.displayTitle, theme),
+                _buildInfoRow('Artist', song.artist, theme),
+                _buildInfoRow('Album', song.album, theme),
+                _buildInfoRow('Duration', song.durationFormatted, theme),
+                _buildInfoRow('File Path', song.filePath, theme, isPath: true),
+                if (song.format != null)
+                  _buildInfoRow('Format', song.format!.toUpperCase(), theme),
+                if (song.bitrate != null)
+                  _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
+                if (song.samplerate != null)
+                  _buildInfoRow(
+                    'Sample Rate',
+                    '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
+                    theme,
+                  ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildInfoRow(String label, String value, ThemeData theme, {bool isPath = false}) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    ThemeData theme, {
+    bool isPath = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -441,35 +549,58 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     VoidCallback? onShuffle;
     VoidCallback onSort;
 
+    void unfocus() => _searchFocusNode.unfocus();
+
     switch (tabIndex) {
       case 1:
         var albums = _getFilteredAlbums();
         count = albums.length;
         label = '$count ${count == 1 ? 'album' : 'albums'} found';
-        onShuffle = () => widget.playerProvider.quickShuffle(
-          albums.expand((a) => a.songs).toList(),
-        );
-        onSort = () => _showSortBottomSheet(tabIndex: 1);
+        onShuffle = () {
+          unfocus();
+          widget.playerProvider.quickShuffle(
+            albums.expand((a) => a.songs).toList(),
+          );
+        };
+        onSort = () {
+          unfocus();
+          _showSortBottomSheet(tabIndex: 1);
+        };
       case 2:
         var artists = _getFilteredArtists();
         count = artists.length;
         label = '$count ${count == 1 ? 'artist' : 'artists'} found';
-        onShuffle = () => widget.playerProvider.quickShuffle(
-          artists.expand((a) => a.songs).toList(),
-        );
-        onSort = () => _showSortBottomSheet(tabIndex: 2);
+        onShuffle = () {
+          unfocus();
+          widget.playerProvider.quickShuffle(
+            artists.expand((a) => a.songs).toList(),
+          );
+        };
+        onSort = () {
+          unfocus();
+          _showSortBottomSheet(tabIndex: 2);
+        };
       case 3:
         var playlists = _getFilteredPlaylists();
         count = playlists.length;
         label = '$count ${count == 1 ? 'playlist' : 'playlists'} found';
         onShuffle = null;
-        onSort = () => _showSortBottomSheet(tabIndex: 3);
+        onSort = () {
+          unfocus();
+          _showSortBottomSheet(tabIndex: 3);
+        };
       default:
         var songs = _getFilteredSongs();
         count = songs.length;
         label = '$count ${count == 1 ? 'song' : 'songs'} found';
-        onShuffle = () => widget.playerProvider.quickShuffle(songs);
-        onSort = () => _showSortBottomSheet();
+        onShuffle = () {
+          unfocus();
+          widget.playerProvider.quickShuffle(songs);
+        };
+        onSort = () {
+          unfocus();
+          _showSortBottomSheet();
+        };
     }
 
     return Padding(
@@ -508,7 +639,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             },
                           )
                         : null,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     filled: true,
                     fillColor: theme.colorScheme.surfaceContainerHigh,
                     border: OutlineInputBorder(
@@ -568,9 +702,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         content: TextField(
           controller: textController,
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Playlist name',
-          ),
+          decoration: const InputDecoration(hintText: 'Playlist name'),
           textCapitalization: TextCapitalization.sentences,
         ),
         actions: [
@@ -642,7 +774,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             Text(
               "It's been at least a month since your last library synchronization. Sonora runs offline—if you have loaded new music files into your device folder, run a sync now to discover and listen to them.",
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.9,
+                ),
                 height: 1.4,
               ),
             ),
@@ -682,6 +816,43 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     var theme = Theme.of(context);
 
     return Scaffold(
+      bottomNavigationBar: ListenableBuilder(
+        listenable: widget.playerProvider,
+        builder: (context, _) {
+          var currentSong = widget.playerProvider.currentSong;
+          if (currentSong == null) return const SizedBox.shrink();
+
+          return StreamBuilder<Duration>(
+            stream: widget.playerProvider.audioHandler.player.positionStream,
+            builder: (context, snapshot) {
+              var position = snapshot.data ?? Duration.zero;
+              var totalMs = currentSong.duration.inMilliseconds;
+              var progress = totalMs > 0
+                  ? position.inMilliseconds / totalMs
+                  : 0.0;
+
+              return MiniPlayer(
+                currentSong: currentSong,
+                isPlaying: widget.playerProvider.audioHandler.player.playing,
+                progress: progress,
+                onTap: () {
+                  _searchFocusNode.unfocus();
+                  _openNowPlaying(context);
+                },
+                onPlayPause: widget.playerProvider.playPause,
+                onNext: widget.playerProvider.next,
+                onSwipeUp: () {
+                  _searchFocusNode.unfocus();
+                  _openNowPlaying(context);
+                },
+                onSwipeDown: widget.playerProvider.stop,
+                onSwipeLeft: widget.playerProvider.previous,
+                onSwipeRight: widget.playerProvider.next,
+              );
+            },
+          );
+        },
+      ),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -694,7 +865,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings_rounded),
-                onPressed: widget.onOpenSettings,
+                onPressed: () {
+                  _searchFocusNode.unfocus();
+                  widget.onOpenSettings();
+                },
                 tooltip: 'Settings',
               ),
               const SizedBox(width: 8),
@@ -719,12 +893,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     const LinearProgressIndicator(minHeight: 2),
                   Container(
                     height: 38,
-                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.3,
+                        ),
                       ),
                     ),
                     child: TabBar(
@@ -743,10 +922,30 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
                       unselectedLabelStyle: theme.textTheme.labelLarge,
                       tabs: [
-                        const Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Songs'))),
-                        const Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Albums'))),
-                        const Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Artists'))),
-                        const Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Playlists'))),
+                        const Tab(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('Songs'),
+                          ),
+                        ),
+                        const Tab(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('Albums'),
+                          ),
+                        ),
+                        const Tab(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('Artists'),
+                          ),
+                        ),
+                        const Tab(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('Playlists'),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -762,448 +961,612 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                // Tab 1: Songs
-                widget.songs.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                widget.scanFolder == null ? Icons.folder_open_rounded : Icons.music_off_rounded,
-                                size: 64,
-                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                widget.scanFolder == null ? 'Set Music Directory' : 'No music files found',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.bold,
+                      // Tab 1: Songs
+                      widget.songs.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32.0,
                                 ),
-                                textAlign: TextAlign.center,
-                                                            ),
-                              const SizedBox(height: 8),
-                              Text(
-                                widget.scanFolder == null
-                                    ? 'Choose a folder directory on your device to scan and play music from.'
-                                    : 'Please put some audio files (e.g. .mp3, .m4a) in the folder:\n\n${widget.scanFolder}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24),
-                              FilledButton.icon(
-                                onPressed: widget.onConfigureFolder,
-                                icon: Icon(widget.scanFolder == null
-                                    ? Icons.folder_copy_rounded
-                                    : Icons.create_new_folder_rounded),
-                                label: Text(widget.scanFolder == null ? 'Set Sync Folder' : 'Change Folder'),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: theme.colorScheme.primaryContainer,
-                                  foregroundColor: theme.colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          if (widget.showSyncPrompt) _buildSyncPromptBanner(theme),
-                          Expanded(
-                            child: _getFilteredSongs().isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'No matching songs found',
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: theme.colorScheme.onSurfaceVariant,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      widget.scanFolder == null
+                                          ? Icons.folder_open_rounded
+                                          : Icons.music_off_rounded,
+                                      size: 64,
+                                      color: theme.colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.4),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      widget.scanFolder == null
+                                          ? 'Set Music Directory'
+                                          : 'No music files found',
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      widget.scanFolder == null
+                                          ? 'Choose a folder directory on your device to scan and play music from.'
+                                          : 'Please put some audio files (e.g. .mp3, .m4a) in the folder:\n\n${widget.scanFolder}',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant
+                                                .withValues(alpha: 0.7),
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 24),
+                                    FilledButton.icon(
+                                      onPressed: widget.onConfigureFolder,
+                                      icon: Icon(
+                                        widget.scanFolder == null
+                                            ? Icons.folder_copy_rounded
+                                            : Icons.create_new_folder_rounded,
+                                      ),
+                                      label: Text(
+                                        widget.scanFolder == null
+                                            ? 'Set Sync Folder'
+                                            : 'Change Folder',
+                                      ),
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor:
+                                            theme.colorScheme.primaryContainer,
+                                        foregroundColor: theme
+                                            .colorScheme
+                                            .onPrimaryContainer,
                                       ),
                                     ),
-                                  )
-                                : ListenableBuilder(
-                                    listenable: widget.playerProvider,
-                                    builder: (context, _) {
-                                      var filteredSongs = _getFilteredSongs();
-                                      var currentSong = widget.playerProvider.currentSong;
-                                       return Scrollbar(
-                                         controller: _songsScrollController,
-                                         child: ListView.builder(
-                                           controller: _songsScrollController,
-                                           padding: const EdgeInsets.only(bottom: 100),
-                                           itemCount: filteredSongs.length,
-                                           itemBuilder: (context, index) {
-                                             var song = filteredSongs[index];
-                                             var isCurrent = currentSong != null && currentSong.id == song.id;
-                                             return SongTile(
-                                               song: song,
-                                               isCurrent: isCurrent,
-                                               onTap: () => widget.playerProvider.playSong(song, filteredSongs),
-                                               onPlayNext: () => widget.playerProvider.playNext(song),
-                                               onAddToQueue: () => widget.playerProvider.addToQueue(song),
-                                               onAddToPlaylist: () => _showAddToPlaylistDialog(song),
-                                               onShowInfo: () => _showSongInfoBottomSheet(song),
-                                               onToggleFavorite: () => widget.playerProvider.toggleFavorite(song.id),
-                                             );
-                                           },
-                                         ),
-                                       );
-                                    },
-                                  ),
-                          ),
-                        ],
-                      ),
-
-                // Tab 2: Albums
-                widget.songs.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No albums found',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      )
-                    : _getFilteredAlbums().isEmpty
-                        ? Center(
-                            child: Text(
-                              'No matching albums found',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
+                                  ],
+                                ),
                               ),
-                            ),
-                          )
-                        : Scrollbar(
-                            controller: _albumsScrollController,
-                            child: GridView.builder(
-                              controller: _albumsScrollController,
-                              padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 100),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
-                                childAspectRatio: 0.78,
-                              ),
-                              itemCount: _getFilteredAlbums().length,
-                              itemBuilder: (context, index) {
-                                var album = _getFilteredAlbums()[index];
-                                var firstSong = album.songs.first;
-
-                                return InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => AlbumDetailScreen(
-                                          album: album,
-                                          playerProvider: widget.playerProvider,
+                            )
+                          : Column(
+                              children: [
+                                if (widget.showSyncPrompt)
+                                  _buildSyncPromptBanner(theme),
+                                Expanded(
+                                  child: _getFilteredSongs().isEmpty
+                                      ? Center(
+                                          child: Text(
+                                            'No matching songs found',
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                                ),
+                                          ),
+                                        )
+                                      : ListenableBuilder(
+                                          listenable: widget.playerProvider,
+                                          builder: (context, _) {
+                                            var filteredSongs =
+                                                _getFilteredSongs();
+                                            var currentSong = widget
+                                                .playerProvider
+                                                .currentSong;
+                                            return Scrollbar(
+                                              controller:
+                                                  _songsScrollController,
+                                              child: ListView.builder(
+                                                controller:
+                                                    _songsScrollController,
+                                                padding: const EdgeInsets.only(
+                                                  bottom: 100,
+                                                ),
+                                                itemCount: filteredSongs.length,
+                                                itemBuilder: (context, index) {
+                                                  var song =
+                                                      filteredSongs[index];
+                                                  var isCurrent =
+                                                      currentSong != null &&
+                                                      currentSong.id == song.id;
+                                                  return SongTile(
+                                                    song: song,
+                                                    isCurrent: isCurrent,
+                                                    showDivider:
+                                                        index <
+                                                        filteredSongs.length -
+                                                            1,
+                                                    onTap: () {
+                                                      _searchFocusNode
+                                                          .unfocus();
+                                                      widget.playerProvider
+                                                          .playSong(
+                                                            song,
+                                                            filteredSongs,
+                                                          );
+                                                    },
+                                                    onPlayNext: () => widget
+                                                        .playerProvider
+                                                        .playNext(song),
+                                                    onAddToQueue: () => widget
+                                                        .playerProvider
+                                                        .addToQueue(song),
+                                                    onAddToPlaylist: () =>
+                                                        _showAddToPlaylistDialog(
+                                                          song,
+                                                        ),
+                                                    onShowInfo: () =>
+                                                        _showSongInfoBottomSheet(
+                                                          song,
+                                                        ),
+                                                    onToggleFavorite: () =>
+                                                        widget.playerProvider
+                                                            .toggleFavorite(
+                                                              song.id,
+                                                            ),
+                                                  );
+                                                },
+                                              ),
+                                            );
+                                          },
                                         ),
-                                      ),
-                                    );
-                                  },
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: AspectRatio(
-                                          aspectRatio: 1.0,
-                                          child: AlbumArt(
-                                            artworkPath: firstSong.artworkPath,
-                                            size: 200,
-                                            borderRadius: 20,
+                                ),
+                              ],
+                            ),
+
+                      // Tab 2: Albums
+                      widget.songs.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No albums found',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            )
+                          : _getFilteredAlbums().isEmpty
+                          ? Center(
+                              child: Text(
+                                'No matching albums found',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            )
+                          : Scrollbar(
+                              controller: _albumsScrollController,
+                              child: GridView.builder(
+                                controller: _albumsScrollController,
+                                padding: const EdgeInsets.only(
+                                  left: 20,
+                                  right: 20,
+                                  top: 16,
+                                  bottom: 100,
+                                ),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: 16,
+                                      mainAxisSpacing: 16,
+                                      childAspectRatio: 0.78,
+                                    ),
+                                itemCount: _getFilteredAlbums().length,
+                                itemBuilder: (context, index) {
+                                  var album = _getFilteredAlbums()[index];
+                                  var firstSong = album.songs.first;
+
+                                  return InkWell(
+                                    onTap: () {
+                                      _searchFocusNode.unfocus();
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              AlbumDetailScreen(
+                                                album: album,
+                                                playerProvider:
+                                                    widget.playerProvider,
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: AspectRatio(
+                                            aspectRatio: 1.0,
+                                            child: AlbumArt(
+                                              artworkPath:
+                                                  firstSong.artworkPath,
+                                              size: 200,
+                                              borderRadius: 20,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        album.name,
-                                        style: theme.textTheme.titleSmall?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Outfit',
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          album.name,
+                                          style: theme.textTheme.titleSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'Outfit',
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        album.artist,
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: theme.colorScheme.onSurfaceVariant,
+                                        Text(
+                                          album.artist,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${album.songs.length} ${album.songs.length == 1 ? 'track' : 'tracks'}',
-                                        style: theme.textTheme.labelSmall?.copyWith(
-                                          color: theme.colorScheme.primary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-
-                // Tab 3: Artists
-                widget.songs.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No artists found',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      )
-                    : _getFilteredArtists().isEmpty
-                        ? Center(
-                            child: Text(
-                              'No matching artists found',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          )
-                        : Scrollbar(
-                            controller: _artistsScrollController,
-                            child: ListView.builder(
-                              controller: _artistsScrollController,
-                              padding: const EdgeInsets.only(top: 12, bottom: 100),
-                              itemCount: _getFilteredArtists().length,
-                              itemBuilder: (context, index) {
-                                var artist = _getFilteredArtists()[index];
-                                var firstSong = artist.songs.first;
-
-                                return ListTile(
-                                  leading: Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.15),
-                                          blurRadius: 6,
-                                          offset: const Offset(0, 3),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${album.songs.length} ${album.songs.length == 1 ? 'track' : 'tracks'}',
+                                          style: theme.textTheme.labelSmall
+                                              ?.copyWith(
+                                                color:
+                                                    theme.colorScheme.primary,
+                                              ),
                                         ),
                                       ],
                                     ),
-                                    child: ClipOval(
-                                      child: AlbumArt(
-                                        artworkPath: firstSong.artworkPath,
-                                        size: 48,
-                                        borderRadius: 0,
-                                      ),
-                                    ),
-                                  ),
-                                  title: Text(
-                                    artist.name,
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Outfit',
-                                      ),
-                                  ),
-                                  subtitle: Text(
-                                    '${artist.albums.length} ${artist.albums.length == 1 ? 'album' : 'albums'} • ${artist.songs.length} ${artist.songs.length == 1 ? 'song' : 'songs'}',
-                                  ),
-                                  trailing: const Icon(Icons.chevron_right_rounded),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ArtistDetailScreen(
-                                          artist: artist,
-                                          playerProvider: widget.playerProvider,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-
-                // Tab 4: Playlists
-                widget.playlists.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.queue_music_rounded,
-                                size: 64,
-                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                                  );
+                                },
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No playlists yet',
-                                style: theme.textTheme.titleMedium?.copyWith(
+                            ),
+
+                      // Tab 3: Artists
+                      widget.songs.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No artists found',
+                                style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.bold,
                                 ),
-                                textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Create custom playlists to group and organize your synced music files.',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            )
+                          : _getFilteredArtists().isEmpty
+                          ? Center(
+                              child: Text(
+                                'No matching artists found',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
-                                textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 24),
-                              FilledButton.icon(
-                                onPressed: _showCreatePlaylistDialog,
-                                icon: const Icon(Icons.playlist_add_rounded),
-                                label: const Text('Create Playlist'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : _getFilteredPlaylists().isEmpty
-                        ? Center(
-                            child: Text(
-                              'No matching playlists found',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
+                            )
+                          : Scrollbar(
+                              controller: _artistsScrollController,
+                              child: ListView.builder(
+                                controller: _artistsScrollController,
+                                padding: const EdgeInsets.only(
+                                  top: 12,
+                                  bottom: 100,
+                                ),
+                                itemCount: _getFilteredArtists().length,
+                                itemBuilder: (context, index) {
+                                  var artist = _getFilteredArtists()[index];
+                                  var firstSong = artist.songs.first;
+                                  var artists = _getFilteredArtists();
+
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        leading: Container(
+                                          width: 48,
+                                          height: 48,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withValues(
+                                                  alpha: 0.15,
+                                                ),
+                                                blurRadius: 6,
+                                                offset: const Offset(0, 3),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipOval(
+                                            child: AlbumArt(
+                                              artworkPath:
+                                                  firstSong.artworkPath,
+                                              size: 48,
+                                              borderRadius: 0,
+                                            ),
+                                          ),
+                                        ),
+                                        title: Text(
+                                          artist.name,
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'Outfit',
+                                              ),
+                                        ),
+                                        subtitle: Text(
+                                          '${artist.albums.length} ${artist.albums.length == 1 ? 'album' : 'albums'} • ${artist.songs.length} ${artist.songs.length == 1 ? 'song' : 'songs'}',
+                                        ),
+                                        trailing: const Icon(
+                                          Icons.chevron_right_rounded,
+                                        ),
+                                        onTap: () {
+                                          _searchFocusNode.unfocus();
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ArtistDetailScreen(
+                                                    artist: artist,
+                                                    playerProvider:
+                                                        widget.playerProvider,
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      if (index < artists.length - 1)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 72,
+                                          ),
+                                          child: Divider(
+                                            height: 1,
+                                            color: theme.colorScheme.onSurface
+                                                .withValues(alpha: 0.06),
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
                               ),
                             ),
-                          )
-                        : Scrollbar(
-                            controller: _playlistsScrollController,
-                            child: ListView.builder(
-                              controller: _playlistsScrollController,
-                              padding: const EdgeInsets.only(bottom: 100),
-                              itemCount: _getFilteredPlaylists().length,
-                              itemBuilder: (context, index) {
-                                var playlist = _getFilteredPlaylists()[index];
-                                var songCount = widget.songs
-                                    .where((s) => playlist.songIds.contains(s.id))
-                                    .length;
 
-                                return ListTile(
-                                  leading: Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          theme.colorScheme.primaryContainer,
-                                          theme.colorScheme.secondaryContainer,
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
+                      // Tab 4: Playlists
+                      widget.playlists.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32.0,
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.queue_music_rounded,
+                                      size: 64,
+                                      color: theme.colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.4),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'No playlists yet',
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Create custom playlists to group and organize your synced music files.',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant
+                                                .withValues(alpha: 0.7),
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 24),
+                                    FilledButton.icon(
+                                      onPressed: _showCreatePlaylistDialog,
+                                      icon: const Icon(
+                                        Icons.playlist_add_rounded,
                                       ),
+                                      label: const Text('Create Playlist'),
                                     ),
-                                    child: Icon(
-                                      playlist.id == 'favorites'
-                                          ? Icons.favorite_rounded
-                                          : Icons.music_note_rounded,
-                                      color: theme.colorScheme.onPrimaryContainer,
-                                    ),
-                                  ),
-                                  title: Text(playlist.name),
-                                  subtitle: Text('$songCount ${songCount == 1 ? 'song' : 'songs'}'),
-                                  trailing: playlist.id == 'favorites'
-                                      ? null
-                                      : PopupMenuButton<int>(
-                                          icon: const Icon(Icons.more_vert_rounded),
-                                          onSelected: (val) async {
-                                            if (val == 1) {
-                                              await widget.onDeletePlaylist(playlist.id);
-                                              if (!context.mounted) return;
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text('Playlist "${playlist.name}" deleted.'),
-                                                  behavior: SnackBarBehavior.floating,
+                                  ],
+                                ),
+                              ),
+                            )
+                          : _getFilteredPlaylists().isEmpty
+                          ? Center(
+                              child: Text(
+                                'No matching playlists found',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            )
+                          : Scrollbar(
+                              controller: _playlistsScrollController,
+                              child: ListView.builder(
+                                controller: _playlistsScrollController,
+                                padding: const EdgeInsets.only(bottom: 100),
+                                itemCount: _getFilteredPlaylists().length,
+                                itemBuilder: (context, index) {
+                                  var playlist = _getFilteredPlaylists()[index];
+                                  var songCount = widget.songs
+                                      .where(
+                                        (s) => playlist.songIds.contains(s.id),
+                                      )
+                                      .length;
+                                  var playlists = _getFilteredPlaylists();
+
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        leading: Container(
+                                          width: 48,
+                                          height: 48,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                theme
+                                                    .colorScheme
+                                                    .primaryContainer,
+                                                theme
+                                                    .colorScheme
+                                                    .secondaryContainer,
+                                              ],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            playlist.id == 'favorites'
+                                                ? Icons.favorite_rounded
+                                                : Icons.music_note_rounded,
+                                            color: theme
+                                                .colorScheme
+                                                .onPrimaryContainer,
+                                          ),
+                                        ),
+                                        title: Text(playlist.name),
+                                        subtitle: Text(
+                                          '$songCount ${songCount == 1 ? 'song' : 'songs'}',
+                                        ),
+                                        trailing: playlist.id == 'favorites'
+                                            ? null
+                                            : PopupMenuButton<int>(
+                                                icon: const Icon(
+                                                  Icons.more_vert_rounded,
                                                 ),
-                                              );
-                                            }
-                                          },
-                                          itemBuilder: (context) => [
-                                            const PopupMenuItem(
-                                              value: 1,
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.delete_outline_rounded, color: Colors.red),
-                                                  SizedBox(width: 8),
-                                                  Text('Delete Playlist', style: TextStyle(color: Colors.red)),
+                                                onSelected: (val) async {
+                                                  if (val == 1) {
+                                                    await widget
+                                                        .onDeletePlaylist(
+                                                          playlist.id,
+                                                        );
+                                                    if (!context.mounted) {
+                                                      return;
+                                                    }
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Playlist "${playlist.name}" deleted.',
+                                                        ),
+                                                        behavior:
+                                                            SnackBarBehavior
+                                                                .floating,
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                                itemBuilder: (context) => [
+                                                  const PopupMenuItem(
+                                                    value: 1,
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons
+                                                              .delete_outline_rounded,
+                                                          color: Colors.red,
+                                                        ),
+                                                        SizedBox(width: 8),
+                                                        Text(
+                                                          'Delete Playlist',
+                                                          style: TextStyle(
+                                                            color: Colors.red,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
+                                        onTap: () {
+                                          _searchFocusNode.unfocus();
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PlaylistDetailScreen(
+                                                    playlist: playlist,
+                                                    songs: widget.songs,
+                                                    playerProvider:
+                                                        widget.playerProvider,
+                                                    onRemoveSong: widget
+                                                        .onRemoveSongFromPlaylist,
+                                                    onReorderSongs: widget
+                                                        .onReorderPlaylistSongs,
+                                                    playlists: widget.playlists,
+                                                    onAddSongToPlaylist: widget
+                                                        .onAddSongToPlaylist,
+                                                  ),
                                             ),
-                                          ],
-                                        ),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PlaylistDetailScreen(
-                                          playlist: playlist,
-                                          songs: widget.songs,
-                                          playerProvider: widget.playerProvider,
-                                          onRemoveSong: widget.onRemoveSongFromPlaylist,
-                                          onReorderSongs: widget.onReorderPlaylistSongs,
-                                          playlists: widget.playlists,
-                                          onAddSongToPlaylist: widget.onAddSongToPlaylist,
-                                        ),
+                                          );
+                                        },
                                       ),
-                                    );
-                                  },
-                                );
-                              },
+                                      if (index < playlists.length - 1)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 72,
+                                          ),
+                                          child: Divider(
+                                            height: 1,
+                                            color: theme.colorScheme.onSurface
+                                                .withValues(alpha: 0.06),
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
+                              ),
                             ),
+                    ],
                   ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-        floatingActionButton: _tabController.index == 3 && widget.playlists.isNotEmpty
+          ),
+        ],
+      ),
+      floatingActionButton:
+          _tabController.index == 3 && widget.playlists.isNotEmpty
           ? FloatingActionButton(
               onPressed: _showCreatePlaylistDialog,
               child: const Icon(Icons.playlist_add_rounded),
             )
           : null,
-      bottomNavigationBar: ListenableBuilder(
-        listenable: widget.playerProvider,
-        builder: (context, child) {
-          var currentSong = widget.playerProvider.currentSong;
-          if (currentSong == null) return const SizedBox.shrink();
+    );
+  }
 
-          return StreamBuilder<Duration>(
-            stream: widget.playerProvider.audioHandler.player.positionStream,
-            builder: (context, snapshot) {
-              var position = snapshot.data ?? Duration.zero;
-              var totalMs = currentSong.duration.inMilliseconds;
-              var progress = totalMs > 0 ? position.inMilliseconds / totalMs : 0.0;
-
-              return MiniPlayer(
-                currentSong: currentSong,
-                isPlaying: widget.playerProvider.audioHandler.player.playing,
-                progress: progress,
-                onTap: widget.onOpenNowPlaying,
-                onPlayPause: widget.playerProvider.playPause,
-                onNext: widget.playerProvider.next,
-                onSwipeUp: widget.onOpenNowPlaying,
-                onSwipeDown: widget.playerProvider.stop,
-                onSwipeLeft: widget.playerProvider.previous,
-                onSwipeRight: widget.playerProvider.next,
-              );
-            },
-          );
-        },
+  void _openNowPlaying(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      builder: (context) =>
+          NowPlayingScreen(playerProvider: widget.playerProvider),
     );
   }
 }
