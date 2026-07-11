@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/services/music_scanner.dart';
 
@@ -11,12 +11,14 @@ class SettingsScreen extends StatefulWidget {
     required this.onResetApp,
     required this.onRetriggerSync,
     required this.themeProvider,
+    required this.playerProvider,
   });
 
   final Future<void> Function() onConfigureFolder;
   final VoidCallback onResetApp;
   final Future<void> Function() onRetriggerSync;
   final ThemeProvider themeProvider;
+  final PlayerProvider playerProvider;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -331,6 +333,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
               setState(() {
                 _keepPlayingOnClose = val;
               });
+            },
+          ),
+          ListenableBuilder(
+            listenable: widget.playerProvider,
+            builder: (context, _) {
+              return Column(
+                children: [
+                  SwitchListTile(
+                    secondary: const Icon(Icons.color_lens_outlined),
+                    title: const Text('Dynamic Theme (Material You)'),
+                    subtitle: const Text('Automatically theme the app using active album art'),
+                    value: widget.playerProvider.useDynamicTheme,
+                    onChanged: (val) => widget.playerProvider.toggleDynamicTheme(val),
+                  ),
+                  SwitchListTile(
+                    secondary: const Icon(Icons.bar_chart_rounded),
+                    title: const Text('Show Audio Visualizer'),
+                    subtitle: const Text('Animate audio wave visualizer inside player screen'),
+                    value: widget.playerProvider.showVisualizer,
+                    onChanged: (val) => widget.playerProvider.toggleVisualizer(val),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.timer_outlined),
+                    title: const Text('Sleep Timer Extension'),
+                    subtitle: Text('Add ${widget.playerProvider.sleepTimerExtendMinutes} minutes on extend button press'),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Slider(
+                      value: widget.playerProvider.sleepTimerExtendMinutes.toDouble(),
+                      min: 1.0,
+                      max: 30.0,
+                      divisions: 29,
+                      label: '${widget.playerProvider.sleepTimerExtendMinutes} min',
+                      onChanged: (val) => widget.playerProvider.setSleepTimerExtendMinutes(val.toInt()),
+                    ),
+                  ),
+                ],
+              );
             },
           ),
 

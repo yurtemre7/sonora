@@ -390,6 +390,7 @@ class _SonoraAppState extends State<SonoraApp> {
           onResetApp: _resetApp,
           onRetriggerSync: _syncSongsSilently,
           themeProvider: _themeProvider,
+          playerProvider: _playerProvider,
         ),
       ),
     );
@@ -400,13 +401,17 @@ class _SonoraAppState extends State<SonoraApp> {
     return ListenableBuilder(
       listenable: _themeProvider,
       builder: (context, _) {
-        return MaterialApp(
-          scaffoldMessengerKey: _scaffoldMessengerKey,
-          title: 'Sonora',
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: _themeProvider.themeMode,
-          debugShowCheckedModeBanner: false,
+        return ListenableBuilder(
+          listenable: _playerProvider,
+          builder: (context, _) {
+            var activeSeedColor = _playerProvider.dynamicThemeColor;
+            return MaterialApp(
+              scaffoldMessengerKey: _scaffoldMessengerKey,
+              title: 'Sonora',
+              theme: AppTheme.buildTheme(Brightness.light, seedColor: activeSeedColor),
+              darkTheme: AppTheme.buildTheme(Brightness.dark, seedColor: activeSeedColor),
+              themeMode: _themeProvider.themeMode,
+              debugShowCheckedModeBanner: false,
           builder: (context, child) {
             return GestureDetector(
               onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -489,7 +494,10 @@ class _SonoraAppState extends State<SonoraApp> {
                     onPostponeSync: _onPostponeSync,
                   ),
                 ),
-      );
-    });
+            );
+          },
+        );
+      },
+    );
   }
 }

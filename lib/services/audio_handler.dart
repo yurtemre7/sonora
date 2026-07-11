@@ -30,6 +30,25 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   // Prevent recursive triggers when updating player sources.
   var _isModifyingSources = false;
 
+  // Sleep timer properties for media notification
+  var sleepTimerActive = false;
+  var sleepTimerExtendLabel = '+5 min';
+  Function(String)? onCustomAction;
+
+  void updateSleepTimerState({required bool active, required String label}) {
+    sleepTimerActive = active;
+    sleepTimerExtendLabel = label;
+    _broadcastPlaybackState(player.playbackEvent);
+  }
+
+  @override
+  Future<dynamic> customAction(String name, [Map<String, dynamic>? extras]) {
+    if (onCustomAction != null) {
+      onCustomAction!(name);
+    }
+    return super.customAction(name, extras);
+  }
+
   SonoraAudioHandler() {
     _init();
   }
@@ -73,6 +92,15 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         MediaControl.skipToPrevious,
         if (playing) MediaControl.pause else MediaControl.play,
         MediaControl.skipToNext,
+        if (sleepTimerActive)
+          MediaControl(
+            androidIcon: 'drawable/ic_menu_add',
+            label: sleepTimerExtendLabel,
+            action: MediaAction.custom,
+            customAction: const CustomMediaAction(
+              name: 'extendSleepTimer',
+            ),
+          ),
       ],
       systemActions: const {
         MediaAction.seek,

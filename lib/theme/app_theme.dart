@@ -7,13 +7,13 @@ class AppTheme {
 
   static const _seedColor = Color(0xFF7C4DFF);
 
-  static TextTheme _buildTextTheme(Brightness brightness) {
+  static TextTheme _buildTextTheme(Brightness brightness, Color seedColor) {
     var base = brightness == Brightness.dark
         ? ThemeData.dark().textTheme
         : ThemeData.light().textTheme;
 
     var colorScheme = ColorScheme.fromSeed(
-      seedColor: _seedColor,
+      seedColor: seedColor,
       brightness: brightness,
     );
 
@@ -45,13 +45,13 @@ class AppTheme {
     );
   }
 
-  static ThemeData _buildTheme(Brightness brightness) {
+  static ThemeData buildTheme(Brightness brightness, {Color seedColor = _seedColor}) {
     var colorScheme = ColorScheme.fromSeed(
-      seedColor: _seedColor,
+      seedColor: seedColor,
       brightness: brightness,
     );
 
-    var textTheme = _buildTextTheme(brightness);
+    var textTheme = _buildTextTheme(brightness, seedColor);
 
     var outfitTitleStyle = GoogleFonts.outfit(
       fontWeight: FontWeight.w600,
@@ -138,7 +138,7 @@ class AppTheme {
     );
   }
 
-  static ThemeData get darkTheme => _buildTheme(Brightness.dark);
+  static ThemeData get darkTheme => buildTheme(Brightness.dark);
 
-  static ThemeData get lightTheme => _buildTheme(Brightness.light);
+  static ThemeData get lightTheme => buildTheme(Brightness.light);
 }

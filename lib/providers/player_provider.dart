@@ -1,12 +1,12 @@
 import 'dart:async';
-
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/foundation.dart';
-
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/utils/color_extractor.dart';
 
 /// Repeat mode for playlist playback.
 enum RepeatMode { off, all, one }
@@ -28,6 +28,19 @@ class PlayerProvider extends ChangeNotifier {
   var isShuffled = false;
   RepeatMode repeatMode = RepeatMode.off;
 
+  // Phase 3 State properties
+  var useDynamicTheme = true;
+  var dynamicThemeColor = const Color(0xFF7C4DFF);
+  var showVisualizer = false;
+
+  Timer? _sleepTimer;
+  Duration? sleepTimerDuration;
+  Duration? sleepTimerOriginalDuration;
+  var sleepTimerExtendMinutes = 5;
+  var _isFadingOut = false;
+  var _originalVolumeBeforeFade = 1.0;
+  var _lastExtractedSongId = -1;
+
   // ── Stream subscriptions ──────────────────────────────────────────────────
 
   StreamSubscription<MediaItem?>? _mediaItemSub;
@@ -38,6 +51,16 @@ class PlayerProvider extends ChangeNotifier {
   PlayerProvider({required this.audioHandler}) {
     _listenToMediaItem();
     _listenToPlaybackState();
+    _initCustomCallbacks();
+    loadSettings();
+  }
+
+  void _initCustomCallbacks() {
+    audioHandler.onCustomAction = (action) {
+      if (action == 'extendSleepTimer') {
+        extendSleepTimer(Duration(minutes: sleepTimerExtendMinutes));
+      }
+    };
   }
 
   // ── Derived getters ───────────────────────────────────────────────────────
@@ -324,8 +347,12 @@ class PlayerProvider extends ChangeNotifier {
       var index = queue.indexWhere(
         (s) => Uri.file(s.filePath).toString() == item.id,
       );
-      if (index >= 0 && index != currentIndex) {
+      if (index >= 0) {
+        var oldIndex = currentIndex;
         currentIndex = index;
+        if (oldIndex != index || _lastExtractedSongId != queue[index].id) {
+          _extractThemeColorForSong(queue[index]);
+        }
         notifyListeners();
       }
     });
@@ -397,6 +424,155 @@ class PlayerProvider extends ChangeNotifier {
     }
     await scanner.savePlaylists(list);
     playlists = list;
+    notifyListeners();
+  }
+
+  // ── Phase 3: Dynamic Theme, Visualizer & Sleep Timer Actions ────────────────
+
+  Future<void> loadSettings() async {
+    var prefs = SharedPreferencesAsync();
+    useDynamicTheme = await prefs.getBool('use_dynamic_theme') ?? true;
+    showVisualizer = await prefs.getBool('show_visualizer') ?? false;
+    sleepTimerExtendMinutes = await prefs.getInt('sleep_timer_extend_minutes') ?? 5;
+    
+    if (useDynamicTheme && currentSong != null) {
+      _extractThemeColorForSong(currentSong!);
+    }
+    notifyListeners();
+  }
+
+  Future<void> toggleDynamicTheme(bool enabled) async {
+    useDynamicTheme = enabled;
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('use_dynamic_theme', enabled);
+
+    if (enabled && currentSong != null) {
+      _extractThemeColorForSong(currentSong!);
+    } else {
+      dynamicThemeColor = const Color(0xFF7C4DFF);
+    }
+    notifyListeners();
+  }
+
+  Future<void> toggleVisualizer(bool enabled) async {
+    showVisualizer = enabled;
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('show_visualizer', enabled);
+    notifyListeners();
+  }
+
+  Future<void> setSleepTimerExtendMinutes(int minutes) async {
+    sleepTimerExtendMinutes = minutes.clamp(1, 30);
+    var prefs = SharedPreferencesAsync();
+    await prefs.setInt('sleep_timer_extend_minutes', sleepTimerExtendMinutes);
+    _updateMediaNotificationControls();
+    notifyListeners();
+  }
+
+  Future<void> _extractThemeColorForSong(Song song) async {
+    if (!useDynamicTheme) {
+      dynamicThemeColor = const Color(0xFF7C4DFF);
+      notifyListeners();
+      return;
+    }
+    _lastExtractedSongId = song.id;
+
+    if (song.artworkPath == null) {
+      dynamicThemeColor = const Color(0xFF7C4DFF);
+      notifyListeners();
+      return;
+    }
+
+    var color = await ColorExtractor.extractDominantColor(song.artworkPath!);
+    if (color != null) {
+      dynamicThemeColor = color;
+    } else {
+      dynamicThemeColor = const Color(0xFF7C4DFF);
+    }
+    notifyListeners();
+  }
+
+  void _updateMediaNotificationControls() {
+    audioHandler.updateSleepTimerState(
+      active: sleepTimerDuration != null,
+      label: '+$sleepTimerExtendMinutes min',
+    );
+  }
+
+  void startSleepTimer(Duration duration) {
+    stopSleepTimer();
+
+    sleepTimerOriginalDuration = duration;
+    sleepTimerDuration = duration;
+    _isFadingOut = false;
+
+    _updateMediaNotificationControls();
+
+    _sleepTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (sleepTimerDuration == null) {
+        timer.cancel();
+        return;
+      }
+
+      var remaining = sleepTimerDuration! - const Duration(seconds: 1);
+      if (remaining.isNegative || remaining == Duration.zero) {
+        sleepTimerDuration = Duration.zero;
+        timer.cancel();
+        _sleepTimer = null;
+
+        await audioHandler.stop();
+        await audioHandler.player.setVolume(1.0);
+
+        sleepTimerDuration = null;
+        sleepTimerOriginalDuration = null;
+        _isFadingOut = false;
+
+        _updateMediaNotificationControls();
+        notifyListeners();
+      } else {
+        sleepTimerDuration = remaining;
+
+        if (remaining.inSeconds <= 10) {
+          if (!_isFadingOut) {
+            _isFadingOut = true;
+            _originalVolumeBeforeFade = audioHandler.player.volume;
+          }
+          var fraction = remaining.inSeconds / 10.0;
+          await audioHandler.player.setVolume(_originalVolumeBeforeFade * fraction);
+        }
+
+        notifyListeners();
+      }
+    });
+
+    notifyListeners();
+  }
+
+  void stopSleepTimer() {
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    sleepTimerDuration = null;
+    sleepTimerOriginalDuration = null;
+    if (_isFadingOut) {
+      audioHandler.player.setVolume(_originalVolumeBeforeFade);
+      _isFadingOut = false;
+    }
+    _updateMediaNotificationControls();
+    notifyListeners();
+  }
+
+  void extendSleepTimer(Duration extension) {
+    if (sleepTimerDuration == null) {
+      startSleepTimer(extension);
+      return;
+    }
+    sleepTimerDuration = sleepTimerDuration! + extension;
+    sleepTimerOriginalDuration = (sleepTimerOriginalDuration ?? Duration.zero) + extension;
+    if (_isFadingOut) {
+      _isFadingOut = false;
+      audioHandler.player.setVolume(_originalVolumeBeforeFade);
+    }
+    _updateMediaNotificationControls();
     notifyListeners();
   }
 }
