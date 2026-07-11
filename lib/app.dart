@@ -133,6 +133,7 @@ class _SonoraAppState extends State<SonoraApp> {
       _isLoading = false;
     });
     
+    _playerProvider.updatePlaylists(playlists);
     _playerProvider.updateSongs(scannedSongs);
   }
 
@@ -163,6 +164,7 @@ class _SonoraAppState extends State<SonoraApp> {
         _hasPermission = true;
         _isLoading = false;
       });
+      _playerProvider.updatePlaylists(playlists);
       _playerProvider.updateSongs(updatedSongs);
 
       _scaffoldMessengerKey.currentState?.showSnackBar(
