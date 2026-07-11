@@ -386,19 +386,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                 onRepeat: widget.playerProvider.cycleRepeatMode,
                               ),
 
-                              if (widget.playerProvider.showVisualizer) ...[
-                                const SizedBox(height: 12),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                  child: AudioVisualizer(
-                                    isPlaying: widget.playerProvider.isPlaying,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                              ] else ...[
-                                const SizedBox(height: 16),
-                              ],
+                              const SizedBox(height: 16),
 
                               // Bottom actions (Queue screen button - restored to original centered layout)
                               IconButton(
@@ -425,6 +413,24 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                   ),
                 ),
               ),
+              if (widget.playerProvider.showVisualizer)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+                    child: SizedBox(
+                      height: 56.0,
+                      child: AudioVisualizer(
+                        isPlaying: widget.playerProvider.isPlaying,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.25),
+                        barCount: 36,
+                        height: 56.0,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         );
