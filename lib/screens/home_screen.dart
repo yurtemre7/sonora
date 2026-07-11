@@ -123,6 +123,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Your sorting preference will be saved and automatically applied on next startup.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   RadioGroup<String>(
                     groupValue: _sortBy,
