@@ -45,4 +45,5 @@ This file outlines project-specific rules and instructions for coding assistants
   1. Run `dtd` with command `listDtdUris` to find available tool daemon endpoints.
   2. Connect using `dtd` command `connect` and the retrieved workspace URI.
   3. Call `hot_reload` or `hot_restart` on the connected `appUri`.
+  * **Rule:** If a Flutter application is currently running, you must invoke a `hot_reload` (or `hot_restart` for structural state changes) immediately after making any Dart-related code changes to ensure the live application stays in sync.
 * **Checking Runtime Failures:** Use `get_runtime_errors` on the active `appUri` to fetch VM/Flutter framework assertions and stack traces instantly.
