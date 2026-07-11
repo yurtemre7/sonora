@@ -122,51 +122,55 @@ class _PlaylistSelectorBottomSheetState extends State<PlaylistSelectorBottomShee
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: ListTile(
+                        child: Material(
+                          color: Colors.transparent,
+                          clipBehavior: Clip.antiAlias,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          tileColor: isAlreadyIn
-                              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2)
-                              : theme.colorScheme.surfaceContainerLow,
-                          leading: Icon(
-                            Icons.playlist_add_rounded,
-                            color: isAlreadyIn ? theme.colorScheme.primary : null,
-                          ),
-                          title: Text(
-                            playlist.name,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              fontWeight: isAlreadyIn ? FontWeight.w600 : null,
+                          child: ListTile(
+                            tileColor: isAlreadyIn
+                                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2)
+                                : theme.colorScheme.surfaceContainerLow,
+                            leading: Icon(
+                              Icons.playlist_add_rounded,
+                              color: isAlreadyIn ? theme.colorScheme.primary : null,
                             ),
+                            title: Text(
+                              playlist.name,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                fontWeight: isAlreadyIn ? FontWeight.w600 : null,
+                              ),
+                            ),
+                            subtitle: Text(
+                              '${playlist.songIds.length} ${playlist.songIds.length == 1 ? 'song' : 'songs'}',
+                            ),
+                            trailing: isAlreadyIn
+                                ? Icon(Icons.check_circle_rounded, color: theme.colorScheme.primary)
+                                : null,
+                            onTap: () async {
+                              var messenger = ScaffoldMessenger.of(context);
+                              if (isAlreadyIn) {
+                                await widget.playerProvider.removeSongFromPlaylist(playlist.id, widget.song.id);
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text('Removed "${widget.song.displayTitle}" from ${playlist.name}.'),
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              } else {
+                                await widget.playerProvider.addSongToPlaylist(playlist.id, widget.song.id);
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text('Added "${widget.song.displayTitle}" to ${playlist.name}.'),
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
                           ),
-                          subtitle: Text(
-                            '${playlist.songIds.length} ${playlist.songIds.length == 1 ? 'song' : 'songs'}',
-                          ),
-                          trailing: isAlreadyIn
-                              ? Icon(Icons.check_circle_rounded, color: theme.colorScheme.primary)
-                              : null,
-                          onTap: () async {
-                            var messenger = ScaffoldMessenger.of(context);
-                            if (isAlreadyIn) {
-                              await widget.playerProvider.removeSongFromPlaylist(playlist.id, widget.song.id);
-                              messenger.showSnackBar(
-                                SnackBar(
-                                  content: Text('Removed "${widget.song.displayTitle}" from ${playlist.name}.'),
-                                  behavior: SnackBarBehavior.floating,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            } else {
-                              await widget.playerProvider.addSongToPlaylist(playlist.id, widget.song.id);
-                              messenger.showSnackBar(
-                                SnackBar(
-                                  content: Text('Added "${widget.song.displayTitle}" to ${playlist.name}.'),
-                                  behavior: SnackBarBehavior.floating,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            }
-                          },
                         ),
                       );
                     },
