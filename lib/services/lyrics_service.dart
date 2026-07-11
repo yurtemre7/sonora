@@ -91,7 +91,7 @@ class LyricsService {
     }
   }
 
-  static final _lrcMetadataTag = RegExp(r'^\[(ti|ar|al|by|offset|re|ve|length):');
+  static final _lrcMetadataTag = RegExp(r'^\[(ti|ar|al|by|offset|re|ve|length):', caseSensitive: false);
 
   /// Returns true for known LRC metadata tags (e.g. [ti:Title], [ar:Artist])
   /// but preserves section headers like [Verse 1], [Chorus], [Bridge].

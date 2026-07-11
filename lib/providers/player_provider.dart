@@ -171,6 +171,7 @@ class PlayerProvider extends ChangeNotifier {
     // Load and play the shuffled playlist. playSong resets isShuffled to false,
     // so we set it to true afterward.
     await playSong(startingSong, shuffled);
+    _originalQueue = List<Song>.from(songsList); // Preserve original order for unshuffling!
     isShuffled = true;
     notifyListeners();
   }
