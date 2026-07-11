@@ -35,3 +35,14 @@ This file outlines project-specific rules and instructions for coding assistants
   * `refactor: simplify theme lookup`
   * `chore: update build gradle configuration`
   * `release: v1.1.2` (use to trigger automation workflows)
+
+## Tooling & Optimization
+
+### Using the Dart MCP Server
+* **Rule:** Prefer using the `dart-mcp-server` tools instead of running raw terminal commands (`fvm flutter ...`) for static analysis, hot reloads, hot restarts, and runtime diagnostics.
+* **Diagnostics / Analysis:** Instead of `fvm flutter analyze`, use the `analyze_files` tool. Ensure the project root (`file:///Users/yurtemre/Documents/antigravity/kind-salk`) is registered first via the `roots` tool with command `add`.
+* **Hot Reload & Hot Restart:** To apply and test code changes instantly:
+  1. Run `dtd` with command `listDtdUris` to find available tool daemon endpoints.
+  2. Connect using `dtd` command `connect` and the retrieved workspace URI.
+  3. Call `hot_reload` or `hot_restart` on the connected `appUri`.
+* **Checking Runtime Failures:** Use `get_runtime_errors` on the active `appUri` to fetch VM/Flutter framework assertions and stack traces instantly.
