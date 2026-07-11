@@ -297,6 +297,9 @@ class PlayerProvider extends ChangeNotifier {
       }
     }
 
+    // Refresh the playlists list so that the Favorites count and item inclusions are in sync!
+    playlists = await scanner.getPlaylists();
+
     notifyListeners();
   }
 
