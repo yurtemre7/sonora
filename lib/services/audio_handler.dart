@@ -467,8 +467,8 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   @override
   Future<void> onTaskRemoved() async {
-    final prefs = SharedPreferencesAsync();
-    final keepPlaying = await prefs.getBool('keep_playing_on_close') ?? false;
+    var prefs = SharedPreferencesAsync();
+    var keepPlaying = await prefs.getBool('keep_playing_on_close') ?? false;
     if (!keepPlaying) {
       await player.stop();
       await super.onTaskRemoved();

@@ -33,7 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSettings();
   }
 
-  bool _keepPlayingOnClose = false;
+  var _keepPlayingOnClose = false;
 
   Future<void> _loadSettings() async {
     var scanner = MusicScanner();

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:sonora/models/song.dart';
@@ -25,14 +26,14 @@ class AlbumDetailScreen extends StatelessWidget {
       body: Stack(
         children: [
           // Blurred background
-          if (firstSong.artworkBytes != null)
+          if (firstSong.artworkPath != null)
             Positioned.fill(
               child: ImageFiltered(
                 imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                 child: Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: MemoryImage(firstSong.artworkBytes!),
+                      image: FileImage(File(firstSong.artworkPath!)),
                       fit: BoxFit.cover,
                       opacity: 0.15,
                     ),
@@ -60,7 +61,7 @@ class AlbumDetailScreen extends StatelessWidget {
                         Hero(
                           tag: 'album_art_${album.name}',
                           child: AlbumArt(
-                            artworkBytes: firstSong.artworkBytes,
+                            artworkPath: firstSong.artworkPath,
                             size: 180,
                             borderRadius: 24,
                           ),
@@ -128,7 +129,7 @@ class AlbumDetailScreen extends StatelessWidget {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             if (album.songs.isNotEmpty) {
-                              final shuffled = List<Song>.from(album.songs)..shuffle();
+                              var shuffled = List<Song>.from(album.songs)..shuffle();
                               playerProvider.playSong(shuffled.first, shuffled);
                             }
                           },

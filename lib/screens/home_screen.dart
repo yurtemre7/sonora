@@ -95,14 +95,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   List<AlbumGroup> _getAlbums() {
-    final albumsMap = <String, List<Song>>{};
+    var albumsMap = <String, List<Song>>{};
     for (var song in widget.songs) {
-      final albumName = song.album.trim().isEmpty ? 'Unknown Album' : song.album;
+      var albumName = song.album.trim().isEmpty ? 'Unknown Album' : song.album;
       albumsMap.putIfAbsent(albumName, () => []).add(song);
     }
 
-    final list = albumsMap.entries.map((entry) {
-      final artistCounts = <String, int>{};
+    var list = albumsMap.entries.map((entry) {
+      var artistCounts = <String, int>{};
       for (var s in entry.value) {
         artistCounts[s.artist] = (artistCounts[s.artist] ?? 0) + 1;
       }
@@ -127,16 +127,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   List<ArtistGroup> _getArtists() {
-    final artistsMap = <String, List<Song>>{};
+    var artistsMap = <String, List<Song>>{};
     for (var song in widget.songs) {
-      final artistName = song.artist.trim().isEmpty ? 'Unknown Artist' : song.artist;
+      var artistName = song.artist.trim().isEmpty ? 'Unknown Artist' : song.artist;
       artistsMap.putIfAbsent(artistName, () => []).add(song);
     }
 
-    final albumsList = _getAlbums();
+    var albumsList = _getAlbums();
 
-    final list = artistsMap.entries.map((entry) {
-      final artistAlbums = albumsList.where((a) => a.artist == entry.key).toList();
+    var list = artistsMap.entries.map((entry) {
+      var artistAlbums = albumsList.where((a) => a.artist == entry.key).toList();
       return ArtistGroup(
         name: entry.key,
         songs: entry.value,
@@ -715,8 +715,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ),
                         itemCount: _getAlbums().length,
                         itemBuilder: (context, index) {
-                          final album = _getAlbums()[index];
-                          final firstSong = album.songs.first;
+                          var album = _getAlbums()[index];
+                          var firstSong = album.songs.first;
                           
                           return InkWell(
                             onTap: () {
@@ -738,7 +738,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                   child: AspectRatio(
                                     aspectRatio: 1.0,
                                     child: AlbumArt(
-                                      artworkBytes: firstSong.artworkBytes,
+                                      artworkPath: firstSong.artworkPath,
                                       size: 200,
                                       borderRadius: 20,
                                     ),
@@ -789,8 +789,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         padding: const EdgeInsets.only(top: 12, bottom: 100),
                         itemCount: _getArtists().length,
                         itemBuilder: (context, index) {
-                          final artist = _getArtists()[index];
-                          final firstSong = artist.songs.first;
+                          var artist = _getArtists()[index];
+                          var firstSong = artist.songs.first;
                           
                           return ListTile(
                             leading: Container(
@@ -808,7 +808,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               ),
                               child: ClipOval(
                                 child: AlbumArt(
-                                  artworkBytes: firstSong.artworkBytes,
+                                  artworkPath: firstSong.artworkPath,
                                   size: 48,
                                   borderRadius: 0,
                                 ),

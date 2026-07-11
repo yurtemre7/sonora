@@ -1,9 +1,10 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
-import 'package:sonora/screens/home_screen.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
+import 'package:sonora/screens/home_screen.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -26,14 +27,14 @@ class ArtistDetailScreen extends StatelessWidget {
       body: Stack(
         children: [
           // Blurred background
-          if (firstSong.artworkBytes != null)
+          if (firstSong.artworkPath != null)
             Positioned.fill(
               child: ImageFiltered(
                 imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                 child: Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: MemoryImage(firstSong.artworkBytes!),
+                      image: FileImage(File(firstSong.artworkPath!)),
                       fit: BoxFit.cover,
                       opacity: 0.1,
                     ),
@@ -73,7 +74,7 @@ class ArtistDetailScreen extends StatelessWidget {
                           ),
                           child: ClipOval(
                             child: AlbumArt(
-                              artworkBytes: firstSong.artworkBytes,
+                              artworkPath: firstSong.artworkPath,
                               size: 140,
                               borderRadius: 0,
                             ),
@@ -128,7 +129,7 @@ class ArtistDetailScreen extends StatelessWidget {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             if (artist.songs.isNotEmpty) {
-                              final shuffled = List<Song>.from(artist.songs)..shuffle();
+                              var shuffled = List<Song>.from(artist.songs)..shuffle();
                               playerProvider.playSong(shuffled.first, shuffled);
                             }
                           },
@@ -163,8 +164,8 @@ class ArtistDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       itemCount: artist.albums.length,
                       itemBuilder: (context, index) {
-                        final album = artist.albums[index];
-                        final albumArtSong = album.songs.first;
+                        var album = artist.albums[index];
+                        var albumArtSong = album.songs.first;
                         
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -185,9 +186,8 @@ class ArtistDetailScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 AlbumArt(
-                                  artworkBytes: albumArtSong.artworkBytes,
+                                  artworkPath: albumArtSong.artworkPath,
                                   size: 110,
-                                  borderRadius: 16,
                                 ),
                                 const SizedBox(height: 8),
                                 SizedBox(
