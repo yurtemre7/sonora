@@ -31,11 +31,15 @@ class MiniPlayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    var mediaQuery = MediaQuery.of(context);
+    var clampedTextScaler = mediaQuery.textScaler.clamp(minScaleFactor: 1.0, maxScaleFactor: 1.3);
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: GestureDetector(
+    return MediaQuery(
+      data: mediaQuery.copyWith(textScaler: clampedTextScaler),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: GestureDetector(
           onTap: onTap,
           onVerticalDragEnd: (details) {
             if (details.primaryVelocity != null) {
@@ -161,6 +165,7 @@ class MiniPlayer extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ),
+   );
   }
 }
