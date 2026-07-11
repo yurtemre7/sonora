@@ -570,7 +570,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     child: TabBar(
                       controller: _tabController,
                       isScrollable: true,
-                      tabAlignment: TabAlignment.start,
+                      tabAlignment: TabAlignment.center,
                       dividerColor: Colors.transparent,
                       indicatorSize: TabBarIndicatorSize.tab,
                       splashBorderRadius: BorderRadius.circular(18),
@@ -584,6 +584,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                       unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
                       unselectedLabelStyle: theme.textTheme.labelLarge,
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 16),
                       tabs: const [
                         Tab(text: 'Songs'),
                         Tab(text: 'Albums'),
