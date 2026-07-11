@@ -2,18 +2,37 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.1.16] - 2026-07-11
+## [1.1.17] - 2026-07-11
 ### Added
-* Add `copyWith` method to Song model for immutable field updates
-* Add `displayTitle` getter to strip artist name duplication from song titles
-### Changed
-* Enable free scrolling on synchronized lyrics, pause auto-centering after manual scroll for 4 seconds
-* Tap lyric line now re-enables auto-scroll and centers the tapped line
-* Replace manual Song construction in toggleFavoriteSong with `copyWith`
+* Animate audio visualizer smoothly to rest when playback pauses
+* Implement dynamic Material You themes, animated visualizer, and Sleep Timer with media notification actions
+* Implement Android background playback settings, scrollable albums/artists tabs, details screens, and subtle ambient glow
+* Add sorting preference saving subtitle to home sort sheet
+* Show and style Favorites playlist inside PlaylistSelectorBottomSheet
+* Make playlist states reactive and implement a premium bottom-sheet selector
+* Add horizontal marquee scrolling text support for long titles and subtitles
 ### Fixed
-* Fix lyrics auto-centering: correct scroll target formula accounts for ListView padding
-* Fix next button stopping playback with single song in repeat modes
-* Remove ProcessingState.completed handler that interfered with just_audio loop wrap
+* Make audio visualizer wave loop perfectly seamless with integer multiplier frequencies
+* Clamp textScaler in MiniPlayer to prevent bottom overflow on high text scaling settings
+* Correct Song artwork property usage, remove unnecessary final keywords, and add missing imports
+* Resolve ListTile background/splash assertion error inside PlaylistSelectorBottomSheet
+* Populate PlayerProvider playlists on app startup and onboarding completion
+* Fix quickShuffle original order preservation and make LRC tag regex case-insensitive
+### Changed
+* Style: Increase audio visualizer height to 80dp, reduce bar count to 20 for wider bars, and raise color opacity to 80%
+* Style: Position visualizer at the absolute bottom of now playing screen with rounded phone corner clipping
+* Style: Wrap TabBar items in FittedBox to auto-scale on smaller screen widths
+* Style: Stretch TabBar segments to fill the outer capsule exactly
+* Style: Shrink-wrap TabBar container to wrap tab items exactly
+* Style: Center scrollable TabBar items and add horizontal padding to tabs
+* Chore: Require hot reload on Dart code changes inside AGENTS.md
+* Chore: Add Dart MCP guidelines to workspace AGENTS.md
+
+## [1.1.16] - 2026-07-11
+### Changed
+* Chore: Add windows support
+
+## [1.1.15] - 2026-07-10
 
 ## [1.1.13] - 2026-07-10
 ### Added
