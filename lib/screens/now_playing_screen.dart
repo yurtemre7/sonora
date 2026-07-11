@@ -10,6 +10,7 @@ import 'package:sonora/screens/queue_screen.dart';
 import 'package:sonora/services/lyrics_service.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/marquee_text.dart';
 import 'package:sonora/widgets/player_controls.dart';
 import 'package:sonora/widgets/seek_bar.dart';
 
@@ -269,22 +270,18 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          song.displayTitle,
+                                        MarqueeText(
+                                          text: song.displayTitle,
                                           style: theme.textTheme.headlineSmall?.copyWith(
                                             fontWeight: FontWeight.bold,
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
                                         ),
                                         const SizedBox(height: 4),
-                                        Text(
-                                          '${song.artist} • ${song.album}',
+                                        MarqueeText(
+                                          text: '${song.artist} • ${song.album}',
                                           style: theme.textTheme.bodyMedium?.copyWith(
                                             color: theme.colorScheme.onSurfaceVariant,
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ],
                                     ),
