@@ -35,6 +35,8 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   var sleepTimerExtendLabel = '+5 min';
   Function(String)? onCustomAction;
 
+
+
   void updateSleepTimerState({required bool active, required String label}) {
     sleepTimerActive = active;
     sleepTimerExtendLabel = label;
@@ -56,16 +58,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   Future<void> _init() async {
     // Configure the audio session for music playback.
     var session = await AudioSession.instance;
-    await session.configure(
-      const AudioSessionConfiguration(
-        avAudioSessionCategory: AVAudioSessionCategory.playback,
-        avAudioSessionMode: AVAudioSessionMode.defaultMode,
-        androidAudioAttributes: AndroidAudioAttributes(
-          contentType: AndroidAudioContentType.music,
-          usage: AndroidAudioUsage.media,
-        ),
-      ),
-    );
+    await session.configure(const AudioSessionConfiguration.music());
 
     // Broadcast playback state changes from just_audio to audio_service.
     player.playbackEventStream.listen(_broadcastPlaybackState);
@@ -77,7 +70,10 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
       var globalIndex = _windowStart + localIndex;
       if (globalIndex >= 0 && globalIndex < _rawPlaylist.length) {
-        mediaItem.add(_rawPlaylist[globalIndex]);
+        var newItem = _rawPlaylist[globalIndex];
+        if (mediaItem.valueOrNull != newItem) {
+          mediaItem.add(newItem);
+        }
         _checkAndSlideWindow(localIndex);
       }
     });
@@ -118,6 +114,23 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
             : null,
       ),
     );
+  }
+
+  /// Recovers the player by reloading the playlist around the current index.
+  Future<void> _recoverPlayer() async {
+    var currentItem = mediaItem.value;
+    if (currentItem != null) {
+      var globalIndex = _rawPlaylist.indexOf(currentItem);
+      if (globalIndex >= 0) {
+        await loadPlaylist(_rawPlaylist, initialIndex: globalIndex);
+        await player.play();
+        return;
+      }
+    }
+    if (_rawPlaylist.isNotEmpty) {
+      await loadPlaylist(_rawPlaylist);
+      await player.play();
+    }
   }
 
   /// Converts a [just_audio] [ProcessingState] to an [audio_service]
@@ -169,6 +182,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
         // Broadcast current window to audio_service
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
+      } on PlayerInterruptedException catch (_) {
+        // Sequence modification collided with internal decode — recover.
+        await _recoverPlayer();
+      } on PlayerException catch (_) {
+        await _recoverPlayer();
       } finally {
         _isModifyingSources = false;
       }
@@ -192,6 +210,10 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
         // Broadcast current window to audio_service
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
+      } on PlayerInterruptedException catch (_) {
+        await _recoverPlayer();
+      } on PlayerException catch (_) {
+        await _recoverPlayer();
       } finally {
         _isModifyingSources = false;
       }

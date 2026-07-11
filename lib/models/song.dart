@@ -13,6 +13,7 @@ class Song {
   final int? lastModifiedMs;
   final int? fileSize;
   final bool hasLyrics;
+  final int? dominantColor;
 
   Song({
     required this.id,
@@ -29,6 +30,7 @@ class Song {
     this.lastModifiedMs,
     this.fileSize,
     this.hasLyrics = false,
+    this.dominantColor,
   });
 
   String get durationFormatted {
@@ -52,6 +54,7 @@ class Song {
     int? lastModifiedMs,
     int? fileSize,
     bool? hasLyrics,
+    int? dominantColor,
   }) {
     return Song(
       id: id ?? this.id,
@@ -68,6 +71,7 @@ class Song {
       lastModifiedMs: lastModifiedMs ?? this.lastModifiedMs,
       fileSize: fileSize ?? this.fileSize,
       hasLyrics: hasLyrics ?? this.hasLyrics,
+      dominantColor: dominantColor ?? this.dominantColor,
     );
   }
 

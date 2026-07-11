@@ -615,6 +615,7 @@ class MusicScanner {
           lastModifiedMs: item['last_modified_ms'] as int?,
           fileSize: item['file_size'] as int?,
           hasLyrics: item['has_lyrics'] as bool? ?? false,
+          dominantColor: item['dominant_color'] as int?,
         );
       }).toList();
     } catch (_) {
@@ -644,11 +645,24 @@ class MusicScanner {
               'last_modified_ms': s.lastModifiedMs,
               'file_size': s.fileSize,
               'has_lyrics': s.hasLyrics,
+              'dominant_color': s.dominantColor,
             },
           )
           .toList();
 
       await jsonFile.writeAsString(jsonEncode(jsonList));
+    } catch (_) {}
+  }
+
+  /// Persists a dominant color value for a song so it survives app restarts.
+  Future<void> saveDominantColor(int songId, int color) async {
+    try {
+      var songs = await _readImportedSongsMetadata();
+      var idx = songs.indexWhere((s) => s.id == songId);
+      if (idx >= 0) {
+        songs[idx] = songs[idx].copyWith(dominantColor: color);
+        await _writeImportedSongsMetadata(songs);
+      }
     } catch (_) {}
   }
 

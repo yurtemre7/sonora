@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
@@ -41,10 +42,15 @@ class PlayerProvider extends ChangeNotifier {
   var _originalVolumeBeforeFade = 1.0;
   var _lastExtractedSongId = -1;
 
+  /// Decouples dynamic theme color changes from general playback state
+  /// notifications. Only fires when the seed color actually changes.
+  final themeColorNotifier = ValueNotifier<Color>(const Color(0xFF7C4DFF));
+
   // ── Stream subscriptions ──────────────────────────────────────────────────
 
   StreamSubscription<MediaItem?>? _mediaItemSub;
-  StreamSubscription<PlaybackState>? _playbackStateSub;
+  StreamSubscription<bool>? _playingSub;
+  StreamSubscription<ProcessingState>? _processingSub;
 
   // ── Constructor ───────────────────────────────────────────────────────────
 
@@ -354,10 +360,9 @@ class PlayerProvider extends ChangeNotifier {
       var index = queue.indexWhere(
         (s) => Uri.file(s.filePath).toString() == item.id,
       );
-      if (index >= 0) {
-        var oldIndex = currentIndex;
+      if (index >= 0 && index != currentIndex) {
         currentIndex = index;
-        if (oldIndex != index || _lastExtractedSongId != queue[index].id) {
+        if (_lastExtractedSongId != queue[index].id) {
           _extractThemeColorForSong(queue[index]);
         }
         notifyListeners();
@@ -366,16 +371,24 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   /// Listens to playback state changes so the UI stays in sync.
+  /// Subscribes to playing and processing state separately (not position)
+  /// to avoid notifying listeners on every position update (~5/sec).
   void _listenToPlaybackState() {
-    _playbackStateSub = audioHandler.playbackState.listen((_) {
+    _playingSub = audioHandler.player.playingStream.listen((_) {
+      notifyListeners();
+    });
+    _processingSub = audioHandler.player.processingStateStream.listen((_) {
       notifyListeners();
     });
   }
 
   @override
   void dispose() {
+    stopSleepTimer();
     _mediaItemSub?.cancel();
-    _playbackStateSub?.cancel();
+    _playingSub?.cancel();
+    _processingSub?.cancel();
+    themeColorNotifier.dispose();
     super.dispose();
   }
 
@@ -460,7 +473,11 @@ class PlayerProvider extends ChangeNotifier {
     if (enabled && currentSong != null) {
       _extractThemeColorForSong(currentSong!);
     } else {
-      dynamicThemeColor = const Color(0xFF7C4DFF);
+      var defaultColor = const Color(0xFF7C4DFF);
+      if (dynamicThemeColor != defaultColor) {
+        dynamicThemeColor = defaultColor;
+        themeColorNotifier.value = defaultColor;
+      }
     }
     notifyListeners();
   }
@@ -482,25 +499,61 @@ class PlayerProvider extends ChangeNotifier {
 
   Future<void> _extractThemeColorForSong(Song song) async {
     if (!useDynamicTheme) {
-      dynamicThemeColor = const Color(0xFF7C4DFF);
-      notifyListeners();
+      _applyThemeColor(const Color(0xFF7C4DFF));
       return;
     }
     _lastExtractedSongId = song.id;
 
     if (song.artworkPath == null) {
-      dynamicThemeColor = const Color(0xFF7C4DFF);
-      notifyListeners();
+      _applyThemeColor(const Color(0xFF7C4DFF));
+      return;
+    }
+
+    // Use cached dominant color if available — avoids artwork I/O entirely.
+    if (song.dominantColor != null) {
+      _applyThemeColor(Color(song.dominantColor!));
       return;
     }
 
     var color = await ColorExtractor.extractDominantColor(song.artworkPath!);
+    var newColor = color ?? const Color(0xFF7C4DFF);
+    _applyThemeColor(newColor);
+
+    // Cache the extracted color for future plays.
     if (color != null) {
-      dynamicThemeColor = color;
-    } else {
-      dynamicThemeColor = const Color(0xFF7C4DFF);
+      var songColor = color.toARGB32();
+      _cacheDominantColor(song.id, songColor);
     }
-    notifyListeners();
+  }
+
+  void _applyThemeColor(Color color) {
+    if (dynamicThemeColor == color) return;
+    dynamicThemeColor = color;
+    themeColorNotifier.value = color;
+  }
+
+  void _cacheDominantColor(int songId, int color) {
+    // Update all in-memory references so subsequent plays skip artwork I/O.
+    for (var i = 0; i < allSongs.length; i++) {
+      if (allSongs[i].id == songId) {
+        allSongs[i] = allSongs[i].copyWith(dominantColor: color);
+        break;
+      }
+    }
+    for (var i = 0; i < queue.length; i++) {
+      if (queue[i].id == songId) {
+        queue[i] = queue[i].copyWith(dominantColor: color);
+        break;
+      }
+    }
+    for (var i = 0; i < _originalQueue.length; i++) {
+      if (_originalQueue[i].id == songId) {
+        _originalQueue[i] = _originalQueue[i].copyWith(dominantColor: color);
+        break;
+      }
+    }
+    // Persist so the cache survives app restarts.
+    MusicScanner().saveDominantColor(songId, color);
   }
 
   void _updateMediaNotificationControls() {

@@ -40,22 +40,24 @@ class _SonoraAppState extends State<SonoraApp> {
   void initState() {
     super.initState();
     _playerProvider = PlayerProvider(audioHandler: widget.audioHandler);
-    _playerProvider.addListener(_onPlayerProviderChanged);
+    _playerProvider.addListener(_syncFromProvider);
     _loadSongs();
   }
 
   @override
   void dispose() {
-    _playerProvider.removeListener(_onPlayerProviderChanged);
+    _playerProvider.removeListener(_syncFromProvider);
+    _playerProvider.dispose();
     super.dispose();
   }
 
-  Future<void> _onPlayerProviderChanged() async {
-    var scanner = MusicScanner();
-    var playlists = await scanner.getPlaylists();
+  /// Syncs in-memory state from the provider. Called only on song/data changes
+  /// (not on every position update) because `notifyListeners` in the provider
+  /// is now decoupled from the playback position stream.
+  void _syncFromProvider() {
     if (!mounted) return;
     setState(() {
-      _playlists = playlists;
+      _playlists = _playerProvider.playlists;
       _songs = _playerProvider.allSongs;
     });
   }
@@ -364,10 +366,9 @@ class _SonoraAppState extends State<SonoraApp> {
     return ListenableBuilder(
       listenable: _themeProvider,
       builder: (context, _) {
-        return ListenableBuilder(
-          listenable: _playerProvider,
-          builder: (context, _) {
-            var activeSeedColor = _playerProvider.dynamicThemeColor;
+        return ValueListenableBuilder<Color>(
+          valueListenable: _playerProvider.themeColorNotifier,
+          builder: (context, activeSeedColor, _) {
             return MaterialApp(
               scaffoldMessengerKey: _scaffoldMessengerKey,
               title: 'Sonora',
