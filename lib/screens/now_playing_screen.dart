@@ -421,12 +421,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
                     child: SizedBox(
-                      height: 56.0,
+                      height: 80.0,
                       child: AudioVisualizer(
                         isPlaying: widget.playerProvider.isPlaying,
-                        color: theme.colorScheme.primary.withValues(alpha: 0.25),
-                        barCount: 36,
-                        height: 56.0,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.8),
+                        barCount: 20,
+                        height: 80.0,
                       ),
                     ),
                   ),
