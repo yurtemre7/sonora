@@ -9,6 +9,7 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/queue_screen.dart';
 import 'package:sonora/services/lyrics_service.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/ambient_glow.dart';
 import 'package:sonora/widgets/marquee_text.dart';
 import 'package:sonora/widgets/player_controls.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
@@ -222,43 +223,52 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               // Album Art / Lyrics Stack Card
-                              Card(
-                                elevation: 10,
-                                shadowColor: Colors.black.withValues(alpha: 0.4),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(28),
-                                ),
-                                clipBehavior: Clip.antiAlias,
-                                child: SizedBox(
-                                  width: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
-                                  height: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
-                                  child: Stack(
-                                    children: [
-                                      Positioned.fill(
-                                        child: AlbumArt(
-                                          artworkPath: song.artworkPath,
-                                          size: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
-                                          borderRadius: 28,
-                                        ),
-                                      ),
-                                      if (_showLyrics)
-                                        Positioned.fill(
-                                          child: BackdropFilter(
-                                            filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
-                                            child: Container(
-                                              color: theme.brightness == Brightness.dark
-                                                  ? Colors.black.withValues(alpha: 0.75)
-                                                  : Colors.white.withValues(alpha: 0.80),
-                                              child: SongLyricsOverlay(
-                                                song: song,
-                                                playerProvider: widget.playerProvider,
-                                              ),
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  AmbientGlow(
+                                    isPlaying: widget.playerProvider.audioHandler.player.playing,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  Card(
+                                    elevation: 10,
+                                    shadowColor: Colors.black.withValues(alpha: 0.4),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(28),
+                                    ),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: SizedBox(
+                                      width: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
+                                      height: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
+                                      child: Stack(
+                                        children: [
+                                          Positioned.fill(
+                                            child: AlbumArt(
+                                              artworkPath: song.artworkPath,
+                                              size: min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
+                                              borderRadius: 28,
                                             ),
                                           ),
-                                        ),
-                                    ],
+                                          if (_showLyrics)
+                                            Positioned.fill(
+                                              child: BackdropFilter(
+                                                filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+                                                child: Container(
+                                                  color: theme.brightness == Brightness.dark
+                                                      ? Colors.black.withValues(alpha: 0.75)
+                                                      : Colors.white.withValues(alpha: 0.80),
+                                                  child: SongLyricsOverlay(
+                                                    song: song,
+                                                    playerProvider: widget.playerProvider,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
 
                               const SizedBox(height: 32),

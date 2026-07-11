@@ -3,11 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/screens/album_detail_screen.dart';
+import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/mini_player.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/song_tile.dart';
+
+class AlbumGroup {
+  final String name;
+  final String artist;
+  final List<Song> songs;
+
+  AlbumGroup({required this.name, required this.artist, required this.songs});
+}
+
+class ArtistGroup {
+  final String name;
+  final List<Song> songs;
+  final List<AlbumGroup> albums;
+
+  ArtistGroup({required this.name, required this.songs, required this.albums});
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -69,10 +88,64 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.initState();
     _sortBy = widget.initialSortBy;
     _sortAscending = widget.initialSortAscending;
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+  }
+
+  List<AlbumGroup> _getAlbums() {
+    final albumsMap = <String, List<Song>>{};
+    for (var song in widget.songs) {
+      final albumName = song.album.trim().isEmpty ? 'Unknown Album' : song.album;
+      albumsMap.putIfAbsent(albumName, () => []).add(song);
+    }
+
+    final list = albumsMap.entries.map((entry) {
+      final artistCounts = <String, int>{};
+      for (var s in entry.value) {
+        artistCounts[s.artist] = (artistCounts[s.artist] ?? 0) + 1;
+      }
+      var albumArtist = 'Unknown Artist';
+      var maxCount = 0;
+      artistCounts.forEach((artist, count) {
+        if (count > maxCount) {
+          maxCount = count;
+          albumArtist = artist;
+        }
+      });
+
+      return AlbumGroup(
+        name: entry.key,
+        artist: albumArtist,
+        songs: entry.value,
+      );
+    }).toList();
+
+    list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return list;
+  }
+
+  List<ArtistGroup> _getArtists() {
+    final artistsMap = <String, List<Song>>{};
+    for (var song in widget.songs) {
+      final artistName = song.artist.trim().isEmpty ? 'Unknown Artist' : song.artist;
+      artistsMap.putIfAbsent(artistName, () => []).add(song);
+    }
+
+    final albumsList = _getAlbums();
+
+    final list = artistsMap.entries.map((entry) {
+      final artistAlbums = albumsList.where((a) => a.artist == entry.key).toList();
+      return ArtistGroup(
+        name: entry.key,
+        songs: entry.value,
+        albums: artistAlbums,
+      );
+    }).toList();
+
+    list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return list;
   }
 
   List<Song> _getFilteredSongs() {
@@ -486,7 +559,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     const LinearProgressIndicator(minHeight: 2),
                   Container(
                     height: 38,
-                    margin: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
+                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(20),
@@ -496,6 +569,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     ),
                     child: TabBar(
                       controller: _tabController,
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
                       dividerColor: Colors.transparent,
                       indicatorSize: TabBarIndicatorSize.tab,
                       splashBorderRadius: BorderRadius.circular(18),
@@ -511,6 +586,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       unselectedLabelStyle: theme.textTheme.labelLarge,
                       tabs: const [
                         Tab(text: 'Songs'),
+                        Tab(text: 'Albums'),
+                        Tab(text: 'Artists'),
                         Tab(text: 'Playlists'),
                       ],
                     ),
@@ -618,7 +695,152 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ],
                       ),
 
-                // Tab 2: Playlists
+                // Tab 2: Albums
+                widget.songs.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No albums found',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      )
+                    : GridView.builder(
+                        padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 100),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.78,
+                        ),
+                        itemCount: _getAlbums().length,
+                        itemBuilder: (context, index) {
+                          final album = _getAlbums()[index];
+                          final firstSong = album.songs.first;
+                          
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AlbumDetailScreen(
+                                    album: album,
+                                    playerProvider: widget.playerProvider,
+                                  ),
+                                ),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: AspectRatio(
+                                    aspectRatio: 1.0,
+                                    child: AlbumArt(
+                                      artworkBytes: firstSong.artworkBytes,
+                                      size: 200,
+                                      borderRadius: 20,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  album.name,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Outfit',
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  album.artist,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${album.songs.length} ${album.songs.length == 1 ? 'track' : 'tracks'}',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+
+                // Tab 3: Artists
+                widget.songs.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No artists found',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.only(top: 12, bottom: 100),
+                        itemCount: _getArtists().length,
+                        itemBuilder: (context, index) {
+                          final artist = _getArtists()[index];
+                          final firstSong = artist.songs.first;
+                          
+                          return ListTile(
+                            leading: Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: ClipOval(
+                                child: AlbumArt(
+                                  artworkBytes: firstSong.artworkBytes,
+                                  size: 48,
+                                  borderRadius: 0,
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              artist.name,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Outfit',
+                                ),
+                            ),
+                            subtitle: Text(
+                              '${artist.albums.length} ${artist.albums.length == 1 ? 'album' : 'albums'} • ${artist.songs.length} ${artist.songs.length == 1 ? 'song' : 'songs'}',
+                            ),
+                            trailing: const Icon(Icons.chevron_right_rounded),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ArtistDetailScreen(
+                                    artist: artist,
+                                    playerProvider: widget.playerProvider,
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+
+                // Tab 4: Playlists
                 widget.playlists.isEmpty
                     ? Center(
                         child: Padding(
@@ -744,7 +966,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
         ],
       ),
-      floatingActionButton: _tabController.index == 1 && widget.playlists.isNotEmpty
+      floatingActionButton: _tabController.index == 3 && widget.playlists.isNotEmpty
           ? FloatingActionButton(
               onPressed: _showCreatePlaylistDialog,
               child: const Icon(Icons.playlist_add_rounded),

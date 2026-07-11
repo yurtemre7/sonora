@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Custom [AudioHandler] for Sonora that provides background audio playback,
 /// media notification controls, and lock-screen integration.
@@ -466,7 +467,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   @override
   Future<void> onTaskRemoved() async {
-    await player.stop();
-    await super.onTaskRemoved();
+    final prefs = SharedPreferencesAsync();
+    final keepPlaying = await prefs.getBool('keep_playing_on_close') ?? false;
+    if (!keepPlaying) {
+      await player.stop();
+      await super.onTaskRemoved();
+    }
   }
 }

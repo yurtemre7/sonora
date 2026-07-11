@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/services/music_scanner.dart';
@@ -32,14 +33,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSettings();
   }
 
+  bool _keepPlayingOnClose = false;
+
   Future<void> _loadSettings() async {
     var scanner = MusicScanner();
     var folder = await scanner.getScanFolder();
     var syncTime = await scanner.getLastSyncTime();
+    var prefs = SharedPreferencesAsync();
+    var keepPlaying = await prefs.getBool('keep_playing_on_close') ?? false;
     if (!mounted) return;
     setState(() {
       _scanFolder = folder;
       _lastSyncTime = syncTime;
+      _keepPlayingOnClose = keepPlaying;
     });
   }
 
@@ -298,6 +304,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => _showThemeModeSheet(context),
               );
+            },
+          ),
+
+          const Divider(height: 32),
+
+          // ── Playback ──────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+            child: Text(
+              'Playback',
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.play_circle_outline_rounded),
+            title: const Text('Keep playing on app close'),
+            subtitle: const Text('Keep playing music in the background when swiped away'),
+            value: _keepPlayingOnClose,
+            onChanged: (val) async {
+              var prefs = SharedPreferencesAsync();
+              await prefs.setBool('keep_playing_on_close', val);
+              setState(() {
+                _keepPlayingOnClose = val;
+              });
             },
           ),
 
