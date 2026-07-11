@@ -61,6 +61,8 @@ class _QueueScreenState extends State<QueueScreen> {
         var queue = widget.playerProvider.queue;
         var current = widget.playerProvider.currentSong;
         var currentIndex = widget.playerProvider.currentIndex;
+        var displayOffset = currentIndex > 0 ? currentIndex - 1 : 0;
+        var displayQueue = queue.sublist(displayOffset);
 
         if (queue.isEmpty) {
           return Scaffold(
@@ -101,22 +103,29 @@ class _QueueScreenState extends State<QueueScreen> {
             controller: _scrollController,
             child: ReorderableListView.builder(
               scrollController: _scrollController,
-              itemCount: queue.length,
-              onReorderItem: widget.playerProvider.reorderQueue,
+              itemCount: displayQueue.length,
+              onReorderItem: (oldIndex, newIndex) {
+                widget.playerProvider.reorderQueue(
+                  oldIndex + displayOffset,
+                  newIndex + displayOffset,
+                );
+              },
               padding: const EdgeInsets.only(bottom: 24, top: 8),
               itemBuilder: (context, index) {
-                var song = queue[index];
+                var song = displayQueue[index];
+                var actualIndex = index + displayOffset;
                 var isCurrent =
                     current != null &&
                     song.id == current.id &&
-                    index == currentIndex;
-                var isOld = index < currentIndex;
+                    actualIndex == currentIndex;
+                var isOld = actualIndex < currentIndex;
 
                 return Column(
+                  key: ValueKey<String>('${song.id}_$actualIndex'),
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Dismissible(
-                      key: ValueKey<String>('${song.id}_$index'),
+                      key: ValueKey<String>('dismiss_${song.id}_$actualIndex'),
                       direction: DismissDirection.endToStart,
                       background: Container(
                         color: theme.colorScheme.errorContainer,
@@ -182,7 +191,7 @@ class _QueueScreenState extends State<QueueScreen> {
                               SizedBox(
                                 width: 36,
                                 child: Text(
-                                  '${index + 1}',
+                                  '${actualIndex + 1}',
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: isCurrent
                                         ? theme.colorScheme.primary
@@ -206,7 +215,7 @@ class _QueueScreenState extends State<QueueScreen> {
                                   onTap: () {
                                     if (!isCurrent) {
                                       widget.playerProvider.audioHandler
-                                          .skipToQueueItem(index);
+                                          .skipToQueueItem(actualIndex);
                                     }
                                   },
                                 ),
@@ -216,7 +225,7 @@ class _QueueScreenState extends State<QueueScreen> {
                         ),
                       ),
                     ),
-                    if (index < queue.length - 1)
+                    if (index < displayQueue.length - 1)
                       Padding(
                         padding: const EdgeInsets.only(left: 20),
                         child: Divider(
