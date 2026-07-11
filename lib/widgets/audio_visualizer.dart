@@ -102,8 +102,8 @@ class _VisualizerPainter extends CustomPainter {
         // High-performance smooth wave equations.
         // No allocations or complex paths.
         var offset = i * (2 * pi / barCount);
-        var rawSine = sin(animationValue * 2 * pi * 1.2 + offset);
-        var rawSine2 = cos(animationValue * 2 * pi * 0.7 - offset * 1.4);
+        var rawSine = sin(animationValue * 2 * pi * 1.0 + offset);
+        var rawSine2 = cos(animationValue * 2 * pi * 2.0 - offset * 1.4);
         var normalized = (rawSine + rawSine2 + 2.0) / 4.0;
         targetHeight = minHeight + normalized * (size.height - minHeight);
       } else {
