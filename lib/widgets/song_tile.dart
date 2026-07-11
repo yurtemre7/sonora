@@ -12,6 +12,7 @@ class SongTile extends StatelessWidget {
     this.onPlayNext,
     this.onAddToQueue,
     this.onAddToPlaylist,
+    this.onRemoveFromPlaylist,
     this.onShowInfo,
     this.onToggleFavorite,
     this.isCurrent = false,
@@ -24,6 +25,7 @@ class SongTile extends StatelessWidget {
   final VoidCallback? onPlayNext;
   final VoidCallback? onAddToQueue;
   final VoidCallback? onAddToPlaylist;
+  final VoidCallback? onRemoveFromPlaylist;
   final VoidCallback? onShowInfo;
   final VoidCallback? onToggleFavorite;
   final bool isCurrent;
@@ -97,7 +99,7 @@ class SongTile extends StatelessWidget {
                   fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
-            if (onPlayNext != null || onAddToQueue != null || onAddToPlaylist != null || onShowInfo != null || onToggleFavorite != null) ...[
+            if (onPlayNext != null || onAddToQueue != null || onAddToPlaylist != null || onRemoveFromPlaylist != null || onShowInfo != null || onToggleFavorite != null) ...[
               const SizedBox(width: 4),
               PopupMenuButton<int>(
                 icon: Icon(
@@ -113,6 +115,7 @@ class SongTile extends StatelessWidget {
                   if (value == 4 && onAddToPlaylist != null) onAddToPlaylist!();
                   if (value == 5 && onShowInfo != null) onShowInfo!();
                   if (value == 6 && onToggleFavorite != null) onToggleFavorite!();
+                  if (value == 7 && onRemoveFromPlaylist != null) onRemoveFromPlaylist!();
                 },
                 itemBuilder: (context) => [
                   if (onPlayNext != null)
@@ -145,6 +148,17 @@ class SongTile extends StatelessWidget {
                           Icon(Icons.playlist_add_rounded, size: 20),
                           SizedBox(width: 8),
                           Text('Add to playlist'),
+                        ],
+                      ),
+                    ),
+                  if (onRemoveFromPlaylist != null)
+                    const PopupMenuItem(
+                      value: 7,
+                      child: Row(
+                        children: [
+                          Icon(Icons.playlist_remove_rounded, size: 20),
+                          SizedBox(width: 8),
+                          Text('Remove from playlist'),
                         ],
                       ),
                     ),

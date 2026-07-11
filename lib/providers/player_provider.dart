@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 
+import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
@@ -21,6 +22,7 @@ class PlayerProvider extends ChangeNotifier {
 
   List<Song> allSongs = [];
   List<Song> queue = [];
+  List<Playlist> playlists = [];
   List<Song> _originalQueue = [];
   var currentIndex = -1;
   var isShuffled = false;
@@ -338,5 +340,60 @@ class PlayerProvider extends ChangeNotifier {
     _mediaItemSub?.cancel();
     _playbackStateSub?.cancel();
     super.dispose();
+  }
+
+  // ── Playlist management APIs ────────────────────────────────────────────────
+
+  void updatePlaylists(List<Playlist> newPlaylists) {
+    playlists = List<Playlist>.from(newPlaylists);
+    notifyListeners();
+  }
+
+  Future<void> loadPlaylists() async {
+    var scanner = MusicScanner();
+    playlists = await scanner.getPlaylists();
+    notifyListeners();
+  }
+
+  Future<void> createPlaylist(String name) async {
+    var scanner = MusicScanner();
+    await scanner.createPlaylist(name);
+    await loadPlaylists();
+  }
+
+  Future<void> deletePlaylist(String id) async {
+    var scanner = MusicScanner();
+    await scanner.deletePlaylist(id);
+    await loadPlaylists();
+  }
+
+  Future<void> addSongToPlaylist(String playlistId, int songId) async {
+    var scanner = MusicScanner();
+    await scanner.addSongToPlaylist(playlistId, songId);
+    await loadPlaylists();
+  }
+
+  Future<void> removeSongFromPlaylist(String playlistId, int songId) async {
+    var scanner = MusicScanner();
+    await scanner.removeSongFromPlaylist(playlistId, songId);
+    await loadPlaylists();
+  }
+
+  Future<void> reorderPlaylistSongs(String playlistId, List<int> reorderedIds) async {
+    var scanner = MusicScanner();
+    var list = await scanner.getPlaylists();
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == playlistId) {
+        list[i] = Playlist(
+          id: list[i].id,
+          name: list[i].name,
+          songIds: reorderedIds,
+        );
+        break;
+      }
+    }
+    await scanner.savePlaylists(list);
+    playlists = list;
+    notifyListeners();
   }
 }

@@ -8,10 +8,10 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/queue_screen.dart';
 import 'package:sonora/services/lyrics_service.dart';
-import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/marquee_text.dart';
 import 'package:sonora/widgets/player_controls.dart';
+import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/seek_bar.dart';
 
 class NowPlayingScreen extends StatefulWidget {
@@ -369,59 +369,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     );
   }
 
-  Future<void> _showAddToPlaylistDialog(BuildContext context, Song song) async {
-    var theme = Theme.of(context);
-    var playlists = await MusicScanner().getPlaylists();
-    if (!context.mounted) return;
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('Add "${song.displayTitle}" to:'),
-        content: playlists.isEmpty
-            ? Text(
-                'No playlists found.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              )
-            : SizedBox(
-                width: double.maxFinite,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: playlists.length,
-                  itemBuilder: (context, index) {
-                    var playlist = playlists[index];
-                    return ListTile(
-                      leading: Icon(
-                        playlist.id == 'favorites'
-                            ? Icons.favorite_rounded
-                            : Icons.queue_music_rounded,
-                      ),
-                      title: Text(playlist.name),
-                      onTap: () async {
-                        Navigator.pop(dialogContext);
-                        await MusicScanner().addSongToPlaylist(playlist.id, song.id);
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added to "${playlist.name}".'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
-    );
+  void _showAddToPlaylistDialog(BuildContext context, Song song) {
+    PlaylistSelectorBottomSheet.show(context, song, widget.playerProvider);
   }
 
   void _showSongInfoBottomSheet(BuildContext context, Song song) {

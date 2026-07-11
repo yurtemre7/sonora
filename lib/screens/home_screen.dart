@@ -6,6 +6,7 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/mini_player.dart';
+import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -353,65 +354,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   void _showAddToPlaylistDialog(Song song) {
-    var theme = Theme.of(context);
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('Add "${song.displayTitle}" to:'),
-        content: widget.playlists.isEmpty
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'No playlists found.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                      _showCreatePlaylistDialog();
-                    },
-                    icon: const Icon(Icons.add_rounded),
-                    label: const Text('Create Playlist'),
-                  ),
-                ],
-              )
-            : SizedBox(
-                width: double.maxFinite,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: widget.playlists.length,
-                  itemBuilder: (context, index) {
-                    var playlist = widget.playlists[index];
-                    return ListTile(
-                      leading: const Icon(Icons.queue_music_rounded),
-                      title: Text(playlist.name),
-                      onTap: () async {
-                        Navigator.pop(dialogContext);
-                        await widget.onAddSongToPlaylist(playlist.id, song.id);
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added to "${playlist.name}".'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
-    );
+    PlaylistSelectorBottomSheet.show(context, song, widget.playerProvider);
   }
 
   Widget _buildSyncPromptBanner(ThemeData theme) {
