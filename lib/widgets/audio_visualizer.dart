@@ -19,19 +19,31 @@ class AudioVisualizer extends StatefulWidget {
   State<AudioVisualizer> createState() => _AudioVisualizerState();
 }
 
-class _AudioVisualizerState extends State<AudioVisualizer> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _AudioVisualizerState extends State<AudioVisualizer> with TickerProviderStateMixin {
+  late AnimationController _waveController;
+  late AnimationController _amplitudeController;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _waveController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
+    _amplitudeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450), // Smooth transition duration
+    );
+
+    _amplitudeController.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed) {
+        _waveController.stop();
+      }
+    });
 
     if (widget.isPlaying) {
-      _controller.repeat();
+      _waveController.repeat();
+      _amplitudeController.value = 1.0;
     }
   }
 
@@ -40,29 +52,31 @@ class _AudioVisualizerState extends State<AudioVisualizer> with SingleTickerProv
     super.didUpdateWidget(oldWidget);
     if (widget.isPlaying != oldWidget.isPlaying) {
       if (widget.isPlaying) {
-        _controller.repeat();
+        _waveController.repeat();
+        _amplitudeController.forward();
       } else {
-        _controller.stop();
+        _amplitudeController.reverse();
       }
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _waveController.dispose();
+    _amplitudeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _controller,
+      animation: Listenable.merge([_waveController, _amplitudeController]),
       builder: (context, _) {
         return CustomPaint(
           size: Size(double.infinity, widget.height),
           painter: _VisualizerPainter(
-            animationValue: _controller.value,
-            isPlaying: widget.isPlaying,
+            animationValue: _waveController.value,
+            amplitudeFactor: _amplitudeController.value,
             color: widget.color,
             barCount: widget.barCount,
           ),
@@ -75,13 +89,13 @@ class _AudioVisualizerState extends State<AudioVisualizer> with SingleTickerProv
 class _VisualizerPainter extends CustomPainter {
   _VisualizerPainter({
     required this.animationValue,
-    required this.isPlaying,
+    required this.amplitudeFactor,
     required this.color,
     required this.barCount,
   });
 
   final double animationValue;
-  final bool isPlaying;
+  final double amplitudeFactor;
   final Color color;
   final int barCount;
 
@@ -98,14 +112,13 @@ class _VisualizerPainter extends CustomPainter {
 
     for (var i = 0; i < barCount; i++) {
       double targetHeight;
-      if (isPlaying) {
-        // High-performance smooth wave equations.
-        // No allocations or complex paths.
+      if (amplitudeFactor > 0.0) {
         var offset = i * (2 * pi / barCount);
         var rawSine = sin(animationValue * 2 * pi * 1.0 + offset);
         var rawSine2 = cos(animationValue * 2 * pi * 2.0 - offset * 1.4);
         var normalized = (rawSine + rawSine2 + 2.0) / 4.0;
-        targetHeight = minHeight + normalized * (size.height - minHeight);
+        // Smoothly scale the active wave height using the amplitude factor
+        targetHeight = minHeight + (normalized * (size.height - minHeight)) * amplitudeFactor;
       } else {
         targetHeight = minHeight;
       }
@@ -125,7 +138,7 @@ class _VisualizerPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _VisualizerPainter oldDelegate) {
     return oldDelegate.animationValue != animationValue ||
-        oldDelegate.isPlaying != isPlaying ||
+        oldDelegate.amplitudeFactor != amplitudeFactor ||
         oldDelegate.color != color ||
         oldDelegate.barCount != barCount;
   }
