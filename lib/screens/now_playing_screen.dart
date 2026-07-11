@@ -41,51 +41,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         var song = widget.playerProvider.currentSong;
 
         if (song == null) {
-          return Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                iconSize: 32,
-                onPressed: () => Navigator.pop(context),
-              ),
-              title: const Text('Now Playing'),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              systemOverlayStyle: SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent,
-                statusBarIconBrightness: theme.brightness == Brightness.dark
-                    ? Brightness.light
-                    : Brightness.dark,
-                statusBarBrightness: theme.brightness == Brightness.dark
-                    ? Brightness.dark
-                    : Brightness.light,
-              ),
-            ),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.music_off_rounded,
-                    size: 64,
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No song playing',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Close Player'),
-                  ),
-                ],
-              ),
-            ),
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) Navigator.pop(context);
+          });
+          return const SizedBox.shrink();
         }
 
         if (!song.hasLyrics && _showLyrics) {
@@ -527,13 +486,18 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
   void _showSleepTimerSheet(BuildContext context) {
     var theme = Theme.of(context);
+    var selectedDuration = ValueNotifier<Duration?>(null);
+
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return ListenableBuilder(
-          listenable: widget.playerProvider,
+          listenable: Listenable.merge([widget.playerProvider, selectedDuration]),
           builder: (context, _) {
             var activeTimer = widget.playerProvider.sleepTimerDuration != null;
+            var sel = selectedDuration.value;
+            var showConfirmation = !activeTimer && sel != null;
+
             return Container(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -599,7 +563,57 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                               );
                               Navigator.pop(context);
                             },
-                            child: Text('+${widget.playerProvider.sleepTimerExtendMinutes} Min'),
+                            child: Text('+${widget.playerProvider.sleepTimerExtendMinutes} min'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else if (showConfirmation) ...[
+                    Card(
+                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Timer Duration',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _formatDuration(sel),
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => selectedDuration.value = null,
+                            child: const Text('Back'),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () {
+                              widget.playerProvider.startSleepTimer(sel);
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Start Timer'),
                           ),
                         ),
                       ],
@@ -610,16 +624,21 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                       runSpacing: 12,
                       alignment: WrapAlignment.center,
                       children: [
-                        _buildPresetChip(context, '5 Min', const Duration(minutes: 5)),
-                        _buildPresetChip(context, '15 Min', const Duration(minutes: 15)),
-                        _buildPresetChip(context, '30 Min', const Duration(minutes: 30)),
-                        _buildPresetChip(context, '45 Min', const Duration(minutes: 45)),
-                        _buildPresetChip(context, '60 Min', const Duration(minutes: 60)),
+                        _buildPresetChip(context, '5 min', const Duration(minutes: 5), () => selectedDuration.value = const Duration(minutes: 5)),
+                        _buildPresetChip(context, '15 min', const Duration(minutes: 15), () => selectedDuration.value = const Duration(minutes: 15)),
+                        _buildPresetChip(context, '30 min', const Duration(minutes: 30), () => selectedDuration.value = const Duration(minutes: 30)),
+                        _buildPresetChip(context, '45 min', const Duration(minutes: 45), () => selectedDuration.value = const Duration(minutes: 45)),
+                        _buildPresetChip(context, '60 min', const Duration(minutes: 60), () => selectedDuration.value = const Duration(minutes: 60)),
                       ],
                     ),
                     const SizedBox(height: 20),
                     OutlinedButton.icon(
-                      onPressed: () => _showCustomTimerDialog(context),
+                      onPressed: () async {
+                        var duration = await _showCustomTimerDialog(context);
+                        if (duration != null) {
+                          selectedDuration.value = duration;
+                        }
+                      },
                       icon: const Icon(Icons.edit_calendar_rounded),
                       label: const Text('Custom Duration...'),
                     ),
@@ -634,14 +653,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     );
   }
 
-  Widget _buildPresetChip(BuildContext context, String label, Duration duration) {
+  Widget _buildPresetChip(BuildContext context, String label, Duration duration, VoidCallback onTap) {
     var theme = Theme.of(context);
     return ActionChip(
       label: Text(label),
-      onPressed: () {
-        widget.playerProvider.startSleepTimer(duration);
-        Navigator.pop(context);
-      },
+      onPressed: onTap,
       backgroundColor: theme.colorScheme.surfaceContainerHighest,
       labelStyle: theme.textTheme.labelMedium?.copyWith(
         color: theme.colorScheme.onSurface,
@@ -653,9 +669,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     );
   }
 
-  void _showCustomTimerDialog(BuildContext context) {
+  Future<Duration?> _showCustomTimerDialog(BuildContext context) {
     var controller = TextEditingController();
-    showDialog(
+    return showDialog<Duration?>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -678,12 +694,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
               onPressed: () {
                 var minutes = int.tryParse(controller.text);
                 if (minutes != null && minutes > 0) {
-                  widget.playerProvider.startSleepTimer(Duration(minutes: minutes));
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                  Navigator.pop(context, Duration(minutes: minutes));
                 }
               },
-              child: const Text('Start'),
+              child: const Text('Next'),
             ),
           ],
         );

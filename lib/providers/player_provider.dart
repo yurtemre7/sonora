@@ -527,6 +527,10 @@ class PlayerProvider extends ChangeNotifier {
         sleepTimerOriginalDuration = null;
         _isFadingOut = false;
 
+        queue = [];
+        _originalQueue = [];
+        currentIndex = -1;
+
         _updateMediaNotificationControls();
         notifyListeners();
       } else {
