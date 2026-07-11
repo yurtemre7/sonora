@@ -2,6 +2,15 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.2.1] - 2026-07-11
+### Fixed
+* Resolve background playback silence and audio focus session conflicts
+* Queue shows only one previous song in UI, fix ReorderableListView key
+
+## [1.2.0] - 2026-07-11
+### Added
+* Add scrollbars, search & sort to albums/artists/playlists tabs
+
 ## [1.1.17] - 2026-07-11
 ### Added
 * Animate audio visualizer smoothly to rest when playback pauses
