@@ -557,45 +557,37 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 children: [
                   if (widget.isSyncing)
                     const LinearProgressIndicator(minHeight: 2),
-                  Center(
-                    child: Container(
-                      height: 38,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.sizeOf(context).width - 40,
+                  Container(
+                    height: 38,
+                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
                       ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-                        ),
+                    ),
+                    child: TabBar(
+                      controller: _tabController,
+                      dividerColor: Colors.transparent,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      splashBorderRadius: BorderRadius.circular(18),
+                      indicator: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(18),
                       ),
-                      child: TabBar(
-                        controller: _tabController,
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.center,
-                        dividerColor: Colors.transparent,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        splashBorderRadius: BorderRadius.circular(18),
-                        indicator: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        labelColor: theme.colorScheme.onPrimaryContainer,
-                        labelStyle: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
-                        unselectedLabelStyle: theme.textTheme.labelLarge,
-                        labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-                        tabs: const [
-                          Tab(text: 'Songs'),
-                          Tab(text: 'Albums'),
-                          Tab(text: 'Artists'),
-                          Tab(text: 'Playlists'),
-                        ],
+                      labelColor: theme.colorScheme.onPrimaryContainer,
+                      labelStyle: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
+                      unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+                      unselectedLabelStyle: theme.textTheme.labelLarge,
+                      tabs: const [
+                        Tab(text: 'Songs'),
+                        Tab(text: 'Albums'),
+                        Tab(text: 'Artists'),
+                        Tab(text: 'Playlists'),
+                      ],
                     ),
                   ),
                 ],
