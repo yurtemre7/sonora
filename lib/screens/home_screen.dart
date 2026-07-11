@@ -582,11 +582,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                       unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
                       unselectedLabelStyle: theme.textTheme.labelLarge,
-                      tabs: const [
-                        Tab(text: 'Songs'),
-                        Tab(text: 'Albums'),
-                        Tab(text: 'Artists'),
-                        Tab(text: 'Playlists'),
+                      tabs: [
+                        const Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Songs'))),
+                        const Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Albums'))),
+                        const Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Artists'))),
+                        const Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Playlists'))),
                       ],
                     ),
                   ),
