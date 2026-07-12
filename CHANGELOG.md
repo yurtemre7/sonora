@@ -2,6 +2,19 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.2.2] - 2026-07-12
+### Added
+* Move RefreshIndicator to individual tab lists for reliable overscroll triggering
+* Implement floating app bar and pull-to-refresh library synchronization
+* Display sync library details and statistics on settings panel
+* Strip featuring artist details from displayTitle in Song model
+### Fixed
+* Extract dynamic theme color when a song is tapped directly in the list view
+* Remove obsolete scroll-to-active logic in queue screen
+### Changed
+* Refactor: Replace CustomScrollView with NestedScrollView for coordinated app bar collapsing
+* Style: Sort dependencies and dev_dependencies alphabetically in pubspec.yaml
+
 ## [1.2.1] - 2026-07-11
 ### Fixed
 * Resolve background playback silence and audio focus session conflicts
