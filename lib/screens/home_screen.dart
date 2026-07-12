@@ -845,37 +845,34 @@ class _HomeScreenState extends State<HomeScreen>
           );
         },
       ),
+      extendBody: true,
       body: NestedScrollView(
-        floatHeaderSlivers: true,
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
               floating: true,
               pinned: true,
-              backgroundColor: theme.colorScheme.surface,
+              backgroundColor: theme.colorScheme.surfaceContainer,
               elevation: 0,
               scrolledUnderElevation: 0,
               expandedHeight: 120,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.settings_rounded),
-                  onPressed: () {
-                    _searchFocusNode.unfocus();
-                    widget.onOpenSettings();
-                  },
-                  tooltip: 'Settings',
-                ),
-                const SizedBox(width: 8),
-              ],
               flexibleSpace: FlexibleSpaceBar(
                 titlePadding: const EdgeInsets.only(left: 20, bottom: 60),
-                title: Text(
-                  'Sonora',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                    color: theme.colorScheme.onSurface,
-                  ),
+                title: Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      'Sonora',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    SizedBox(width: 6),
+                    Icon(Icons.headphones, color: theme.colorScheme.primary),
+                  ],
                 ),
               ),
               bottom: PreferredSize(
@@ -885,63 +882,80 @@ class _HomeScreenState extends State<HomeScreen>
                   children: [
                     if (widget.isSyncing)
                       const LinearProgressIndicator(minHeight: 2),
-                    Container(
-                      height: 38,
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: theme.colorScheme.outlineVariant.withValues(
-                            alpha: 0.3,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 38,
+                            margin: const EdgeInsets.only(
+                              left: 16,
+                              top: 8,
+                              bottom: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: theme.colorScheme.outlineVariant
+                                    .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: TabBar(
+                              controller: _tabController,
+                              dividerColor: Colors.transparent,
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              splashBorderRadius: BorderRadius.circular(18),
+                              indicator: BoxDecoration(
+                                color: theme.colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              labelColor: theme.colorScheme.onPrimaryContainer,
+                              labelStyle: theme.textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              unselectedLabelColor:
+                                  theme.colorScheme.onSurfaceVariant,
+                              unselectedLabelStyle: theme.textTheme.labelLarge,
+                              tabs: [
+                                const Tab(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text('Songs'),
+                                  ),
+                                ),
+                                const Tab(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text('Albums'),
+                                  ),
+                                ),
+                                const Tab(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text('Artists'),
+                                  ),
+                                ),
+                                const Tab(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text('Playlists'),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      child: TabBar(
-                        controller: _tabController,
-                        dividerColor: Colors.transparent,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        splashBorderRadius: BorderRadius.circular(18),
-                        indicator: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(18),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.settings_rounded),
+                          onPressed: () {
+                            _searchFocusNode.unfocus();
+                            widget.onOpenSettings();
+                          },
+                          tooltip: 'Settings',
                         ),
-                        labelColor: theme.colorScheme.onPrimaryContainer,
-                        labelStyle: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
-                        unselectedLabelStyle: theme.textTheme.labelLarge,
-                        tabs: [
-                          const Tab(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('Songs'),
-                            ),
-                          ),
-                          const Tab(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('Albums'),
-                            ),
-                          ),
-                          const Tab(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('Artists'),
-                            ),
-                          ),
-                          const Tab(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('Playlists'),
-                            ),
-                          ),
-                        ],
-                      ),
+                        const SizedBox(width: 16),
+                      ],
                     ),
                   ],
                 ),
@@ -980,9 +994,12 @@ class _HomeScreenState extends State<HomeScreen>
                               child: RefreshIndicator(
                                 onRefresh: widget.onResyncNow,
                                 child: GridView.builder(
-                                  key: const PageStorageKey<String>('albums_grid'),
+                                  key: const PageStorageKey<String>(
+                                    'albums_grid',
+                                  ),
                                   primary: true,
-                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
                                   padding: const EdgeInsets.only(
                                     left: 20,
                                     right: 20,
@@ -1095,9 +1112,12 @@ class _HomeScreenState extends State<HomeScreen>
                               child: RefreshIndicator(
                                 onRefresh: widget.onResyncNow,
                                 child: ListView.builder(
-                                  key: const PageStorageKey<String>('artists_list'),
+                                  key: const PageStorageKey<String>(
+                                    'artists_list',
+                                  ),
                                   primary: true,
-                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
                                   padding: const EdgeInsets.only(
                                     top: 12,
                                     bottom: 100,
@@ -1119,9 +1139,8 @@ class _HomeScreenState extends State<HomeScreen>
                                               shape: BoxShape.circle,
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withValues(
-                                                    alpha: 0.15,
-                                                  ),
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.15),
                                                   blurRadius: 6,
                                                   offset: const Offset(0, 3),
                                                 ),
@@ -1249,16 +1268,21 @@ class _HomeScreenState extends State<HomeScreen>
                               child: RefreshIndicator(
                                 onRefresh: widget.onResyncNow,
                                 child: ListView.builder(
-                                  key: const PageStorageKey<String>('playlists_list'),
+                                  key: const PageStorageKey<String>(
+                                    'playlists_list',
+                                  ),
                                   primary: true,
-                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
                                   padding: const EdgeInsets.only(bottom: 100),
                                   itemCount: _getFilteredPlaylists().length,
                                   itemBuilder: (context, index) {
-                                    var playlist = _getFilteredPlaylists()[index];
+                                    var playlist =
+                                        _getFilteredPlaylists()[index];
                                     var songCount = widget.songs
                                         .where(
-                                          (s) => playlist.songIds.contains(s.id),
+                                          (s) =>
+                                              playlist.songIds.contains(s.id),
                                         )
                                         .length;
                                     var playlists = _getFilteredPlaylists();
@@ -1271,9 +1295,8 @@ class _HomeScreenState extends State<HomeScreen>
                                             width: 48,
                                             height: 48,
                                             decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(
-                                                8,
-                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                               gradient: LinearGradient(
                                                 colors: [
                                                   theme
@@ -1366,7 +1389,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                           .onRemoveSongFromPlaylist,
                                                       onReorderSongs: widget
                                                           .onReorderPlaylistSongs,
-                                                      playlists: widget.playlists,
+                                                      playlists:
+                                                          widget.playlists,
                                                       onAddSongToPlaylist: widget
                                                           .onAddSongToPlaylist,
                                                     ),
@@ -1493,19 +1517,26 @@ class _HomeScreenState extends State<HomeScreen>
                                               child: RefreshIndicator(
                                                 onRefresh: widget.onResyncNow,
                                                 child: ListView.builder(
-                                                  key: const PageStorageKey<String>('songs_list'),
+                                                  key:
+                                                      const PageStorageKey<
+                                                        String
+                                                      >('songs_list'),
                                                   primary: true,
-                                                  physics: const AlwaysScrollableScrollPhysics(),
-                                                  padding: const EdgeInsets.only(
-                                                    bottom: 100,
-                                                  ),
-                                                  itemCount: filteredSongs.length,
+                                                  physics:
+                                                      const AlwaysScrollableScrollPhysics(),
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 100,
+                                                      ),
+                                                  itemCount:
+                                                      filteredSongs.length,
                                                   itemBuilder: (context, index) {
                                                     var song =
                                                         filteredSongs[index];
                                                     var isCurrent =
                                                         currentSong != null &&
-                                                        currentSong.id == song.id;
+                                                        currentSong.id ==
+                                                            song.id;
                                                     return SongTile(
                                                       song: song,
                                                       isCurrent: isCurrent,
