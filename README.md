@@ -2,6 +2,9 @@
 
 Sonora is a local music player for Android built with Flutter, featuring a dark mode Material 3 Expressive design with a deep violet/purple theme. It focuses on privacy, zero file duplication, directory-based file sync, and background playback.
 
+> [!NOTE]
+> **AI Disclaimer:** This project is built entirely with AI assistance (using Google's Antigravity agentic coding framework). All code, architectures, and features were designed, implemented, and refined through AI-human pair programming.
+
 ## Features
 
 - **Material 3 Expressive Design**: Dark mode interface using Outfit and Inter typography, circular vinyl play controls, blurred background art, and custom sliders.
