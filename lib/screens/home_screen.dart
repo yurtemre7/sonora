@@ -75,10 +75,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final _songsScrollController = ScrollController();
-  final _albumsScrollController = ScrollController();
-  final _artistsScrollController = ScrollController();
-  final _playlistsScrollController = ScrollController();
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
   var _searchQuery = '';
@@ -684,10 +680,6 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     _tabController.dispose();
-    _songsScrollController.dispose();
-    _albumsScrollController.dispose();
-    _artistsScrollController.dispose();
-    _playlistsScrollController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
@@ -853,114 +845,116 @@ class _HomeScreenState extends State<HomeScreen>
           );
         },
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            pinned: true,
-            backgroundColor: theme.colorScheme.surface,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            expandedHeight: 120,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings_rounded),
-                onPressed: () {
-                  _searchFocusNode.unfocus();
-                  widget.onOpenSettings();
-                },
-                tooltip: 'Settings',
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              floating: true,
+              pinned: true,
+              backgroundColor: theme.colorScheme.surface,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              expandedHeight: 120,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.settings_rounded),
+                  onPressed: () {
+                    _searchFocusNode.unfocus();
+                    widget.onOpenSettings();
+                  },
+                  tooltip: 'Settings',
+                ),
+                const SizedBox(width: 8),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                titlePadding: const EdgeInsets.only(left: 20, bottom: 60),
+                title: Text(
+                  'Sonora',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
               ),
-              const SizedBox(width: 8),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 60),
-              title: Text(
-                'Sonora',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                  color: theme.colorScheme.onSurface,
+              bottom: PreferredSize(
+                preferredSize: Size.fromHeight(widget.isSyncing ? 56 : 54),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.isSyncing)
+                      const LinearProgressIndicator(minHeight: 2),
+                    Container(
+                      height: 38,
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant.withValues(
+                            alpha: 0.3,
+                          ),
+                        ),
+                      ),
+                      child: TabBar(
+                        controller: _tabController,
+                        dividerColor: Colors.transparent,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        splashBorderRadius: BorderRadius.circular(18),
+                        indicator: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        labelColor: theme.colorScheme.onPrimaryContainer,
+                        labelStyle: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+                        unselectedLabelStyle: theme.textTheme.labelLarge,
+                        tabs: [
+                          const Tab(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Songs'),
+                            ),
+                          ),
+                          const Tab(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Albums'),
+                            ),
+                          ),
+                          const Tab(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Artists'),
+                            ),
+                          ),
+                          const Tab(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Playlists'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            bottom: PreferredSize(
-              preferredSize: Size.fromHeight(widget.isSyncing ? 56 : 54),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+          ];
+        },
+        body: Column(
+          children: [
+            _buildSearchAndFilterHeader(theme),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
                 children: [
-                  if (widget.isSyncing)
-                    const LinearProgressIndicator(minHeight: 2),
-                  Container(
-                    height: 38,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: theme.colorScheme.outlineVariant.withValues(
-                          alpha: 0.3,
-                        ),
-                      ),
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      dividerColor: Colors.transparent,
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      splashBorderRadius: BorderRadius.circular(18),
-                      indicator: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      labelColor: theme.colorScheme.onPrimaryContainer,
-                      labelStyle: theme.textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
-                      unselectedLabelStyle: theme.textTheme.labelLarge,
-                      tabs: [
-                        const Tab(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text('Songs'),
-                          ),
-                        ),
-                        const Tab(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text('Albums'),
-                          ),
-                        ),
-                        const Tab(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text('Artists'),
-                          ),
-                        ),
-                        const Tab(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text('Playlists'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverFillRemaining(
-            child: Column(
-              children: [
-                _buildSearchAndFilterHeader(theme),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
                       // Tab 1: Songs
                       widget.songs.isEmpty
                           ? Center(
@@ -1058,11 +1052,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                 .playerProvider
                                                 .currentSong;
                                             return Scrollbar(
-                                              controller:
-                                                  _songsScrollController,
                                               child: ListView.builder(
-                                                controller:
-                                                    _songsScrollController,
+                                                primary: true,
                                                 padding: const EdgeInsets.only(
                                                   bottom: 100,
                                                 ),
@@ -1138,9 +1129,8 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                             )
                           : Scrollbar(
-                              controller: _albumsScrollController,
                               child: GridView.builder(
-                                controller: _albumsScrollController,
+                                primary: true,
                                 padding: const EdgeInsets.only(
                                   left: 20,
                                   right: 20,
@@ -1248,9 +1238,8 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                             )
                           : Scrollbar(
-                              controller: _artistsScrollController,
                               child: ListView.builder(
-                                controller: _artistsScrollController,
+                                primary: true,
                                 padding: const EdgeInsets.only(
                                   top: 12,
                                   bottom: 100,
@@ -1397,9 +1386,8 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                             )
                           : Scrollbar(
-                              controller: _playlistsScrollController,
                               child: ListView.builder(
-                                controller: _playlistsScrollController,
+                                primary: true,
                                 padding: const EdgeInsets.only(bottom: 100),
                                 itemCount: _getFilteredPlaylists().length,
                                 itemBuilder: (context, index) {
@@ -1543,8 +1531,6 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ],
             ),
-          ),
-        ],
       ),
       floatingActionButton:
           _tabController.index == 3 && widget.playlists.isNotEmpty
