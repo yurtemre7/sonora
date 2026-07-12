@@ -2,6 +2,13 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.3.0] - 2026-07-12
+### Added
+* Show dynamic, actual application version name and version code dynamically using `package_info_plus` package on Settings screen
+* Implemented native `PageStorageKey` scroll state preservation across tab navigation switches
+### Changed
+* Refactored `TabBarView` to a conditional switch layout to resolve `PrimaryScrollController` multi-position conflicts with interactive `Scrollbar` widgets
+
 ## [1.2.2] - 2026-07-12
 ### Added
 * Move RefreshIndicator to individual tab lists for reliable overscroll triggering
