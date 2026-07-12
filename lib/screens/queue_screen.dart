@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/widgets/song_tile.dart';
@@ -18,37 +17,11 @@ class QueueScreen extends StatefulWidget {
 
 class _QueueScreenState extends State<QueueScreen> {
   final _scrollController = ScrollController();
-  var _hasScrolledToActive = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollToActiveItem();
-  }
 
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-
-  /// Scrolls the currently playing item to the center of the list view.
-  void _scrollToActiveItem() {
-    if (_hasScrolledToActive) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      var activeIndex = widget.playerProvider.currentIndex;
-      if (activeIndex > 0 && _scrollController.hasClients) {
-        // Average list item height is roughly 68.0
-        var offset = max(0.0, activeIndex * 68.0 - 150.0);
-        _scrollController.animateTo(
-          offset,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOutCubic,
-        );
-        _hasScrolledToActive = true;
-      }
-    });
   }
 
   @override
