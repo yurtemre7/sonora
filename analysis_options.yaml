@@ -44,6 +44,7 @@ linter:
     directives_ordering: true
     unnecessary_async: true
     avoid_slow_async_io: true
+    sort_pub_dependencies: true
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

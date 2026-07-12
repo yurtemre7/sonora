@@ -7,37 +7,24 @@ environment:
   sdk: ^3.12.2
 
 dependencies:
+  audio_service: ^0.18.19
+  audio_service_win: ^0.0.3
+  audio_session: ^0.2.4
+  audio_tags_lofty: ^0.0.6
+  file_picker: ^12.0.0-beta.7
   flutter:
     sdk: flutter
-
-  # Audio playback engine
-  just_audio: ^0.10.6
-
-  # Background playback + media notifications
-  audio_service: ^0.18.19
-
-  # Audio session management (focus, interruptions)
-  audio_session: ^0.2.4
-
-  # File and directory selection
-  file_picker: ^12.0.0-beta.7
-
-  # Runtime permission handling
-  permission_handler: ^12.0.3
-
-  # Google Fonts for M3 Expressive typography
   google_fonts: ^8.1.0
-
-  # Path provider for caching artwork
-  path_provider: ^2.1.5
-  audio_tags_lofty: ^0.0.6
-  shared_preferences: ^2.5.5
+  just_audio: ^0.10.6
   just_audio_windows: ^0.2.3
-  audio_service_win: ^0.0.3
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.3
+  shared_preferences: ^2.5.5
+
 dev_dependencies:
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
