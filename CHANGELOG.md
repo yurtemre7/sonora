@@ -2,12 +2,25 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.3.1] - 2026-07-12
+### Added
+* Add correct app icon at info
+* Add simple app icon
+### Fixed
+* Improve seek bar
+* Scroll bar up scrolling buggy behaviour
+### Changed
+* Chore: Format files
+
 ## [1.3.0] - 2026-07-12
 ### Added
-* Show dynamic, actual application version name and version code dynamically using `package_info_plus` package on Settings screen
-* Implemented native `PageStorageKey` scroll state preservation across tab navigation switches
+* Switch TabBarView to conditional rendering with PageStorageKeys to enable Scrollbars without PrimaryScrollController conflicts
+* Display actual app version and build number in settings screen using package_info_plus
+### Fixed
+* Remove Scrollbar widgets to prevent PrimaryScrollController multi-position crash in TabBarView
 ### Changed
-* Refactored `TabBarView` to a conditional switch layout to resolve `PrimaryScrollController` multi-position conflicts with interactive `Scrollbar` widgets
+* Docs: Add AI disclaimer to README.md
+* Chore: Set pubspec build number to placeholder +1
 
 ## [1.2.2] - 2026-07-12
 ### Added
