@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
@@ -28,6 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String? _scanFolder;
   String? _lastSyncTime;
   var _isSyncing = false;
+  var _appVersion = '1.0.0';
 
   @override
   void initState() {
@@ -43,11 +45,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     var syncTime = await scanner.getLastSyncTime();
     var prefs = SharedPreferencesAsync();
     var keepPlaying = await prefs.getBool('keep_playing_on_close') ?? false;
+
+    var version = '1.0.0';
+    try {
+      var packageInfo = await PackageInfo.fromPlatform();
+      version = '${packageInfo.version}+${packageInfo.buildNumber}';
+    } catch (_) {}
+
     if (!mounted) return;
     setState(() {
       _scanFolder = folder;
       _lastSyncTime = syncTime;
       _keepPlayingOnClose = keepPlaying;
+      _appVersion = version;
     });
   }
 
@@ -194,7 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Version 1.0.0',
+                  'Version $_appVersion',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -741,7 +751,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.info_outline_rounded),
             title: const Text('About Sonora'),
-            subtitle: const Text('Version 1.0.0'),
+            subtitle: Text('Version $_appVersion'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => _showAboutAppDialog(context),
           ),
@@ -754,7 +764,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               showLicensePage(
                 context: context,
                 applicationName: 'Sonora',
-                applicationVersion: '1.0.0',
+                applicationVersion: _appVersion,
                 applicationIcon: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
