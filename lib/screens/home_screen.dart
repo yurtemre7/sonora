@@ -65,7 +65,7 @@ class HomeScreen extends StatefulWidget {
   onReorderPlaylistSongs;
   final bool isSyncing;
   final bool showSyncPrompt;
-  final VoidCallback onResyncNow;
+  final Future<void> Function() onResyncNow;
   final VoidCallback onPostponeSync;
 
   @override
@@ -845,10 +845,15 @@ class _HomeScreenState extends State<HomeScreen>
           );
         },
       ),
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await widget.onResyncNow();
+        },
+        child: NestedScrollView(
+          floatHeaderSlivers: true,
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
               floating: true,
               pinned: true,
               backgroundColor: theme.colorScheme.surface,
@@ -1054,6 +1059,7 @@ class _HomeScreenState extends State<HomeScreen>
                                             return Scrollbar(
                                               child: ListView.builder(
                                                 primary: true,
+                                                physics: const AlwaysScrollableScrollPhysics(),
                                                 padding: const EdgeInsets.only(
                                                   bottom: 100,
                                                 ),
@@ -1131,6 +1137,7 @@ class _HomeScreenState extends State<HomeScreen>
                           : Scrollbar(
                               child: GridView.builder(
                                 primary: true,
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.only(
                                   left: 20,
                                   right: 20,
@@ -1240,6 +1247,7 @@ class _HomeScreenState extends State<HomeScreen>
                           : Scrollbar(
                               child: ListView.builder(
                                 primary: true,
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.only(
                                   top: 12,
                                   bottom: 100,
@@ -1388,6 +1396,7 @@ class _HomeScreenState extends State<HomeScreen>
                           : Scrollbar(
                               child: ListView.builder(
                                 primary: true,
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.only(bottom: 100),
                                 itemCount: _getFilteredPlaylists().length,
                                 itemBuilder: (context, index) {
@@ -1531,6 +1540,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ],
             ),
+        ),
       ),
       floatingActionButton:
           _tabController.index == 3 && widget.playlists.isNotEmpty
