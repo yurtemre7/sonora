@@ -845,15 +845,11 @@ class _HomeScreenState extends State<HomeScreen>
           );
         },
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await widget.onResyncNow();
-        },
-        child: NestedScrollView(
-          floatHeaderSlivers: true,
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverAppBar(
+      body: NestedScrollView(
+        floatHeaderSlivers: true,
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
               floating: true,
               pinned: true,
               backgroundColor: theme.colorScheme.surface,
@@ -1057,13 +1053,15 @@ class _HomeScreenState extends State<HomeScreen>
                                                 .playerProvider
                                                 .currentSong;
                                             return Scrollbar(
-                                              child: ListView.builder(
-                                                primary: true,
-                                                physics: const AlwaysScrollableScrollPhysics(),
-                                                padding: const EdgeInsets.only(
-                                                  bottom: 100,
-                                                ),
-                                                itemCount: filteredSongs.length,
+                                              child: RefreshIndicator(
+                                                onRefresh: widget.onResyncNow,
+                                                child: ListView.builder(
+                                                  primary: true,
+                                                  physics: const AlwaysScrollableScrollPhysics(),
+                                                  padding: const EdgeInsets.only(
+                                                    bottom: 100,
+                                                  ),
+                                                  itemCount: filteredSongs.length,
                                                 itemBuilder: (context, index) {
                                                   var song =
                                                       filteredSongs[index];
@@ -1108,9 +1106,10 @@ class _HomeScreenState extends State<HomeScreen>
                                                   );
                                                 },
                                               ),
-                                            );
-                                          },
-                                        ),
+                                            ),
+                                          );
+                                        },
+                                      ),
                                 ),
                               ],
                             ),
@@ -1135,10 +1134,12 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                             )
                           : Scrollbar(
-                              child: GridView.builder(
-                                primary: true,
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                padding: const EdgeInsets.only(
+                              child: RefreshIndicator(
+                                onRefresh: widget.onResyncNow,
+                                child: GridView.builder(
+                                  primary: true,
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  padding: const EdgeInsets.only(
                                   left: 20,
                                   right: 20,
                                   top: 16,
@@ -1224,6 +1225,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                             ),
+                          ),
 
                       // Tab 3: Artists
                       widget.songs.isEmpty
@@ -1245,10 +1247,12 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                             )
                           : Scrollbar(
-                              child: ListView.builder(
-                                primary: true,
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                padding: const EdgeInsets.only(
+                              child: RefreshIndicator(
+                                onRefresh: widget.onResyncNow,
+                                child: ListView.builder(
+                                  primary: true,
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  padding: const EdgeInsets.only(
                                   top: 12,
                                   bottom: 100,
                                 ),
@@ -1331,6 +1335,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                             ),
+                          ),
 
                       // Tab 4: Playlists
                       widget.playlists.isEmpty
@@ -1394,10 +1399,12 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                             )
                           : Scrollbar(
-                              child: ListView.builder(
-                                primary: true,
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                padding: const EdgeInsets.only(bottom: 100),
+                              child: RefreshIndicator(
+                                onRefresh: widget.onResyncNow,
+                                child: ListView.builder(
+                                  primary: true,
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  padding: const EdgeInsets.only(bottom: 100),
                                 itemCount: _getFilteredPlaylists().length,
                                 itemBuilder: (context, index) {
                                   var playlist = _getFilteredPlaylists()[index];
@@ -1535,12 +1542,12 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                             ),
+                          ),
                     ],
                   ),
                 ),
               ],
             ),
-        ),
       ),
       floatingActionButton:
           _tabController.index == 3 && widget.playlists.isNotEmpty
