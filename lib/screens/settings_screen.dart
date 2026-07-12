@@ -275,6 +275,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
     };
   }
 
+  Widget _buildStatRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
+    var theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 18,
+          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '$label:',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -499,6 +536,106 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 16),
                     const Divider(),
+                    const SizedBox(height: 12),
+                    ListenableBuilder(
+                      listenable: widget.playerProvider,
+                      builder: (context, _) {
+                        var songs = widget.playerProvider.allSongs;
+                        if (songs.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+
+                        var fileCount = songs.length;
+                        var totalBytes = 0;
+                        var songsWithLyrics = 0;
+                        var formats = <String>{};
+                        var uniqueColors = <int>{};
+
+                        for (var song in songs) {
+                          if (song.fileSize != null) {
+                            totalBytes += song.fileSize!;
+                          }
+                          if (song.hasLyrics) {
+                            songsWithLyrics++;
+                          }
+                          if (song.dominantColor != null) {
+                            uniqueColors.add(song.dominantColor!);
+                          }
+                          var fmt = song.format;
+                          if (fmt != null && fmt.isNotEmpty) {
+                            formats.add(fmt.toUpperCase());
+                          } else {
+                            var dotIdx = song.filePath.lastIndexOf('.');
+                            if (dotIdx >= 0) {
+                              var ext = song.filePath.substring(dotIdx + 1).toUpperCase();
+                              if (ext.length <= 4) {
+                                formats.add(ext);
+                              }
+                            }
+                          }
+                        }
+
+                        String formattedSize;
+                        if (totalBytes >= 1024 * 1024 * 1024) {
+                          formattedSize = '${(totalBytes / (1024.0 * 1024.0 * 1024.0)).toStringAsFixed(2)} GB';
+                        } else if (totalBytes >= 1024 * 1024) {
+                          formattedSize = '${(totalBytes / (1024.0 * 1024.0)).toStringAsFixed(2)} MB';
+                        } else if (totalBytes >= 1024) {
+                          formattedSize = '${(totalBytes / 1024.0).toStringAsFixed(2)} KB';
+                        } else {
+                          formattedSize = '$totalBytes B';
+                        }
+
+                        var formatList = formats.toList()..sort();
+                        var formatText = formatList.join(', ');
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Sync Details',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              _buildStatRow(
+                                context,
+                                Icons.library_music_rounded,
+                                'Library Size',
+                                '$fileCount songs ($formattedSize)',
+                              ),
+                              const SizedBox(height: 8),
+                              _buildStatRow(
+                                context,
+                                Icons.audiotrack_rounded,
+                                'Audio Formats',
+                                formatText.isEmpty ? 'None' : formatText,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildStatRow(
+                                context,
+                                Icons.palette_rounded,
+                                'Extracted Colors',
+                                '${uniqueColors.length} unique colors',
+                              ),
+                              const SizedBox(height: 8),
+                              _buildStatRow(
+                                context,
+                                Icons.lyrics_rounded,
+                                'Lyrics Synced',
+                                '$songsWithLyrics songs',
+                              ),
+                              const SizedBox(height: 12),
+                              const Divider(),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
