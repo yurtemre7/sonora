@@ -360,12 +360,14 @@ class PlayerProvider extends ChangeNotifier {
       var index = queue.indexWhere(
         (s) => Uri.file(s.filePath).toString() == item.id,
       );
-      if (index >= 0 && index != currentIndex) {
-        currentIndex = index;
+      if (index >= 0) {
         if (_lastExtractedSongId != queue[index].id) {
           _extractThemeColorForSong(queue[index]);
         }
-        notifyListeners();
+        if (index != currentIndex) {
+          currentIndex = index;
+          notifyListeners();
+        }
       }
     });
   }
