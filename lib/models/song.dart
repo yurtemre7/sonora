@@ -76,19 +76,28 @@ class Song {
   }
 
   String get displayTitle {
-    if (artist.isEmpty) return title;
+    var cleaned = title.replaceAll(
+      RegExp(
+        r'\s*[\(\[](?:feat|featuring|ft)\.?\s+[^\]\)]+[\)\]]',
+        caseSensitive: false,
+      ),
+      '',
+    );
+
+    if (artist.isEmpty) return cleaned.trim().isEmpty ? title : cleaned.trim();
+
     var escaped = RegExp.escape(artist);
-    var cleaned = title.replaceFirst(
+    var artistRemoved = cleaned.replaceFirst(
       RegExp(r'\s*[—–-]\s*' + escaped + r'\s*$'),
       '',
     );
-    if (cleaned == title) {
-      cleaned = title.replaceFirst(
+    if (artistRemoved == cleaned) {
+      artistRemoved = cleaned.replaceFirst(
         RegExp(r'^\s*' + escaped + r'\s*[—–-]\s*'),
         '',
       );
     }
-    cleaned = cleaned.trim();
-    return cleaned.isEmpty ? title : cleaned;
+    artistRemoved = artistRemoved.trim();
+    return artistRemoved.isEmpty ? cleaned.trim() : artistRemoved;
   }
 }
