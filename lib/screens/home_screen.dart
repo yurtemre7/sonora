@@ -1052,10 +1052,9 @@ class _HomeScreenState extends State<HomeScreen>
                                             var currentSong = widget
                                                 .playerProvider
                                                 .currentSong;
-                                            return Scrollbar(
-                                              child: RefreshIndicator(
-                                                onRefresh: widget.onResyncNow,
-                                                child: ListView.builder(
+                                            return RefreshIndicator(
+                                              onRefresh: widget.onResyncNow,
+                                              child: ListView.builder(
                                                   primary: true,
                                                   physics: const AlwaysScrollableScrollPhysics(),
                                                   padding: const EdgeInsets.only(
@@ -1106,10 +1105,9 @@ class _HomeScreenState extends State<HomeScreen>
                                                   );
                                                 },
                                               ),
-                                            ),
-                                          );
-                                        },
-                                      ),
+                                            );
+                                          },
+                                        ),
                                 ),
                               ],
                             ),
@@ -1133,10 +1131,9 @@ class _HomeScreenState extends State<HomeScreen>
                                 ),
                               ),
                             )
-                          : Scrollbar(
-                              child: RefreshIndicator(
-                                onRefresh: widget.onResyncNow,
-                                child: GridView.builder(
+                          : RefreshIndicator(
+                              onRefresh: widget.onResyncNow,
+                              child: GridView.builder(
                                   primary: true,
                                   physics: const AlwaysScrollableScrollPhysics(),
                                   padding: const EdgeInsets.only(
@@ -1225,7 +1222,6 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                             ),
-                          ),
 
                       // Tab 3: Artists
                       widget.songs.isEmpty
@@ -1246,10 +1242,9 @@ class _HomeScreenState extends State<HomeScreen>
                                 ),
                               ),
                             )
-                          : Scrollbar(
-                              child: RefreshIndicator(
-                                onRefresh: widget.onResyncNow,
-                                child: ListView.builder(
+                          : RefreshIndicator(
+                              onRefresh: widget.onResyncNow,
+                              child: ListView.builder(
                                   primary: true,
                                   physics: const AlwaysScrollableScrollPhysics(),
                                   padding: const EdgeInsets.only(
@@ -1335,7 +1330,6 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                             ),
-                          ),
 
                       // Tab 4: Playlists
                       widget.playlists.isEmpty
@@ -1398,10 +1392,9 @@ class _HomeScreenState extends State<HomeScreen>
                                 ),
                               ),
                             )
-                          : Scrollbar(
-                              child: RefreshIndicator(
-                                onRefresh: widget.onResyncNow,
-                                child: ListView.builder(
+                          : RefreshIndicator(
+                              onRefresh: widget.onResyncNow,
+                              child: ListView.builder(
                                   primary: true,
                                   physics: const AlwaysScrollableScrollPhysics(),
                                   padding: const EdgeInsets.only(bottom: 100),
@@ -1542,7 +1535,6 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                             ),
-                          ),
                     ],
                   ),
                 ),
