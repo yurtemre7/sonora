@@ -35,8 +35,6 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   var sleepTimerExtendLabel = '+5 min';
   Function(String)? onCustomAction;
 
-
-
   void updateSleepTimerState({required bool active, required String label}) {
     sleepTimerActive = active;
     sleepTimerExtendLabel = label;
