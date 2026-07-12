@@ -175,25 +175,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 8),
-                Container(
+                SizedBox(
                   width: 80,
                   height: 80,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
-                      colors: [
-                        theme.colorScheme.primary,
-                        theme.colorScheme.tertiary,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.music_note_rounded,
-                    size: 40,
-                    color: theme.colorScheme.onPrimary,
-                  ),
+                  child: Image.asset('assets/icon/ic_launcher.png'),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -577,7 +562,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           } else {
                             var dotIdx = song.filePath.lastIndexOf('.');
                             if (dotIdx >= 0) {
-                              var ext = song.filePath.substring(dotIdx + 1).toUpperCase();
+                              var ext = song.filePath
+                                  .substring(dotIdx + 1)
+                                  .toUpperCase();
                               if (ext.length <= 4) {
                                 formats.add(ext);
                               }
@@ -587,11 +574,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                         String formattedSize;
                         if (totalBytes >= 1024 * 1024 * 1024) {
-                          formattedSize = '${(totalBytes / (1024.0 * 1024.0 * 1024.0)).toStringAsFixed(2)} GB';
+                          formattedSize =
+                              '${(totalBytes / (1024.0 * 1024.0 * 1024.0)).toStringAsFixed(2)} GB';
                         } else if (totalBytes >= 1024 * 1024) {
-                          formattedSize = '${(totalBytes / (1024.0 * 1024.0)).toStringAsFixed(2)} MB';
+                          formattedSize =
+                              '${(totalBytes / (1024.0 * 1024.0)).toStringAsFixed(2)} MB';
                         } else if (totalBytes >= 1024) {
-                          formattedSize = '${(totalBytes / 1024.0).toStringAsFixed(2)} KB';
+                          formattedSize =
+                              '${(totalBytes / 1024.0).toStringAsFixed(2)} KB';
                         } else {
                           formattedSize = '$totalBytes B';
                         }
