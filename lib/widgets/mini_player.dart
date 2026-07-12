@@ -69,11 +69,11 @@ class MiniPlayer extends StatelessWidget {
             child: Container(
               height: 72,
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHigh,
+                color: theme.colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 16,
                     offset: const Offset(0, 8),
                   ),
@@ -117,19 +117,6 @@ class MiniPlayer extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  if (fillWidth > 8)
-                                    Positioned(
-                                      left: fillWidth - 5,
-                                      top: 0,
-                                      child: Container(
-                                        width: 6,
-                                        height: 6,
-                                        decoration: BoxDecoration(
-                                          color: theme.colorScheme.tertiary,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
                                 ],
                               );
                             },

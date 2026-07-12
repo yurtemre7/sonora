@@ -138,9 +138,7 @@ class _SeekBarState extends State<SeekBar> {
                                 width: thumbRadius * 2,
                                 height: thumbRadius * 2,
                                 decoration: BoxDecoration(
-                                  color: _dragging
-                                      ? theme.colorScheme.tertiary
-                                      : theme.colorScheme.primary,
+                                  color: theme.colorScheme.tertiary,
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
