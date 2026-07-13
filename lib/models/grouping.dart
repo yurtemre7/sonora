@@ -16,7 +16,11 @@ class ArtistGroup {
   ArtistGroup({required this.name, required this.songs, required this.albums});
 }
 
-AlbumGroup buildAlbumGroup(String albumName, String artistName, List<Song> allSongs) {
+AlbumGroup buildAlbumGroup(
+  String albumName,
+  String artistName,
+  List<Song> allSongs,
+) {
   var normalizedAlbum = albumName;
   var normalizedArtist = artistName;
   var songs = allSongs.where((s) {
@@ -24,13 +28,18 @@ AlbumGroup buildAlbumGroup(String albumName, String artistName, List<Song> allSo
     var sArtist = s.artist.trim().isEmpty ? 'Unknown Artist' : s.artist;
     return sAlbum == normalizedAlbum && sArtist == normalizedArtist;
   }).toList();
-  return AlbumGroup(name: normalizedAlbum, artist: normalizedArtist, songs: songs);
+  return AlbumGroup(
+    name: normalizedAlbum,
+    artist: normalizedArtist,
+    songs: songs,
+  );
 }
 
 ArtistGroup buildArtistGroup(String artistName, List<Song> allSongs) {
   var normalizedArtist = artistName;
   var songs = allSongs.where((s) {
-    return (s.artist.trim().isEmpty ? 'Unknown Artist' : s.artist) == normalizedArtist;
+    return (s.artist.trim().isEmpty ? 'Unknown Artist' : s.artist) ==
+        normalizedArtist;
   }).toList();
 
   var albumMap = <String, List<Song>>{};
