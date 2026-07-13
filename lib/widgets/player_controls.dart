@@ -112,8 +112,8 @@ class PlayerControls extends StatelessWidget {
           tooltip: repeatMode == RepeatMode.one
               ? 'Repeat one'
               : repeatMode == RepeatMode.all
-                  ? 'Repeat all'
-                  : 'Repeat off',
+              ? 'Repeat all'
+              : 'Repeat off',
           color: repeatMode != RepeatMode.off
               ? theme.colorScheme.primary
               : theme.colorScheme.onSurfaceVariant,

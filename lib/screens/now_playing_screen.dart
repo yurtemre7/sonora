@@ -28,7 +28,7 @@ class NowPlayingScreen extends StatefulWidget {
   State<NowPlayingScreen> createState() => _NowPlayingScreenState();
 }
 
-enum _ViewMode { player, upNext, songInfo }
+enum _ViewMode { player, upNext, lyrics, related }
 
 class _NowPlayingScreenState extends State<NowPlayingScreen>
     with SingleTickerProviderStateMixin {
@@ -91,6 +91,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                     : Icons.arrow_back_rounded,
               ),
               iconSize: _viewMode == _ViewMode.player ? 32 : 24,
+              tooltip: _viewMode == _ViewMode.player ? 'Close' : 'Back',
               onPressed: () {
                 if (_viewMode == _ViewMode.player) {
                   Navigator.pop(context);
@@ -104,7 +105,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   ? 'Now Playing'
                   : _viewMode == _ViewMode.upNext
                   ? 'Up Next'
-                  : 'Song Info',
+                  : _viewMode == _ViewMode.lyrics
+                  ? 'Lyrics'
+                  : 'Related',
             ),
             systemOverlayStyle: SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
@@ -255,12 +258,18 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                     )
                                   : _viewMode == _ViewMode.upNext
                                   ? _buildQueueContent(theme)
-                                  : _buildSongInfoContent(theme, song),
+                                  : _viewMode == _ViewMode.lyrics
+                                  ? _buildLyricsContent(theme, song)
+                                  : _buildRelatedContent(theme, song),
                             ),
                           ),
 
                           // Bottom action bar
-                          _buildBottomBar(theme),
+                          _buildBottomBar(
+                            theme,
+                            hasLyrics: song.hasLyrics,
+                            hasRelated: _hasRelatedSongs(song),
+                          ),
                         ],
                       );
                     },
@@ -306,6 +315,15 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
         // Album Art / Lyrics Stack Card
         GestureDetector(
           onTap: () => setState(() => _immersiveMode = !_immersiveMode),
+          onHorizontalDragEnd: (details) {
+            if (details.primaryVelocity != null) {
+              if (details.primaryVelocity! < -100) {
+                widget.playerProvider.next();
+              } else if (details.primaryVelocity! > 100) {
+                widget.playerProvider.previous();
+              }
+            }
+          },
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -496,6 +514,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                       : theme.colorScheme.onSurfaceVariant,
                   size: 28,
                 ),
+                tooltip: song.isFavorite
+                    ? 'Remove from favorites'
+                    : 'Add to favorites',
                 onPressed: () {
                   var wasFavorite = song.isFavorite;
                   widget.playerProvider.toggleFavorite(song.id);
@@ -533,68 +554,152 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     );
   }
 
-  Widget _buildBottomBar(ThemeData theme) {
+  Widget _buildBottomBar(
+    ThemeData theme, {
+    required bool hasLyrics,
+    required bool hasRelated,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 16),
       child: Row(
         children: [
-          Expanded(
-            child: TextButton(
-              onPressed: () => setState(() => _viewMode = _ViewMode.upNext),
-              style: TextButton.styleFrom(
-                foregroundColor: _viewMode == _ViewMode.upNext
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurfaceVariant,
-                backgroundColor: _viewMode == _ViewMode.upNext
-                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2)
-                    : Colors.transparent,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                'UP NEXT',
-                style: TextStyle(
-                  fontWeight: _viewMode == _ViewMode.upNext
-                      ? FontWeight.bold
-                      : FontWeight.w500,
-                  fontSize: 13,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
+          _bottomTab(theme, _ViewMode.upNext, 'UP NEXT', true, 'Up next'),
+          const SizedBox(width: 8),
+          _bottomTab(
+            theme,
+            _ViewMode.lyrics,
+            'LYRICS',
+            hasLyrics,
+            hasLyrics ? 'Lyrics' : 'No lyrics available',
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextButton(
-              onPressed: () => setState(() => _viewMode = _ViewMode.songInfo),
-              style: TextButton.styleFrom(
-                foregroundColor: _viewMode == _ViewMode.songInfo
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurfaceVariant,
-                backgroundColor: _viewMode == _ViewMode.songInfo
-                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2)
-                    : Colors.transparent,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                'SONG INFO',
-                style: TextStyle(
-                  fontWeight: _viewMode == _ViewMode.songInfo
-                      ? FontWeight.bold
-                      : FontWeight.w500,
-                  fontSize: 13,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
+          const SizedBox(width: 8),
+          _bottomTab(
+            theme,
+            _ViewMode.related,
+            'RELATED',
+            hasRelated,
+            hasRelated ? 'Related' : 'No related songs',
           ),
         ],
       ),
+    );
+  }
+
+  Widget _bottomTab(
+    ThemeData theme,
+    _ViewMode mode,
+    String label,
+    bool enabled,
+    String tooltip,
+  ) {
+    var isActive = _viewMode == mode;
+    return Expanded(
+      child: Tooltip(
+        message: tooltip,
+        child: TextButton(
+          onPressed: enabled ? () => setState(() => _viewMode = mode) : null,
+          style: TextButton.styleFrom(
+            foregroundColor: isActive
+                ? theme.colorScheme.primary
+                : enabled
+                ? theme.colorScheme.onSurfaceVariant
+                : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+            backgroundColor: isActive
+                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2)
+                : Colors.transparent,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+              fontSize: 13,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLyricsContent(ThemeData theme, Song song) {
+    return SongLyricsOverlay(song: song, playerProvider: widget.playerProvider);
+  }
+
+  Widget _buildRelatedContent(ThemeData theme, Song song) {
+    var allSongs = widget.playerProvider.allSongs;
+    var sameAlbum = allSongs
+        .where(
+          (s) =>
+              s.id != song.id &&
+              s.album == song.album &&
+              s.artist == song.artist,
+        )
+        .toList();
+    var sameArtist = allSongs
+        .where(
+          (s) =>
+              s.id != song.id &&
+              s.artist == song.artist &&
+              s.album != song.album,
+        )
+        .toList();
+
+    return ListView(
+      key: const ValueKey('related_view'),
+      children: [
+        if (sameAlbum.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              'From this album',
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ...sameAlbum.map(
+            (s) => SongTile(
+              song: s,
+              onTap: () => widget.playerProvider.playSong(s, allSongs),
+              showDivider: true,
+              showHighlightBackground: false,
+            ),
+          ),
+        ],
+        if (sameArtist.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              'More by ${song.artist}',
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ...sameArtist.map(
+            (s) => SongTile(
+              song: s,
+              onTap: () => widget.playerProvider.playSong(s, allSongs),
+              showDivider: true,
+              showHighlightBackground: false,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  bool _hasRelatedSongs(Song song) {
+    return widget.playerProvider.allSongs.any(
+      (s) =>
+          s.id != song.id && (s.artist == song.artist || s.album == song.album),
     );
   }
 
@@ -783,41 +888,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           ],
         );
       },
-    );
-  }
-
-  Widget _buildSongInfoContent(ThemeData theme, Song song) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              'Song Information',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          _buildInfoRow('Title', song.displayTitle, theme),
-          _buildInfoRow('Artist', song.artist, theme),
-          _buildInfoRow('Album', song.album, theme),
-          _buildInfoRow('Duration', song.durationFormatted, theme),
-          _buildInfoRow('File Path', song.filePath, theme, isPath: true),
-          if (song.format != null)
-            _buildInfoRow('Format', song.format!.toUpperCase(), theme),
-          if (song.bitrate != null)
-            _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
-          if (song.samplerate != null)
-            _buildInfoRow(
-              'Sample Rate',
-              '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
-              theme,
-            ),
-        ],
-      ),
     );
   }
 
