@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
@@ -12,22 +12,6 @@ import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/mini_player.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/song_tile.dart';
-
-class AlbumGroup {
-  final String name;
-  final String artist;
-  final List<Song> songs;
-
-  AlbumGroup({required this.name, required this.artist, required this.songs});
-}
-
-class ArtistGroup {
-  final String name;
-  final List<Song> songs;
-  final List<AlbumGroup> albums;
-
-  ArtistGroup({required this.name, required this.songs, required this.albums});
-}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({

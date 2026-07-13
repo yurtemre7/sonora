@@ -4,8 +4,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/screens/album_detail_screen.dart';
+import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/screens/queue_screen.dart';
 import 'package:sonora/services/lyrics_service.dart';
 import 'package:sonora/widgets/album_art.dart';
@@ -311,18 +314,73 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                               ),
                                         ),
                                         const SizedBox(height: 4),
-                                        MarqueeText(
-                                          key: ValueKey(
-                                            'np_sub_${song.artist}_${song.album}',
-                                          ),
-                                          text:
-                                              '${song.artist} • ${song.album}',
-                                          style: theme.textTheme.bodyMedium
-                                              ?.copyWith(
-                                                color: theme
-                                                    .colorScheme
-                                                    .onSurfaceVariant,
+                                        Row(
+                                          children: [
+                                            Flexible(
+                                              child: GestureDetector(
+                                                onTap: () => _showArtistSheet(
+                                                  context,
+                                                  song.artist,
+                                                ),
+                                                child: MarqueeText(
+                                                  key: ValueKey(
+                                                    'np_artist_${song.artist}',
+                                                  ),
+                                                  text: song.artist,
+                                                  style: theme
+                                                      .textTheme
+                                                      .bodyMedium
+                                                      ?.copyWith(
+                                                        color: theme
+                                                            .colorScheme
+                                                            .onSurfaceVariant,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                ),
                                               ),
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                  ),
+                                              child: Text(
+                                                '•',
+                                                style: theme
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      color: theme
+                                                          .colorScheme
+                                                          .onSurfaceVariant,
+                                                    ),
+                                              ),
+                                            ),
+                                            Flexible(
+                                              child: GestureDetector(
+                                                onTap: () => _showAlbumSheet(
+                                                  context,
+                                                  song.album,
+                                                  song.artist,
+                                                ),
+                                                child: MarqueeText(
+                                                  key: ValueKey(
+                                                    'np_album_${song.album}_${song.artist}',
+                                                  ),
+                                                  text: song.album,
+                                                  style: theme
+                                                      .textTheme
+                                                      .bodyMedium
+                                                      ?.copyWith(
+                                                        color: theme
+                                                            .colorScheme
+                                                            .onSurfaceVariant,
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                         if (widget
                                                 .playerProvider
@@ -808,6 +866,50 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
           },
         );
       },
+    );
+  }
+
+  void _showArtistSheet(BuildContext context, String artistName) {
+    var artist = buildArtistGroup(artistName, widget.playerProvider.allSongs);
+    if (artist.songs.isEmpty) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => ArtistDetailScreen(
+        artist: artist,
+        playerProvider: widget.playerProvider,
+      ),
+    );
+  }
+
+  void _showAlbumSheet(
+    BuildContext context,
+    String albumName,
+    String artistName,
+  ) {
+    var album = buildAlbumGroup(
+      albumName,
+      artistName,
+      widget.playerProvider.allSongs,
+    );
+    if (album.songs.isEmpty) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => AlbumDetailScreen(
+        album: album,
+        playerProvider: widget.playerProvider,
+      ),
     );
   }
 
