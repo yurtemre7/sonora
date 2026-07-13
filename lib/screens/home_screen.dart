@@ -985,10 +985,10 @@ class _HomeScreenState extends State<HomeScreen>
                                   physics:
                                       const AlwaysScrollableScrollPhysics(),
                                   padding: const EdgeInsets.only(
-                                    left: 20,
-                                    right: 20,
-                                    top: 16,
-                                    bottom: 100,
+                                    left: 16,
+                                    right: 16,
+                                    top: 12,
+                                    bottom: 120,
                                   ),
                                   gridDelegate:
                                       const SliverGridDelegateWithFixedCrossAxisCount(
@@ -1102,10 +1102,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   primary: true,
                                   physics:
                                       const AlwaysScrollableScrollPhysics(),
-                                  padding: const EdgeInsets.only(
-                                    top: 12,
-                                    bottom: 100,
-                                  ),
+                                  padding: const EdgeInsets.only(bottom: 120),
                                   itemCount: _getFilteredArtists().length,
                                   itemBuilder: (context, index) {
                                     var artist = _getFilteredArtists()[index];
@@ -1258,7 +1255,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   primary: true,
                                   physics:
                                       const AlwaysScrollableScrollPhysics(),
-                                  padding: const EdgeInsets.only(bottom: 100),
+                                  padding: const EdgeInsets.only(bottom: 120),
                                   itemCount: _getFilteredPlaylists().length,
                                   itemBuilder: (context, index) {
                                     var playlist =
@@ -1510,7 +1507,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                       const AlwaysScrollableScrollPhysics(),
                                                   padding:
                                                       const EdgeInsets.only(
-                                                        bottom: 100,
+                                                        bottom: 120,
                                                       ),
                                                   itemCount:
                                                       filteredSongs.length,
