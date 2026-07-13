@@ -27,6 +27,7 @@ class NowPlayingScreen extends StatefulWidget {
 
 class _NowPlayingScreenState extends State<NowPlayingScreen> {
   var _showLyrics = false;
+  var _immersiveMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -195,81 +196,98 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // Album Art / Lyrics Stack Card
-                              Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  AmbientGlow(
-                                    isPlaying: widget
-                                        .playerProvider
-                                        .audioHandler
-                                        .player
-                                        .playing,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                  Card(
-                                    elevation: 10,
-                                    shadowColor: Colors.black.withValues(
-                                      alpha: 0.4,
+                              // Album Art / Lyrics Stack Card (tap for immersive mode)
+                              GestureDetector(
+                                onTap: () => setState(
+                                  () => _immersiveMode = !_immersiveMode,
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    AmbientGlow(
+                                      isPlaying: widget
+                                          .playerProvider
+                                          .audioHandler
+                                          .player
+                                          .playing,
+                                      color: theme.colorScheme.primary,
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(28),
-                                    ),
-                                    clipBehavior: Clip.antiAlias,
-                                    child: SizedBox(
-                                      width: min(
-                                        MediaQuery.sizeOf(context).width * 0.80,
-                                        300.0,
+                                    AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 400,
                                       ),
-                                      height: min(
-                                        MediaQuery.sizeOf(context).width * 0.80,
-                                        300.0,
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          Positioned.fill(
-                                            child: AlbumArt(
-                                              artworkPath: song.artworkPath,
-                                              size: min(
-                                                MediaQuery.sizeOf(
-                                                      context,
-                                                    ).width *
-                                                    0.80,
-                                                300.0,
-                                              ),
-                                              borderRadius: 28,
+                                      curve: Curves.easeInOut,
+                                      width: _immersiveMode
+                                          ? constraints.maxWidth
+                                          : min(
+                                              MediaQuery.sizeOf(context).width *
+                                                  0.80,
+                                              300.0,
                                             ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(28),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.4,
+                                            ),
+                                            blurRadius: 10,
                                           ),
-                                          if (_showLyrics)
+                                        ],
+                                      ),
+                                      clipBehavior: Clip.antiAlias,
+                                      child: AspectRatio(
+                                        aspectRatio: 1,
+                                        child: Stack(
+                                          children: [
                                             Positioned.fill(
-                                              child: BackdropFilter(
-                                                filter: ImageFilter.blur(
-                                                  sigmaX: 18.0,
-                                                  sigmaY: 18.0,
-                                                ),
-                                                child: Container(
-                                                  color:
-                                                      theme.brightness ==
-                                                          Brightness.dark
-                                                      ? Colors.black.withValues(
-                                                          alpha: 0.75,
-                                                        )
-                                                      : Colors.white.withValues(
-                                                          alpha: 0.80,
-                                                        ),
-                                                  child: SongLyricsOverlay(
-                                                    song: song,
-                                                    playerProvider:
-                                                        widget.playerProvider,
+                                              child: AlbumArt(
+                                                artworkPath: song.artworkPath,
+                                                size: _immersiveMode
+                                                    ? constraints.maxWidth
+                                                    : min(
+                                                        MediaQuery.sizeOf(
+                                                              context,
+                                                            ).width *
+                                                            0.80,
+                                                        300.0,
+                                                      ),
+                                                borderRadius: 28,
+                                              ),
+                                            ),
+                                            if (_showLyrics)
+                                              Positioned.fill(
+                                                child: BackdropFilter(
+                                                  filter: ImageFilter.blur(
+                                                    sigmaX: 18.0,
+                                                    sigmaY: 18.0,
+                                                  ),
+                                                  child: Container(
+                                                    color:
+                                                        theme.brightness ==
+                                                            Brightness.dark
+                                                        ? Colors.black
+                                                              .withValues(
+                                                                alpha: 0.75,
+                                                              )
+                                                        : Colors.white
+                                                              .withValues(
+                                                                alpha: 0.80,
+                                                              ),
+                                                    child: SongLyricsOverlay(
+                                                      song: song,
+                                                      playerProvider:
+                                                          widget.playerProvider,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
 
                               const SizedBox(height: 32),
@@ -415,7 +433,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
                               const SizedBox(height: 16),
 
-                              // Bottom actions (Queue screen button - restored to original centered layout)
+                              // Bottom actions (Queue screen button)
                               IconButton(
                                 onPressed: () {
                                   Navigator.push(

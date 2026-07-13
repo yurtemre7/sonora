@@ -20,6 +20,7 @@ class SeekBar extends StatefulWidget {
 
 class _SeekBarState extends State<SeekBar> {
   var _dragging = false;
+  var _interacting = false;
   var _dragValue = 0.0;
 
   String _formatDuration(Duration d) {
@@ -61,12 +62,14 @@ class _SeekBarState extends State<SeekBar> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     var trackWidth = constraints.maxWidth;
-                    var thumbRadius = 6.0;
+                    var trackHeight = _interacting ? 10.0 : 6.0;
+                    var thumbRadius = _interacting ? 10.0 : 6.0;
                     var fillWidth = trackWidth * progress;
 
                     return GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTapDown: (details) {
+                        setState(() => _interacting = true);
                         var tapFraction =
                             (details.localPosition.dx / trackWidth).clamp(
                               0.0,
@@ -75,9 +78,16 @@ class _SeekBarState extends State<SeekBar> {
                         var seekMs = (tapFraction * totalMs).round().toDouble();
                         widget.onSeek(Duration(milliseconds: seekMs.round()));
                       },
+                      onTapUp: (details) {
+                        setState(() => _interacting = false);
+                      },
+                      onTapCancel: () {
+                        setState(() => _interacting = false);
+                      },
                       onHorizontalDragStart: (details) {
                         setState(() {
                           _dragging = true;
+                          _interacting = true;
                           _dragValue =
                               (details.localPosition.dx / trackWidth).clamp(
                                 0.0,
@@ -101,25 +111,32 @@ class _SeekBarState extends State<SeekBar> {
                         );
                         setState(() {
                           _dragging = false;
+                          _interacting = false;
                         });
                       },
                       child: Stack(
                         alignment: Alignment.centerLeft,
                         children: [
                           // Track background (pill shape)
-                          Container(
-                            height: 6,
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            height: trackHeight,
                             decoration: BoxDecoration(
                               color: theme.colorScheme.onSurface.withValues(
                                 alpha: 0.08,
                               ),
-                              borderRadius: BorderRadius.circular(3),
+                              borderRadius: BorderRadius.circular(
+                                trackHeight / 2,
+                              ),
                             ),
                           ),
                           // Filled portion (pill shape)
-                          Container(
-                            width: fillWidth > 6 ? fillWidth : 6,
-                            height: 6,
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            width: fillWidth > trackHeight
+                                ? fillWidth
+                                : trackHeight,
+                            height: trackHeight,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -127,14 +144,17 @@ class _SeekBarState extends State<SeekBar> {
                                   theme.colorScheme.tertiary,
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(3),
+                              borderRadius: BorderRadius.circular(
+                                trackHeight / 2,
+                              ),
                             ),
                           ),
                           // Thumb dot at the end of the fill
                           if (fillWidth > thumbRadius)
                             Positioned(
                               left: fillWidth - thumbRadius,
-                              child: Container(
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
                                 width: thumbRadius * 2,
                                 height: thumbRadius * 2,
                                 decoration: BoxDecoration(
@@ -145,7 +165,7 @@ class _SeekBarState extends State<SeekBar> {
                                       color: Colors.black.withValues(
                                         alpha: 0.2,
                                       ),
-                                      blurRadius: 4,
+                                      blurRadius: thumbRadius > 6 ? 6 : 4,
                                       offset: const Offset(0, 1),
                                     ),
                                   ],
