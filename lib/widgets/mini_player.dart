@@ -59,10 +59,10 @@ class MiniPlayer extends StatelessWidget {
               if (details.primaryVelocity != null) {
                 if (details.primaryVelocity! < -100) {
                   // Swipe Left (previous track)
-                  if (onSwipeLeft != null) onSwipeLeft!();
+                  if (onSwipeRight != null) onSwipeRight!();
                 } else if (details.primaryVelocity! > 100) {
                   // Swipe Right (next track)
-                  if (onSwipeRight != null) onSwipeRight!();
+                  if (onSwipeLeft != null) onSwipeLeft!();
                 }
               }
             },
