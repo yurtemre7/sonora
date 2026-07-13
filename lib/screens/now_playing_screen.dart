@@ -245,16 +245,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                             child: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 300),
                               child: _viewMode == _ViewMode.player
-                                  ? SingleChildScrollView(
-                                      key: const ValueKey('player_view'),
-                                      child: SizedBox(
-                                        height: constraints.maxHeight - 60,
-                                        child: _buildPlayerContent(
-                                          theme,
-                                          song,
-                                          constraints,
-                                        ),
-                                      ),
+                                  ? _buildPlayerContent(
+                                      theme,
+                                      song,
+                                      constraints,
                                     )
                                   : _viewMode == _ViewMode.upNext
                                   ? _buildQueueContent(theme)
@@ -281,17 +275,21 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(32),
-                    ),
-                    child: SizedBox(
-                      height: 80.0,
-                      child: AudioVisualizer(
-                        isPlaying: widget.playerProvider.isPlaying,
-                        color: theme.colorScheme.primary.withValues(alpha: 0.8),
-                        barCount: 20,
+                  child: IgnorePointer(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(32),
+                      ),
+                      child: SizedBox(
                         height: 80.0,
+                        child: AudioVisualizer(
+                          isPlaying: widget.playerProvider.isPlaying,
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.8,
+                          ),
+                          barCount: 20,
+                          height: 80.0,
+                        ),
                       ),
                     ),
                   ),
