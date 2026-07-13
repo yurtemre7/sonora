@@ -38,6 +38,7 @@ class PlayerControls extends StatelessWidget {
             isShuffled ? Icons.shuffle_on_rounded : Icons.shuffle_rounded,
           ),
           iconSize: 24,
+          tooltip: isShuffled ? 'Disable shuffle' : 'Enable shuffle',
           color: isShuffled
               ? theme.colorScheme.primary
               : theme.colorScheme.onSurfaceVariant,
@@ -49,6 +50,7 @@ class PlayerControls extends StatelessWidget {
           onPressed: onPrevious,
           icon: const Icon(Icons.skip_previous_rounded),
           iconSize: 36,
+          tooltip: 'Previous',
           color: theme.colorScheme.onSurface,
         ),
         const SizedBox(width: 8),
@@ -79,6 +81,7 @@ class PlayerControls extends StatelessWidget {
                 isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
               ),
               iconSize: 36,
+              tooltip: isPlaying ? 'Pause' : 'Play',
               color: theme.colorScheme.onPrimary,
             ),
           ),
@@ -90,6 +93,7 @@ class PlayerControls extends StatelessWidget {
           onPressed: onNext,
           icon: const Icon(Icons.skip_next_rounded),
           iconSize: 36,
+          tooltip: 'Next',
           color: theme.colorScheme.onSurface,
         ),
         const SizedBox(width: 12),
@@ -105,6 +109,11 @@ class PlayerControls extends StatelessWidget {
                       : Icons.repeat_rounded),
           ),
           iconSize: 24,
+          tooltip: repeatMode == RepeatMode.one
+              ? 'Repeat one'
+              : repeatMode == RepeatMode.all
+                  ? 'Repeat all'
+                  : 'Repeat off',
           color: repeatMode != RepeatMode.off
               ? theme.colorScheme.primary
               : theme.colorScheme.onSurfaceVariant,
