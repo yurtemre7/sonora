@@ -300,10 +300,16 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   /// Sets all songs and updates the queue with the list.
+  ///
+  /// If a song is currently playing, the active queue is preserved and only
+  /// [allSongs] is refreshed. The queue is replaced only during initial load
+  /// or when nothing is playing.
   void updateSongs(List<Song> songs) {
     allSongs = List<Song>.from(songs);
-    queue = List<Song>.from(songs);
-    _originalQueue = List<Song>.from(songs);
+    if (currentIndex < 0 || queue.isEmpty) {
+      queue = List<Song>.from(songs);
+      _originalQueue = List<Song>.from(songs);
+    }
     notifyListeners();
   }
 
