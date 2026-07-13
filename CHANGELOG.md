@@ -2,6 +2,19 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.3.2] - 2026-07-13
+### Added
+* Improve now playing UI once more
+* Improve now playing UI
+* Add like animation
+* Add artist and album onTap on now playing screen
+* Add immersive mode
+### Fixed
+* Marquee text now reset properly upon song change
+* Refreshing while having a queue with changes elements, does not reset the queue
+### Changed
+* Chore: Format files
+
 ## [1.3.1] - 2026-07-12
 ### Added
 * Add correct app icon at info
@@ -10,6 +23,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Improve seek bar
 * Scroll bar up scrolling buggy behaviour
 ### Changed
+* 1.3.1
 * Chore: Format files
 
 ## [1.3.0] - 2026-07-12
