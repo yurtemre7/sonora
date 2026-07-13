@@ -28,9 +28,37 @@ class NowPlayingScreen extends StatefulWidget {
   State<NowPlayingScreen> createState() => _NowPlayingScreenState();
 }
 
-class _NowPlayingScreenState extends State<NowPlayingScreen> {
+class _NowPlayingScreenState extends State<NowPlayingScreen>
+    with SingleTickerProviderStateMixin {
   var _showLyrics = false;
   var _immersiveMode = false;
+  late AnimationController _likeAnimController;
+  late Animation<double> _likeAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _likeAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _likeAnimController.reverse();
+      }
+    });
+    _likeAnim = Tween<double>(begin: 1.0, end: 1.35).animate(
+      CurvedAnimation(
+        parent: _likeAnimController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _likeAnimController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -456,18 +484,35 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                     ),
                                     const SizedBox(width: 8),
                                   ],
-                                  IconButton(
-                                    icon: Icon(
-                                      song.isFavorite
-                                          ? Icons.favorite_rounded
-                                          : Icons.favorite_border_rounded,
-                                      color: song.isFavorite
-                                          ? Colors.red
-                                          : theme.colorScheme.onSurfaceVariant,
-                                      size: 28,
+                                  AnimatedBuilder(
+                                    animation: _likeAnim,
+                                    builder: (context, child) =>
+                                        Transform.scale(
+                                      scale: _likeAnim.value,
+                                      child: child,
                                     ),
-                                    onPressed: () => widget.playerProvider
-                                        .toggleFavorite(song.id),
+                                    child: IconButton(
+                                      icon: Icon(
+                                        song.isFavorite
+                                            ? Icons.favorite_rounded
+                                            : Icons.favorite_border_rounded,
+                                        color: song.isFavorite
+                                            ? Colors.red
+                                            : theme
+                                                .colorScheme.onSurfaceVariant,
+                                        size: 28,
+                                      ),
+                                      onPressed: () {
+                                        var wasFavorite = song.isFavorite;
+                                        widget.playerProvider
+                                            .toggleFavorite(song.id);
+                                        if (!wasFavorite) {
+                                          _likeAnimController.forward(
+                                            from: 0.0,
+                                          );
+                                        }
+                                      },
+                                    ),
                                   ),
                                 ],
                               ),
