@@ -6,7 +6,7 @@ class MarqueeText extends StatefulWidget {
     super.key,
     required this.text,
     required this.style,
-    this.velocity = 30.0, // pixels per second
+    this.velocity = 30.0,
     this.blankSpace = 40.0,
     this.startDelay = const Duration(seconds: 3),
     this.pauseAfterRound = const Duration(seconds: 3),
@@ -62,7 +62,6 @@ class _MarqueeTextState extends State<MarqueeText> {
   void _startScrolling(double maxScroll) {
     if (_isScrolling) return;
     _isScrolling = true;
-
     _runScrollLoop(maxScroll);
   }
 

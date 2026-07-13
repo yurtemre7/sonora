@@ -301,6 +301,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         MarqueeText(
+                                          key: ValueKey(
+                                            'np_title_${song.displayTitle}',
+                                          ),
                                           text: song.displayTitle,
                                           style: theme.textTheme.headlineSmall
                                               ?.copyWith(
@@ -309,6 +312,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         MarqueeText(
+                                          key: ValueKey(
+                                            'np_sub_${song.artist}_${song.album}',
+                                          ),
                                           text:
                                               '${song.artist} • ${song.album}',
                                           style: theme.textTheme.bodyMedium
