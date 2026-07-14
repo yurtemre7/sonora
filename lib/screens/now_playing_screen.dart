@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/services/lyrics_service.dart';
@@ -72,7 +73,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
 
         if (song == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) Navigator.pop(context);
+            if (mounted) closeRoute(context);
           });
           return const SizedBox.shrink();
         }
@@ -94,7 +95,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
               tooltip: _viewMode == _ViewMode.player ? 'Close' : 'Back',
               onPressed: () {
                 if (_viewMode == _ViewMode.player) {
-                  Navigator.pop(context);
+                  closeRoute(context);
                 } else {
                   setState(() => _viewMode = _ViewMode.player);
                 }

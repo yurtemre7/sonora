@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -47,7 +48,7 @@ class AlbumDetailScreen extends StatelessWidget {
               SliverAppBar(
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => closeRoute(context),
                 ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,

@@ -3,10 +3,8 @@ import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
-import 'package:sonora/screens/album_detail_screen.dart';
-import 'package:sonora/screens/artist_detail_screen.dart';
+import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/screens/now_playing_screen.dart';
-import 'package:sonora/screens/playlist_detail_screen.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/mini_player.dart';
@@ -1005,17 +1003,7 @@ class _HomeScreenState extends State<HomeScreen>
                                     return InkWell(
                                       onTap: () {
                                         _searchFocusNode.unfocus();
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                AlbumDetailScreen(
-                                                  album: album,
-                                                  playerProvider:
-                                                      widget.playerProvider,
-                                                ),
-                                          ),
-                                        );
+                                        openAlbum(context, album);
                                       },
                                       borderRadius: BorderRadius.circular(20),
                                       child: Column(
@@ -1152,17 +1140,7 @@ class _HomeScreenState extends State<HomeScreen>
                                           ),
                                           onTap: () {
                                             _searchFocusNode.unfocus();
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ArtistDetailScreen(
-                                                      artist: artist,
-                                                      playerProvider:
-                                                          widget.playerProvider,
-                                                    ),
-                                              ),
-                                            );
+                                            openArtist(context, artist);
                                           },
                                         ),
                                         if (index < artists.length - 1)
@@ -1357,26 +1335,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                 ),
                                           onTap: () {
                                             _searchFocusNode.unfocus();
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    PlaylistDetailScreen(
-                                                      playlist: playlist,
-                                                      songs: widget.songs,
-                                                      playerProvider:
-                                                          widget.playerProvider,
-                                                      onRemoveSong: widget
-                                                          .onRemoveSongFromPlaylist,
-                                                      onReorderSongs: widget
-                                                          .onReorderPlaylistSongs,
-                                                      playlists:
-                                                          widget.playlists,
-                                                      onAddSongToPlaylist: widget
-                                                          .onAddSongToPlaylist,
-                                                    ),
-                                              ),
-                                            );
+                                            openPlaylist(context, playlist);
                                           },
                                         ),
                                         if (index < playlists.length - 1)

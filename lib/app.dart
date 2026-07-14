@@ -6,9 +6,10 @@ import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
+import 'package:sonora/routing/app_navigation.dart';
+import 'package:sonora/routing/app_router.dart';
 import 'package:sonora/screens/home_screen.dart';
 import 'package:sonora/screens/onboarding_screen.dart';
-import 'package:sonora/screens/settings_screen.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/permission_service.dart';
@@ -23,8 +24,14 @@ class SonoraApp extends StatefulWidget {
   State<SonoraApp> createState() => _SonoraAppState();
 }
 
+class _RouterRefreshNotifier extends ChangeNotifier {
+  void refresh() => notifyListeners();
+}
+
 class _SonoraAppState extends State<SonoraApp> {
   late final PlayerProvider _playerProvider;
+  late final _RouterRefreshNotifier _routerRefreshNotifier;
+  late final SonoraAppRouter _appRouter;
   final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   List<Song> _songs = [];
   var _isLoading = true;
@@ -40,7 +47,43 @@ class _SonoraAppState extends State<SonoraApp> {
   void initState() {
     super.initState();
     _playerProvider = PlayerProvider(audioHandler: widget.audioHandler);
+    _routerRefreshNotifier = _RouterRefreshNotifier();
+    _appRouter = SonoraAppRouter(
+      refreshListenable: _routerRefreshNotifier,
+      loadingBuilder: _buildLoadingScreen,
+      permissionBuilder: _buildPermissionScreen,
+      playerProvider: _playerProvider,
+      themeProvider: _themeProvider,
+      buildOnboarding: (context) =>
+          OnboardingScreen(onComplete: _completeOnboarding),
+      buildHome: (context) => HomeScreen(
+        playerProvider: _playerProvider,
+        songs: _songs,
+        playlists: _playlists,
+        onOpenSettings: () => _openSettings(context),
+        scanFolder: _scanFolder,
+        onConfigureFolder: _configureScanFolder,
+        onCreatePlaylist: _onCreatePlaylist,
+        onDeletePlaylist: _onDeletePlaylist,
+        onAddSongToPlaylist: _onAddSongToPlaylist,
+        onRemoveSongFromPlaylist: _onRemoveSongFromPlaylist,
+        onReorderPlaylistSongs: _onReorderPlaylistSongs,
+        isSyncing: _isSyncing,
+        showSyncPrompt: _showSyncPrompt,
+        onResyncNow: _onResyncNow,
+        onPostponeSync: _onPostponeSync,
+      ),
+      onConfigureFolder: _configureScanFolder,
+      onResetApp: _resetApp,
+      onRetriggerSync: _syncSongsSilently,
+      onCreatePlaylist: _onCreatePlaylist,
+      onDeletePlaylist: _onDeletePlaylist,
+      onAddSongToPlaylist: _onAddSongToPlaylist,
+      onRemoveSongFromPlaylist: _onRemoveSongFromPlaylist,
+      onReorderPlaylistSongs: _onReorderPlaylistSongs,
+    );
     _playerProvider.addListener(_syncFromProvider);
+    _syncRouterState();
     _loadSongs();
   }
 
@@ -48,6 +91,7 @@ class _SonoraAppState extends State<SonoraApp> {
   void dispose() {
     _playerProvider.removeListener(_syncFromProvider);
     _playerProvider.dispose();
+    _routerRefreshNotifier.dispose();
     super.dispose();
   }
 
@@ -60,6 +104,16 @@ class _SonoraAppState extends State<SonoraApp> {
       _playlists = _playerProvider.playlists;
       _songs = _playerProvider.allSongs;
     });
+    _syncRouterState();
+  }
+
+  void _syncRouterState() {
+    _appRouter.updateGateState(
+      isLoading: _isLoading,
+      showOnboarding: _showOnboarding,
+      hasPermission: _hasPermission,
+    );
+    _routerRefreshNotifier.refresh();
   }
 
   Future<void> _loadSongs() async {
@@ -77,6 +131,7 @@ class _SonoraAppState extends State<SonoraApp> {
         _isLoading = false;
         _showOnboarding = true;
       });
+      _syncRouterState();
       return;
     }
 
@@ -88,6 +143,7 @@ class _SonoraAppState extends State<SonoraApp> {
         _isLoading = false;
         _hasPermission = false;
       });
+      _syncRouterState();
       return;
     }
 
@@ -107,6 +163,7 @@ class _SonoraAppState extends State<SonoraApp> {
         _showOnboarding = true;
         _isLoading = false;
       });
+      _syncRouterState();
       return;
     }
 
@@ -140,6 +197,7 @@ class _SonoraAppState extends State<SonoraApp> {
       _showSyncPrompt = showSyncPrompt;
       _isLoading = false;
     });
+    _syncRouterState();
 
     _playerProvider.updatePlaylists(playlists);
     _playerProvider.updateSongs(scannedSongs);
@@ -153,11 +211,13 @@ class _SonoraAppState extends State<SonoraApp> {
     setState(() {
       _showOnboarding = false;
     });
+    _syncRouterState();
 
     if (selectedFolder != null) {
       setState(() {
         _isLoading = true;
       });
+      _syncRouterState();
       var scanner = MusicScanner();
       await scanner.setScanFolder(selectedFolder);
       var newSongs = await scanner.importFromFolder(selectedFolder);
@@ -172,6 +232,7 @@ class _SonoraAppState extends State<SonoraApp> {
         _hasPermission = true;
         _isLoading = false;
       });
+      _syncRouterState();
       _playerProvider.updatePlaylists(playlists);
       _playerProvider.updateSongs(updatedSongs);
 
@@ -198,6 +259,7 @@ class _SonoraAppState extends State<SonoraApp> {
       _playlists = [];
       _showOnboarding = true;
     });
+    _syncRouterState();
     _playerProvider.updateSongs([]);
 
     _scaffoldMessengerKey.currentState?.showSnackBar(
@@ -208,19 +270,54 @@ class _SonoraAppState extends State<SonoraApp> {
     );
   }
 
-  void _openSettings(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SettingsScreen(
-          onConfigureFolder: _configureScanFolder,
-          onResetApp: _resetApp,
-          onRetriggerSync: _syncSongsSilently,
-          themeProvider: _themeProvider,
-          playerProvider: _playerProvider,
+  Widget _buildLoadingScreen(BuildContext context) {
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+  }
+
+  Widget _buildPermissionScreen(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.audio_file_rounded,
+                size: 80,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Access to Music Files',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'To play local audio files, Sonora requires permission to access your device storage.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              FilledButton.icon(
+                onPressed: _loadSongs,
+                icon: const Icon(Icons.security_rounded),
+                label: const Text('Grant Permission'),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void _openSettings(BuildContext context) {
+    openSettings(context);
   }
 
   Future<void> _configureScanFolder() async {
@@ -238,6 +335,7 @@ class _SonoraAppState extends State<SonoraApp> {
         _songs = updatedSongs;
         _hasPermission = true;
       });
+      _syncRouterState();
       _playerProvider.updateSongs(updatedSongs);
 
       _scaffoldMessengerKey.currentState?.showSnackBar(
@@ -264,6 +362,7 @@ class _SonoraAppState extends State<SonoraApp> {
       setState(() {
         _songs = updatedSongs;
       });
+      _syncRouterState();
       _playerProvider.updateSongs(updatedSongs);
     } catch (_) {
     } finally {
@@ -306,6 +405,7 @@ class _SonoraAppState extends State<SonoraApp> {
     setState(() {
       _playlists = playlists;
     });
+    _syncRouterState();
   }
 
   Future<void> _onDeletePlaylist(String playlistId) async {
@@ -316,6 +416,7 @@ class _SonoraAppState extends State<SonoraApp> {
     setState(() {
       _playlists = playlists;
     });
+    _syncRouterState();
   }
 
   Future<void> _onAddSongToPlaylist(String playlistId, int songId) async {
@@ -326,6 +427,7 @@ class _SonoraAppState extends State<SonoraApp> {
     setState(() {
       _playlists = playlists;
     });
+    _syncRouterState();
   }
 
   Future<void> _onRemoveSongFromPlaylist(String playlistId, int songId) async {
@@ -336,6 +438,7 @@ class _SonoraAppState extends State<SonoraApp> {
     setState(() {
       _playlists = playlists;
     });
+    _syncRouterState();
   }
 
   Future<void> _onReorderPlaylistSongs(
@@ -359,6 +462,7 @@ class _SonoraAppState extends State<SonoraApp> {
     setState(() {
       _playlists = playlists;
     });
+    _syncRouterState();
   }
 
   @override
@@ -369,7 +473,7 @@ class _SonoraAppState extends State<SonoraApp> {
         return ValueListenableBuilder<Color>(
           valueListenable: _playerProvider.themeColorNotifier,
           builder: (context, activeSeedColor, _) {
-            return MaterialApp(
+            return MaterialApp.router(
               scaffoldMessengerKey: _scaffoldMessengerKey,
               title: 'Sonora',
               theme: AppTheme.buildTheme(
@@ -388,75 +492,7 @@ class _SonoraAppState extends State<SonoraApp> {
                   child: child,
                 );
               },
-              home: _isLoading
-                  ? const Scaffold(
-                      body: Center(child: CircularProgressIndicator()),
-                    )
-                  : _showOnboarding
-                  ? OnboardingScreen(onComplete: _completeOnboarding)
-                  : !_hasPermission
-                  ? Scaffold(
-                      body: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.audio_file_rounded,
-                                size: 80,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(height: 24),
-                              Text(
-                                'Access to Music Files',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'To play local audio files, Sonora requires permission to access your device storage.',
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 32),
-                              FilledButton.icon(
-                                onPressed: _loadSongs,
-                                icon: const Icon(Icons.security_rounded),
-                                label: const Text('Grant Permission'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    )
-                  : Builder(
-                      builder: (context) => HomeScreen(
-                        playerProvider: _playerProvider,
-                        songs: _songs,
-                        playlists: _playlists,
-                        onOpenSettings: () => _openSettings(context),
-                        scanFolder: _scanFolder,
-                        onConfigureFolder: _configureScanFolder,
-                        onCreatePlaylist: _onCreatePlaylist,
-                        onDeletePlaylist: _onDeletePlaylist,
-                        onAddSongToPlaylist: _onAddSongToPlaylist,
-                        onRemoveSongFromPlaylist: _onRemoveSongFromPlaylist,
-                        onReorderPlaylistSongs: _onReorderPlaylistSongs,
-                        isSyncing: _isSyncing,
-                        showSyncPrompt: _showSyncPrompt,
-                        onResyncNow: _onResyncNow,
-                        onPostponeSync: _onPostponeSync,
-                      ),
-                    ),
+              routerConfig: _appRouter.router,
             );
           },
         );

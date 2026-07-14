@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
+import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/music_scanner.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -82,7 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               onPressed: () {
                 Navigator.pop(dialogContext); // Close dialog
-                Navigator.pop(context); // Close SettingsScreen
+                closeRoute(context); // Close SettingsScreen
                 widget.onResetApp();
               },
               child: const Text('Reset'),
@@ -316,7 +317,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: const Text('Settings'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => closeRoute(context),
         ),
       ),
       body: ListView(
