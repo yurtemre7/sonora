@@ -316,7 +316,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         title: const Text('Settings'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => closeRoute(context),
         ),
       ),
@@ -799,19 +799,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-          ListTile(
-            leading: Icon(
-              Icons.delete_forever_rounded,
-              color: theme.colorScheme.error,
+          SafeArea(
+            child: ListTile(
+              leading: Icon(
+                Icons.delete_forever_rounded,
+                color: theme.colorScheme.error,
+              ),
+              title: Text(
+                'Reset Application',
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
+              subtitle: const Text('Delete all imported music and settings'),
+              onTap: () {
+                _confirmResetDialog(context);
+              },
             ),
-            title: Text(
-              'Reset Application',
-              style: TextStyle(color: theme.colorScheme.error),
-            ),
-            subtitle: const Text('Delete all imported music and settings'),
-            onTap: () {
-              _confirmResetDialog(context);
-            },
           ),
         ],
       ),
