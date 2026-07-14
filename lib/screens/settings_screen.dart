@@ -72,14 +72,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           content: const Text(
             'This action will permanently delete all imported audio files and clear your library. This cannot be undone.',
           ),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.error,
+            FilledButton(
+              style: FilledButton.styleFrom(
+                foregroundColor: theme.colorScheme.onError,
+                backgroundColor: theme.colorScheme.error
               ),
               onPressed: () {
                 Navigator.pop(dialogContext); // Close dialog
@@ -87,6 +85,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 widget.onResetApp();
               },
               child: const Text('Reset'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
             ),
           ],
         );
@@ -242,7 +244,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           actions: [
-            TextButton(
+            FilledButton(
               onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Close'),
             ),

@@ -691,12 +691,13 @@ class _HomeScreenState extends State<HomeScreen>
           decoration: const InputDecoration(hintText: 'Playlist name'),
           textCapitalization: TextCapitalization.sentences,
         ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () async {
               var name = textController.text.trim();
               if (name.isNotEmpty) {

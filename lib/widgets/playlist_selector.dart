@@ -271,12 +271,13 @@ class _PlaylistSelectorBottomSheetState
           autofocus: true,
           textCapitalization: TextCapitalization.sentences,
         ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () async {
               var name = _playlistNameController.text.trim();
               if (name.isNotEmpty) {

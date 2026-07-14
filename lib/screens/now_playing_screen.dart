@@ -1296,12 +1296,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
               hintText: 'Enter duration',
             ),
           ),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancel'),
             ),
-            TextButton(
+            FilledButton(
               onPressed: () {
                 var minutes = int.tryParse(controller.text);
                 if (minutes != null && minutes > 0) {
