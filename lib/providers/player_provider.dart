@@ -41,6 +41,7 @@ class PlayerProvider extends ChangeNotifier {
   var _isFadingOut = false;
   var _originalVolumeBeforeFade = 1.0;
   var _lastExtractedSongId = -1;
+  var _playRequestToken = 0;
 
   /// Decouples dynamic theme color changes from general playback state
   /// notifications. Only fires when the seed color actually changes.
@@ -97,6 +98,8 @@ class PlayerProvider extends ChangeNotifier {
   /// Builds a new queue from [songList], locates [song] within it, loads the
   /// playlist into the audio handler, and begins playback.
   Future<void> playSong(Song song, List<Song> songList) async {
+    var requestToken = ++_playRequestToken;
+
     queue = List<Song>.from(songList);
     _originalQueue = List<Song>.from(songList);
     isShuffled = false;
@@ -105,8 +108,17 @@ class PlayerProvider extends ChangeNotifier {
     currentIndex = index >= 0 ? index : 0;
 
     var mediaItems = queue.map(_songToMediaItem).toList();
-    await audioHandler.loadPlaylist(mediaItems, initialIndex: currentIndex);
-    await audioHandler.play();
+    try {
+      await audioHandler.loadPlaylist(mediaItems, initialIndex: currentIndex);
+      if (requestToken != _playRequestToken) return;
+
+      await audioHandler.play();
+      if (requestToken != _playRequestToken) return;
+    } on PlayerInterruptedException {
+      if (requestToken != _playRequestToken) return;
+      rethrow;
+    }
+
     notifyListeners();
   }
 
