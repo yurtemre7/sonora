@@ -38,7 +38,6 @@ class _SonoraAppState extends State<SonoraApp> {
   var _hasPermission = true;
   String? _scanFolder;
   var _isSyncing = false;
-  List<Playlist> _playlists = [];
   final _themeProvider = ThemeProvider();
   var _showOnboarding = false;
   var _showSyncPrompt = false;
@@ -59,7 +58,6 @@ class _SonoraAppState extends State<SonoraApp> {
       buildHome: (context) => HomeScreen(
         playerProvider: _playerProvider,
         songs: _songs,
-        playlists: _playlists,
         onOpenSettings: () => _openSettings(context),
         scanFolder: _scanFolder,
         onConfigureFolder: _configureScanFolder,
@@ -101,7 +99,6 @@ class _SonoraAppState extends State<SonoraApp> {
   void _syncFromProvider() {
     if (!mounted) return;
     setState(() {
-      _playlists = _playerProvider.playlists;
       _songs = _playerProvider.allSongs;
     });
     _syncRouterState();
@@ -193,7 +190,6 @@ class _SonoraAppState extends State<SonoraApp> {
     setState(() {
       _scanFolder = folder;
       _songs = scannedSongs;
-      _playlists = playlists;
       _showSyncPrompt = showSyncPrompt;
       _isLoading = false;
     });
@@ -228,7 +224,6 @@ class _SonoraAppState extends State<SonoraApp> {
       setState(() {
         _scanFolder = selectedFolder;
         _songs = updatedSongs;
-        _playlists = playlists;
         _hasPermission = true;
         _isLoading = false;
       });
@@ -256,7 +251,6 @@ class _SonoraAppState extends State<SonoraApp> {
     setState(() {
       _scanFolder = null;
       _songs = [];
-      _playlists = [];
       _showOnboarding = true;
     });
     _syncRouterState();
@@ -403,9 +397,7 @@ class _SonoraAppState extends State<SonoraApp> {
     await scanner.createPlaylist(name);
     var playlists = await scanner.getPlaylists();
     if (!mounted) return;
-    setState(() {
-      _playlists = playlists;
-    });
+    _playerProvider.updatePlaylists(playlists);
     _syncRouterState();
   }
 
@@ -414,9 +406,7 @@ class _SonoraAppState extends State<SonoraApp> {
     await scanner.deletePlaylist(playlistId);
     var playlists = await scanner.getPlaylists();
     if (!mounted) return;
-    setState(() {
-      _playlists = playlists;
-    });
+    _playerProvider.updatePlaylists(playlists);
     _syncRouterState();
   }
 
@@ -425,9 +415,7 @@ class _SonoraAppState extends State<SonoraApp> {
     await scanner.addSongToPlaylist(playlistId, songId);
     var playlists = await scanner.getPlaylists();
     if (!mounted) return;
-    setState(() {
-      _playlists = playlists;
-    });
+    _playerProvider.updatePlaylists(playlists);
     _syncRouterState();
   }
 
@@ -436,9 +424,7 @@ class _SonoraAppState extends State<SonoraApp> {
     await scanner.removeSongFromPlaylist(playlistId, songId);
     var playlists = await scanner.getPlaylists();
     if (!mounted) return;
-    setState(() {
-      _playlists = playlists;
-    });
+    _playerProvider.updatePlaylists(playlists);
     _syncRouterState();
   }
 
@@ -460,9 +446,7 @@ class _SonoraAppState extends State<SonoraApp> {
     }
     await scanner.savePlaylists(playlists);
     if (!mounted) return;
-    setState(() {
-      _playlists = playlists;
-    });
+    _playerProvider.updatePlaylists(playlists);
     _syncRouterState();
   }
 

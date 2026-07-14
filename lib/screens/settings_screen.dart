@@ -77,7 +77,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             FilledButton(
               style: FilledButton.styleFrom(
                 foregroundColor: theme.colorScheme.onError,
-                backgroundColor: theme.colorScheme.error
+                backgroundColor: theme.colorScheme.error,
               ),
               onPressed: () {
                 Navigator.pop(dialogContext); // Close dialog
