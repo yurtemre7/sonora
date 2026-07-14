@@ -2,6 +2,26 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.4.0] - 2026-07-14
+### Added
+* Make miniplayer global
+* Improve routing with deep links for albums, artists and playlists + logging
+* Change now playing state after a new song was selected in the related tab
+* Add new routing
+### Fixed
+* Playlist add and delete
+* Shuffle not toggled if shuffle play was selected for a list of songs
+* Playing 2 songs after each other fast crashed the app
+* Let taps go through the audio visualizer
+* Reverse swipe on mini player
+### Changed
+* Chore: Improving dialog actions
+* Chore: Add logging
+* Chore: Safe area on settings and change back icon
+* Chore: Improve back icon
+* Chore: Fix icon in the Android system media player
+* Chore: Fix margins/paddings
+
 ## [1.3.2] - 2026-07-13
 ### Added
 * Improve now playing UI once more
@@ -13,6 +33,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Marquee text now reset properly upon song change
 * Refreshing while having a queue with changes elements, does not reset the queue
 ### Changed
+* 1.3.2
 * Chore: Format files
 
 ## [1.3.1] - 2026-07-12
