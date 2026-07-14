@@ -664,7 +664,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           ...sameAlbum.map(
             (s) => SongTile(
               song: s,
-              onTap: () => widget.playerProvider.playSong(s, allSongs),
+              onTap: () => _playRelatedSong(s, allSongs),
               showDivider: true,
               showHighlightBackground: false,
             ),
@@ -685,7 +685,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           ...sameArtist.map(
             (s) => SongTile(
               song: s,
-              onTap: () => widget.playerProvider.playSong(s, allSongs),
+              onTap: () => _playRelatedSong(s, allSongs),
               showDivider: true,
               showHighlightBackground: false,
             ),
@@ -700,6 +700,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       (s) =>
           s.id != song.id && (s.artist == song.artist || s.album == song.album),
     );
+  }
+
+  Future<void> _playRelatedSong(Song song, List<Song> allSongs) async {
+    if (mounted) {
+      setState(() => _viewMode = _ViewMode.player);
+    }
+    await widget.playerProvider.playSong(song, allSongs);
   }
 
   Widget _buildQueueContent(ThemeData theme) {
