@@ -98,28 +98,12 @@ class PlayerProvider extends ChangeNotifier {
   /// Builds a new queue from [songList], locates [song] within it, loads the
   /// playlist into the audio handler, and begins playback.
   Future<void> playSong(Song song, List<Song> songList) async {
-    var requestToken = ++_playRequestToken;
-
-    queue = List<Song>.from(songList);
-    _originalQueue = List<Song>.from(songList);
-    isShuffled = false;
-
-    var index = queue.indexWhere((s) => s.id == song.id);
-    currentIndex = index >= 0 ? index : 0;
-
-    var mediaItems = queue.map(_songToMediaItem).toList();
-    try {
-      await audioHandler.loadPlaylist(mediaItems, initialIndex: currentIndex);
-      if (requestToken != _playRequestToken) return;
-
-      await audioHandler.play();
-      if (requestToken != _playRequestToken) return;
-    } on PlayerInterruptedException {
-      if (requestToken != _playRequestToken) return;
-      rethrow;
-    }
-
-    notifyListeners();
+    await _loadAndPlay(
+      song: song,
+      songList: songList,
+      originalQueue: songList,
+      shuffled: false,
+    );
   }
 
   /// Toggles between play and pause.
@@ -196,12 +180,24 @@ class PlayerProvider extends ChangeNotifier {
       isShuffled = true;
     }
 
+    notifyListeners();
+
     // Update the audio handler's playlist source after current index
     var remainingMediaItems = queue
         .sublist(currentIndex + 1)
         .map(_songToMediaItem)
         .toList();
-    await audioHandler.updatePlaylistAfter(currentIndex, remainingMediaItems);
+    try {
+      await audioHandler.updatePlaylistAfter(currentIndex, remainingMediaItems);
+    } on PlayerInterruptedException {
+      await audioHandler.loadPlaylist(
+        queue.map(_songToMediaItem).toList(),
+        initialIndex: currentIndex,
+      );
+      if (isPlaying) {
+        await audioHandler.play();
+      }
+    }
 
     notifyListeners();
   }
@@ -216,14 +212,12 @@ class PlayerProvider extends ChangeNotifier {
     // Pick the first shuffled song as the starting track
     var startingSong = shuffled.first;
 
-    // Load and play the shuffled playlist. playSong resets isShuffled to false,
-    // so we set it to true afterward.
-    await playSong(startingSong, shuffled);
-    _originalQueue = List<Song>.from(
-      songsList,
-    ); // Preserve original order for unshuffling!
-    isShuffled = true;
-    notifyListeners();
+    await _loadAndPlay(
+      song: startingSong,
+      songList: shuffled,
+      originalQueue: songsList,
+      shuffled: true,
+    );
   }
 
   // ── Repeat ────────────────────────────────────────────────────────────────
@@ -296,6 +290,38 @@ class PlayerProvider extends ChangeNotifier {
   Future<void> addToQueue(Song song) async {
     queue.add(song);
     await audioHandler.addQueueItem(_songToMediaItem(song));
+    notifyListeners();
+  }
+
+  Future<void> _loadAndPlay({
+    required Song song,
+    required List<Song> songList,
+    required List<Song> originalQueue,
+    required bool shuffled,
+  }) async {
+    var requestToken = ++_playRequestToken;
+
+    queue = List<Song>.from(songList);
+    _originalQueue = List<Song>.from(originalQueue);
+    isShuffled = shuffled;
+
+    var index = queue.indexWhere((s) => s.id == song.id);
+    currentIndex = index >= 0 ? index : 0;
+
+    notifyListeners();
+
+    var mediaItems = queue.map(_songToMediaItem).toList();
+    try {
+      await audioHandler.loadPlaylist(mediaItems, initialIndex: currentIndex);
+      if (requestToken != _playRequestToken) return;
+
+      await audioHandler.play();
+      if (requestToken != _playRequestToken) return;
+    } on PlayerInterruptedException {
+      if (requestToken != _playRequestToken) return;
+      rethrow;
+    }
+
     notifyListeners();
   }
 

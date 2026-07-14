@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:sonora/models/grouping.dart';
-import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/widgets/album_art.dart';
@@ -136,9 +135,7 @@ class AlbumDetailScreen extends StatelessWidget {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             if (album.songs.isNotEmpty) {
-                              var shuffled = List<Song>.from(album.songs)
-                                ..shuffle();
-                              playerProvider.playSong(shuffled.first, shuffled);
+                              playerProvider.quickShuffle(album.songs);
                             }
                           },
                           icon: const Icon(Icons.shuffle_rounded),
