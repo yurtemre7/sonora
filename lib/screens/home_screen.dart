@@ -4,10 +4,8 @@ import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
-import 'package:sonora/screens/now_playing_screen.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/album_art.dart';
-import 'package:sonora/widgets/mini_player.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -301,66 +299,69 @@ class _HomeScreenState extends State<HomeScreen>
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+            return SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  RadioGroup<String>(
-                    groupValue: _sortByForTab(tabIndex),
-                    onChanged: (val) {
-                      setState(() => _setSortByForTab(tabIndex, val!));
-                      setSheetState(() {});
-                      MusicScanner().saveTabSortSettings(
-                        tabName,
-                        _sortByForTab(tabIndex),
-                        _sortAscendingForTab(tabIndex),
-                      );
-                      Navigator.pop(context);
-                    },
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: options.map((opt) {
-                        return RadioListTile<String>(
-                          title: Text(opt.$1),
-                          value: opt.$2,
+                    const SizedBox(height: 16),
+                    RadioGroup<String>(
+                      groupValue: _sortByForTab(tabIndex),
+                      onChanged: (val) {
+                        setState(() => _setSortByForTab(tabIndex, val!));
+                        setSheetState(() {});
+                        MusicScanner().saveTabSortSettings(
+                          tabName,
+                          _sortByForTab(tabIndex),
+                          _sortAscendingForTab(tabIndex),
                         );
-                      }).toList(),
+                        Navigator.pop(context);
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: options.map((opt) {
+                          return RadioListTile<String>(
+                            title: Text(opt.$1),
+                            value: opt.$2,
+                          );
+                        }).toList(),
+                      ),
                     ),
-                  ),
-                  const Divider(),
-                  SwitchListTile(
-                    title: const Text('Sort Ascending'),
-                    value: _sortAscendingForTab(tabIndex),
-                    onChanged: (val) {
-                      setState(() => _setSortAscendingForTab(tabIndex, val));
-                      setSheetState(() {});
-                      MusicScanner().saveTabSortSettings(
-                        tabName,
-                        _sortByForTab(tabIndex),
-                        _sortAscendingForTab(tabIndex),
-                      );
-                    },
-                  ),
-                ],
+                    const Divider(),
+                    SwitchListTile(
+                      title: const Text('Sort Ascending'),
+                      value: _sortAscendingForTab(tabIndex),
+                      onChanged: (val) {
+                        setState(() => _setSortAscendingForTab(tabIndex, val));
+                        setSheetState(() {});
+                        MusicScanner().saveTabSortSettings(
+                          tabName,
+                          _sortByForTab(tabIndex),
+                          _sortAscendingForTab(tabIndex),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -432,6 +433,7 @@ class _HomeScreenState extends State<HomeScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       builder: (context) {
         return Container(
           width: double.infinity,
@@ -562,7 +564,10 @@ class _HomeScreenState extends State<HomeScreen>
         var playlists = _getFilteredPlaylists();
         count = playlists.length;
         label = '$count ${count == 1 ? 'playlist' : 'playlists'} found';
-        onShuffle = null;
+        onShuffle = () {
+          unfocus();
+          _showCreatePlaylistDialog();
+        };
         onSort = () {
           unfocus();
           _showSortBottomSheet(tabIndex: 3);
@@ -630,13 +635,20 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
               ),
-              if (onShuffle != null) ...[
+              ...[
                 const SizedBox(width: 8),
-                IconButton.filledTonal(
-                  icon: const Icon(Icons.shuffle_rounded),
-                  onPressed: onShuffle,
-                  tooltip: 'Shuffle Play',
-                ),
+                if (tabIndex != 3)
+                  IconButton.filledTonal(
+                    icon: const Icon(Icons.shuffle_rounded),
+                    onPressed: onShuffle,
+                    tooltip: 'Shuffle Play',
+                  )
+                else
+                  IconButton.filledTonal(
+                    icon: const Icon(Icons.playlist_add),
+                    onPressed: onShuffle,
+                    tooltip: 'Create a playlist',
+                  ),
               ],
               const SizedBox(width: 8),
               IconButton.filledTonal(
@@ -790,44 +802,6 @@ class _HomeScreenState extends State<HomeScreen>
     var theme = Theme.of(context);
 
     return Scaffold(
-      bottomNavigationBar: ListenableBuilder(
-        listenable: widget.playerProvider,
-        builder: (context, _) {
-          var currentSong = widget.playerProvider.currentSong;
-          if (currentSong == null) return const SizedBox.shrink();
-
-          return StreamBuilder<Duration>(
-            stream: widget.playerProvider.audioHandler.player.positionStream,
-            builder: (context, snapshot) {
-              var position = snapshot.data ?? Duration.zero;
-              var totalMs = currentSong.duration.inMilliseconds;
-              var progress = totalMs > 0
-                  ? position.inMilliseconds / totalMs
-                  : 0.0;
-
-              return MiniPlayer(
-                currentSong: currentSong,
-                isPlaying: widget.playerProvider.audioHandler.player.playing,
-                progress: progress,
-                onTap: () {
-                  _searchFocusNode.unfocus();
-                  _openNowPlaying(context);
-                },
-                onPlayPause: widget.playerProvider.playPause,
-                onNext: widget.playerProvider.next,
-                onSwipeUp: () {
-                  _searchFocusNode.unfocus();
-                  _openNowPlaying(context);
-                },
-                onSwipeDown: widget.playerProvider.stop,
-                onSwipeLeft: widget.playerProvider.previous,
-                onSwipeRight: widget.playerProvider.next,
-              );
-            },
-          );
-        },
-      ),
-      extendBody: true,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -1529,27 +1503,6 @@ class _HomeScreenState extends State<HomeScreen>
           ],
         ),
       ),
-      floatingActionButton:
-          _tabController.index == 3 && widget.playlists.isNotEmpty
-          ? FloatingActionButton(
-              onPressed: _showCreatePlaylistDialog,
-              child: const Icon(Icons.playlist_add_rounded),
-            )
-          : null,
-    );
-  }
-
-  void _openNowPlaying(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      clipBehavior: Clip.antiAlias,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) =>
-          NowPlayingScreen(playerProvider: widget.playerProvider),
     );
   }
 }

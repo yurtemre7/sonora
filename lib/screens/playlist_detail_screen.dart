@@ -76,6 +76,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       builder: (context) {
         return Container(
           width: double.infinity,
@@ -187,6 +188,16 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => closeRoute(context),
             ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  widget.playerProvider.quickShuffle(_playlistSongs);
+                },
+                icon: const Icon(Icons.shuffle_rounded),
+                tooltip: 'Shuffle Play',
+              ),
+              SizedBox(width: 8),
+            ],
           ),
           body: _playlistSongs.isEmpty
               ? Center(
@@ -310,17 +321,6 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                       );
                     },
                   ),
-                ),
-          floatingActionButton: _playlistSongs.isEmpty
-              ? null
-              : FloatingActionButton.extended(
-                  onPressed: () {
-                    widget.playerProvider.quickShuffle(_playlistSongs);
-                  },
-                  icon: const Icon(Icons.shuffle_rounded),
-                  label: const Text('Shuffle Play'),
-                  backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: theme.colorScheme.onPrimary,
                 ),
         );
       },

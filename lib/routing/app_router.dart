@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
+import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/routing/app_routes.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
+import 'package:sonora/screens/now_playing_screen.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
 import 'package:sonora/screens/settings_screen.dart';
 import 'package:sonora/utils/logger.dart';
+import 'package:sonora/widgets/mini_player.dart';
 
 class SonoraAppRouter {
   SonoraAppRouter({
@@ -103,116 +106,142 @@ class SonoraAppRouter {
         path: AppRoutes.permission,
         builder: (context, state) => permissionBuilder(context),
       ),
-      GoRoute(
-        path: AppRoutes.home,
-        builder: (context, state) => buildHome(context),
-      ),
-      GoRoute(
-        path: AppRoutes.settings,
-        builder: (context, state) => SettingsScreen(
-          onConfigureFolder: onConfigureFolder,
-          onResetApp: onResetApp,
-          onRetriggerSync: onRetriggerSync,
-          themeProvider: themeProvider,
-          playerProvider: playerProvider,
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.album,
-        builder: (context, state) {
-          var albumName = state.uri.queryParameters['album'];
-          var artistName = state.uri.queryParameters['artist'];
-          if (albumName == null || artistName == null) {
-            return const Scaffold(
-              body: Center(child: Text('Missing album data')),
-            );
-          }
-          var latestAlbum = buildAlbumGroup(
-            albumName,
-            artistName,
-            playerProvider.allSongs,
-          );
-          if (latestAlbum.songs.isEmpty) {
-            return const Scaffold(body: Center(child: Text('Album not found')));
-          }
-          return AlbumDetailScreen(
-            album: latestAlbum,
-            playerProvider: playerProvider,
+      ShellRoute(
+        builder: (context, state, child) {
+          return ListenableBuilder(
+            listenable: playerProvider,
+            builder: (context, _) {
+              var currentSong = playerProvider.currentSong;
+
+              return Scaffold(
+                body: child,
+                extendBody: true,
+                bottomNavigationBar: currentSong == null
+                    ? null
+                    : _ShellMiniPlayer(
+                        playerProvider: playerProvider,
+                        currentSong: currentSong,
+                        onOpenNowPlaying: () => _openNowPlayingSheet(context),
+                      ),
+              );
+            },
           );
         },
-      ),
-      GoRoute(
-        path: AppRoutes.artist,
-        builder: (context, state) {
-          var artistName = state.uri.queryParameters['name'];
-          if (artistName == null) {
-            return const Scaffold(
-              body: Center(child: Text('Missing artist data')),
-            );
-          }
-          var latestArtist = buildArtistGroup(
-            artistName,
-            playerProvider.allSongs,
-          );
-          if (latestArtist.songs.isEmpty) {
-            return const Scaffold(
-              body: Center(child: Text('Artist not found')),
-            );
-          }
-          return ArtistDetailScreen(
-            artist: latestArtist,
-            playerProvider: playerProvider,
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.playlist,
-        builder: (context, state) {
-          var playlistId = state.uri.queryParameters['id'];
-          if (playlistId == null) {
-            return const Scaffold(
-              body: Center(child: Text('Missing playlist data')),
-            );
-          }
-          Playlist? latestPlaylist;
-          for (var item in playerProvider.playlists) {
-            if (item.id == playlistId) {
-              latestPlaylist = item;
-              break;
-            }
-          }
-          if (latestPlaylist == null && playlistId != 'favorites') {
-            return const Scaffold(
-              body: Center(child: Text('Playlist not found')),
-            );
-          }
-          var resolvedPlaylist = latestPlaylist;
-          if (resolvedPlaylist == null && playlistId == 'favorites') {
-            var favoriteIds = playerProvider.allSongs
-                .where((song) => song.isFavorite)
-                .map((song) => song.id)
-                .toList();
-            resolvedPlaylist = Playlist(
-              id: 'favorites',
-              name: 'Favorites',
-              songIds: favoriteIds,
-            );
-          }
-          if (resolvedPlaylist == null) {
-            return const Scaffold(
-              body: Center(child: Text('Playlist not found')),
-            );
-          }
-          return PlaylistDetailScreen(
-            playlist: resolvedPlaylist,
-            songs: playerProvider.allSongs,
-            playerProvider: playerProvider,
-            onRemoveSong: onRemoveSongFromPlaylist,
-            onReorderSongs: onReorderPlaylistSongs,
-            playlists: playerProvider.playlists,
-            onAddSongToPlaylist: onAddSongToPlaylist,
-          );
-        },
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (context, state) => buildHome(context),
+          ),
+          GoRoute(
+            path: AppRoutes.settings,
+            builder: (context, state) => SettingsScreen(
+              onConfigureFolder: onConfigureFolder,
+              onResetApp: onResetApp,
+              onRetriggerSync: onRetriggerSync,
+              themeProvider: themeProvider,
+              playerProvider: playerProvider,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.album,
+            builder: (context, state) {
+              var albumName = state.uri.queryParameters['album'];
+              var artistName = state.uri.queryParameters['artist'];
+              if (albumName == null || artistName == null) {
+                return const Scaffold(
+                  body: Center(child: Text('Missing album data')),
+                );
+              }
+              var latestAlbum = buildAlbumGroup(
+                albumName,
+                artistName,
+                playerProvider.allSongs,
+              );
+              if (latestAlbum.songs.isEmpty) {
+                return const Scaffold(
+                  body: Center(child: Text('Album not found')),
+                );
+              }
+              return AlbumDetailScreen(
+                album: latestAlbum,
+                playerProvider: playerProvider,
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.artist,
+            builder: (context, state) {
+              var artistName = state.uri.queryParameters['name'];
+              if (artistName == null) {
+                return const Scaffold(
+                  body: Center(child: Text('Missing artist data')),
+                );
+              }
+              var latestArtist = buildArtistGroup(
+                artistName,
+                playerProvider.allSongs,
+              );
+              if (latestArtist.songs.isEmpty) {
+                return const Scaffold(
+                  body: Center(child: Text('Artist not found')),
+                );
+              }
+              return ArtistDetailScreen(
+                artist: latestArtist,
+                playerProvider: playerProvider,
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.playlist,
+            builder: (context, state) {
+              var playlistId = state.uri.queryParameters['id'];
+              if (playlistId == null) {
+                return const Scaffold(
+                  body: Center(child: Text('Missing playlist data')),
+                );
+              }
+              Playlist? latestPlaylist;
+              for (var item in playerProvider.playlists) {
+                if (item.id == playlistId) {
+                  latestPlaylist = item;
+                  break;
+                }
+              }
+              if (latestPlaylist == null && playlistId != 'favorites') {
+                return const Scaffold(
+                  body: Center(child: Text('Playlist not found')),
+                );
+              }
+              var resolvedPlaylist = latestPlaylist;
+              if (resolvedPlaylist == null && playlistId == 'favorites') {
+                var favoriteIds = playerProvider.allSongs
+                    .where((song) => song.isFavorite)
+                    .map((song) => song.id)
+                    .toList();
+                resolvedPlaylist = Playlist(
+                  id: 'favorites',
+                  name: 'Favorites',
+                  songIds: favoriteIds,
+                );
+              }
+              if (resolvedPlaylist == null) {
+                return const Scaffold(
+                  body: Center(child: Text('Playlist not found')),
+                );
+              }
+              return PlaylistDetailScreen(
+                playlist: resolvedPlaylist,
+                songs: playerProvider.allSongs,
+                playerProvider: playerProvider,
+                onRemoveSong: onRemoveSongFromPlaylist,
+                onReorderSongs: onReorderPlaylistSongs,
+                playlists: playerProvider.playlists,
+                onAddSongToPlaylist: onAddSongToPlaylist,
+              );
+            },
+          ),
+        ],
       ),
     ],
   );
@@ -234,5 +263,55 @@ class SonoraAppRouter {
     _loading = isLoading;
     _onboarding = showOnboarding;
     _permissionGranted = hasPermission;
+  }
+
+  void _openNowPlayingSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => NowPlayingScreen(playerProvider: playerProvider),
+    );
+  }
+}
+
+class _ShellMiniPlayer extends StatelessWidget {
+  const _ShellMiniPlayer({
+    required this.playerProvider,
+    required this.currentSong,
+    required this.onOpenNowPlaying,
+  });
+
+  final PlayerProvider playerProvider;
+  final Song currentSong;
+  final VoidCallback onOpenNowPlaying;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<Duration>(
+      stream: playerProvider.audioHandler.player.positionStream,
+      builder: (context, snapshot) {
+        var position = snapshot.data ?? Duration.zero;
+        var totalMs = currentSong.duration.inMilliseconds;
+        var progress = totalMs > 0 ? position.inMilliseconds / totalMs : 0.0;
+
+        return MiniPlayer(
+          currentSong: currentSong,
+          isPlaying: playerProvider.audioHandler.player.playing,
+          progress: progress,
+          onTap: onOpenNowPlaying,
+          onPlayPause: playerProvider.playPause,
+          onNext: playerProvider.next,
+          onSwipeUp: onOpenNowPlaying,
+          onSwipeDown: playerProvider.stop,
+          onSwipeLeft: playerProvider.previous,
+          onSwipeRight: playerProvider.next,
+        );
+      },
+    );
   }
 }

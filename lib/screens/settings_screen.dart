@@ -103,6 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      useRootNavigator: true,
       builder: (sheetContext) {
         return SafeArea(
           child: ListenableBuilder(

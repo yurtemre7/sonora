@@ -260,6 +260,7 @@ class _SonoraAppState extends State<SonoraApp> {
       _showOnboarding = true;
     });
     _syncRouterState();
+    _playerProvider.stop();
     _playerProvider.updateSongs([]);
 
     _scaffoldMessengerKey.currentState?.showSnackBar(
