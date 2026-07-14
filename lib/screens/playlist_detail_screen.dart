@@ -184,7 +184,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
           appBar: AppBar(
             title: Text(_playlist.name),
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => closeRoute(context),
             ),
           ),
