@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.4.2] - 2026-07-15
+### Changed
+* Precompute album and artist tab snapshots to reduce UI blocking when switching tabs after sync.
+
 ## [1.4.1] - 2026-07-15
 ### Added
 * Upgrade to android 37, kotlin 2.4.10 and agp 9.3 / gradle 9.6.1
