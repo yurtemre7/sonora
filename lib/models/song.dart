@@ -33,6 +33,11 @@ class Song {
     this.dominantColor,
   });
 
+  // Pre-normalized lowercase keys computed once at construction time
+  late final String titleLower = title.toLowerCase();
+  late final String artistLower = artist.toLowerCase();
+  late final String albumLower = album.toLowerCase();
+
   String get durationFormatted {
     var minutes = duration.inMinutes;
     var seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');

@@ -107,18 +107,21 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   List<Song> _getFilteredSongs() {
-    var filtered = widget.songs.where((song) {
-      if (_searchQuery.isEmpty) return true;
-      var query = _searchQuery.toLowerCase();
-      return song.title.toLowerCase().contains(query) ||
-          song.artist.toLowerCase().contains(query) ||
-          song.album.toLowerCase().contains(query);
-    }).toList();
+    // Pre-compute the query lowercase once — not once per element in where().
+    var query = _searchQuery.isEmpty ? '' : _searchQuery.toLowerCase();
+
+    var filtered = query.isEmpty
+        ? widget.songs
+        : widget.songs.where((song) {
+            return song.titleLower.contains(query) ||
+                song.artistLower.contains(query) ||
+                song.albumLower.contains(query);
+          }).toList();
 
     filtered.sort((a, b) {
       int comparison;
       if (_songSortBy == 'artist') {
-        comparison = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
+        comparison = a.artistLower.compareTo(b.artistLower);
       } else if (_songSortBy == 'duration') {
         comparison = a.duration.compareTo(b.duration);
       } else if (_songSortBy == 'recent') {
@@ -126,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen>
         var bTime = b.lastModifiedMs ?? 0;
         comparison = bTime.compareTo(aTime);
       } else {
-        comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+        comparison = a.titleLower.compareTo(b.titleLower);
       }
       return _songSortAscending ? comparison : -comparison;
     });
@@ -140,20 +143,18 @@ class _HomeScreenState extends State<HomeScreen>
       var query = _searchQuery.toLowerCase();
       albums = albums
           .where(
-            (a) =>
-                a.name.toLowerCase().contains(query) ||
-                a.artist.toLowerCase().contains(query),
+            (a) => a.nameLower.contains(query) || a.artistLower.contains(query),
           )
           .toList();
     }
     albums.sort((a, b) {
       int cmp;
       if (_albumSortBy == 'artist') {
-        cmp = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
+        cmp = a.artistLower.compareTo(b.artistLower);
       } else if (_albumSortBy == 'tracks') {
         cmp = a.songs.length.compareTo(b.songs.length);
       } else {
-        cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        cmp = a.nameLower.compareTo(b.nameLower);
       }
       return _albumSortAscending ? cmp : -cmp;
     });
@@ -164,9 +165,7 @@ class _HomeScreenState extends State<HomeScreen>
     var artists = _getArtists();
     if (_searchQuery.isNotEmpty) {
       var query = _searchQuery.toLowerCase();
-      artists = artists
-          .where((a) => a.name.toLowerCase().contains(query))
-          .toList();
+      artists = artists.where((a) => a.nameLower.contains(query)).toList();
     }
     artists.sort((a, b) {
       int cmp;
@@ -175,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen>
       } else if (_artistSortBy == 'songs') {
         cmp = a.songs.length.compareTo(b.songs.length);
       } else {
-        cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        cmp = a.nameLower.compareTo(b.nameLower);
       }
       return _artistSortAscending ? cmp : -cmp;
     });
@@ -187,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen>
     if (_searchQuery.isNotEmpty) {
       var query = _searchQuery.toLowerCase();
       playlists = playlists
-          .where((p) => p.name.toLowerCase().contains(query))
+          .where((p) => p.nameLower.contains(query))
           .toList();
     }
     playlists.sort((a, b) {
@@ -197,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen>
         var bCount = widget.songs.where((s) => b.songIds.contains(s.id)).length;
         cmp = aCount.compareTo(bCount);
       } else {
-        cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        cmp = a.nameLower.compareTo(b.nameLower);
       }
       return _playlistSortAscending ? cmp : -cmp;
     });
@@ -1099,7 +1098,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                 openArtist(context, artist);
                                               },
                                             ),
-                                            if (index < filteredArtists.length - 1)
+                                            if (index <
+                                                filteredArtists.length - 1)
                                               Padding(
                                                 padding: const EdgeInsets.only(
                                                   left: 72,
@@ -1307,7 +1307,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                 openPlaylist(context, playlist);
                                               },
                                             ),
-                                            if (index < filteredPlaylists.length - 1)
+                                            if (index <
+                                                filteredPlaylists.length - 1)
                                               Padding(
                                                 padding: const EdgeInsets.only(
                                                   left: 72,

@@ -6,6 +6,10 @@ class AlbumGroup {
   final List<Song> songs;
 
   AlbumGroup({required this.name, required this.artist, required this.songs});
+
+  // Pre-normalized lowercase keys computed once at construction time
+  late final String nameLower = name.toLowerCase();
+  late final String artistLower = artist.toLowerCase();
 }
 
 class ArtistGroup {
@@ -14,6 +18,9 @@ class ArtistGroup {
   final List<AlbumGroup> albums;
 
   ArtistGroup({required this.name, required this.songs, required this.albums});
+
+  // Pre-normalized lowercase key computed once at construction time
+  late final String nameLower = name.toLowerCase();
 }
 
 List<AlbumGroup> buildAlbumGroups(List<Song> allSongs) {
@@ -45,7 +52,7 @@ List<AlbumGroup> buildAlbumGroups(List<Song> allSongs) {
     );
   }).toList();
 
-  list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+  list.sort((a, b) => a.nameLower.compareTo(b.nameLower));
   return list;
 }
 
@@ -72,7 +79,7 @@ List<ArtistGroup> buildArtistGroups(
     );
   }).toList();
 
-  list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+  list.sort((a, b) => a.nameLower.compareTo(b.nameLower));
   return list;
 }
 

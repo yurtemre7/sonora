@@ -5,6 +5,9 @@ class Playlist {
 
   Playlist({required this.id, required this.name, required this.songIds});
 
+  // Pre-normalized lowercase key computed once at construction time
+  late final String nameLower = name.toLowerCase();
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
