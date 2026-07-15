@@ -92,61 +92,18 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   List<AlbumGroup> _getAlbums() {
-    var albumsMap = <String, List<Song>>{};
-    for (var song in widget.songs) {
-      var albumName = song.album.trim().isEmpty ? 'Unknown Album' : song.album;
-      albumsMap.putIfAbsent(albumName, () => []).add(song);
+    if (widget.playerProvider.cachedAlbums.isNotEmpty) {
+      return List<AlbumGroup>.from(widget.playerProvider.cachedAlbums);
     }
-
-    var list = albumsMap.entries.map((entry) {
-      var artistCounts = <String, int>{};
-      for (var s in entry.value) {
-        artistCounts[s.artist] = (artistCounts[s.artist] ?? 0) + 1;
-      }
-      var albumArtist = 'Unknown Artist';
-      var maxCount = 0;
-      artistCounts.forEach((artist, count) {
-        if (count > maxCount) {
-          maxCount = count;
-          albumArtist = artist;
-        }
-      });
-
-      return AlbumGroup(
-        name: entry.key,
-        artist: albumArtist,
-        songs: entry.value,
-      );
-    }).toList();
-
-    list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-    return list;
+    return buildAlbumGroups(widget.songs);
   }
 
   List<ArtistGroup> _getArtists() {
-    var artistsMap = <String, List<Song>>{};
-    for (var song in widget.songs) {
-      var artistName = song.artist.trim().isEmpty
-          ? 'Unknown Artist'
-          : song.artist;
-      artistsMap.putIfAbsent(artistName, () => []).add(song);
+    if (widget.playerProvider.cachedArtists.isNotEmpty) {
+      return List<ArtistGroup>.from(widget.playerProvider.cachedArtists);
     }
-
     var albumsList = _getAlbums();
-
-    var list = artistsMap.entries.map((entry) {
-      var artistAlbums = albumsList
-          .where((a) => a.artist == entry.key)
-          .toList();
-      return ArtistGroup(
-        name: entry.key,
-        songs: entry.value,
-        albums: artistAlbums,
-      );
-    }).toList();
-
-    list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-    return list;
+    return buildArtistGroups(widget.songs, albumsList);
   }
 
   List<Song> _getFilteredSongs() {
@@ -933,7 +890,8 @@ class _HomeScreenState extends State<HomeScreen>
                     builder: (context) {
                       switch (_tabController.index) {
                         case 1:
-                          // Tab 2: Albums
+                          // Tab 2: Albums — compute filtered list once.
+                          var filteredAlbums = _getFilteredAlbums();
                           return widget.songs.isEmpty
                               ? Center(
                                   child: Text(
@@ -943,7 +901,7 @@ class _HomeScreenState extends State<HomeScreen>
                                     ),
                                   ),
                                 )
-                              : _getFilteredAlbums().isEmpty
+                              : filteredAlbums.isEmpty
                               ? Center(
                                   child: Text(
                                     'No matching albums found',
@@ -975,9 +933,9 @@ class _HomeScreenState extends State<HomeScreen>
                                             mainAxisSpacing: 16,
                                             childAspectRatio: 0.78,
                                           ),
-                                      itemCount: _getFilteredAlbums().length,
+                                      itemCount: filteredAlbums.length,
                                       itemBuilder: (context, index) {
-                                        var album = _getFilteredAlbums()[index];
+                                        var album = filteredAlbums[index];
                                         var firstSong = album.songs.first;
 
                                         return InkWell(
@@ -1049,7 +1007,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 );
 
                         case 2:
-                          // Tab 3: Artists
+                          // Tab 3: Artists — compute filtered list once.
+                          var filteredArtists = _getFilteredArtists();
                           return widget.songs.isEmpty
                               ? Center(
                                   child: Text(
@@ -1059,7 +1018,7 @@ class _HomeScreenState extends State<HomeScreen>
                                     ),
                                   ),
                                 )
-                              : _getFilteredArtists().isEmpty
+                              : filteredArtists.isEmpty
                               ? Center(
                                   child: Text(
                                     'No matching artists found',
@@ -1081,12 +1040,10 @@ class _HomeScreenState extends State<HomeScreen>
                                       padding: const EdgeInsets.only(
                                         bottom: 120,
                                       ),
-                                      itemCount: _getFilteredArtists().length,
+                                      itemCount: filteredArtists.length,
                                       itemBuilder: (context, index) {
-                                        var artist =
-                                            _getFilteredArtists()[index];
+                                        var artist = filteredArtists[index];
                                         var firstSong = artist.songs.first;
-                                        var artists = _getFilteredArtists();
 
                                         return Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -1142,7 +1099,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                 openArtist(context, artist);
                                               },
                                             ),
-                                            if (index < artists.length - 1)
+                                            if (index < filteredArtists.length - 1)
                                               Padding(
                                                 padding: const EdgeInsets.only(
                                                   left: 72,
@@ -1163,7 +1120,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 );
 
                         case 3:
-                          // Tab 4: Playlists
+                          // Tab 4: Playlists — compute filtered list once.
+                          var filteredPlaylists = _getFilteredPlaylists();
                           return widget.playerProvider.playlists.isEmpty
                               ? Center(
                                   child: Padding(
@@ -1217,7 +1175,7 @@ class _HomeScreenState extends State<HomeScreen>
                                     ),
                                   ),
                                 )
-                              : _getFilteredPlaylists().isEmpty
+                              : filteredPlaylists.isEmpty
                               ? Center(
                                   child: Text(
                                     'No matching playlists found',
@@ -1239,10 +1197,9 @@ class _HomeScreenState extends State<HomeScreen>
                                       padding: const EdgeInsets.only(
                                         bottom: 120,
                                       ),
-                                      itemCount: _getFilteredPlaylists().length,
+                                      itemCount: filteredPlaylists.length,
                                       itemBuilder: (context, index) {
-                                        var playlist =
-                                            _getFilteredPlaylists()[index];
+                                        var playlist = filteredPlaylists[index];
                                         var songCount = widget.songs
                                             .where(
                                               (s) => playlist.songIds.contains(
@@ -1250,7 +1207,6 @@ class _HomeScreenState extends State<HomeScreen>
                                               ),
                                             )
                                             .length;
-                                        var playlists = _getFilteredPlaylists();
 
                                         return Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -1351,7 +1307,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                 openPlaylist(context, playlist);
                                               },
                                             ),
-                                            if (index < playlists.length - 1)
+                                            if (index < filteredPlaylists.length - 1)
                                               Padding(
                                                 padding: const EdgeInsets.only(
                                                   left: 72,

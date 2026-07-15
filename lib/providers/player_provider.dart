@@ -3,6 +3,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/audio_handler.dart';
@@ -24,6 +25,8 @@ class PlayerProvider extends ChangeNotifier {
   List<Song> allSongs = [];
   List<Song> queue = [];
   List<Playlist> playlists = [];
+  List<AlbumGroup> cachedAlbums = [];
+  List<ArtistGroup> cachedArtists = [];
   List<Song> _originalQueue = [];
   var currentIndex = -1;
   var isShuffled = false;
@@ -340,15 +343,27 @@ class PlayerProvider extends ChangeNotifier {
   /// Sets all songs and updates the queue with the list.
   ///
   /// If a song is currently playing, the active queue is preserved and only
-  /// [allSongs] is refreshed. The queue is replaced only during initial load
-  /// or when nothing is playing.
+  /// [allSongs] is refreshed. The audio handler's internal playlist is patched
+  /// in-place so that [skipToQueueItem] always lands on the correct track even
+  /// after a resync that may have changed library metadata.
   void updateSongs(List<Song> songs) {
     allSongs = List<Song>.from(songs);
+    _refreshLibrarySnapshots();
     if (currentIndex < 0 || queue.isEmpty) {
+      // Nothing playing — replace queue entirely.
       queue = List<Song>.from(songs);
       _originalQueue = List<Song>.from(songs);
+    } else {
+      // A song is playing — keep the queue intact but refresh the audio
+      // handler's raw playlist metadata so index-based skips stay correct.
+      audioHandler.syncQueueMetadata(queue.map(_songToMediaItem).toList());
     }
     notifyListeners();
+  }
+
+  void _refreshLibrarySnapshots() {
+    cachedAlbums = buildAlbumGroups(allSongs);
+    cachedArtists = buildArtistGroups(allSongs, cachedAlbums);
   }
 
   /// Toggles a song's favorite status in the cache index and favorite playlist.
@@ -379,6 +394,8 @@ class PlayerProvider extends ChangeNotifier {
 
     // Refresh the playlists list so that the Favorites count and item inclusions are in sync!
     playlists = await scanner.getPlaylists();
+    allSongs = List<Song>.from(updatedSongs);
+    _refreshLibrarySnapshots();
 
     notifyListeners();
   }

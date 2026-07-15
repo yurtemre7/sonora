@@ -405,6 +405,36 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     }
   }
 
+  /// Patches [_rawPlaylist] metadata in-place after a library resync.
+  ///
+  /// Called by [PlayerProvider.updateSongs] when the queue is active (a song is
+  /// playing). It matches each existing entry by its URI and replaces the
+  /// [MediaItem] metadata with the refreshed version from [updatedItems].
+  ///
+  /// This keeps the audio-engine index table (the sliding window) perfectly
+  /// aligned with the Dart-side [PlayerProvider.queue], so that
+  /// [skipToQueueItem] always lands on the correct track even after a resync
+  /// that may have added, removed, or re-ordered songs in the library.
+  void syncQueueMetadata(List<MediaItem> updatedItems) {
+    // Build a fast lookup: URI → updated MediaItem.
+    var byUri = <String, MediaItem>{
+      for (final item in updatedItems) item.id: item,
+    };
+
+    for (var i = 0; i < _rawPlaylist.length; i++) {
+      var updated = byUri[_rawPlaylist[i].id];
+      if (updated != null) {
+        _rawPlaylist[i] = updated;
+      }
+    }
+
+    // Broadcast the refreshed window slice so that the notification and
+    // lock-screen now show up-to-date metadata.
+    if (_windowStart < _windowEnd) {
+      queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
+    }
+  }
+
   /// Inserts [item] at [globalIndex] in the logical queue.
   Future<void> insertQueueItemAt(int globalIndex, MediaItem item) async {
     if (globalIndex < 0 || globalIndex > _rawPlaylist.length) return;
