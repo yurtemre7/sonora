@@ -2,9 +2,19 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.4.3] - 2026-07-16
+### Fixed
+* Update playlists info on "add to playlist" sheet
+
 ## [1.4.2] - 2026-07-15
+### Added
+* Implement performance optimizations: pre-normalized lowercase keys and lifted filtered lists
+* Add library benchmark tests for 100/500/5000/100k song libraries
+### Fixed
+* Sync audio handler _rawPlaylist after resync and eliminate redundant filtered list recomputation per build frame
 ### Changed
-* Precompute album and artist tab snapshots to reduce UI blocking when switching tabs after sync.
+* Reduce max benchmark size from 100k to 10k songs (more realistic)
+* Perf: Cache lowercase keys on Song/AlbumGroup/ArtistGroup; lift filtered list computation to one per rebuild
 
 ## [1.4.1] - 2026-07-15
 ### Added
