@@ -33,9 +33,7 @@ class Song {
     this.dominantColor,
   });
 
-  /// Pre-normalized lowercase keys — computed once on first access and cached.
-  /// Use these instead of calling [String.toLowerCase] in sort comparators or
-  /// search filters to avoid repeated string allocations per comparison.
+  // Pre-normalized lowercase keys computed once at construction time
   late final String titleLower = title.toLowerCase();
   late final String artistLower = artist.toLowerCase();
   late final String albumLower = album.toLowerCase();

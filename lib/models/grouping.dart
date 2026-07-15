@@ -7,6 +7,7 @@ class AlbumGroup {
 
   AlbumGroup({required this.name, required this.artist, required this.songs});
 
+  // Pre-normalized lowercase keys computed once at construction time
   late final String nameLower = name.toLowerCase();
   late final String artistLower = artist.toLowerCase();
 }
@@ -18,6 +19,7 @@ class ArtistGroup {
 
   ArtistGroup({required this.name, required this.songs, required this.albums});
 
+  // Pre-normalized lowercase key computed once at construction time
   late final String nameLower = name.toLowerCase();
 }
 

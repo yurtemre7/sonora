@@ -110,12 +110,13 @@ class _HomeScreenState extends State<HomeScreen>
     // Pre-compute the query lowercase once — not once per element in where().
     var query = _searchQuery.isEmpty ? '' : _searchQuery.toLowerCase();
 
-    var filtered = widget.songs.where((song) {
-      if (query.isEmpty) return true;
-      return song.titleLower.contains(query) ||
-          song.artistLower.contains(query) ||
-          song.albumLower.contains(query);
-    }).toList();
+    var filtered = query.isEmpty
+        ? widget.songs
+        : widget.songs.where((song) {
+            return song.titleLower.contains(query) ||
+                song.artistLower.contains(query) ||
+                song.albumLower.contains(query);
+          }).toList();
 
     filtered.sort((a, b) {
       int comparison;
@@ -142,9 +143,7 @@ class _HomeScreenState extends State<HomeScreen>
       var query = _searchQuery.toLowerCase();
       albums = albums
           .where(
-            (a) =>
-                a.nameLower.contains(query) ||
-                a.artistLower.contains(query),
+            (a) => a.nameLower.contains(query) || a.artistLower.contains(query),
           )
           .toList();
     }
@@ -166,9 +165,7 @@ class _HomeScreenState extends State<HomeScreen>
     var artists = _getArtists();
     if (_searchQuery.isNotEmpty) {
       var query = _searchQuery.toLowerCase();
-      artists = artists
-          .where((a) => a.nameLower.contains(query))
-          .toList();
+      artists = artists.where((a) => a.nameLower.contains(query)).toList();
     }
     artists.sort((a, b) {
       int cmp;
@@ -189,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen>
     if (_searchQuery.isNotEmpty) {
       var query = _searchQuery.toLowerCase();
       playlists = playlists
-          .where((p) => p.name.toLowerCase().contains(query))
+          .where((p) => p.nameLower.contains(query))
           .toList();
     }
     playlists.sort((a, b) {
@@ -199,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen>
         var bCount = widget.songs.where((s) => b.songIds.contains(s.id)).length;
         cmp = aCount.compareTo(bCount);
       } else {
-        cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        cmp = a.nameLower.compareTo(b.nameLower);
       }
       return _playlistSortAscending ? cmp : -cmp;
     });
@@ -1114,7 +1111,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                 openArtist(context, artist);
                                               },
                                             ),
-                                            if (index < filteredArtists.length - 1)
+                                            if (index <
+                                                filteredArtists.length - 1)
                                               Padding(
                                                 padding: const EdgeInsets.only(
                                                   left: 72,
@@ -1321,7 +1319,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                 openPlaylist(context, playlist);
                                               },
                                             ),
-                                            if (index < filteredPlaylists.length - 1)
+                                            if (index <
+                                                filteredPlaylists.length - 1)
                                               Padding(
                                                 padding: const EdgeInsets.only(
                                                   left: 72,
