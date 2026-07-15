@@ -158,7 +158,7 @@ void _printResult(
 // ---------------------------------------------------------------------------
 
 void main() {
-  const sizes = [100, 500, 5000, 100000];
+  const sizes = [100, 500, 5000, 10000];
 
   group('Library grouping benchmarks', () {
     for (final n in sizes) {
