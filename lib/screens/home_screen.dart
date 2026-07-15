@@ -107,18 +107,20 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   List<Song> _getFilteredSongs() {
+    // Pre-compute the query lowercase once — not once per element in where().
+    var query = _searchQuery.isEmpty ? '' : _searchQuery.toLowerCase();
+
     var filtered = widget.songs.where((song) {
-      if (_searchQuery.isEmpty) return true;
-      var query = _searchQuery.toLowerCase();
-      return song.title.toLowerCase().contains(query) ||
-          song.artist.toLowerCase().contains(query) ||
-          song.album.toLowerCase().contains(query);
+      if (query.isEmpty) return true;
+      return song.titleLower.contains(query) ||
+          song.artistLower.contains(query) ||
+          song.albumLower.contains(query);
     }).toList();
 
     filtered.sort((a, b) {
       int comparison;
       if (_songSortBy == 'artist') {
-        comparison = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
+        comparison = a.artistLower.compareTo(b.artistLower);
       } else if (_songSortBy == 'duration') {
         comparison = a.duration.compareTo(b.duration);
       } else if (_songSortBy == 'recent') {
@@ -126,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen>
         var bTime = b.lastModifiedMs ?? 0;
         comparison = bTime.compareTo(aTime);
       } else {
-        comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+        comparison = a.titleLower.compareTo(b.titleLower);
       }
       return _songSortAscending ? comparison : -comparison;
     });
@@ -141,19 +143,19 @@ class _HomeScreenState extends State<HomeScreen>
       albums = albums
           .where(
             (a) =>
-                a.name.toLowerCase().contains(query) ||
-                a.artist.toLowerCase().contains(query),
+                a.nameLower.contains(query) ||
+                a.artistLower.contains(query),
           )
           .toList();
     }
     albums.sort((a, b) {
       int cmp;
       if (_albumSortBy == 'artist') {
-        cmp = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
+        cmp = a.artistLower.compareTo(b.artistLower);
       } else if (_albumSortBy == 'tracks') {
         cmp = a.songs.length.compareTo(b.songs.length);
       } else {
-        cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        cmp = a.nameLower.compareTo(b.nameLower);
       }
       return _albumSortAscending ? cmp : -cmp;
     });
@@ -165,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen>
     if (_searchQuery.isNotEmpty) {
       var query = _searchQuery.toLowerCase();
       artists = artists
-          .where((a) => a.name.toLowerCase().contains(query))
+          .where((a) => a.nameLower.contains(query))
           .toList();
     }
     artists.sort((a, b) {
@@ -175,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen>
       } else if (_artistSortBy == 'songs') {
         cmp = a.songs.length.compareTo(b.songs.length);
       } else {
-        cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        cmp = a.nameLower.compareTo(b.nameLower);
       }
       return _artistSortAscending ? cmp : -cmp;
     });
@@ -477,7 +479,13 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildSearchAndFilterHeader(ThemeData theme) {
+  Widget _buildSearchAndFilterHeader(
+    ThemeData theme, {
+    required List<Song> filteredSongs,
+    required List<AlbumGroup> filteredAlbums,
+    required List<ArtistGroup> filteredArtists,
+    required List<Playlist> filteredPlaylists,
+  }) {
     var tabIndex = _tabController.index;
     String label;
     int count;
@@ -488,13 +496,12 @@ class _HomeScreenState extends State<HomeScreen>
 
     switch (tabIndex) {
       case 1:
-        var albums = _getFilteredAlbums();
-        count = albums.length;
+        count = filteredAlbums.length;
         label = '$count ${count == 1 ? 'album' : 'albums'} found';
         onShuffle = () {
           unfocus();
           widget.playerProvider.quickShuffle(
-            albums.expand((a) => a.songs).toList(),
+            filteredAlbums.expand((a) => a.songs).toList(),
           );
         };
         onSort = () {
@@ -502,13 +509,12 @@ class _HomeScreenState extends State<HomeScreen>
           _showSortBottomSheet(tabIndex: 1);
         };
       case 2:
-        var artists = _getFilteredArtists();
-        count = artists.length;
+        count = filteredArtists.length;
         label = '$count ${count == 1 ? 'artist' : 'artists'} found';
         onShuffle = () {
           unfocus();
           widget.playerProvider.quickShuffle(
-            artists.expand((a) => a.songs).toList(),
+            filteredArtists.expand((a) => a.songs).toList(),
           );
         };
         onSort = () {
@@ -516,8 +522,7 @@ class _HomeScreenState extends State<HomeScreen>
           _showSortBottomSheet(tabIndex: 2);
         };
       case 3:
-        var playlists = _getFilteredPlaylists();
-        count = playlists.length;
+        count = filteredPlaylists.length;
         label = '$count ${count == 1 ? 'playlist' : 'playlists'} found';
         onShuffle = () {
           unfocus();
@@ -528,12 +533,11 @@ class _HomeScreenState extends State<HomeScreen>
           _showSortBottomSheet(tabIndex: 3);
         };
       default:
-        var songs = _getFilteredSongs();
-        count = songs.length;
+        count = filteredSongs.length;
         label = '$count ${count == 1 ? 'song' : 'songs'} found';
         onShuffle = () {
           unfocus();
-          widget.playerProvider.quickShuffle(songs);
+          widget.playerProvider.quickShuffle(filteredSongs);
         };
         onSort = () {
           unfocus();
@@ -760,6 +764,13 @@ class _HomeScreenState extends State<HomeScreen>
     return ListenableBuilder(
       listenable: widget.playerProvider,
       builder: (context, _) {
+        // Compute all filtered lists once per rebuild so both the header
+        // (count label + shuffle) and the tab body share the same result.
+        var filteredSongs = _getFilteredSongs();
+        var filteredAlbums = _getFilteredAlbums();
+        var filteredArtists = _getFilteredArtists();
+        var filteredPlaylists = _getFilteredPlaylists();
+
         return Scaffold(
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -884,14 +895,19 @@ class _HomeScreenState extends State<HomeScreen>
             },
             body: Column(
               children: [
-                _buildSearchAndFilterHeader(theme),
+                _buildSearchAndFilterHeader(
+                  theme,
+                  filteredSongs: filteredSongs,
+                  filteredAlbums: filteredAlbums,
+                  filteredArtists: filteredArtists,
+                  filteredPlaylists: filteredPlaylists,
+                ),
                 Expanded(
                   child: Builder(
                     builder: (context) {
                       switch (_tabController.index) {
                         case 1:
-                          // Tab 2: Albums — compute filtered list once.
-                          var filteredAlbums = _getFilteredAlbums();
+                          // Tab 2: Albums.
                           return widget.songs.isEmpty
                               ? Center(
                                   child: Text(
@@ -1007,8 +1023,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 );
 
                         case 2:
-                          // Tab 3: Artists — compute filtered list once.
-                          var filteredArtists = _getFilteredArtists();
+                          // Tab 3: Artists.
                           return widget.songs.isEmpty
                               ? Center(
                                   child: Text(
@@ -1120,8 +1135,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 );
 
                         case 3:
-                          // Tab 4: Playlists — compute filtered list once.
-                          var filteredPlaylists = _getFilteredPlaylists();
+                          // Tab 4: Playlists.
                           return widget.playerProvider.playlists.isEmpty
                               ? Center(
                                   child: Padding(
@@ -1408,7 +1422,7 @@ class _HomeScreenState extends State<HomeScreen>
                                     if (widget.showSyncPrompt)
                                       _buildSyncPromptBanner(theme),
                                     Expanded(
-                                      child: _getFilteredSongs().isEmpty
+                                      child: filteredSongs.isEmpty
                                           ? Center(
                                               child: Text(
                                                 'No matching songs found',
@@ -1425,8 +1439,6 @@ class _HomeScreenState extends State<HomeScreen>
                                           : ListenableBuilder(
                                               listenable: widget.playerProvider,
                                               builder: (context, _) {
-                                                var filteredSongs =
-                                                    _getFilteredSongs();
                                                 var currentSong = widget
                                                     .playerProvider
                                                     .currentSong;

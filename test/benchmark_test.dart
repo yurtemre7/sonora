@@ -15,21 +15,21 @@ import 'package:sonora/models/song.dart';
 // ---------------------------------------------------------------------------
 
 List<Song> generateLibrary(int count, {int seed = 42}) {
-  final rng = Random(seed);
+  var rng = Random(seed);
 
-  final artistCount = max(1, count ~/ 10);
-  final albumCount = max(1, count ~/ 8);
+  var artistCount = max(1, count ~/ 10);
+  var albumCount = max(1, count ~/ 8);
 
-  final artists = List.generate(artistCount, (i) => 'Artist ${i + 1}');
-  final albums = List.generate(
+  var artists = List.generate(artistCount, (i) => 'Artist ${i + 1}');
+  var albums = List.generate(
     albumCount,
     (i) => 'Album ${i + 1} by ${artists[i % artistCount]}',
   );
 
   return List.generate(count, (i) {
-    final isLongTail = rng.nextDouble() < 0.20;
-    final artist = isLongTail ? 'Solo Artist $i' : artists[i % artistCount];
-    final album =
+    var isLongTail = rng.nextDouble() < 0.20;
+    var artist = isLongTail ? 'Solo Artist $i' : artists[i % artistCount];
+    var album =
         isLongTail ? 'Single $i' : albums[i % albumCount];
 
     return Song(
@@ -57,18 +57,17 @@ List<AlbumGroup> filteredAlbums(
 }) {
   var result = albums.where((a) {
     if (query.isEmpty) return true;
-    return a.name.toLowerCase().contains(query) ||
-        a.artist.toLowerCase().contains(query);
+    return a.nameLower.contains(query) || a.artistLower.contains(query);
   }).toList();
 
   result.sort((a, b) {
     int cmp;
     if (sortBy == 'artist') {
-      cmp = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
+      cmp = a.artistLower.compareTo(b.artistLower);
     } else if (sortBy == 'tracks') {
       cmp = a.songs.length.compareTo(b.songs.length);
     } else {
-      cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      cmp = a.nameLower.compareTo(b.nameLower);
     }
     return ascending ? cmp : -cmp;
   });
@@ -83,7 +82,7 @@ List<ArtistGroup> filteredArtists(
 }) {
   var result = artists.where((a) {
     if (query.isEmpty) return true;
-    return a.name.toLowerCase().contains(query);
+    return a.nameLower.contains(query);
   }).toList();
 
   result.sort((a, b) {
@@ -93,7 +92,7 @@ List<ArtistGroup> filteredArtists(
     } else if (sortBy == 'songs') {
       cmp = a.songs.length.compareTo(b.songs.length);
     } else {
-      cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      cmp = a.nameLower.compareTo(b.nameLower);
     }
     return ascending ? cmp : -cmp;
   });
@@ -117,16 +116,16 @@ typedef _BenchFn = void Function();
     fn();
   }
 
-  final timings = <Duration>[];
+  var timings = <Duration>[];
   for (var i = 0; i < iterations; i++) {
-    final sw = Stopwatch()..start();
+    var sw = Stopwatch()..start();
     fn();
     sw.stop();
     timings.add(sw.elapsed);
   }
 
   timings.sort();
-  final totalUs =
+  var totalUs =
       timings.fold<int>(0, (sum, d) => sum + d.inMicroseconds);
   return (
     min: timings.first,
@@ -161,13 +160,13 @@ void main() {
   const sizes = [100, 500, 5000, 100000];
 
   group('Library grouping benchmarks', () {
-    for (final n in sizes) {
+    for (var n in sizes) {
       test('buildAlbumGroups + buildArtistGroups — $n songs', () {
-        final songs = generateLibrary(n);
+        var songs = generateLibrary(n);
 
-        final r = _bench(
+        var r = _bench(
           () {
-            final albums = buildAlbumGroups(songs);
+            var albums = buildAlbumGroups(songs);
             buildArtistGroups(songs, albums);
           },
           iterations: n <= 500 ? 50 : n <= 5000 ? 20 : 5,
@@ -176,8 +175,8 @@ void main() {
         _printResult('[$n songs] grouping', r);
 
         // Correctness sanity checks
-        final albums = buildAlbumGroups(songs);
-        final artists = buildArtistGroups(songs, albums);
+        var albums = buildAlbumGroups(songs);
+        var artists = buildArtistGroups(songs, albums);
         expect(albums, isNotEmpty);
         expect(artists, isNotEmpty);
         expect(
@@ -195,13 +194,13 @@ void main() {
   });
 
   group('Filtered album list benchmarks (per-frame cost)', () {
-    for (final n in sizes) {
+    for (var n in sizes) {
       test('filteredAlbums (no query) — $n songs', () {
-        final songs = generateLibrary(n);
-        final albums = buildAlbumGroups(songs);
+        var songs = generateLibrary(n);
+        var albums = buildAlbumGroups(songs);
 
-        final r = _bench(
-          () => filteredAlbums(albums, query: '', sortBy: 'name'),
+        var r = _bench(
+          () => filteredAlbums(albums),
           iterations: n <= 5000 ? 50 : 10,
         );
 
@@ -210,11 +209,11 @@ void main() {
       });
 
       test('filteredAlbums (search query "Artist 1") — $n songs', () {
-        final songs = generateLibrary(n);
-        final albums = buildAlbumGroups(songs);
+        var songs = generateLibrary(n);
+        var albums = buildAlbumGroups(songs);
 
-        final r = _bench(
-          () => filteredAlbums(albums, query: 'artist 1', sortBy: 'name'),
+        var r = _bench(
+          () => filteredAlbums(albums, query: 'artist 1'),
           iterations: n <= 5000 ? 50 : 10,
         );
 
@@ -224,14 +223,14 @@ void main() {
   });
 
   group('Filtered artist list benchmarks (per-frame cost)', () {
-    for (final n in sizes) {
+    for (var n in sizes) {
       test('filteredArtists (no query) — $n songs', () {
-        final songs = generateLibrary(n);
-        final albums = buildAlbumGroups(songs);
-        final artists = buildArtistGroups(songs, albums);
+        var songs = generateLibrary(n);
+        var albums = buildAlbumGroups(songs);
+        var artists = buildArtistGroups(songs, albums);
 
-        final r = _bench(
-          () => filteredArtists(artists, query: '', sortBy: 'name'),
+        var r = _bench(
+          () => filteredArtists(artists),
           iterations: n <= 5000 ? 50 : 10,
         );
 
@@ -240,12 +239,12 @@ void main() {
       });
 
       test('filteredArtists (search query "Artist 1") — $n songs', () {
-        final songs = generateLibrary(n);
-        final albums = buildAlbumGroups(songs);
-        final artists = buildArtistGroups(songs, albums);
+        var songs = generateLibrary(n);
+        var albums = buildAlbumGroups(songs);
+        var artists = buildArtistGroups(songs, albums);
 
-        final r = _bench(
-          () => filteredArtists(artists, query: 'artist 1', sortBy: 'name'),
+        var r = _bench(
+          () => filteredArtists(artists, query: 'artist 1'),
           iterations: n <= 5000 ? 50 : 10,
         );
 
@@ -255,17 +254,14 @@ void main() {
   });
 
   group('Song list sort benchmarks (per-frame cost)', () {
-    for (final n in sizes) {
+    for (var n in sizes) {
       test('sort songs by title — $n songs', () {
-        final songs = generateLibrary(n);
+        var songs = generateLibrary(n);
 
-        final r = _bench(
+        var r = _bench(
           () {
-            final copy = List<Song>.from(songs);
-            copy.sort(
-              (a, b) =>
-                  a.title.toLowerCase().compareTo(b.title.toLowerCase()),
-            );
+            var copy = List<Song>.from(songs);
+            copy.sort((a, b) => a.titleLower.compareTo(b.titleLower));
           },
           iterations: n <= 5000 ? 30 : 5,
         );
@@ -274,15 +270,12 @@ void main() {
       });
 
       test('sort songs by artist — $n songs', () {
-        final songs = generateLibrary(n);
+        var songs = generateLibrary(n);
 
-        final r = _bench(
+        var r = _bench(
           () {
-            final copy = List<Song>.from(songs);
-            copy.sort(
-              (a, b) =>
-                  a.artist.toLowerCase().compareTo(b.artist.toLowerCase()),
-            );
+            var copy = List<Song>.from(songs);
+            copy.sort((a, b) => a.artistLower.compareTo(b.artistLower));
           },
           iterations: n <= 5000 ? 30 : 5,
         );
@@ -291,14 +284,14 @@ void main() {
       });
 
       test('sort songs by recent — $n songs', () {
-        final songs = generateLibrary(n);
+        var songs = generateLibrary(n);
 
-        final r = _bench(
+        var r = _bench(
           () {
-            final copy = List<Song>.from(songs);
+            var copy = List<Song>.from(songs);
             copy.sort((a, b) {
-              final aTime = a.lastModifiedMs ?? 0;
-              final bTime = b.lastModifiedMs ?? 0;
+              var aTime = a.lastModifiedMs ?? 0;
+              var bTime = b.lastModifiedMs ?? 0;
               return bTime.compareTo(aTime);
             });
           },
