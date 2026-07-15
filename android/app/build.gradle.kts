@@ -14,7 +14,7 @@ val keyProperties = Properties().apply {
 
 android {
     namespace = "de.yurtemre.sonora"
-    compileSdk = 36
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -25,7 +25,7 @@ android {
     defaultConfig {
         applicationId = "de.yurtemre.sonora"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
