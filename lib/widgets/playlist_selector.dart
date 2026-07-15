@@ -40,6 +40,12 @@ class _PlaylistSelectorBottomSheetState
   final _playlistNameController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    widget.playerProvider.loadPlaylists();
+  }
+
+  @override
   void dispose() {
     _playlistNameController.dispose();
     super.dispose();
