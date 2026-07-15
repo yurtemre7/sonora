@@ -2,6 +2,12 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.4.1] - 2026-07-15
+### Added
+* Upgrade to android 37, kotlin 2.4.10 and agp 9.3 / gradle 9.6.1
+### Changed
+* Chore: Update packages
+
 ## [1.4.0] - 2026-07-14
 ### Added
 * Make miniplayer global
@@ -15,6 +21,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Let taps go through the audio visualizer
 * Reverse swipe on mini player
 ### Changed
+* 1.4.0
 * Chore: Improving dialog actions
 * Chore: Add logging
 * Chore: Safe area on settings and change back icon
