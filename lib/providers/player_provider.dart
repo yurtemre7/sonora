@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -39,6 +40,7 @@ class PlayerProvider extends ChangeNotifier {
   var dynamicThemeColor = const Color(0xFF7C4DFF);
   var showVisualizer = false;
 
+  var _volume = 1.0;
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
   Duration? sleepTimerOriginalDuration;
@@ -61,10 +63,23 @@ class PlayerProvider extends ChangeNotifier {
   // ── Constructor ───────────────────────────────────────────────────────────
 
   PlayerProvider({required this.audioHandler}) {
+    _volume = Platform.isWindows ? 0.1 : 1.0;
     _listenToMediaItem();
     _listenToPlaybackState();
     _initCustomCallbacks();
     loadSettings();
+  }
+
+  // ── Volume ────────────────────────────────────────────────────────────────
+
+  double get volume => _volume;
+
+  Future<void> setVolume(double value) async {
+    _volume = (value.clamp(0.0, 1.0) * 100).round() / 100;
+    await audioHandler.player.setVolume(_volume);
+    var prefs = SharedPreferencesAsync();
+    await prefs.setDouble('volume', _volume);
+    notifyListeners();
   }
 
   void _initCustomCallbacks() {
@@ -524,6 +539,8 @@ class PlayerProvider extends ChangeNotifier {
     showVisualizer = await prefs.getBool('show_visualizer') ?? false;
     sleepTimerExtendMinutes =
         await prefs.getInt('sleep_timer_extend_minutes') ?? 5;
+    _volume = await prefs.getDouble('volume') ?? _volume;
+    audioHandler.player.setVolume(_volume);
 
     if (useDynamicTheme && currentSong != null) {
       _extractThemeColorForSong(currentSong!);
@@ -651,7 +668,7 @@ class PlayerProvider extends ChangeNotifier {
         _sleepTimer = null;
 
         await audioHandler.stop();
-        await audioHandler.player.setVolume(1.0);
+        await audioHandler.player.setVolume(_volume);
 
         sleepTimerDuration = null;
         sleepTimerOriginalDuration = null;

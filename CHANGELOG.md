@@ -2,6 +2,17 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.5.0] - 2026-07-16
+### Added
+* Add volume slider with persistent percentage and platform-aware defaults
+
+### Fixed
+* Correct split-ABI versionCode display for --build-number flag
+
+### Changed
+* Relocate song actions to inline chip row and three-dot menu
+* Remove redundant sleep timer badge from now-playing info section
+
 ## [1.4.5] - 2026-07-16
 ### Added
 * Add sync method selector setting with timing benchmarks and warnings

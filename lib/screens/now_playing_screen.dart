@@ -19,6 +19,7 @@ import 'package:sonora/widgets/player_controls.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/seek_bar.dart';
 import 'package:sonora/widgets/song_tile.dart';
+import 'package:sonora/widgets/volume_slider.dart';
 
 class NowPlayingScreen extends StatefulWidget {
   const NowPlayingScreen({super.key, required this.playerProvider});
@@ -34,6 +35,7 @@ enum _ViewMode { player, upNext, lyrics, related }
 class _NowPlayingScreenState extends State<NowPlayingScreen>
     with SingleTickerProviderStateMixin {
   var _showLyrics = false;
+  var _showVolume = Platform.isWindows;
   var _immersiveMode = false;
   var _viewMode = _ViewMode.player;
   late AnimationController _likeAnimController;
@@ -124,17 +126,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 icon: const Icon(Icons.more_vert_rounded),
                 onSelected: (value) {
                   if (value == 1) _showSongInfoBottomSheet(context, song);
-                  if (value == 2) {
-                    widget.playerProvider.addToQueue(song);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Added to Queue.'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                  if (value == 3) _showAddToPlaylistDialog(context, song);
-                  if (value == 4) _showSleepTimerSheet(context);
                 },
                 itemBuilder: (context) => [
                   const PopupMenuItem(
@@ -144,36 +135,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                         Icon(Icons.info_outline_rounded, size: 20),
                         SizedBox(width: 12),
                         Text('Song Info'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 2,
-                    child: Row(
-                      children: [
-                        Icon(Icons.queue_play_next_rounded, size: 20),
-                        SizedBox(width: 12),
-                        Text('Add to Queue'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 3,
-                    child: Row(
-                      children: [
-                        Icon(Icons.playlist_add_rounded, size: 20),
-                        SizedBox(width: 12),
-                        Text('Add to Playlist'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 4,
-                    child: Row(
-                      children: [
-                        Icon(Icons.timer_outlined, size: 20),
-                        SizedBox(width: 12),
-                        Text('Sleep Timer'),
                       ],
                     ),
                   ),
@@ -307,10 +268,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     Song song,
     BoxConstraints constraints,
   ) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
         // Album Art / Lyrics Stack Card
         GestureDetector(
           onTap: () => setState(() => _immersiveMode = !_immersiveMode),
@@ -409,7 +371,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                     children: [
                       Flexible(
                         child: GestureDetector(
-                          onTap: () => _showArtistSheet(context, song.artist),
+                          onTap: () =>
+                              _showArtistSheet(context, song.artist),
                           child: MarqueeText(
                             key: ValueKey('np_artist_${song.artist}'),
                             text: song.artist,
@@ -421,7 +384,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 6),
                         child: Text(
                           '•',
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -431,8 +395,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                       ),
                       Flexible(
                         child: GestureDetector(
-                          onTap: () =>
-                              _showAlbumSheet(context, song.album, song.artist),
+                          onTap: () => _showAlbumSheet(
+                              context, song.album, song.artist),
                           child: MarqueeText(
                             key: ValueKey(
                               'np_album_${song.album}_${song.artist}',
@@ -446,59 +410,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                       ),
                     ],
                   ),
-                  if (widget.playerProvider.sleepTimerDuration != null) ...[
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => _showSleepTimerSheet(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer.withValues(
-                            alpha: 0.15,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.timer_outlined,
-                              size: 14,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Stop in ${_formatDuration(widget.playerProvider.sleepTimerDuration!)}',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+
                 ],
               ),
             ),
             const SizedBox(width: 16),
-            if (song.hasLyrics) ...[
-              IconButton(
-                icon: Icon(
-                  _showLyrics ? Icons.lyrics_rounded : Icons.lyrics_outlined,
-                  color: _showLyrics
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurfaceVariant,
-                  size: 28,
-                ),
-                onPressed: () => setState(() => _showLyrics = !_showLyrics),
-              ),
-              const SizedBox(width: 8),
-            ],
             AnimatedBuilder(
               animation: _likeAnim,
               builder: (context, child) =>
@@ -528,6 +444,51 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           ],
         ),
 
+        const SizedBox(height: 16),
+
+        // Action Buttons Row
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            children: [
+              if (song.hasLyrics)
+                _buildActionChip(
+                  icon: _showLyrics
+                      ? Icons.lyrics_rounded
+                      : Icons.lyrics_outlined,
+                  label: 'Lyrics',
+                  active: _showLyrics,
+                  onPressed: () =>
+                      setState(() => _showLyrics = !_showLyrics),
+                ),
+              _buildActionChip(
+                icon: Icons.playlist_add_rounded,
+                label: 'Playlist',
+                active: false,
+                onPressed: () =>
+                    _showAddToPlaylistDialog(context, song),
+              ),
+              _buildTimerChip(context),
+              Tooltip(
+                message:
+                    '${(widget.playerProvider.volume * 100).round()}% — ${_showVolume ? "Hide" : "Show"} volume',
+                child: _buildActionChip(
+                  icon: _showVolume
+                      ? Icons.volume_up_rounded
+                      : Icons.volume_up_outlined,
+                  label:
+                      '${(widget.playerProvider.volume * 100).round()}%',
+                  active: _showVolume,
+                  onPressed: () =>
+                      setState(() => _showVolume = !_showVolume),
+                ),
+              ),
+            ],
+          ),
+        ),
+
         const SizedBox(height: 32),
 
         // Seek Bar
@@ -537,6 +498,17 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           onSeek: widget.playerProvider.seek,
           isPlaying: widget.playerProvider.isPlaying,
         ),
+
+        // Volume Slider
+        if (_showVolume) ...[
+          const SizedBox(height: 8),
+          VolumeSlider(
+            volume: widget.playerProvider.volume,
+            onChanged: widget.playerProvider.setVolume,
+          ),
+        ],
+
+        const SizedBox(height: 8),
 
         // Player Controls
         PlayerControls(
@@ -550,6 +522,69 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           onRepeat: widget.playerProvider.cycleRepeatMode,
         ),
       ],
+    ),
+    );
+  }
+
+  Widget _buildActionChip({
+    required IconData icon,
+    required String label,
+    required bool active,
+    required VoidCallback onPressed,
+  }) {
+    var theme = Theme.of(context);
+    return TextButton.icon(
+      style: TextButton.styleFrom(
+        foregroundColor: active
+            ? theme.colorScheme.primary
+            : theme.colorScheme.secondary,
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+      ),
+      icon: Icon(icon, size: 18),
+      label: Text(label, style: const TextStyle(fontSize: 13)),
+      onPressed: onPressed,
+    );
+  }
+
+  Widget _buildTimerChip(BuildContext context) {
+    var theme = Theme.of(context);
+    var timerActive = widget.playerProvider.sleepTimerDuration != null;
+
+    if (timerActive) {
+      return Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: GestureDetector(
+          onTap: () => _showSleepTimerSheet(context),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.timer_outlined, size: 18, color: theme.colorScheme.primary),
+              const SizedBox(width: 6),
+              Text(
+                'Stop in ${_formatDuration(widget.playerProvider.sleepTimerDuration!)}',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return _buildActionChip(
+      icon: Icons.timer_outlined,
+      label: 'Timer',
+      active: false,
+      onPressed: () => _showSleepTimerSheet(context),
     );
   }
 
