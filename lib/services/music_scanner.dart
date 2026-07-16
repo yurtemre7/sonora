@@ -41,7 +41,7 @@ class MusicScanner {
 
   /// Performs an asynchronous background scan of the sync folder, updating the metadata index.
   /// Runs inside a background isolate and checks file size/modification times to skip unchanged files.
-  Future<List<Song>> syncLibrary() async {
+  Future<List<Song>> syncLibrary({int maxWorkers = 4}) async {
     try {
       var folderPath = await getScanFolder();
       var appDir = await getApplicationDocumentsDirectory();
@@ -187,7 +187,7 @@ class MusicScanner {
           }
 
           var numWorkers = Platform.numberOfProcessors;
-          if (numWorkers > 4) numWorkers = 4;
+          if (numWorkers > maxWorkers) numWorkers = maxWorkers;
           if (numWorkers < 1) numWorkers = 1;
 
           // If very few files, sequential execution avoids isolate spawning overhead

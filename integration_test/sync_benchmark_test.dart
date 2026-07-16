@@ -10,21 +10,25 @@ import 'package:sonora/services/music_scanner.dart';
 
 class _BenchmarkResult {
   final int size;
-  final Duration initialScanParallel;
-  final Duration initialScanSequential;
-  final Duration noChangeSyncParallel;
-  final Duration noChangeSyncSequential;
-  final Duration partialSyncParallel;
-  final Duration partialSyncSequential;
+  final Duration initialP4;
+  final Duration initialP6;
+  final Duration initialP8;
+  final Duration initialSeq;
+  final Duration cachedP4;
+  final Duration cachedSeq;
+  final Duration partialP4;
+  final Duration partialSeq;
 
   _BenchmarkResult({
     required this.size,
-    required this.initialScanParallel,
-    required this.initialScanSequential,
-    required this.noChangeSyncParallel,
-    required this.noChangeSyncSequential,
-    required this.partialSyncParallel,
-    required this.partialSyncSequential,
+    required this.initialP4,
+    required this.initialP6,
+    required this.initialP8,
+    required this.initialSeq,
+    required this.cachedP4,
+    required this.cachedSeq,
+    required this.partialP4,
+    required this.partialSeq,
   });
 }
 
@@ -37,7 +41,7 @@ void main() {
   late Uint8List mp3CoverBytes;
 
   setUpAll(() async {
-    final appDir = await getApplicationDocumentsDirectory();
+    var appDir = await getApplicationDocumentsDirectory();
     tempDocsDir = Directory('${appDir.path}/sonora_docs_test');
     tempScanDir = Directory('${appDir.path}/sonora_scan_test');
 
@@ -49,18 +53,18 @@ void main() {
     }
 
     // Set mock scan folder path in preferences
-    final prefs = SharedPreferencesAsync();
+    var prefs = SharedPreferencesAsync();
     await prefs.setString('scan_folder_path', tempScanDir.path);
 
     // Load actual audio asset bytes from the packaged assets bundle
-    final byteDataMp3 = await rootBundle.load('test/audio.mp3');
+    var byteDataMp3 = await rootBundle.load('test/audio.mp3');
     mp3Bytes = byteDataMp3.buffer.asUint8List(byteDataMp3.offsetInBytes, byteDataMp3.lengthInBytes);
 
-    final byteDataCover = await rootBundle.load('test/audio_cover.mp3');
+    var byteDataCover = await rootBundle.load('test/audio_cover.mp3');
     mp3CoverBytes = byteDataCover.buffer.asUint8List(byteDataCover.offsetInBytes, byteDataCover.lengthInBytes);
   });
 
-  tearDownAll(() async {
+  tearDownAll(() {
     try {
       if (tempDocsDir.existsSync()) {
         tempDocsDir.deleteSync(recursive: true);
@@ -86,14 +90,14 @@ void main() {
   }
 
   testWidgets('Comparative Discovery & Sync Integration Benchmark', (WidgetTester tester) async {
-    const testSizes = [50, 250, 500, 1000];
+    const testSizes = [50, 250, 500, 1000, 5000];
     var results = <_BenchmarkResult>[];
 
     var scanner = MusicScanner();
 
     for (var n in testSizes) {
       // --------------------------------------------------------
-      // 1. MEASURE PARALLEL IMPLEMENTATION (NEW)
+      // 1. MEASURE PARALLEL 4X
       // --------------------------------------------------------
       if (tempScanDir.existsSync()) {
         for (var entity in tempScanDir.listSync()) {
@@ -105,24 +109,19 @@ void main() {
           entity.deleteSync(recursive: true);
         }
       }
-
       generateSyntheticFiles(tempScanDir, n);
 
-      // Scenario A: Initial Scan
       var sw = Stopwatch()..start();
-      var initialSongsP = await scanner.syncLibrary();
+      var songsP4 = await scanner.syncLibrary();
       sw.stop();
-      var initialTimeP = sw.elapsed;
-      expect(initialSongsP.length, equals(n));
+      var initP4 = sw.elapsed;
+      expect(songsP4.length, equals(n));
 
-      // Scenario B: No-Change Sync
       sw = Stopwatch()..reset()..start();
-      var cachedSongsP = await scanner.syncLibrary();
+      await scanner.syncLibrary();
       sw.stop();
-      var cachedTimeP = sw.elapsed;
-      expect(cachedSongsP.length, equals(n));
+      var cacheP4 = sw.elapsed;
 
-      // Modify 10 files
       var allFiles = tempScanDir.listSync(recursive: true).whereType<File>().toList();
       var numToModify = allFiles.length > 10 ? 10 : allFiles.length;
       for (var i = 0; i < numToModify; i++) {
@@ -130,15 +129,13 @@ void main() {
         file.writeAsStringSync('modified content');
       }
 
-      // Scenario C: Partial Sync
       sw = Stopwatch()..reset()..start();
-      var partialSongsP = await scanner.syncLibrary();
+      await scanner.syncLibrary();
       sw.stop();
-      var partialTimeP = sw.elapsed;
-      expect(partialSongsP.length, equals(n));
+      var partP4 = sw.elapsed;
 
       // --------------------------------------------------------
-      // 2. MEASURE SEQUENTIAL IMPLEMENTATION (LEGACY)
+      // 2. MEASURE PARALLEL 6X
       // --------------------------------------------------------
       if (tempScanDir.existsSync()) {
         for (var entity in tempScanDir.listSync()) {
@@ -150,74 +147,113 @@ void main() {
           entity.deleteSync(recursive: true);
         }
       }
-
       generateSyntheticFiles(tempScanDir, n);
 
-      // Scenario A: Initial Scan
       sw = Stopwatch()..reset()..start();
-      var initialSongsS = await scanner.legacySyncLibrary();
+      var songsP6 = await scanner.syncLibrary(maxWorkers: 6);
       sw.stop();
-      var initialTimeS = sw.elapsed;
-      expect(initialSongsS.length, equals(n));
+      var initP6 = sw.elapsed;
+      expect(songsP6.length, equals(n));
 
-      // Scenario B: No-Change Sync
+      // --------------------------------------------------------
+      // 3. MEASURE PARALLEL 8X
+      // --------------------------------------------------------
+      if (tempScanDir.existsSync()) {
+        for (var entity in tempScanDir.listSync()) {
+          entity.deleteSync(recursive: true);
+        }
+      }
+      if (tempDocsDir.existsSync()) {
+        for (var entity in tempDocsDir.listSync()) {
+          entity.deleteSync(recursive: true);
+        }
+      }
+      generateSyntheticFiles(tempScanDir, n);
+
       sw = Stopwatch()..reset()..start();
-      var cachedSongsS = await scanner.legacySyncLibrary();
+      var songsP8 = await scanner.syncLibrary(maxWorkers: 8);
       sw.stop();
-      var cachedTimeS = sw.elapsed;
-      expect(cachedSongsS.length, equals(n));
+      var initP8 = sw.elapsed;
+      expect(songsP8.length, equals(n));
 
-      // Modify identical 10 files
+      // --------------------------------------------------------
+      // 4. MEASURE LEGACY SEQUENTIAL
+      // --------------------------------------------------------
+      if (tempScanDir.existsSync()) {
+        for (var entity in tempScanDir.listSync()) {
+          entity.deleteSync(recursive: true);
+        }
+      }
+      if (tempDocsDir.existsSync()) {
+        for (var entity in tempDocsDir.listSync()) {
+          entity.deleteSync(recursive: true);
+        }
+      }
+      generateSyntheticFiles(tempScanDir, n);
+
+      sw = Stopwatch()..reset()..start();
+      var songsSeq = await scanner.legacySyncLibrary();
+      sw.stop();
+      var initSeq = sw.elapsed;
+      expect(songsSeq.length, equals(n));
+
+      sw = Stopwatch()..reset()..start();
+      await scanner.legacySyncLibrary();
+      sw.stop();
+      var cacheSeq = sw.elapsed;
+
       allFiles = tempScanDir.listSync(recursive: true).whereType<File>().toList();
       for (var i = 0; i < numToModify; i++) {
         var file = allFiles[i];
         file.writeAsStringSync('modified content');
       }
 
-      // Scenario C: Partial Sync
       sw = Stopwatch()..reset()..start();
-      var partialSongsS = await scanner.legacySyncLibrary();
+      await scanner.legacySyncLibrary();
       sw.stop();
-      var partialTimeS = sw.elapsed;
-      expect(partialSongsS.length, equals(n));
+      var partSeq = sw.elapsed;
 
       results.add(_BenchmarkResult(
         size: n,
-        initialScanParallel: initialTimeP,
-        initialScanSequential: initialTimeS,
-        noChangeSyncParallel: cachedTimeP,
-        noChangeSyncSequential: cachedTimeS,
-        partialSyncParallel: partialTimeP,
-        partialSyncSequential: partialTimeS,
+        initialP4: initP4,
+        initialP6: initP6,
+        initialP8: initP8,
+        initialSeq: initSeq,
+        cachedP4: cacheP4,
+        cachedSeq: cacheSeq,
+        partialP4: partP4,
+        partialSeq: partSeq,
       ));
     }
 
-    // Print consolidated summary comparison table at the end
+    // Print comparative Markdown table
     // ignore: avoid_print
-    print('\n==========================================================================================');
+    print('\n================================================================================-------------------------');
     // ignore: avoid_print
-    print('                      ON-DEVICE DISCOVERY & SYNC BENCHMARK RUNNER                        ');
+    print('                            ON-DEVICE COMPREHENSIVE BENCHMARK RUNNER                                    ');
     // ignore: avoid_print
-    print('                      Comparison: Parallel vs. Legacy Sequential                          ');
+    print('                      Comparison: Parallel (4x, 6x, 8x) vs. Legacy Sequential                            ');
     // ignore: avoid_print
-    print('==========================================================================================');
+    print('================================================================================-------------------------');
     // ignore: avoid_print
-    print('| Size  | Initial (P) | Initial (Seq) | No-Change (P) | No-Change (Seq) | Partial (P) | Partial (Seq) |');
+    print('| Size  | Initial (P4) | Initial (P6) | Initial (P8) | Initial (Seq) | Cache (P4) | Cache (Seq) | Part (P4) | Part (Seq) |');
     // ignore: avoid_print
-    print('| ----- | ----------- | ------------- | ------------- | --------------- | ----------- | ------------- |');
+    print('| ----- | ------------ | ------------ | ------------ | ------------- | ---------- | ----------- | --------- | ---------- |');
     for (var r in results) {
       // ignore: avoid_print
       print(
         '| ${r.size.toString().padRight(5)} '
-        '| ${'${r.initialScanParallel.inMilliseconds}ms'.padRight(11)} '
-        '| ${'${r.initialScanSequential.inMilliseconds}ms'.padRight(13)} '
-        '| ${'${r.noChangeSyncParallel.inMilliseconds}ms'.padRight(13)} '
-        '| ${'${r.noChangeSyncSequential.inMilliseconds}ms'.padRight(15)} '
-        '| ${'${r.partialSyncParallel.inMilliseconds}ms'.padRight(11)} '
-        '| ${'${r.partialSyncSequential.inMilliseconds}ms'.padRight(13)} |'
+        '| ${'${r.initialP4.inMilliseconds}ms'.padRight(12)} '
+        '| ${'${r.initialP6.inMilliseconds}ms'.padRight(12)} '
+        '| ${'${r.initialP8.inMilliseconds}ms'.padRight(12)} '
+        '| ${'${r.initialSeq.inMilliseconds}ms'.padRight(13)} '
+        '| ${'${r.cachedP4.inMilliseconds}ms'.padRight(10)} '
+        '| ${'${r.cachedSeq.inMilliseconds}ms'.padRight(11)} '
+        '| ${'${r.partialP4.inMilliseconds}ms'.padRight(9)} '
+        '| ${'${r.partialSeq.inMilliseconds}ms'.padRight(10)} |'
       );
     }
     // ignore: avoid_print
-    print('==========================================================================================\n');
+    print('================================================================================-------------------------\n');
   });
 }
