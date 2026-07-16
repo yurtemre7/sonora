@@ -596,7 +596,15 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       child: Tooltip(
         message: tooltip,
         child: TextButton(
-          onPressed: enabled ? () => setState(() => _viewMode = mode) : null,
+          onPressed: enabled
+              ? () => setState(() {
+                    if (_viewMode == mode) {
+                      _viewMode = _ViewMode.player;
+                    } else {
+                      _viewMode = mode;
+                    }
+                  })
+              : null,
           style: TextButton.styleFrom(
             foregroundColor: isActive
                 ? theme.colorScheme.primary

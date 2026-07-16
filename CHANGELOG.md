@@ -7,6 +7,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Add a reusable `ConfirmDeleteDialog` shared widget for destructive actions
 * Add a 3-dot action button in the playlist detail AppBar to delete the current playlist
 * Show file size and last modified date in the song info bottom sheet
+* Toggle back to the main music player view when pressing an active bottom tab button on the now playing screen a second time
 
 ### Fixed
 * Fix favorite button state sync in song tile action menu
