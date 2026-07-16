@@ -8,6 +8,7 @@ import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/theme/app_theme.dart';
 import 'package:sonora/utils/color_extractor.dart';
 
 /// Repeat mode for playlist playback.
@@ -22,6 +23,7 @@ class PlayerProvider extends ChangeNotifier {
 
   // ── State fields ──────────────────────────────────────────────────────────
 
+  var uniqueThemeCount = 0;
   List<Song> allSongs = [];
   List<Song> queue = [];
   List<Playlist> playlists = [];
@@ -364,6 +366,7 @@ class PlayerProvider extends ChangeNotifier {
   void _refreshLibrarySnapshots() {
     cachedAlbums = buildAlbumGroups(allSongs);
     cachedArtists = buildArtistGroups(allSongs, cachedAlbums);
+    uniqueThemeCount = AppTheme.precomputeThemes(allSongs);
   }
 
   /// Toggles a song's favorite status in the cache index and favorite playlist.

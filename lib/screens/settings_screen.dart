@@ -528,7 +528,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         var totalBytes = 0;
                         var songsWithLyrics = 0;
                         var formats = <String>{};
-                        var uniqueColors = <int>{};
 
                         for (var song in songs) {
                           if (song.fileSize != null) {
@@ -536,9 +535,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           }
                           if (song.hasLyrics) {
                             songsWithLyrics++;
-                          }
-                          if (song.dominantColor != null) {
-                            uniqueColors.add(song.dominantColor!);
                           }
                           var fmt = song.format;
                           if (fmt != null && fmt.isNotEmpty) {
@@ -603,8 +599,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               _buildStatRow(
                                 context,
                                 Icons.palette_rounded,
-                                'Extracted Colors',
-                                '${uniqueColors.length} unique colors',
+                                'Unique Themes',
+                                '${widget.playerProvider.uniqueThemeCount} unique themes',
                               ),
                               const SizedBox(height: 8),
                               _buildStatRow(
@@ -660,9 +656,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
-                                            'Library synchronization complete.',
+                                            'Library synchronization complete (${widget.playerProvider.uniqueThemeCount} unique themes pre-computed).',
                                           ),
                                           behavior: SnackBarBehavior.floating,
                                         ),

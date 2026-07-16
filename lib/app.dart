@@ -235,8 +235,8 @@ class _SonoraAppState extends State<SonoraApp> {
         SnackBar(
           content: Text(
             newSongs.isNotEmpty
-                ? 'Sync folder configured. Imported ${newSongs.length} new ${newSongs.length == 1 ? 'song' : 'songs'}!'
-                : 'Sync folder configured successfully!',
+                ? 'Sync folder configured. Imported ${newSongs.length} new ${newSongs.length == 1 ? 'song' : 'songs'} (${_playerProvider.uniqueThemeCount} unique themes pre-computed)!'
+                : 'Sync folder configured successfully (${_playerProvider.uniqueThemeCount} unique themes pre-computed)!',
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -337,8 +337,8 @@ class _SonoraAppState extends State<SonoraApp> {
         SnackBar(
           content: Text(
             newSongs.isNotEmpty
-                ? 'Sync folder configured. Imported ${newSongs.length} new ${newSongs.length == 1 ? 'song' : 'songs'}!'
-                : 'Sync folder configured successfully!',
+                ? 'Sync folder configured. Imported ${newSongs.length} new ${newSongs.length == 1 ? 'song' : 'songs'} (${_playerProvider.uniqueThemeCount} unique themes pre-computed)!'
+                : 'Sync folder configured successfully (${_playerProvider.uniqueThemeCount} unique themes pre-computed)!',
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -461,11 +461,11 @@ class _SonoraAppState extends State<SonoraApp> {
             return MaterialApp.router(
               scaffoldMessengerKey: _scaffoldMessengerKey,
               title: 'Sonora',
-              theme: AppTheme.buildTheme(
+              theme: AppTheme.getTheme(
                 Brightness.light,
                 seedColor: activeSeedColor,
               ),
-              darkTheme: AppTheme.buildTheme(
+              darkTheme: AppTheme.getTheme(
                 Brightness.dark,
                 seedColor: activeSeedColor,
               ),

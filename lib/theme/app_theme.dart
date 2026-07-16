@@ -1,11 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sonora/models/song.dart';
 
 class AppTheme {
   AppTheme._();
 
   static const _seedColor = Color(0xFF7C4DFF);
+
+  static final Map<int, ThemeData> _lightThemeCache = {};
+  static final Map<int, ThemeData> _darkThemeCache = {};
+
+  /// Retrieves the cached [ThemeData] for [seedColor] and [brightness], or
+  /// builds it on demand.
+  static ThemeData getTheme(
+    Brightness brightness, {
+    Color seedColor = _seedColor,
+  }) {
+    var cache = brightness == Brightness.light
+        ? _lightThemeCache
+        : _darkThemeCache;
+    var key = seedColor.toARGB32();
+    return cache.putIfAbsent(
+      key,
+      () => buildTheme(brightness, seedColor: seedColor),
+    );
+  }
+
+  /// Pre-computes and caches Light/Dark [ThemeData] for all unique dominant colors in the song list.
+  /// Returns the count of truly unique generated [ColorScheme]s.
+  static int precomputeThemes(List<Song> songs) {
+    var uniqueColors = <int>{};
+    for (var song in songs) {
+      if (song.dominantColor != null) {
+        uniqueColors.add(song.dominantColor!);
+      }
+    }
+    // Also include default seed color
+    uniqueColors.add(_seedColor.toARGB32());
+
+    var uniqueColorSchemes = <ColorScheme>{};
+
+    for (var colorValue in uniqueColors) {
+      var color = Color(colorValue);
+      var lightTheme = getTheme(Brightness.light, seedColor: color);
+      getTheme(Brightness.dark, seedColor: color);
+      uniqueColorSchemes.add(lightTheme.colorScheme);
+    }
+
+    return uniqueColorSchemes.length;
+  }
 
   static TextTheme _buildTextTheme(Brightness brightness, Color seedColor) {
     var base = brightness == Brightness.dark
@@ -135,7 +179,7 @@ class AppTheme {
     );
   }
 
-  static ThemeData get darkTheme => buildTheme(Brightness.dark);
+  static ThemeData get darkTheme => getTheme(Brightness.dark);
 
-  static ThemeData get lightTheme => buildTheme(Brightness.light);
+  static ThemeData get lightTheme => getTheme(Brightness.light);
 }

@@ -574,7 +574,7 @@ class MusicScanner {
     songs.sort((a, b) {
       int comparison;
       if (sortBy == 'artist') {
-        comparison = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
+        comparison = a.artistLower.compareTo(b.artistLower);
       } else if (sortBy == 'duration') {
         comparison = a.duration.compareTo(b.duration);
       } else if (sortBy == 'recent') {
@@ -582,7 +582,7 @@ class MusicScanner {
         var bTime = b.lastModifiedMs ?? 0;
         comparison = bTime.compareTo(aTime);
       } else {
-        comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+        comparison = a.titleLower.compareTo(b.titleLower);
       }
       return sortAscending ? comparison : -comparison;
     });
