@@ -32,6 +32,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String? _lastSyncTime;
   var _isSyncing = false;
   var _appVersion = '1.0.0';
+  var _syncMethod = 'parallel';
+  int? _lastSyncDurationParallel;
+  int? _lastSyncDurationSequential;
+  String? _lastSyncMethodUsed;
 
   @override
   void initState() {
@@ -48,6 +52,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     var prefs = SharedPreferencesAsync();
     var keepPlaying = await prefs.getBool('keep_playing_on_close') ?? false;
 
+    var syncMethod = await scanner.getSyncMethod();
+    var durationParallel = await scanner.getLastSyncDuration('parallel');
+    var durationSequential = await scanner.getLastSyncDuration('sequential');
+    var lastMethodUsed = await scanner.getLastSyncMethodUsed();
+
     var version = '1.0.0';
     try {
       var packageInfo = await PackageInfo.fromPlatform();
@@ -60,6 +69,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _lastSyncTime = syncTime;
       _keepPlayingOnClose = keepPlaying;
       _appVersion = version;
+      _syncMethod = syncMethod;
+      _lastSyncDurationParallel = durationParallel;
+      _lastSyncDurationSequential = durationSequential;
+      _lastSyncMethodUsed = lastMethodUsed;
     });
   }
 
@@ -616,6 +629,150 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         );
                       },
                     ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Sync Method',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Parallel uses multi-core isolates to scan your files concurrently. Sequential runs on a single thread.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.errorContainer.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: theme.colorScheme.errorContainer.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            color: theme.colorScheme.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Parallel sync is resource-heavy and recommended for devices with at least 4 CPU cores.',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onErrorContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment(
+                            value: 'parallel',
+                            label: Text('Parallel (Isolates)'),
+                            icon: Icon(Icons.bolt_rounded),
+                          ),
+                          ButtonSegment(
+                            value: 'sequential',
+                            label: Text('Sequential (Legacy)'),
+                            icon: Icon(Icons.slow_motion_video_rounded),
+                          ),
+                        ],
+                        selected: {_syncMethod},
+                        onSelectionChanged: (newSelection) async {
+                          var method = newSelection.first;
+                          var scanner = MusicScanner();
+                          await scanner.setSyncMethod(method);
+                          setState(() {
+                            _syncMethod = method;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (_lastSyncDurationParallel != null || _lastSyncDurationSequential != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Last Scan Time Comparison:',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Parallel (Multi-core):',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                Text(
+                                  _lastSyncDurationParallel != null
+                                      ? '${_lastSyncDurationParallel}ms'
+                                      : 'Not scanned yet',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: _lastSyncMethodUsed == 'parallel'
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Sequential (Legacy):',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                Text(
+                                  _lastSyncDurationSequential != null
+                                      ? '${_lastSyncDurationSequential}ms'
+                                      : 'Not scanned yet',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: _lastSyncMethodUsed == 'sequential'
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    const Divider(),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -653,12 +810,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       await widget.onRetriggerSync();
                                       await _loadSettings();
                                       if (!context.mounted) return;
+
+                                      var methodDisplay = _lastSyncMethodUsed == 'sequential'
+                                          ? 'Sequential (Legacy)'
+                                          : 'Parallel (Isolates)';
+                                      var durationMs = _lastSyncMethodUsed == 'sequential'
+                                          ? _lastSyncDurationSequential
+                                          : _lastSyncDurationParallel;
+                                      var durationText = durationMs != null ? ' in ${durationMs}ms' : '';
+
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            'Library synchronization complete (${widget.playerProvider.uniqueThemeCount} unique themes pre-computed).',
+                                            'Synced ${widget.playerProvider.allSongs.length} songs$durationText using $methodDisplay method.',
                                           ),
                                           behavior: SnackBarBehavior.floating,
                                         ),

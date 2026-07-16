@@ -42,12 +42,14 @@ class MusicScanner {
   /// Performs an asynchronous background scan of the sync folder, updating the metadata index.
   /// Runs inside a background isolate and checks file size/modification times to skip unchanged files.
   Future<List<Song>> syncLibrary({int maxWorkers = 4}) async {
+    var sw = Stopwatch()..start();
     try {
       var folderPath = await getScanFolder();
       var appDir = await getApplicationDocumentsDirectory();
       var appDocsDirPath = appDir.path;
 
       var cachedSongs = await _readImportedSongsMetadata();
+      var syncMethod = await getSyncMethod();
 
       if (folderPath == null) {
         // No sync folder configured. Filter existing cached references by physical existence.
@@ -186,118 +188,207 @@ class MusicScanner {
             scanTasks.add((file.path, songId, isFav));
           }
 
-          var numWorkers = Platform.numberOfProcessors;
-          if (numWorkers > maxWorkers) numWorkers = maxWorkers;
-          if (numWorkers < 1) numWorkers = 1;
+          if (syncMethod == 'sequential') {
+            for (var task in scanTasks) {
+              var filePath = task.$1;
+              var songId = task.$2;
+              var isFav = task.$3;
 
-          // If very few files, sequential execution avoids isolate spawning overhead
-          if (scanTasks.length < 10) {
-            numWorkers = 1;
-          }
-
-          var chunks = List.generate(numWorkers, (_) => <(String, int, bool)>[]);
-          for (var i = 0; i < scanTasks.length; i++) {
-            chunks[i % numWorkers].add(scanTasks[i]);
-          }
-
-          var futures = <Future<List<Song>>>[];
-          for (var chunk in chunks) {
-            if (chunk.isEmpty) continue;
-            futures.add(Isolate.run(() {
-              var resultList = <Song>[];
-              for (var task in chunk) {
-                var filePath = task.$1;
-                var songId = task.$2;
-                var isFav = task.$3;
-
+              try {
+                var file = File(filePath);
+                tags.AudioMetadata? meta;
                 try {
-                  var file = File(filePath);
-                  tags.AudioMetadata? meta;
-                  try {
-                    meta = tags.readMetadata(file.path, true);
-                  } catch (_) {}
-
-                  String? title;
-                  String? artist;
-                  String? album;
-                  String? artworkPath;
-                  String? format;
-                  int? bitrate;
-                  int? samplerate;
-                  var duration = Duration.zero;
-
-                  var stat = file.statSync();
-                  var mtime = stat.modified.millisecondsSinceEpoch;
-                  var size = stat.size;
-
-                  if (meta != null) {
-                    title = meta.title?.trim();
-                    artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
-                    album = meta.album?.trim();
-                    format = meta.format?.trim();
-                    bitrate = meta.bitrate;
-                    samplerate = meta.samplerate;
-                    if (meta.duration != null) {
-                      duration = meta.duration!;
-                    }
-
-                    if (meta.pictureBytes != null &&
-                        meta.pictureBytes!.isNotEmpty) {
-                      var artFile = File(
-                        '$appDocsDirPath/artwork_${DateTime.now().millisecondsSinceEpoch}_$songId.jpg',
-                      );
-                      artFile.writeAsBytesSync(meta.pictureBytes!);
-                      artworkPath = artFile.path;
-                    }
-                  }
-
-                  var fileName = file.path.split(Platform.pathSeparator).last;
-                  var extIndex = fileName.lastIndexOf('.');
-                  var defaultTitle = extIndex != -1
-                      ? fileName.substring(0, extIndex)
-                      : fileName;
-
-                  var hasLrc = false;
-                  if (extIndex != -1) {
-                    var basePath = file.path.substring(0, extIndex);
-                    hasLrc =
-                        File('$basePath.lrc').existsSync() ||
-                        File('$basePath.txt').existsSync();
-                  }
-
-                  resultList.add(
-                    Song(
-                      id: songId,
-                      title: (title == null || title.isEmpty)
-                          ? defaultTitle
-                          : title,
-                      artist: (artist == null || artist.isEmpty)
-                          ? 'Unknown Artist'
-                          : artist,
-                      album: (album == null || album.isEmpty)
-                          ? 'Unknown Album'
-                          : album,
-                      duration: duration,
-                      filePath: file.path,
-                      artworkPath: artworkPath,
-                      format: format,
-                      bitrate: bitrate,
-                      samplerate: samplerate,
-                      isFavorite: isFav,
-                      lastModifiedMs: mtime,
-                      fileSize: size,
-                      hasLyrics: hasLrc,
-                    ),
-                  );
+                  meta = tags.readMetadata(file.path, true);
                 } catch (_) {}
-              }
-              return resultList;
-            }));
-          }
 
-          var listResults = await Future.wait(futures);
-          for (var list in listResults) {
-            songsToKeep.addAll(list);
+                String? title;
+                String? artist;
+                String? album;
+                String? artworkPath;
+                String? format;
+                int? bitrate;
+                int? samplerate;
+                var duration = Duration.zero;
+
+                var stat = file.statSync();
+                var mtime = stat.modified.millisecondsSinceEpoch;
+                var size = stat.size;
+
+                if (meta != null) {
+                  title = meta.title?.trim();
+                  artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
+                  album = meta.album?.trim();
+                  format = meta.format?.trim();
+                  bitrate = meta.bitrate;
+                  samplerate = meta.samplerate;
+                  if (meta.duration != null) {
+                    duration = meta.duration!;
+                  }
+
+                  if (meta.pictureBytes != null &&
+                      meta.pictureBytes!.isNotEmpty) {
+                    var artFile = File(
+                      '$appDocsDirPath/artwork_${DateTime.now().millisecondsSinceEpoch}_$songId.jpg',
+                    );
+                    artFile.writeAsBytesSync(meta.pictureBytes!);
+                    artworkPath = artFile.path;
+                  }
+                }
+
+                var fileName = file.path.split(Platform.pathSeparator).last;
+                var extIndex = fileName.lastIndexOf('.');
+                var defaultTitle = extIndex != -1
+                    ? fileName.substring(0, extIndex)
+                    : fileName;
+
+                var hasLrc = false;
+                if (extIndex != -1) {
+                  var basePath = file.path.substring(0, extIndex);
+                  hasLrc =
+                      File('$basePath.lrc').existsSync() ||
+                      File('$basePath.txt').existsSync();
+                }
+
+                songsToKeep.add(
+                  Song(
+                    id: songId,
+                    title: (title == null || title.isEmpty)
+                        ? defaultTitle
+                        : title,
+                    artist: (artist == null || artist.isEmpty)
+                        ? 'Unknown Artist'
+                        : artist,
+                    album: (album == null || album.isEmpty)
+                        ? 'Unknown Album'
+                        : album,
+                    duration: duration,
+                    filePath: file.path,
+                    artworkPath: artworkPath,
+                    format: format,
+                    bitrate: bitrate,
+                    samplerate: samplerate,
+                    isFavorite: isFav,
+                    lastModifiedMs: mtime,
+                    fileSize: size,
+                    hasLyrics: hasLrc,
+                  ),
+                );
+              } catch (_) {}
+            }
+          } else {
+            var numWorkers = Platform.numberOfProcessors;
+            if (numWorkers > maxWorkers) numWorkers = maxWorkers;
+            if (numWorkers < 1) numWorkers = 1;
+
+            // If very few files, sequential execution avoids isolate spawning overhead
+            if (scanTasks.length < 10) {
+              numWorkers = 1;
+            }
+
+            var chunks = List.generate(numWorkers, (_) => <(String, int, bool)>[]);
+            for (var i = 0; i < scanTasks.length; i++) {
+              chunks[i % numWorkers].add(scanTasks[i]);
+            }
+
+            var futures = <Future<List<Song>>>[];
+            for (var chunk in chunks) {
+              if (chunk.isEmpty) continue;
+              futures.add(Isolate.run(() {
+                var resultList = <Song>[];
+                for (var task in chunk) {
+                  var filePath = task.$1;
+                  var songId = task.$2;
+                  var isFav = task.$3;
+
+                  try {
+                    var file = File(filePath);
+                    tags.AudioMetadata? meta;
+                    try {
+                      meta = tags.readMetadata(file.path, true);
+                    } catch (_) {}
+
+                    String? title;
+                    String? artist;
+                    String? album;
+                    String? artworkPath;
+                    String? format;
+                    int? bitrate;
+                    int? samplerate;
+                    var duration = Duration.zero;
+
+                    var stat = file.statSync();
+                    var mtime = stat.modified.millisecondsSinceEpoch;
+                    var size = stat.size;
+
+                    if (meta != null) {
+                      title = meta.title?.trim();
+                      artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
+                      album = meta.album?.trim();
+                      format = meta.format?.trim();
+                      bitrate = meta.bitrate;
+                      samplerate = meta.samplerate;
+                      if (meta.duration != null) {
+                        duration = meta.duration!;
+                      }
+
+                      if (meta.pictureBytes != null &&
+                          meta.pictureBytes!.isNotEmpty) {
+                        var artFile = File(
+                          '$appDocsDirPath/artwork_${DateTime.now().millisecondsSinceEpoch}_$songId.jpg',
+                        );
+                        artFile.writeAsBytesSync(meta.pictureBytes!);
+                        artworkPath = artFile.path;
+                      }
+                    }
+
+                    var fileName = file.path.split(Platform.pathSeparator).last;
+                    var extIndex = fileName.lastIndexOf('.');
+                    var defaultTitle = extIndex != -1
+                        ? fileName.substring(0, extIndex)
+                        : fileName;
+
+                    var hasLrc = false;
+                    if (extIndex != -1) {
+                      var basePath = file.path.substring(0, extIndex);
+                      hasLrc =
+                          File('$basePath.lrc').existsSync() ||
+                          File('$basePath.txt').existsSync();
+                    }
+
+                    resultList.add(
+                      Song(
+                        id: songId,
+                        title: (title == null || title.isEmpty)
+                            ? defaultTitle
+                            : title,
+                        artist: (artist == null || artist.isEmpty)
+                            ? 'Unknown Artist'
+                            : artist,
+                        album: (album == null || album.isEmpty)
+                            ? 'Unknown Album'
+                            : album,
+                        duration: duration,
+                        filePath: file.path,
+                        artworkPath: artworkPath,
+                        format: format,
+                        bitrate: bitrate,
+                        samplerate: samplerate,
+                        isFavorite: isFav,
+                        lastModifiedMs: mtime,
+                        fileSize: size,
+                        hasLyrics: hasLrc,
+                      ),
+                    );
+                  } catch (_) {}
+                }
+                return resultList;
+              }));
+            }
+
+            var listResults = await Future.wait(futures);
+            for (var list in listResults) {
+              songsToKeep.addAll(list);
+            }
           }
         }
 
@@ -346,8 +437,16 @@ class MusicScanner {
         await _prefs.remove('postpone_sync_until');
       } catch (_) {}
 
+      sw.stop();
+      var durationMs = sw.elapsedMilliseconds;
+      var currentMethod = await getSyncMethod();
+      await setLastSyncDuration(currentMethod, durationMs);
+      await setLastSyncMethodUsed(currentMethod);
+
       return resultSongs;
-    } catch (_) {
+    } catch (e, stack) {
+      // ignore: avoid_print
+      print('SYNC ERROR: $e\n$stack');
       return [];
     }
   }
@@ -968,5 +1067,29 @@ class MusicScanner {
   /// Helper placeholder to avoid breaking any references
   Future<Uint8List?> getArtwork(int songId) async {
     return null;
+  }
+
+  Future<String> getSyncMethod() async {
+    return await _prefs.getString('sync_method') ?? 'parallel';
+  }
+
+  Future<void> setSyncMethod(String method) async {
+    await _prefs.setString('sync_method', method);
+  }
+
+  Future<int?> getLastSyncDuration(String method) async {
+    return await _prefs.getInt('last_sync_duration_$method');
+  }
+
+  Future<void> setLastSyncDuration(String method, int durationMs) async {
+    await _prefs.setInt('last_sync_duration_$method', durationMs);
+  }
+
+  Future<String?> getLastSyncMethodUsed() async {
+    return await _prefs.getString('last_sync_method_used');
+  }
+
+  Future<void> setLastSyncMethodUsed(String method) async {
+    await _prefs.setString('last_sync_method_used', method);
   }
 }

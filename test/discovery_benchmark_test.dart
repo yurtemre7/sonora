@@ -87,6 +87,13 @@ void main() {
       var songFile = File('${artistDir.path}/song_$i.mp3');
       var bytes = (i % 2 == 0) ? mp3CoverBytes : mp3Bytes;
       songFile.writeAsBytesSync(bytes);
+
+      // Simulate lyrics files for 50% of songs (alternating .lrc and .txt)
+      if (i % 2 == 0) {
+        var ext = (i % 4 == 0) ? 'lrc' : 'txt';
+        var lrcFile = File('${artistDir.path}/song_$i.$ext');
+        lrcFile.writeAsStringSync('[00:12.00] Line 1 for song $i\n[00:24.00] Line 2');
+      }
     }
   }
 

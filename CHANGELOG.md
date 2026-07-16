@@ -13,6 +13,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Parallelize metadata reading and artwork extraction using multi-core worker isolates during library synchronization
 * Add a filesystem-based discovery and sync benchmark test (`discovery_benchmark_test.dart`) to measure directory traversal and metadata parsing performance under empty-cache, full-cache, and partial-update scenarios
 * Add an on-device comparative integration test benchmark (`integration_test/sync_benchmark_test.dart`) to measure parallel vs. legacy sequential sync speeds on emulator/device using actual audio files
+* Add settings option to select between Parallel and Legacy Sequential sync methods, including millisecond duration comparison readouts, performance impact warnings, and detailed execution time snackbars
 
 ### Fixed
 * Fix favorite button state sync in song tile action menu

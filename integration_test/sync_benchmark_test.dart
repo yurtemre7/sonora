@@ -11,8 +11,6 @@ import 'package:sonora/services/music_scanner.dart';
 class _BenchmarkResult {
   final int size;
   final Duration initialP4;
-  final Duration initialP6;
-  final Duration initialP8;
   final Duration initialSeq;
   final Duration cachedP4;
   final Duration cachedSeq;
@@ -22,8 +20,6 @@ class _BenchmarkResult {
   _BenchmarkResult({
     required this.size,
     required this.initialP4,
-    required this.initialP6,
-    required this.initialP8,
     required this.initialSeq,
     required this.cachedP4,
     required this.cachedSeq,
@@ -86,18 +82,25 @@ void main() {
       var songFile = File('${artistDir.path}/song_$i.mp3');
       var bytes = (i % 2 == 0) ? mp3CoverBytes : mp3Bytes;
       songFile.writeAsBytesSync(bytes);
+
+      // Simulate lyrics files for 50% of songs (alternating .lrc and .txt)
+      if (i % 2 == 0) {
+        var ext = (i % 4 == 0) ? 'lrc' : 'txt';
+        var lrcFile = File('${artistDir.path}/song_$i.$ext');
+        lrcFile.writeAsStringSync('[00:12.00] Line 1 for song $i\n[00:24.00] Line 2');
+      }
     }
   }
 
   testWidgets('Comparative Discovery & Sync Integration Benchmark', (WidgetTester tester) async {
-    const testSizes = [50, 250, 500, 1000, 5000];
+    const testSizes = [100, 500, 1000, 2000];
     var results = <_BenchmarkResult>[];
 
     var scanner = MusicScanner();
 
     for (var n in testSizes) {
       // --------------------------------------------------------
-      // 1. MEASURE PARALLEL 4X
+      // 1. MEASURE PARALLEL (4X)
       // --------------------------------------------------------
       if (tempScanDir.existsSync()) {
         for (var entity in tempScanDir.listSync()) {
@@ -135,49 +138,7 @@ void main() {
       var partP4 = sw.elapsed;
 
       // --------------------------------------------------------
-      // 2. MEASURE PARALLEL 6X
-      // --------------------------------------------------------
-      if (tempScanDir.existsSync()) {
-        for (var entity in tempScanDir.listSync()) {
-          entity.deleteSync(recursive: true);
-        }
-      }
-      if (tempDocsDir.existsSync()) {
-        for (var entity in tempDocsDir.listSync()) {
-          entity.deleteSync(recursive: true);
-        }
-      }
-      generateSyntheticFiles(tempScanDir, n);
-
-      sw = Stopwatch()..reset()..start();
-      var songsP6 = await scanner.syncLibrary(maxWorkers: 6);
-      sw.stop();
-      var initP6 = sw.elapsed;
-      expect(songsP6.length, equals(n));
-
-      // --------------------------------------------------------
-      // 3. MEASURE PARALLEL 8X
-      // --------------------------------------------------------
-      if (tempScanDir.existsSync()) {
-        for (var entity in tempScanDir.listSync()) {
-          entity.deleteSync(recursive: true);
-        }
-      }
-      if (tempDocsDir.existsSync()) {
-        for (var entity in tempDocsDir.listSync()) {
-          entity.deleteSync(recursive: true);
-        }
-      }
-      generateSyntheticFiles(tempScanDir, n);
-
-      sw = Stopwatch()..reset()..start();
-      var songsP8 = await scanner.syncLibrary(maxWorkers: 8);
-      sw.stop();
-      var initP8 = sw.elapsed;
-      expect(songsP8.length, equals(n));
-
-      // --------------------------------------------------------
-      // 4. MEASURE LEGACY SEQUENTIAL
+      // 2. MEASURE LEGACY SEQUENTIAL
       // --------------------------------------------------------
       if (tempScanDir.existsSync()) {
         for (var entity in tempScanDir.listSync()) {
@@ -216,8 +177,6 @@ void main() {
       results.add(_BenchmarkResult(
         size: n,
         initialP4: initP4,
-        initialP6: initP6,
-        initialP8: initP8,
         initialSeq: initSeq,
         cachedP4: cacheP4,
         cachedSeq: cacheSeq,
@@ -228,24 +187,22 @@ void main() {
 
     // Print comparative Markdown table
     // ignore: avoid_print
-    print('\n================================================================================-------------------------');
+    print('\n==========================================================================================');
     // ignore: avoid_print
-    print('                            ON-DEVICE COMPREHENSIVE BENCHMARK RUNNER                                    ');
+    print('                      ON-DEVICE DISCOVERY & SYNC BENCHMARK RUNNER                        ');
     // ignore: avoid_print
-    print('                      Comparison: Parallel (4x, 6x, 8x) vs. Legacy Sequential                            ');
+    print('                      Comparison: Parallel (4x) vs. Legacy Sequential                     ');
     // ignore: avoid_print
-    print('================================================================================-------------------------');
+    print('==========================================================================================');
     // ignore: avoid_print
-    print('| Size  | Initial (P4) | Initial (P6) | Initial (P8) | Initial (Seq) | Cache (P4) | Cache (Seq) | Part (P4) | Part (Seq) |');
+    print('| Size  | Initial (P4) | Initial (Seq) | Cache (P4) | Cache (Seq) | Part (P4) | Part (Seq) |');
     // ignore: avoid_print
-    print('| ----- | ------------ | ------------ | ------------ | ------------- | ---------- | ----------- | --------- | ---------- |');
+    print('| ----- | ------------ | ------------- | ---------- | ----------- | --------- | ---------- |');
     for (var r in results) {
       // ignore: avoid_print
       print(
         '| ${r.size.toString().padRight(5)} '
         '| ${'${r.initialP4.inMilliseconds}ms'.padRight(12)} '
-        '| ${'${r.initialP6.inMilliseconds}ms'.padRight(12)} '
-        '| ${'${r.initialP8.inMilliseconds}ms'.padRight(12)} '
         '| ${'${r.initialSeq.inMilliseconds}ms'.padRight(13)} '
         '| ${'${r.cachedP4.inMilliseconds}ms'.padRight(10)} '
         '| ${'${r.cachedSeq.inMilliseconds}ms'.padRight(11)} '
@@ -254,6 +211,6 @@ void main() {
       );
     }
     // ignore: avoid_print
-    print('================================================================================-------------------------\n');
+    print('==========================================================================================\n');
   });
 }
