@@ -212,8 +212,10 @@ class MusicScanner {
 
                 try {
                   var file = File(filePath);
-                  // Read metadata inside the parallel worker isolate
-                  var meta = tags.readMetadata(file.path, true);
+                  tags.AudioMetadata? meta;
+                  try {
+                    meta = tags.readMetadata(file.path, true);
+                  } catch (_) {}
 
                   String? title;
                   String? artist;
