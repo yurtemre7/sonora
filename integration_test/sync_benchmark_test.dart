@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
-import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/services/music_scanner.dart';
 
 class _BenchmarkResult {
@@ -27,44 +29,38 @@ class _BenchmarkResult {
 }
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   late Directory tempDocsDir;
   late Directory tempScanDir;
   late Uint8List mp3Bytes;
   late Uint8List mp3CoverBytes;
 
-  setUpAll(() {
-    // Create temporary directories once for all tests
-    tempDocsDir = Directory.systemTemp.createTempSync('sonora_docs');
-    tempScanDir = Directory.systemTemp.createTempSync('sonora_scan');
+  setUpAll(() async {
+    final appDir = await getApplicationDocumentsDirectory();
+    tempDocsDir = Directory('${appDir.path}/sonora_docs_test');
+    tempScanDir = Directory('${appDir.path}/sonora_scan_test');
 
-    // Mock PathProvider
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall methodCall) async {
-        if (methodCall.method == 'getApplicationDocumentsDirectory') {
-          return tempDocsDir.path;
-        }
-        return null;
-      },
-    );
+    if (!tempDocsDir.existsSync()) {
+      tempDocsDir.createSync(recursive: true);
+    }
+    if (!tempScanDir.existsSync()) {
+      tempScanDir.createSync(recursive: true);
+    }
 
-    // Mock SharedPreferencesAsync platform instance once
-    SharedPreferencesAsyncPlatform.instance =
-        InMemorySharedPreferencesAsync.withData({
-      'scan_folder_path': tempScanDir.path,
-    });
+    // Set mock scan folder path in preferences
+    final prefs = SharedPreferencesAsync();
+    await prefs.setString('scan_folder_path', tempScanDir.path);
 
-    // Load actual audio.mp3 bytes to use as realistic tag payload
-    mp3Bytes = File('test/audio.mp3').readAsBytesSync();
-    // Load audio_cover.mp3 bytes containing embedded album artwork
-    mp3CoverBytes = File('test/audio_cover.mp3').readAsBytesSync();
+    // Load actual audio asset bytes from the packaged assets bundle
+    final byteDataMp3 = await rootBundle.load('test/audio.mp3');
+    mp3Bytes = byteDataMp3.buffer.asUint8List(byteDataMp3.offsetInBytes, byteDataMp3.lengthInBytes);
+
+    final byteDataCover = await rootBundle.load('test/audio_cover.mp3');
+    mp3CoverBytes = byteDataCover.buffer.asUint8List(byteDataCover.offsetInBytes, byteDataCover.lengthInBytes);
   });
 
-  tearDownAll(() {
-    // Clean up temporary directories once at the end
+  tearDownAll(() async {
     try {
       if (tempDocsDir.existsSync()) {
         tempDocsDir.deleteSync(recursive: true);
@@ -76,7 +72,6 @@ void main() {
   });
 
   void generateSyntheticFiles(Directory root, int count) {
-    // Generate subdirectories to simulate artist/album structure
     for (var i = 0; i < count; i++) {
       var artistId = i ~/ 10;
       var albumId = i ~/ 5;
@@ -90,8 +85,8 @@ void main() {
     }
   }
 
-  test('Discovery & Sync Benchmark Runner', () async {
-    const testSizes = [50, 250, 500, 1000, 5000];
+  testWidgets('Comparative Discovery & Sync Integration Benchmark', (WidgetTester tester) async {
+    const testSizes = [50, 250, 500, 1000];
     var results = <_BenchmarkResult>[];
 
     var scanner = MusicScanner();
@@ -100,7 +95,6 @@ void main() {
       // --------------------------------------------------------
       // 1. MEASURE PARALLEL IMPLEMENTATION (NEW)
       // --------------------------------------------------------
-      // Clean temp Docs and Scan directories to prepare fresh run
       if (tempScanDir.existsSync()) {
         for (var entity in tempScanDir.listSync()) {
           entity.deleteSync(recursive: true);
@@ -112,7 +106,6 @@ void main() {
         }
       }
 
-      // Generate synthetic files
       generateSyntheticFiles(tempScanDir, n);
 
       // Scenario A: Initial Scan
@@ -147,7 +140,6 @@ void main() {
       // --------------------------------------------------------
       // 2. MEASURE SEQUENTIAL IMPLEMENTATION (LEGACY)
       // --------------------------------------------------------
-      // Clean temp Docs and Scan directories to empty cache for sequential run
       if (tempScanDir.existsSync()) {
         for (var entity in tempScanDir.listSync()) {
           entity.deleteSync(recursive: true);
@@ -159,7 +151,6 @@ void main() {
         }
       }
 
-      // Generate identical synthetic files
       generateSyntheticFiles(tempScanDir, n);
 
       // Scenario A: Initial Scan
@@ -205,7 +196,7 @@ void main() {
     // ignore: avoid_print
     print('\n==========================================================================================');
     // ignore: avoid_print
-    print('                          DISCOVERY & SYNC BENCHMARK RUNNER                               ');
+    print('                      ON-DEVICE DISCOVERY & SYNC BENCHMARK RUNNER                        ');
     // ignore: avoid_print
     print('                      Comparison: Parallel vs. Legacy Sequential                          ');
     // ignore: avoid_print

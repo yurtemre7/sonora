@@ -12,6 +12,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Optimize library sorting by using pre-computed lowercase keys instead of calling `toLowerCase()` repeatedly during sort comparisons
 * Parallelize metadata reading and artwork extraction using multi-core worker isolates during library synchronization
 * Add a filesystem-based discovery and sync benchmark test (`discovery_benchmark_test.dart`) to measure directory traversal and metadata parsing performance under empty-cache, full-cache, and partial-update scenarios
+* Add an on-device comparative integration test benchmark (`integration_test/sync_benchmark_test.dart`) to measure parallel vs. legacy sequential sync speeds on emulator/device using actual audio files
 
 ### Fixed
 * Fix favorite button state sync in song tile action menu

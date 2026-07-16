@@ -352,6 +352,267 @@ class MusicScanner {
     }
   }
 
+  /// Legacy sequential syncLibrary method for benchmark comparisons.
+  Future<List<Song>> legacySyncLibrary() async {
+    try {
+      var folderPath = await getScanFolder();
+      var appDir = await getApplicationDocumentsDirectory();
+      var appDocsDirPath = appDir.path;
+
+      var cachedSongs = await _readImportedSongsMetadata();
+
+      if (folderPath == null) {
+        var verified = cachedSongs
+            .where((s) => File(s.filePath).existsSync())
+            .toList();
+        await _writeImportedSongsMetadata(verified);
+        return verified;
+      }
+
+      var dir = Directory(folderPath);
+      if (!dir.existsSync()) {
+        await _writeImportedSongsMetadata([]);
+        return [];
+      }
+
+      var resultSongs = await Isolate.run<List<Song>>(() {
+        var localCachedSongs = List<Song>.from(cachedSongs);
+
+        var audioExtensions = {
+          'mp3',
+          'm4a',
+          'mp4',
+          'aac',
+          'flac',
+          'ogg',
+          'opus',
+          'wav',
+          'wma',
+          'amr',
+          '3gp',
+          'ts',
+          'mkv',
+          'mid',
+          'midi',
+        };
+        var foundFiles = <File>[];
+
+        try {
+          var syncDir = Directory(folderPath);
+          for (var entity in syncDir.listSync(
+            recursive: true,
+            followLinks: false,
+          )) {
+            if (entity is File) {
+              var ext = entity.path.split('.').last.toLowerCase();
+              if (audioExtensions.contains(ext)) {
+                foundFiles.add(entity);
+              }
+            }
+          }
+        } catch (_) {}
+
+        var foundPaths = foundFiles.map((f) => f.path).toSet();
+        var verifiedSongs = localCachedSongs
+            .where((s) => foundPaths.contains(s.filePath))
+            .toList();
+
+        var existingIds = {for (var s in verifiedSongs) s.filePath: s.id};
+        var existingFavoriteStatus = {
+          for (var s in verifiedSongs) s.filePath: s.isFavorite
+        };
+        var cachedMap = {for (var s in verifiedSongs) s.filePath: s};
+
+        var songsToKeep = <Song>[];
+        var filesToScan = <File>[];
+
+        for (var file in foundFiles) {
+          var cached = cachedMap[file.path];
+          if (cached != null) {
+            try {
+              var stat = file.statSync();
+              var mtime = stat.modified.millisecondsSinceEpoch;
+              var size = stat.size;
+
+              if (cached.lastModifiedMs == mtime && cached.fileSize == size) {
+                var hasLrc = false;
+                var extIndex = file.path.lastIndexOf('.');
+                if (extIndex != -1) {
+                  var basePath = file.path.substring(0, extIndex);
+                  hasLrc =
+                      File('$basePath.lrc').existsSync() ||
+                      File('$basePath.txt').existsSync();
+                }
+
+                if (cached.hasLyrics != hasLrc) {
+                  songsToKeep.add(
+                    Song(
+                      id: cached.id,
+                      title: cached.title,
+                      artist: cached.artist,
+                      album: cached.album,
+                      duration: cached.duration,
+                      filePath: cached.filePath,
+                      artworkPath: cached.artworkPath,
+                      format: cached.format,
+                      bitrate: cached.bitrate,
+                      samplerate: cached.samplerate,
+                      isFavorite: cached.isFavorite,
+                      lastModifiedMs: cached.lastModifiedMs,
+                      fileSize: cached.fileSize,
+                      hasLyrics: hasLrc,
+                    ),
+                  );
+                } else {
+                  songsToKeep.add(cached);
+                }
+                continue;
+              }
+            } catch (_) {}
+          }
+          filesToScan.add(file);
+        }
+
+        if (filesToScan.isNotEmpty) {
+          var idCounter = verifiedSongs.isEmpty
+              ? 1
+              : verifiedSongs.map((s) => s.id).reduce((a, b) => a > b ? a : b) +
+                    1;
+
+          for (var file in filesToScan) {
+            try {
+              tags.AudioMetadata? meta;
+              try {
+                meta = tags.readMetadata(file.path, true);
+              } catch (_) {}
+
+              String? title;
+              String? artist;
+              String? album;
+              String? artworkPath;
+              String? format;
+              int? bitrate;
+              int? samplerate;
+              var duration = Duration.zero;
+
+              var stat = file.statSync();
+              var mtime = stat.modified.millisecondsSinceEpoch;
+              var size = stat.size;
+
+              if (meta != null) {
+                title = meta.title?.trim();
+                artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
+                album = meta.album?.trim();
+                format = meta.format?.trim();
+                bitrate = meta.bitrate;
+                samplerate = meta.samplerate;
+                if (meta.duration != null) {
+                  duration = meta.duration!;
+                }
+
+                if (meta.pictureBytes != null &&
+                    meta.pictureBytes!.isNotEmpty) {
+                  var artFile = File(
+                    '$appDocsDirPath/artwork_${DateTime.now().millisecondsSinceEpoch}_$idCounter.jpg',
+                  );
+                  artFile.writeAsBytesSync(meta.pictureBytes!);
+                  artworkPath = artFile.path;
+                }
+              }
+
+              var fileName = file.path.split(Platform.pathSeparator).last;
+              var extIndex = fileName.lastIndexOf('.');
+              var defaultTitle = extIndex != -1
+                  ? fileName.substring(0, extIndex)
+                  : fileName;
+
+              var songId = existingIds[file.path] ?? idCounter++;
+              var isFav = existingFavoriteStatus[file.path] ?? false;
+
+              var hasLrc = false;
+              if (extIndex != -1) {
+                var basePath = file.path.substring(0, extIndex);
+                hasLrc =
+                    File('$basePath.lrc').existsSync() ||
+                    File('$basePath.txt').existsSync();
+              }
+
+              songsToKeep.add(
+                Song(
+                  id: songId,
+                  title: (title == null || title.isEmpty)
+                      ? defaultTitle
+                      : title,
+                  artist: (artist == null || artist.isEmpty)
+                      ? 'Unknown Artist'
+                      : artist,
+                  album: (album == null || album.isEmpty)
+                      ? 'Unknown Album'
+                      : album,
+                  duration: duration,
+                  filePath: file.path,
+                  artworkPath: artworkPath,
+                  format: format,
+                  bitrate: bitrate,
+                  samplerate: samplerate,
+                  isFavorite: isFav,
+                  lastModifiedMs: mtime,
+                  fileSize: size,
+                  hasLyrics: hasLrc,
+                ),
+              );
+            } catch (_) {}
+          }
+        }
+
+        return songsToKeep;
+      });
+
+      var sortSettings = await getSortSettings();
+      sortSongs(
+        resultSongs,
+        sortSettings['sortBy'] as String,
+        sortSettings['sortAscending'] as bool,
+      );
+
+      await _writeImportedSongsMetadata(resultSongs);
+
+      var now = DateTime.now();
+      var hour = now.hour > 12
+          ? now.hour - 12
+          : (now.hour == 0 ? 12 : now.hour);
+      var ampm = now.hour >= 12 ? 'PM' : 'AM';
+      var minute = now.minute.toString().padLeft(2, '0');
+      var second = now.second.toString().padLeft(2, '0');
+      var monthNames = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
+      var month = monthNames[now.month - 1];
+      var formatted =
+          '$month ${now.day}, ${now.year} at $hour:$minute:$second $ampm';
+      await setLastSyncTime(formatted);
+      await setLastSyncTimestamp(now.millisecondsSinceEpoch);
+      try {
+        await _prefs.remove('postpone_sync_until');
+      } catch (_) {}
+
+      return resultSongs;
+    } catch (_) {
+      return [];
+    }
+  }
+
   /// Recursively scans the selected folder path and updates references. Files are NOT copied.
   Future<List<Song>> importFromFolder(String folderPath) async {
     try {

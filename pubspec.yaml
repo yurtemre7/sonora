@@ -28,6 +28,8 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   shared_preferences_platform_interface: ^2.4.2
 
 # dart run flutter_launcher_icons
@@ -49,3 +51,5 @@ flutter:
 
   assets:
     - assets/icon/
+    - test/audio.mp3
+    - test/audio_cover.mp3
