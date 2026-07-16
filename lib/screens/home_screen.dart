@@ -8,6 +8,7 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -1339,6 +1340,19 @@ class _HomeScreenState extends State<HomeScreen>
                                                       ),
                                                       onSelected: (val) async {
                                                         if (val == 1) {
+                                                          var confirmed =
+                                                              await ConfirmDeleteDialog
+                                                                  .show(
+                                                            context,
+                                                            title:
+                                                                'Delete Playlist?',
+                                                            message:
+                                                                'Delete "${playlist.name}"? This cannot be undone.',
+                                                          );
+                                                          if (confirmed !=
+                                                              true) {
+                                                            return;
+                                                          }
                                                           await widget
                                                               .onDeletePlaylist(
                                                                 playlist.id,

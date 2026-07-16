@@ -2,6 +2,17 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [Unreleased]
+### Added
+* Add a reusable `ConfirmDeleteDialog` shared widget for destructive actions
+* Add a 3-dot action button in the playlist detail AppBar to delete the current playlist
+* Show file size and last modified date in the song info bottom sheet
+
+### Fixed
+* Fix favorite button state sync in song tile action menu
+* Fix song count mismatch in "Add to Playlist" sheet by filtering orphaned song IDs
+* Integrate shared confirmation dialog on playlist delete actions (home list and detail screen) and app reset (settings screen)
+
 ## [1.4.3] - 2026-07-16
 ### Fixed
 * Update playlists info on "add to playlist" sheet

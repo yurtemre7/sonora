@@ -238,6 +238,7 @@ class SonoraAppRouter {
                 onReorderSongs: onReorderPlaylistSongs,
                 playlists: playerProvider.playlists,
                 onAddSongToPlaylist: onAddSongToPlaylist,
+                onDeletePlaylist: onDeletePlaylist,
               );
             },
           ),

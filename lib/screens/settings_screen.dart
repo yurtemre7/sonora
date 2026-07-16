@@ -5,6 +5,7 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/widgets/confirm_delete_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -62,38 +63,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  void _confirmResetDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        var theme = Theme.of(dialogContext);
-        return AlertDialog(
-          title: const Text('Reset Application?'),
-          content: const Text(
-            'This action will permanently delete all imported audio files and clear your library. This cannot be undone.',
-          ),
-          actionsAlignment: MainAxisAlignment.spaceBetween,
-          actions: [
-            FilledButton(
-              style: FilledButton.styleFrom(
-                foregroundColor: theme.colorScheme.onError,
-                backgroundColor: theme.colorScheme.error,
-              ),
-              onPressed: () {
-                Navigator.pop(dialogContext); // Close dialog
-                closeRoute(context); // Close SettingsScreen
-                widget.onResetApp();
-              },
-              child: const Text('Reset'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
+  Future<void> _confirmResetDialog() async {
+    var confirmed = await ConfirmDeleteDialog.show(
+      context,
+      title: 'Reset Application?',
+      message:
+          'This will permanently delete all imported audio files and clear your library. This cannot be undone.',
+      confirmLabel: 'Reset',
     );
+    if (confirmed != true || !mounted) return;
+    closeRoute(context);
+    widget.onResetApp();
   }
 
   void _showThemeModeSheet(BuildContext context) {
@@ -814,7 +794,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               subtitle: const Text('Delete all imported music and settings'),
               onTap: () {
-                _confirmResetDialog(context);
+                _confirmResetDialog();
               },
             ),
           ),

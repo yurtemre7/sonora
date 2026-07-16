@@ -8,6 +8,7 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -21,6 +22,7 @@ class PlaylistDetailScreen extends StatefulWidget {
     required this.onReorderSongs,
     required this.playlists,
     required this.onAddSongToPlaylist,
+    this.onDeletePlaylist,
   });
 
   final Playlist playlist;
@@ -32,6 +34,7 @@ class PlaylistDetailScreen extends StatefulWidget {
   final List<Playlist> playlists;
   final Future<void> Function(String playlistId, int songId)
   onAddSongToPlaylist;
+  final Future<void> Function(String playlistId)? onDeletePlaylist;
 
   @override
   State<PlaylistDetailScreen> createState() => _PlaylistDetailScreenState();
@@ -72,6 +75,22 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
 
   void _showAddToPlaylistDialog(Song song) {
     PlaylistSelectorBottomSheet.show(context, song, widget.playerProvider);
+  }
+
+  /// Confirms and performs playlist deletion, then closes this screen.
+  Future<void> _deletePlaylist() async {
+    if (widget.onDeletePlaylist == null) return;
+    var confirmed = await ConfirmDeleteDialog.show(
+      context,
+      title: 'Delete Playlist?',
+      message:
+          'Delete "${_playlist.name}"? This cannot be undone.',
+    );
+    if (confirmed != true || !mounted) return;
+    // Close the detail screen first so go_router never tries to
+    // resolve the now-deleted playlist route.
+    closeRoute(context);
+    await widget.onDeletePlaylist!(_playlist.id);
   }
 
   void _showSongInfoBottomSheet(Song song) {
@@ -281,6 +300,35 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                       icon: const Icon(Icons.arrow_back_rounded),
                       onPressed: () => closeRoute(context),
                     ),
+                    actions: [
+                      // Only non-favorites playlists can be deleted.
+                      if (_playlist.id != 'favorites' &&
+                          widget.onDeletePlaylist != null)
+                        PopupMenuButton<int>(
+                          icon: const Icon(Icons.more_vert_rounded),
+                          onSelected: (val) {
+                            if (val == 1) _deletePlaylist();
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 1,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.delete_outline_rounded,
+                                    color: Colors.red,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Delete Playlist',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
                     backgroundColor: Colors.transparent,
                     elevation: 0,
                     expandedHeight: 320,
