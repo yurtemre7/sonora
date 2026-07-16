@@ -178,8 +178,22 @@ class _PlaylistSelectorBottomSheetState
                                         : null,
                                   ),
                                 ),
-                                subtitle: Text(
-                                  '${playlist.songIds.length} ${playlist.songIds.length == 1 ? 'song' : 'songs'}',
+                                subtitle: Builder(
+                                  builder: (context) {
+                                    // Count only IDs that still exist in the
+                                    // loaded library, so orphaned/stale IDs
+                                    // do not inflate the displayed count.
+                                    var allIds = widget
+                                        .playerProvider.allSongs
+                                        .map((s) => s.id)
+                                        .toSet();
+                                    var liveCount = playlist.songIds
+                                        .where((id) => allIds.contains(id))
+                                        .length;
+                                    return Text(
+                                      '$liveCount ${liveCount == 1 ? 'song' : 'songs'}',
+                                    );
+                                  },
                                 ),
                                 trailing: isAlreadyIn
                                     ? Icon(

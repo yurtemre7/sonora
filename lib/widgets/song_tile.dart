@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:sonora/models/song.dart';
+import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/widgets/album_art.dart';
 
 class SongTile extends StatelessWidget {
@@ -8,6 +9,7 @@ class SongTile extends StatelessWidget {
     super.key,
     required this.song,
     required this.onTap,
+    this.playerProvider,
     this.onLongPress,
     this.onPlayNext,
     this.onAddToQueue,
@@ -22,6 +24,10 @@ class SongTile extends StatelessWidget {
 
   final Song song;
   final VoidCallback onTap;
+  /// Optional: provide the player provider so the popup menu can look up
+  /// the live favorite state from [PlayerProvider.allSongs] at open time,
+  /// avoiding stale-closure issues.
+  final PlayerProvider? playerProvider;
   final VoidCallback? onLongPress;
   final VoidCallback? onPlayNext;
   final VoidCallback? onAddToQueue;
@@ -196,24 +202,36 @@ class SongTile extends StatelessWidget {
                             ),
                           ),
                         if (onToggleFavorite != null)
+                          // Look up the live isFavorite state from the
+                          // provider so this menu item is always fresh
+                          // at the moment the menu opens.
                           PopupMenuItem(
                             value: 6,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  song.isFavorite
-                                      ? Icons.favorite_rounded
-                                      : Icons.favorite_border_rounded,
-                                  size: 20,
-                                  color: song.isFavorite ? Colors.red : null,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  song.isFavorite
-                                      ? 'Remove Favorite'
-                                      : 'Favorite Song',
-                                ),
-                              ],
+                            child: Builder(
+                              builder: (context) {
+                                var liveSong = playerProvider?.allSongs
+                                    .where((s) => s.id == song.id)
+                                    .firstOrNull;
+                                var isFav =
+                                    liveSong?.isFavorite ?? song.isFavorite;
+                                return Row(
+                                  children: [
+                                    Icon(
+                                      isFav
+                                          ? Icons.favorite_rounded
+                                          : Icons.favorite_border_rounded,
+                                      size: 20,
+                                      color: isFav ? Colors.red : null,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      isFav
+                                          ? 'Remove Favorite'
+                                          : 'Favorite Song',
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ),
                       ],

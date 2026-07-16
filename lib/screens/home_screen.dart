@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
@@ -426,6 +428,40 @@ class _HomeScreenState extends State<HomeScreen>
                 _buildInfoRow('Album', song.album, theme),
                 _buildInfoRow('Duration', song.durationFormatted, theme),
                 _buildInfoRow('File Path', song.filePath, theme, isPath: true),
+                if (song.fileSize != null)
+                  _buildInfoRow(
+                    'File Size',
+                    _formatFileSize(song.fileSize!),
+                    theme,
+                  ),
+                if (song.lastModifiedMs != null)
+                  _buildInfoRow(
+                    'Date Modified',
+                    _formatDate(
+                      DateTime.fromMillisecondsSinceEpoch(
+                        song.lastModifiedMs!,
+                      ),
+                    ),
+                    theme,
+                  ),
+                FutureBuilder<FileStat?>(
+                  future: _getFileStat(song.filePath),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data != null) {
+                      var stat = snapshot.data!;
+                      // 'changed' is the closest to creation time available
+                      // on most platforms.
+                      if (stat.changed != stat.modified) {
+                        return _buildInfoRow(
+                          'Date Created',
+                          _formatDate(stat.changed),
+                          theme,
+                        );
+                      }
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
                 if (song.format != null)
                   _buildInfoRow('Format', song.format!.toUpperCase(), theme),
                 if (song.bitrate != null)
@@ -474,6 +510,43 @@ class _HomeScreenState extends State<HomeScreen>
         ],
       ),
     );
+  }
+
+  /// Returns a human-readable file size string (e.g. "4.2 MB").
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    }
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
+    }
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+  }
+
+  /// Formats a [DateTime] as a readable string (e.g. "Jul 16, 2026, 8:28 PM").
+  String _formatDate(DateTime dt) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    var hour = dt.hour == 0
+        ? 12
+        : dt.hour > 12
+            ? dt.hour - 12
+            : dt.hour;
+    var ampm = dt.hour >= 12 ? 'PM' : 'AM';
+    var minute = dt.minute.toString().padLeft(2, '0');
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}  $hour:$minute $ampm';
+  }
+
+  /// Reads [FileStat] for [path]; returns null on any error.
+  Future<FileStat?> _getFileStat(String path) async {
+    try {
+      return File(path).statSync();
+    } catch (_) {
+      return null;
+    }
   }
 
   Widget _buildSearchAndFilterHeader(
@@ -1469,6 +1542,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                                 song.id;
                                                         return SongTile(
                                                           song: song,
+                                                          playerProvider:
+                                                              widget.playerProvider,
                                                           isCurrent: isCurrent,
                                                           showDivider:
                                                               index <

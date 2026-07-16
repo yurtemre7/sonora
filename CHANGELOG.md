@@ -5,6 +5,8 @@ All notable changes to the Sonora music player project are documented in this fi
 ## [1.4.3] - 2026-07-16
 ### Fixed
 * Update playlists info on "add to playlist" sheet
+### Changed
+* 1.4.3
 
 ## [1.4.2] - 2026-07-15
 ### Added
