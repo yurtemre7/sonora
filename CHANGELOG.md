@@ -2,23 +2,22 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [Unreleased]
+## [1.4.5] - 2026-07-16
 ### Added
-* Add a reusable `ConfirmDeleteDialog` shared widget for destructive actions
-* Add a 3-dot action button in the playlist detail AppBar to delete the current playlist
-* Show file size and last modified date in the song info bottom sheet
-* Toggle back to the main music player view when pressing an active bottom tab button on the now playing screen a second time
-* Pre-compute and cache Light/Dark `ThemeData` for all unique album seed colors during library sync/load to prevent UI jank on song changes, and show the unique theme count in sync notifications
-* Optimize library sorting by using pre-computed lowercase keys instead of calling `toLowerCase()` repeatedly during sort comparisons
-* Parallelize metadata reading and artwork extraction using multi-core worker isolates during library synchronization
-* Add a filesystem-based discovery and sync benchmark test (`discovery_benchmark_test.dart`) to measure directory traversal and metadata parsing performance under empty-cache, full-cache, and partial-update scenarios
-* Add an on-device comparative integration test benchmark (`integration_test/sync_benchmark_test.dart`) to measure parallel vs. legacy sequential sync speeds on emulator/device using actual audio files
-* Add settings option to select between Parallel and Legacy Sequential sync methods, including millisecond duration comparison readouts, performance impact warnings, and detailed execution time snackbars
+* Add sync method selector setting with timing benchmarks and warnings
 
+## [1.4.4] - 2026-07-16
+### Added
+* Toggle back to music player view when pressing active bottom tab a second time
+* Add confirm dialog for destructive actions and delete button in playlist detail view
 ### Fixed
-* Fix favorite button state sync in song tile action menu
-* Fix song count mismatch in "Add to Playlist" sheet by filtering orphaned song IDs
-* Integrate shared confirmation dialog on playlist delete actions (home list and detail screen) and app reset (settings screen)
+* Correct favorite button state, playlist count, and add file info to song info sheet
+### Changed
+* Perf: Support configurable maxWorkers and run comparative benchmarks up to 5k songs
+* Perf: Add on-device comparative integration test benchmark
+* Perf: Add consolidated filesystem discovery and sync benchmark test
+* Perf: Parallelize metadata reading and artwork extraction in background isolates
+* Perf: Precompute and cache themes, optimize sorting, and update settings stats
 
 ## [1.4.3] - 2026-07-16
 ### Fixed
