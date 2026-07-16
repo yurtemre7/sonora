@@ -50,7 +50,7 @@ Ensure you have Flutter SDK set up on your machine:
 
 1. Clone or navigate to the project directory:
    ```bash
-   cd kind-salk
+   cd sonora
    ```
 2. Get dependencies:
    ```bash
