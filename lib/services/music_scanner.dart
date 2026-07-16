@@ -66,7 +66,7 @@ class MusicScanner {
       }
 
       // Offload all directory scanning, metadata comparison, and parsing to background isolate
-      var resultSongs = await Isolate.run<List<Song>>(() {
+      var resultSongs = await Isolate.run<List<Song>>(() async {
         var localCachedSongs = List<Song>.from(cachedSongs);
 
         // Supports wide variety of standard audio formats
@@ -178,88 +178,124 @@ class MusicScanner {
               : verifiedSongs.map((s) => s.id).reduce((a, b) => a > b ? a : b) +
                     1;
 
+          // Pre-allocate IDs and favorite status to avoid ID assignment race conditions
+          var scanTasks = <(String, int, bool)>[];
           for (var file in filesToScan) {
-            try {
-              // Read metadata synchronously inside background isolate
-              var meta = tags.readMetadata(file.path, true);
+            var songId = existingIds[file.path] ?? idCounter++;
+            var isFav = existingFavoriteStatus[file.path] ?? false;
+            scanTasks.add((file.path, songId, isFav));
+          }
 
-              String? title;
-              String? artist;
-              String? album;
-              String? artworkPath;
-              String? format;
-              int? bitrate;
-              int? samplerate;
-              var duration = Duration.zero;
+          var numWorkers = Platform.numberOfProcessors;
+          if (numWorkers > 4) numWorkers = 4;
+          if (numWorkers < 1) numWorkers = 1;
 
-              var stat = file.statSync();
-              var mtime = stat.modified.millisecondsSinceEpoch;
-              var size = stat.size;
+          // If very few files, sequential execution avoids isolate spawning overhead
+          if (scanTasks.length < 10) {
+            numWorkers = 1;
+          }
 
-              if (meta != null) {
-                title = meta.title?.trim();
-                artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
-                album = meta.album?.trim();
-                format = meta.format?.trim();
-                bitrate = meta.bitrate;
-                samplerate = meta.samplerate;
-                if (meta.duration != null) {
-                  duration = meta.duration!;
-                }
+          var chunks = List.generate(numWorkers, (_) => <(String, int, bool)>[]);
+          for (var i = 0; i < scanTasks.length; i++) {
+            chunks[i % numWorkers].add(scanTasks[i]);
+          }
 
-                if (meta.pictureBytes != null &&
-                    meta.pictureBytes!.isNotEmpty) {
-                  var artFile = File(
-                    '$appDocsDirPath/artwork_${DateTime.now().millisecondsSinceEpoch}_$idCounter.jpg',
+          var futures = <Future<List<Song>>>[];
+          for (var chunk in chunks) {
+            if (chunk.isEmpty) continue;
+            futures.add(Isolate.run(() {
+              var resultList = <Song>[];
+              for (var task in chunk) {
+                var filePath = task.$1;
+                var songId = task.$2;
+                var isFav = task.$3;
+
+                try {
+                  var file = File(filePath);
+                  // Read metadata inside the parallel worker isolate
+                  var meta = tags.readMetadata(file.path, true);
+
+                  String? title;
+                  String? artist;
+                  String? album;
+                  String? artworkPath;
+                  String? format;
+                  int? bitrate;
+                  int? samplerate;
+                  var duration = Duration.zero;
+
+                  var stat = file.statSync();
+                  var mtime = stat.modified.millisecondsSinceEpoch;
+                  var size = stat.size;
+
+                  if (meta != null) {
+                    title = meta.title?.trim();
+                    artist = meta.artist?.trim() ?? meta.albumArtist?.trim();
+                    album = meta.album?.trim();
+                    format = meta.format?.trim();
+                    bitrate = meta.bitrate;
+                    samplerate = meta.samplerate;
+                    if (meta.duration != null) {
+                      duration = meta.duration!;
+                    }
+
+                    if (meta.pictureBytes != null &&
+                        meta.pictureBytes!.isNotEmpty) {
+                      var artFile = File(
+                        '$appDocsDirPath/artwork_${DateTime.now().millisecondsSinceEpoch}_$songId.jpg',
+                      );
+                      artFile.writeAsBytesSync(meta.pictureBytes!);
+                      artworkPath = artFile.path;
+                    }
+                  }
+
+                  var fileName = file.path.split(Platform.pathSeparator).last;
+                  var extIndex = fileName.lastIndexOf('.');
+                  var defaultTitle = extIndex != -1
+                      ? fileName.substring(0, extIndex)
+                      : fileName;
+
+                  var hasLrc = false;
+                  if (extIndex != -1) {
+                    var basePath = file.path.substring(0, extIndex);
+                    hasLrc =
+                        File('$basePath.lrc').existsSync() ||
+                        File('$basePath.txt').existsSync();
+                  }
+
+                  resultList.add(
+                    Song(
+                      id: songId,
+                      title: (title == null || title.isEmpty)
+                          ? defaultTitle
+                          : title,
+                      artist: (artist == null || artist.isEmpty)
+                          ? 'Unknown Artist'
+                          : artist,
+                      album: (album == null || album.isEmpty)
+                          ? 'Unknown Album'
+                          : album,
+                      duration: duration,
+                      filePath: file.path,
+                      artworkPath: artworkPath,
+                      format: format,
+                      bitrate: bitrate,
+                      samplerate: samplerate,
+                      isFavorite: isFav,
+                      lastModifiedMs: mtime,
+                      fileSize: size,
+                      hasLyrics: hasLrc,
+                    ),
                   );
-                  artFile.writeAsBytesSync(meta.pictureBytes!);
-                  artworkPath = artFile.path;
-                }
+                } catch (_) {}
               }
+              return resultList;
+            }));
+          }
 
-              var fileName = file.path.split(Platform.pathSeparator).last;
-              var extIndex = fileName.lastIndexOf('.');
-              var defaultTitle = extIndex != -1
-                  ? fileName.substring(0, extIndex)
-                  : fileName;
-
-              // Retain original ID and favorite status if the file was modified, otherwise allocate new
-              var songId = existingIds[file.path] ?? idCounter++;
-              var isFav = existingFavoriteStatus[file.path] ?? false;
-
-              var hasLrc = false;
-              if (extIndex != -1) {
-                var basePath = file.path.substring(0, extIndex);
-                hasLrc =
-                    File('$basePath.lrc').existsSync() ||
-                    File('$basePath.txt').existsSync();
-              }
-
-              songsToKeep.add(
-                Song(
-                  id: songId,
-                  title: (title == null || title.isEmpty)
-                      ? defaultTitle
-                      : title,
-                  artist: (artist == null || artist.isEmpty)
-                      ? 'Unknown Artist'
-                      : artist,
-                  album: (album == null || album.isEmpty)
-                      ? 'Unknown Album'
-                      : album,
-                  duration: duration,
-                  filePath: file.path,
-                  artworkPath: artworkPath,
-                  format: format,
-                  bitrate: bitrate,
-                  samplerate: samplerate,
-                  isFavorite: isFav,
-                  lastModifiedMs: mtime,
-                  fileSize: size,
-                  hasLyrics: hasLrc,
-                ),
-              );
-            } catch (_) {}
+          var listResults = await Future.wait(futures);
+          for (var list in listResults) {
+            songsToKeep.addAll(list);
           }
         }
 

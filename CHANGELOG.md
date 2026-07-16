@@ -10,6 +10,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Toggle back to the main music player view when pressing an active bottom tab button on the now playing screen a second time
 * Pre-compute and cache Light/Dark `ThemeData` for all unique album seed colors during library sync/load to prevent UI jank on song changes, and show the unique theme count in sync notifications
 * Optimize library sorting by using pre-computed lowercase keys instead of calling `toLowerCase()` repeatedly during sort comparisons
+* Parallelize metadata reading and artwork extraction using multi-core worker isolates during library synchronization
 
 ### Fixed
 * Fix favorite button state sync in song tile action menu
