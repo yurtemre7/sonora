@@ -39,16 +39,23 @@ class AppTheme {
     // Also include default seed color
     uniqueColors.add(_seedColor.toARGB32());
 
-    var uniqueColorSchemes = <ColorScheme>{};
+    var buckets = <String>{};
 
     for (var colorValue in uniqueColors) {
       var color = Color(colorValue);
-      var lightTheme = getTheme(Brightness.light, seedColor: color);
-      getTheme(Brightness.dark, seedColor: color);
-      uniqueColorSchemes.add(lightTheme.colorScheme);
+      var hsl = HSLColor.fromColor(color);
+
+      // Group low saturation/grayscale, and extremely dark or light colors into a neutral theme bucket
+      if (hsl.saturation < 0.15 || hsl.lightness < 0.15 || hsl.lightness > 0.85) {
+        buckets.add('neutral');
+      } else {
+        // Group similar hues by rounding the hue angle to the nearest 30 degrees (12 segments on the color wheel)
+        var hueSector = ((hsl.hue / 30).round() * 30) % 360;
+        buckets.add('hue_$hueSector');
+      }
     }
 
-    return uniqueColorSchemes.length;
+    return buckets.length;
   }
 
   static TextTheme _buildTextTheme(Brightness brightness, Color seedColor) {
