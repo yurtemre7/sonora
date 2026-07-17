@@ -14,6 +14,8 @@ All notable changes to the Sonora music player project are documented in this fi
 * Make sequential sync the default and sole option, simplify settings UI
 * Apply saved tab sorting on app start and group duplicate album names by artist
 ### Changed
+* Chore: Remove redundant and slow benchmark tests to speed up test runs
+* Chore: Refresh changelog with stable sorting fix
 * Chore: Refresh changelog with unique themes bucketing fix
 * Chore: Refresh changelog with extractor performance optimizations
 * Perf: Batch disk writes and defer library updates in color extractor to prevent lag
