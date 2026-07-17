@@ -947,6 +947,13 @@ class MusicScanner {
     } catch (_) {}
   }
 
+  /// Persists the entire songs list metadata back to disk in one bulk write.
+  Future<void> saveAllSongsMetadata(List<Song> songs) async {
+    try {
+      await _writeImportedSongsMetadata(songs);
+    } catch (_) {}
+  }
+
   /// Helper placeholder to avoid breaking any references
   Future<Uint8List?> getArtwork(int songId) async {
     return null;

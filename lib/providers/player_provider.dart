@@ -619,8 +619,7 @@ class PlayerProvider extends ChangeNotifier {
     themeColorNotifier.value = color;
   }
 
-  void _cacheDominantColor(int songId, int color) {
-    // Update all in-memory references so subsequent plays skip artwork I/O.
+  void _cacheDominantColorInMemory(int songId, int color) {
     for (var i = 0; i < allSongs.length; i++) {
       if (allSongs[i].id == songId) {
         allSongs[i] = allSongs[i].copyWith(dominantColor: color);
@@ -639,6 +638,10 @@ class PlayerProvider extends ChangeNotifier {
         break;
       }
     }
+  }
+
+  void _cacheDominantColor(int songId, int color) {
+    _cacheDominantColorInMemory(songId, color);
     _refreshLibrarySnapshots();
     // Persist so the cache survives app restarts.
     MusicScanner().saveDominantColor(songId, color);
@@ -654,6 +657,8 @@ class PlayerProvider extends ChangeNotifier {
           .toList();
 
       var processedCount = 0;
+      var dirty = false;
+
       for (var song in songsToProcess) {
         if (!_isExtractingColors) break;
 
@@ -661,20 +666,29 @@ class PlayerProvider extends ChangeNotifier {
           var color = await ColorExtractor.extractDominantColor(song.artworkPath!);
           if (color != null) {
             var songColor = color.toARGB32();
-            _cacheDominantColor(song.id, songColor);
+            _cacheDominantColorInMemory(song.id, songColor);
             processedCount++;
+            dirty = true;
 
-            // Notify UI in batches of 10 to minimize rebuild overhead
-            if (processedCount % 10 == 0) {
+            // Notify UI and refresh snapshots in batches of 20 to keep UI 100% fluid
+            if (processedCount % 20 == 0) {
+              _refreshLibrarySnapshots();
               notifyListeners();
+              // Bulk save current progress to disk in a single write operation
+              await MusicScanner().saveAllSongsMetadata(allSongs);
+              dirty = false;
             }
           }
         } catch (_) {}
 
+        // 50ms stagger yields control to event loop to guarantee 0% layout lag
         await Future.delayed(const Duration(milliseconds: 50));
       }
       
-      // Final notification when complete
+      if (dirty) {
+        _refreshLibrarySnapshots();
+        await MusicScanner().saveAllSongsMetadata(allSongs);
+      }
       notifyListeners();
       _isExtractingColors = false;
     });
