@@ -4,12 +4,14 @@ All notable changes to the Sonora music player project are documented in this fi
 
 ## [Unreleased]
 ### Added
+* Add real-time active worker indicator next to Unique Themes in settings sync panel
 * Implement background theme color extractor to dynamically populate unique themes and album colors
 ### Fixed
 * Pre-sort files by tab-specific song setting and fix initial sync lyrics detection path
 * Make sequential sync the default and sole option, simplify settings UI
 * Apply saved tab sorting on app start and group duplicate album names by artist
 ### Changed
+* Chore: Refresh changelog with background color extractor feature
 * Chore: Refresh changelog with sorting and lyrics updates
 * Chore: Refresh changelog with sequential sync update
 * Chore: Refresh changelog
