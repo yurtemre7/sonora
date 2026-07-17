@@ -34,6 +34,7 @@ class PlayerProvider extends ChangeNotifier {
   var currentIndex = -1;
   var isShuffled = false;
   RepeatMode repeatMode = RepeatMode.off;
+  bool _isExtractingColors = false;
 
   // Phase 3 State properties
   var useDynamicTheme = true;
@@ -376,6 +377,7 @@ class PlayerProvider extends ChangeNotifier {
       audioHandler.syncQueueMetadata(queue.map(_songToMediaItem).toList());
     }
     notifyListeners();
+    _startBackgroundColorExtraction();
   }
 
   void _refreshLibrarySnapshots() {
@@ -465,6 +467,7 @@ class PlayerProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isExtractingColors = false;
     stopSleepTimer();
     _mediaItemSub?.cancel();
     _playingSub?.cancel();
@@ -635,8 +638,45 @@ class PlayerProvider extends ChangeNotifier {
         break;
       }
     }
+    _refreshLibrarySnapshots();
     // Persist so the cache survives app restarts.
     MusicScanner().saveDominantColor(songId, color);
+  }
+
+  void _startBackgroundColorExtraction() {
+    if (_isExtractingColors) return;
+    _isExtractingColors = true;
+
+    Future(() async {
+      var songsToProcess = allSongs
+          .where((s) => s.artworkPath != null && s.dominantColor == null)
+          .toList();
+
+      var processedCount = 0;
+      for (var song in songsToProcess) {
+        if (!_isExtractingColors) break;
+
+        try {
+          var color = await ColorExtractor.extractDominantColor(song.artworkPath!);
+          if (color != null) {
+            var songColor = color.toARGB32();
+            _cacheDominantColor(song.id, songColor);
+            processedCount++;
+
+            // Notify UI in batches of 10 to minimize rebuild overhead
+            if (processedCount % 10 == 0) {
+              notifyListeners();
+            }
+          }
+        } catch (_) {}
+
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+      
+      // Final notification when complete
+      notifyListeners();
+      _isExtractingColors = false;
+    });
   }
 
   void _updateMediaNotificationControls() {
