@@ -67,7 +67,7 @@ class MusicScanner {
       }
 
       // Offload all directory scanning, metadata comparison, and parsing to background isolate
-      var resultSongs = await Isolate.run<List<Song>>(() async {
+      var resultSongs = await Isolate.run<List<Song>>(() {
         var localCachedSongs = List<Song>.from(cachedSongs);
 
         // Supports wide variety of standard audio formats
