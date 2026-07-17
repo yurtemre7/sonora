@@ -2,8 +2,9 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [Unreleased]
+## [1.5.1] - 2026-07-17
 ### Added
+* Make immersive mode persistent
 * Add real-time active worker indicator next to Unique Themes in settings sync panel
 * Implement background theme color extractor to dynamically populate unique themes and album colors
 ### Fixed
@@ -16,6 +17,8 @@ All notable changes to the Sonora music player project are documented in this fi
 * Make sequential sync the default and sole option, simplify settings UI
 * Apply saved tab sorting on app start and group duplicate album names by artist
 ### Changed
+* Chore: Remove wrong popscopes
+* Chore: Refresh changelog with router refresh dedup fix
 * Perf: Only refresh go_router when gate state actually changes to eliminate startup route log spam
 * Chore: Refresh changelog with Now Playing back gesture fix
 * Chore: Refresh changelog with Now Playing back gesture fix

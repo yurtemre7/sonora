@@ -1,7 +1,7 @@
 name: sonora
 description: "A local music player for Android with Material 3 Expressive design."
 publish_to: 'none'
-version: 1.5.0+1
+version: 1.5.1+1
 
 environment:
   sdk: ^3.12.2
