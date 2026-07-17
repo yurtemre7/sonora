@@ -7,6 +7,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Add real-time active worker indicator next to Unique Themes in settings sync panel
 * Implement background theme color extractor to dynamically populate unique themes and album colors
 ### Fixed
+* Close Now Playing sheet before popping nested routes on Android back gesture
 * Make song sorting stable with title and ID fallback comparisons for matching timestamps
 * Group dynamic colors into visual HSL buckets to show realistic unique themes count
 * Prevent vertical overflow in album detail screen appbar
@@ -14,6 +15,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Make sequential sync the default and sole option, simplify settings UI
 * Apply saved tab sorting on app start and group duplicate album names by artist
 ### Changed
+* Chore: Refresh changelog with dart format updates
 * Chore: Run dart format to apply standard formatting style across all files
 * Chore: Refresh changelog with lint fixes
 * Chore: Fix minor dart lint warnings to ensure clean static analysis
