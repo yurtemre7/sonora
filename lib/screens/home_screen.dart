@@ -128,14 +128,27 @@ class _HomeScreenState extends State<HomeScreen>
       int comparison;
       if (_songSortBy == 'artist') {
         comparison = a.artistLower.compareTo(b.artistLower);
+        if (comparison == 0) {
+          comparison = a.titleLower.compareTo(b.titleLower);
+        }
       } else if (_songSortBy == 'duration') {
         comparison = a.duration.compareTo(b.duration);
+        if (comparison == 0) {
+          comparison = a.titleLower.compareTo(b.titleLower);
+        }
       } else if (_songSortBy == 'recent') {
         var aTime = a.lastModifiedMs ?? 0;
         var bTime = b.lastModifiedMs ?? 0;
         comparison = bTime.compareTo(aTime);
+        if (comparison == 0) {
+          comparison = a.titleLower.compareTo(b.titleLower);
+        }
       } else {
         comparison = a.titleLower.compareTo(b.titleLower);
+      }
+
+      if (comparison == 0) {
+        comparison = a.id.compareTo(b.id);
       }
       return _songSortAscending ? comparison : -comparison;
     });
