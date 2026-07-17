@@ -35,6 +35,7 @@ class PlayerProvider extends ChangeNotifier {
   var isShuffled = false;
   RepeatMode repeatMode = RepeatMode.off;
   bool _isExtractingColors = false;
+  bool get isExtractingColors => _isExtractingColors;
 
   // Phase 3 State properties
   var useDynamicTheme = true;

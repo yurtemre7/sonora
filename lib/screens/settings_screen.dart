@@ -38,6 +38,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadSettings();
+    widget.playerProvider.addListener(_onPlayerProviderUpdate);
+  }
+
+  @override
+  void dispose() {
+    widget.playerProvider.removeListener(_onPlayerProviderUpdate);
+    super.dispose();
+  }
+
+  void _onPlayerProviderUpdate() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   var _keepPlayingOnClose = false;
@@ -265,8 +278,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     BuildContext context,
     IconData icon,
     String label,
-    String value,
-  ) {
+    String value, {
+    Widget? trailing,
+  }) {
     var theme = Theme.of(context);
     return Row(
       children: [
@@ -294,6 +308,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             maxLines: 1,
           ),
         ),
+        if (trailing != null) ...[
+          const SizedBox(width: 6),
+          trailing,
+        ],
       ],
     );
   }
@@ -608,6 +626,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 Icons.palette_rounded,
                                 'Unique Themes',
                                 '${widget.playerProvider.uniqueThemeCount} unique themes',
+                                trailing: widget.playerProvider.isExtractingColors
+                                    ? SizedBox(
+                                        width: 12,
+                                        height: 12,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.0,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                      )
+                                    : null,
                               ),
                               const SizedBox(height: 8),
                               _buildStatRow(
