@@ -189,6 +189,10 @@ class _SonoraAppState extends State<SonoraApp> {
     var scannedSongs = await scanner2.scanAllSongs();
     var playlists = await scanner2.getPlaylists();
 
+    // Load sort preferences before HomeScreen mounts so the first render
+    // uses the saved order — avoids a visible sort flash.
+    await _playerProvider.loadSortSettings();
+
     // Check if sync warning banner should be displayed
     var showSyncPrompt = false;
     var lastSyncTs = await prefs.getInt('last_sync_timestamp');
@@ -236,6 +240,8 @@ class _SonoraAppState extends State<SonoraApp> {
       var newSongs = await scanner.importFromFolder(selectedFolder);
       var updatedSongs = await scanner.scanAllSongs();
       var playlists = await scanner.getPlaylists();
+
+      await _playerProvider.loadSortSettings();
 
       if (!mounted) return;
       setState(() {

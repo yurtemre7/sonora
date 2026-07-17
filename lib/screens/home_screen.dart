@@ -71,29 +71,17 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    _loadSortSettings();
+    _songSortBy = widget.playerProvider.songSortBy;
+    _songSortAscending = widget.playerProvider.songSortAscending;
+    _albumSortBy = widget.playerProvider.albumSortBy;
+    _albumSortAscending = widget.playerProvider.albumSortAscending;
+    _artistSortBy = widget.playerProvider.artistSortBy;
+    _artistSortAscending = widget.playerProvider.artistSortAscending;
+    _playlistSortBy = widget.playerProvider.playlistSortBy;
+    _playlistSortAscending = widget.playerProvider.playlistSortAscending;
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() {
       if (mounted) setState(() {});
-    });
-  }
-
-  Future<void> _loadSortSettings() async {
-    var scanner = MusicScanner();
-    var songsSettings = await scanner.getTabSortSettings('songs');
-    var albumsSettings = await scanner.getTabSortSettings('albums');
-    var artistsSettings = await scanner.getTabSortSettings('artists');
-    var playlistsSettings = await scanner.getTabSortSettings('playlists');
-    if (!mounted) return;
-    setState(() {
-      _songSortBy = songsSettings['sortBy'] as String;
-      _songSortAscending = songsSettings['sortAscending'] as bool;
-      _albumSortBy = albumsSettings['sortBy'] as String;
-      _albumSortAscending = albumsSettings['sortAscending'] as bool;
-      _artistSortBy = artistsSettings['sortBy'] as String;
-      _artistSortAscending = artistsSettings['sortAscending'] as bool;
-      _playlistSortBy = playlistsSettings['sortBy'] as String;
-      _playlistSortAscending = playlistsSettings['sortAscending'] as bool;
     });
   }
 

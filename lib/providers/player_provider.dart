@@ -43,6 +43,16 @@ class PlayerProvider extends ChangeNotifier {
   var showVisualizer = false;
   var immersiveMode = false;
 
+  // Sort preferences (loaded eagerly before HomeScreen mounts)
+  var songSortBy = 'title';
+  var songSortAscending = true;
+  var albumSortBy = 'name';
+  var albumSortAscending = true;
+  var artistSortBy = 'name';
+  var artistSortAscending = true;
+  var playlistSortBy = 'name';
+  var playlistSortAscending = true;
+
   var _volume = 1.0;
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
@@ -552,6 +562,22 @@ class PlayerProvider extends ChangeNotifier {
       _extractThemeColorForSong(currentSong!);
     }
     notifyListeners();
+  }
+
+  Future<void> loadSortSettings() async {
+    var scanner = MusicScanner();
+    var songs = await scanner.getTabSortSettings('songs');
+    var albums = await scanner.getTabSortSettings('albums');
+    var artists = await scanner.getTabSortSettings('artists');
+    var playlists = await scanner.getTabSortSettings('playlists');
+    songSortBy = songs['sortBy'] as String;
+    songSortAscending = songs['sortAscending'] as bool;
+    albumSortBy = albums['sortBy'] as String;
+    albumSortAscending = albums['sortAscending'] as bool;
+    artistSortBy = artists['sortBy'] as String;
+    artistSortAscending = artists['sortAscending'] as bool;
+    playlistSortBy = playlists['sortBy'] as String;
+    playlistSortAscending = playlists['sortAscending'] as bool;
   }
 
   Future<void> toggleDynamicTheme(bool enabled) async {
