@@ -41,6 +41,7 @@ class PlayerProvider extends ChangeNotifier {
   var useDynamicTheme = true;
   var dynamicThemeColor = const Color(0xFF7C4DFF);
   var showVisualizer = false;
+  var immersiveMode = false;
 
   var _volume = 1.0;
   Timer? _sleepTimer;
@@ -541,6 +542,7 @@ class PlayerProvider extends ChangeNotifier {
     var prefs = SharedPreferencesAsync();
     useDynamicTheme = await prefs.getBool('use_dynamic_theme') ?? true;
     showVisualizer = await prefs.getBool('show_visualizer') ?? false;
+    immersiveMode = await prefs.getBool('now_playing_immersive_mode') ?? false;
     sleepTimerExtendMinutes =
         await prefs.getInt('sleep_timer_extend_minutes') ?? 5;
     _volume = await prefs.getDouble('volume') ?? _volume;
@@ -574,6 +576,13 @@ class PlayerProvider extends ChangeNotifier {
     var prefs = SharedPreferencesAsync();
     await prefs.setBool('show_visualizer', enabled);
     notifyListeners();
+  }
+
+  Future<void> toggleImmersiveMode(bool enabled) async {
+    immersiveMode = enabled;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('now_playing_immersive_mode', enabled);
   }
 
   Future<void> setSleepTimerExtendMinutes(int minutes) async {

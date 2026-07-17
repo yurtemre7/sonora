@@ -36,7 +36,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     with SingleTickerProviderStateMixin {
   var _showLyrics = false;
   var _showVolume = Platform.isWindows;
-  var _immersiveMode = false;
   var _viewMode = _ViewMode.player;
   late AnimationController _likeAnimController;
   late Animation<double> _likeAnim;
@@ -275,7 +274,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
         children: [
           // Album Art / Lyrics Stack Card
           GestureDetector(
-            onTap: () => setState(() => _immersiveMode = !_immersiveMode),
+            onTap: () => widget.playerProvider.toggleImmersiveMode(
+              !widget.playerProvider.immersiveMode,
+            ),
             onHorizontalDragEnd: (details) {
               if (details.primaryVelocity != null) {
                 if (details.primaryVelocity! < -100) {
@@ -295,7 +296,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeInOut,
-                  width: _immersiveMode
+                  width: widget.playerProvider.immersiveMode
                       ? constraints.maxWidth
                       : min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
                   decoration: BoxDecoration(
@@ -315,7 +316,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                         Positioned.fill(
                           child: AlbumArt(
                             artworkPath: song.artworkPath,
-                            size: _immersiveMode
+                            size: widget.playerProvider.immersiveMode
                                 ? constraints.maxWidth
                                 : min(
                                     MediaQuery.sizeOf(context).width * 0.80,
