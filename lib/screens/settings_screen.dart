@@ -317,533 +317,539 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => closeRoute(context),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (_, _) => closeRoute(context),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Settings'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () => closeRoute(context),
+          ),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        children: [
-          // ── Appearance ───────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 8.0,
-            ),
-            child: Text(
-              'Appearance',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
+        body: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          children: [
+            // ── Appearance ───────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 8.0,
               ),
-            ),
-          ),
-          ListenableBuilder(
-            listenable: widget.themeProvider,
-            builder: (context, _) {
-              var mode = widget.themeProvider.themeMode;
-              return ListTile(
-                leading: Icon(_themeModeIcon(mode)),
-                title: const Text('Theme'),
-                subtitle: Text(_themeModeName(mode)),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => _showThemeModeSheet(context),
-              );
-            },
-          ),
-
-          const Divider(height: 32),
-
-          // ── Playback ──────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 8.0,
-            ),
-            child: Text(
-              'Playback',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          SwitchListTile(
-            secondary: const Icon(Icons.play_circle_outline_rounded),
-            title: const Text('Keep playing on app close'),
-            subtitle: const Text(
-              'Keep playing music in the background when swiped away',
-            ),
-            value: _keepPlayingOnClose,
-            onChanged: (val) async {
-              var prefs = SharedPreferencesAsync();
-              await prefs.setBool('keep_playing_on_close', val);
-              setState(() {
-                _keepPlayingOnClose = val;
-              });
-            },
-          ),
-          ListenableBuilder(
-            listenable: widget.playerProvider,
-            builder: (context, _) {
-              return Column(
-                children: [
-                  SwitchListTile(
-                    secondary: const Icon(Icons.color_lens_outlined),
-                    title: const Text('Dynamic Theme (Material You)'),
-                    subtitle: const Text(
-                      'Automatically theme the app using active album art',
-                    ),
-                    value: widget.playerProvider.useDynamicTheme,
-                    onChanged: (val) =>
-                        widget.playerProvider.toggleDynamicTheme(val),
-                  ),
-                  SwitchListTile(
-                    secondary: const Icon(Icons.bar_chart_rounded),
-                    title: const Text('Show Audio Visualizer'),
-                    subtitle: const Text(
-                      'Animate audio wave visualizer inside player screen',
-                    ),
-                    value: widget.playerProvider.showVisualizer,
-                    onChanged: (val) =>
-                        widget.playerProvider.toggleVisualizer(val),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.timer_outlined),
-                    title: const Text('Sleep Timer Extension'),
-                    subtitle: Text(
-                      'Add ${widget.playerProvider.sleepTimerExtendMinutes} minutes on extend button press',
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Slider(
-                      value: widget.playerProvider.sleepTimerExtendMinutes
-                          .toDouble(),
-                      min: 1.0,
-                      max: 30.0,
-                      divisions: 29,
-                      label:
-                          '${widget.playerProvider.sleepTimerExtendMinutes} min',
-                      onChanged: (val) => widget.playerProvider
-                          .setSleepTimerExtendMinutes(val.toInt()),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-
-          const Divider(height: 32),
-
-          // ── Library Sync ──────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 8.0,
-            ),
-            child: Text(
-              'Library Sync',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 4.0,
-            ),
-            child: Card(
-              elevation: 0,
-              color: theme.colorScheme.surfaceContainerLow,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(
-                  color: theme.colorScheme.outlineVariant.withValues(
-                    alpha: 0.5,
-                  ),
+              child: Text(
+                'Appearance',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            ListenableBuilder(
+              listenable: widget.themeProvider,
+              builder: (context, _) {
+                var mode = widget.themeProvider.themeMode;
+                return ListTile(
+                  leading: Icon(_themeModeIcon(mode)),
+                  title: const Text('Theme'),
+                  subtitle: Text(_themeModeName(mode)),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => _showThemeModeSheet(context),
+                );
+              },
+            ),
+
+            const Divider(height: 32),
+
+            // ── Playback ──────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 8.0,
+              ),
+              child: Text(
+                'Playback',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SwitchListTile(
+              secondary: const Icon(Icons.play_circle_outline_rounded),
+              title: const Text('Keep playing on app close'),
+              subtitle: const Text(
+                'Keep playing music in the background when swiped away',
+              ),
+              value: _keepPlayingOnClose,
+              onChanged: (val) async {
+                var prefs = SharedPreferencesAsync();
+                await prefs.setBool('keep_playing_on_close', val);
+                setState(() {
+                  _keepPlayingOnClose = val;
+                });
+              },
+            ),
+            ListenableBuilder(
+              listenable: widget.playerProvider,
+              builder: (context, _) {
+                return Column(
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.folder_shared_rounded,
-                          color: theme.colorScheme.primary,
-                          size: 26,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Sync Folder Path',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                _scanFolder ?? 'Not configured',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  fontFamily: 'monospace',
-                                  fontSize: 12,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        OutlinedButton(
-                          onPressed: () async {
-                            await widget.onConfigureFolder();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                          ),
-                          child: const Text('Change'),
-                        ),
-                      ],
+                    SwitchListTile(
+                      secondary: const Icon(Icons.color_lens_outlined),
+                      title: const Text('Dynamic Theme (Material You)'),
+                      subtitle: const Text(
+                        'Automatically theme the app using active album art',
+                      ),
+                      value: widget.playerProvider.useDynamicTheme,
+                      onChanged: (val) =>
+                          widget.playerProvider.toggleDynamicTheme(val),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Sonora plays your files locally and offline. When you copy new tracks into this folder, run a sync below to add them to your library.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.8,
-                        ),
-                        height: 1.3,
+                    SwitchListTile(
+                      secondary: const Icon(Icons.bar_chart_rounded),
+                      title: const Text('Show Audio Visualizer'),
+                      subtitle: const Text(
+                        'Animate audio wave visualizer inside player screen',
+                      ),
+                      value: widget.playerProvider.showVisualizer,
+                      onChanged: (val) =>
+                          widget.playerProvider.toggleVisualizer(val),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.timer_outlined),
+                      title: const Text('Sleep Timer Extension'),
+                      subtitle: Text(
+                        'Add ${widget.playerProvider.sleepTimerExtendMinutes} minutes on extend button press',
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 12),
-                    ListenableBuilder(
-                      listenable: widget.playerProvider,
-                      builder: (context, _) {
-                        var songs = widget.playerProvider.allSongs;
-                        if (songs.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-
-                        var fileCount = songs.length;
-                        var totalBytes = 0;
-                        var songsWithLyrics = 0;
-                        var formats = <String>{};
-
-                        for (var song in songs) {
-                          if (song.fileSize != null) {
-                            totalBytes += song.fileSize!;
-                          }
-                          if (song.hasLyrics) {
-                            songsWithLyrics++;
-                          }
-                          var fmt = song.format;
-                          if (fmt != null && fmt.isNotEmpty) {
-                            formats.add(fmt.toUpperCase());
-                          } else {
-                            var dotIdx = song.filePath.lastIndexOf('.');
-                            if (dotIdx >= 0) {
-                              var ext = song.filePath
-                                  .substring(dotIdx + 1)
-                                  .toUpperCase();
-                              if (ext.length <= 4) {
-                                formats.add(ext);
-                              }
-                            }
-                          }
-                        }
-
-                        String formattedSize;
-                        if (totalBytes >= 1024 * 1024 * 1024) {
-                          formattedSize =
-                              '${(totalBytes / (1024.0 * 1024.0 * 1024.0)).toStringAsFixed(2)} GB';
-                        } else if (totalBytes >= 1024 * 1024) {
-                          formattedSize =
-                              '${(totalBytes / (1024.0 * 1024.0)).toStringAsFixed(2)} MB';
-                        } else if (totalBytes >= 1024) {
-                          formattedSize =
-                              '${(totalBytes / 1024.0).toStringAsFixed(2)} KB';
-                        } else {
-                          formattedSize = '$totalBytes B';
-                        }
-
-                        var formatList = formats.toList()..sort();
-                        var formatText = formatList.join(', ');
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Sync Details',
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              _buildStatRow(
-                                context,
-                                Icons.library_music_rounded,
-                                'Library Size',
-                                '$fileCount songs ($formattedSize)',
-                              ),
-                              const SizedBox(height: 8),
-                              _buildStatRow(
-                                context,
-                                Icons.audiotrack_rounded,
-                                'Audio Formats',
-                                formatText.isEmpty ? 'None' : formatText,
-                              ),
-                              const SizedBox(height: 8),
-                              _buildStatRow(
-                                context,
-                                Icons.palette_rounded,
-                                'Unique Themes',
-                                '${widget.playerProvider.uniqueThemeCount} unique themes',
-                                trailing:
-                                    widget.playerProvider.isExtractingColors
-                                    ? SizedBox(
-                                        width: 12,
-                                        height: 12,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.0,
-                                          color: theme.colorScheme.primary,
-                                        ),
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(height: 8),
-                              _buildStatRow(
-                                context,
-                                Icons.lyrics_rounded,
-                                'Lyrics Synced',
-                                '$songsWithLyrics songs',
-                              ),
-                              const SizedBox(height: 12),
-                              const Divider(),
-                            ],
-                          ),
-                        );
-                      },
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Slider(
+                        value: widget.playerProvider.sleepTimerExtendMinutes
+                            .toDouble(),
+                        min: 1.0,
+                        max: 30.0,
+                        divisions: 29,
+                        label:
+                            '${widget.playerProvider.sleepTimerExtendMinutes} min',
+                        onChanged: (val) => widget.playerProvider
+                            .setSleepTimerExtendMinutes(val.toInt()),
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Last Sync',
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant
-                                      .withValues(alpha: 0.7),
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                _lastSyncTime ?? 'Never synced',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              if (_lastSyncDuration != null) ...[
-                                const SizedBox(height: 4),
+                  ],
+                );
+              },
+            ),
+
+            const Divider(height: 32),
+
+            // ── Library Sync ──────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 8.0,
+              ),
+              child: Text(
+                'Library Sync',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 4.0,
+              ),
+              child: Card(
+                elevation: 0,
+                color: theme.colorScheme.surfaceContainerLow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.5,
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.folder_shared_rounded,
+                            color: theme.colorScheme.primary,
+                            size: 26,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  'Duration: ${_lastSyncDuration}ms',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
+                                  'Sync Folder Path',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _scanFolder ?? 'Not configured',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontFamily: 'monospace',
+                                    fontSize: 12,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ],
-                            ],
+                            ),
                           ),
-                        ),
-                        if (_scanFolder != null)
-                          FilledButton.tonalIcon(
-                            onPressed: _isSyncing
-                                ? null
-                                : () async {
-                                    setState(() {
-                                      _isSyncing = true;
-                                    });
-                                    try {
-                                      await widget.onRetriggerSync();
-                                      await _loadSettings();
-                                      if (!context.mounted) return;
-
-                                      var durationText =
-                                          _lastSyncDuration != null
-                                          ? ' in ${_lastSyncDuration}ms'
-                                          : '';
-
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Synced ${widget.playerProvider.allSongs.length} songs$durationText.',
-                                          ),
-                                          behavior: SnackBarBehavior.floating,
-                                        ),
-                                      );
-                                    } finally {
-                                      if (context.mounted) {
-                                        setState(() {
-                                          _isSyncing = false;
-                                        });
-                                      }
-                                    }
-                                  },
-                            style: FilledButton.styleFrom(
+                          const SizedBox(width: 12),
+                          OutlinedButton(
+                            onPressed: () async {
+                              await widget.onConfigureFolder();
+                            },
+                            style: OutlinedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
+                                horizontal: 12,
+                                vertical: 8,
                               ),
                             ),
-                            icon: _isSyncing
-                                ? SizedBox(
-                                    width: 14,
-                                    height: 14,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: theme
-                                          .colorScheme
-                                          .onSecondaryContainer,
-                                    ),
-                                  )
-                                : const Icon(Icons.sync_rounded, size: 16),
-                            label: Text(_isSyncing ? 'Syncing...' : 'Sync Now'),
+                            child: const Text('Change'),
                           ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          const Divider(height: 32),
-
-          // ── About ─────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 8.0,
-            ),
-            child: Text(
-              'About',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.info_outline_rounded),
-            title: const Text('About Sonora'),
-            subtitle: Text('Version $_appVersion'),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => _showAboutAppDialog(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.description_outlined),
-            title: const Text('Licenses'),
-            subtitle: const Text('Open source licenses'),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () {
-              showLicensePage(
-                context: context,
-                applicationName: 'Sonora',
-                applicationVersion: _appVersion,
-                applicationIcon: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        colors: [
-                          theme.colorScheme.primary,
-                          theme.colorScheme.tertiary,
                         ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
                       ),
-                    ),
-                    child: Icon(
-                      Icons.music_note_rounded,
-                      size: 32,
-                      color: theme.colorScheme.onPrimary,
-                    ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Sonora plays your files locally and offline. When you copy new tracks into this folder, run a sync below to add them to your library.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.8,
+                          ),
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      ListenableBuilder(
+                        listenable: widget.playerProvider,
+                        builder: (context, _) {
+                          var songs = widget.playerProvider.allSongs;
+                          if (songs.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+
+                          var fileCount = songs.length;
+                          var totalBytes = 0;
+                          var songsWithLyrics = 0;
+                          var formats = <String>{};
+
+                          for (var song in songs) {
+                            if (song.fileSize != null) {
+                              totalBytes += song.fileSize!;
+                            }
+                            if (song.hasLyrics) {
+                              songsWithLyrics++;
+                            }
+                            var fmt = song.format;
+                            if (fmt != null && fmt.isNotEmpty) {
+                              formats.add(fmt.toUpperCase());
+                            } else {
+                              var dotIdx = song.filePath.lastIndexOf('.');
+                              if (dotIdx >= 0) {
+                                var ext = song.filePath
+                                    .substring(dotIdx + 1)
+                                    .toUpperCase();
+                                if (ext.length <= 4) {
+                                  formats.add(ext);
+                                }
+                              }
+                            }
+                          }
+
+                          String formattedSize;
+                          if (totalBytes >= 1024 * 1024 * 1024) {
+                            formattedSize =
+                                '${(totalBytes / (1024.0 * 1024.0 * 1024.0)).toStringAsFixed(2)} GB';
+                          } else if (totalBytes >= 1024 * 1024) {
+                            formattedSize =
+                                '${(totalBytes / (1024.0 * 1024.0)).toStringAsFixed(2)} MB';
+                          } else if (totalBytes >= 1024) {
+                            formattedSize =
+                                '${(totalBytes / 1024.0).toStringAsFixed(2)} KB';
+                          } else {
+                            formattedSize = '$totalBytes B';
+                          }
+
+                          var formatList = formats.toList()..sort();
+                          var formatText = formatList.join(', ');
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Sync Details',
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: theme.colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                _buildStatRow(
+                                  context,
+                                  Icons.library_music_rounded,
+                                  'Library Size',
+                                  '$fileCount songs ($formattedSize)',
+                                ),
+                                const SizedBox(height: 8),
+                                _buildStatRow(
+                                  context,
+                                  Icons.audiotrack_rounded,
+                                  'Audio Formats',
+                                  formatText.isEmpty ? 'None' : formatText,
+                                ),
+                                const SizedBox(height: 8),
+                                _buildStatRow(
+                                  context,
+                                  Icons.palette_rounded,
+                                  'Unique Themes',
+                                  '${widget.playerProvider.uniqueThemeCount} unique themes',
+                                  trailing:
+                                      widget.playerProvider.isExtractingColors
+                                      ? SizedBox(
+                                          width: 12,
+                                          height: 12,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.0,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(height: 8),
+                                _buildStatRow(
+                                  context,
+                                  Icons.lyrics_rounded,
+                                  'Lyrics Synced',
+                                  '$songsWithLyrics songs',
+                                ),
+                                const SizedBox(height: 12),
+                                const Divider(),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Last Sync',
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant
+                                        .withValues(alpha: 0.7),
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _lastSyncTime ?? 'Never synced',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                if (_lastSyncDuration != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Duration: ${_lastSyncDuration}ms',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          if (_scanFolder != null)
+                            FilledButton.tonalIcon(
+                              onPressed: _isSyncing
+                                  ? null
+                                  : () async {
+                                      setState(() {
+                                        _isSyncing = true;
+                                      });
+                                      try {
+                                        await widget.onRetriggerSync();
+                                        await _loadSettings();
+                                        if (!context.mounted) return;
+
+                                        var durationText =
+                                            _lastSyncDuration != null
+                                            ? ' in ${_lastSyncDuration}ms'
+                                            : '';
+
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Synced ${widget.playerProvider.allSongs.length} songs$durationText.',
+                                            ),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      } finally {
+                                        if (context.mounted) {
+                                          setState(() {
+                                            _isSyncing = false;
+                                          });
+                                        }
+                                      }
+                                    },
+                              style: FilledButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                              ),
+                              icon: _isSyncing
+                                  ? SizedBox(
+                                      width: 14,
+                                      height: 14,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: theme
+                                            .colorScheme
+                                            .onSecondaryContainer,
+                                      ),
+                                    )
+                                  : const Icon(Icons.sync_rounded, size: 16),
+                              label: Text(
+                                _isSyncing ? 'Syncing...' : 'Sync Now',
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              );
-            },
-          ),
-
-          const Divider(height: 32),
-
-          // ── Danger Zone ───────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 8.0,
-            ),
-            child: Text(
-              'Danger Zone',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.error,
-                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-          SafeArea(
-            child: ListTile(
-              leading: Icon(
-                Icons.delete_forever_rounded,
-                color: theme.colorScheme.error,
+
+            const Divider(height: 32),
+
+            // ── About ─────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 8.0,
               ),
-              title: Text(
-                'Reset Application',
-                style: TextStyle(color: theme.colorScheme.error),
+              child: Text(
+                'About',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              subtitle: const Text('Delete all imported music and settings'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.info_outline_rounded),
+              title: const Text('About Sonora'),
+              subtitle: Text('Version $_appVersion'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => _showAboutAppDialog(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.description_outlined),
+              title: const Text('Licenses'),
+              subtitle: const Text('Open source licenses'),
+              trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
-                _confirmResetDialog();
+                showLicensePage(
+                  context: context,
+                  applicationName: 'Sonora',
+                  applicationVersion: _appVersion,
+                  applicationIcon: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          colors: [
+                            theme.colorScheme.primary,
+                            theme.colorScheme.tertiary,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.music_note_rounded,
+                        size: 32,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                );
               },
             ),
-          ),
-        ],
-      ),
-    );
+
+            const Divider(height: 32),
+
+            // ── Danger Zone ───────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 8.0,
+              ),
+              child: Text(
+                'Danger Zone',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SafeArea(
+              child: ListTile(
+                leading: Icon(
+                  Icons.delete_forever_rounded,
+                  color: theme.colorScheme.error,
+                ),
+                title: Text(
+                  'Reset Application',
+                  style: TextStyle(color: theme.colorScheme.error),
+                ),
+                subtitle: const Text('Delete all imported music and settings'),
+                onTap: () {
+                  _confirmResetDialog();
+                },
+              ),
+            ),
+          ],
+        ),
+      ), // Scaffold (child of PopScope)
+    ); // PopScope
   }
 }

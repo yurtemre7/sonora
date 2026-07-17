@@ -282,289 +282,263 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
             ? 'Your favorites'
             : 'Your own playlist';
 
-        return Scaffold(
-          body: Stack(
-            children: [
-              if (firstSong?.artworkPath != null)
-                Positioned.fill(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: FileImage(File(firstSong!.artworkPath!)),
-                          fit: BoxFit.cover,
-                          opacity: 0.15,
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (_, _) => closeRoute(context),
+          child: Scaffold(
+            body: Stack(
+              children: [
+                if (firstSong?.artworkPath != null)
+                  Positioned.fill(
+                    child: ImageFiltered(
+                      imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: FileImage(File(firstSong!.artworkPath!)),
+                            fit: BoxFit.cover,
+                            opacity: 0.15,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back_rounded),
-                      onPressed: () => closeRoute(context),
-                    ),
-                    actions: [
-                      // Only non-favorites playlists can be deleted.
-                      if (_playlist.id != 'favorites' &&
-                          widget.onDeletePlaylist != null)
-                        PopupMenuButton<int>(
-                          icon: const Icon(Icons.more_vert_rounded),
-                          onSelected: (val) {
-                            if (val == 1) _deletePlaylist();
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 1,
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.delete_outline_rounded,
-                                    color: Colors.red,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Delete Playlist',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ],
+                CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      leading: IconButton(
+                        icon: const Icon(Icons.arrow_back_rounded),
+                        onPressed: () => closeRoute(context),
+                      ),
+                      actions: [
+                        // Only non-favorites playlists can be deleted.
+                        if (_playlist.id != 'favorites' &&
+                            widget.onDeletePlaylist != null)
+                          PopupMenuButton<int>(
+                            icon: const Icon(Icons.more_vert_rounded),
+                            onSelected: (val) {
+                              if (val == 1) _deletePlaylist();
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: 1,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.delete_outline_rounded,
+                                      color: Colors.red,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Delete Playlist',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                    ],
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    expandedHeight: 320,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: SafeArea(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const SizedBox(height: 40),
-                            Hero(
-                              tag: 'playlist_art_${_playlist.id}',
-                              child: firstSong != null
-                                  ? AlbumArt(
-                                      artworkPath: firstSong.artworkPath,
-                                      size: 180,
-                                      borderRadius: 24,
-                                    )
-                                  : Container(
-                                      width: 180,
-                                      height: 180,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(24),
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            theme.colorScheme.primaryContainer,
-                                            theme
-                                                .colorScheme
-                                                .secondaryContainer,
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
+                            ],
+                          ),
+                      ],
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      expandedHeight: 320,
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: SafeArea(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 40),
+                              Hero(
+                                tag: 'playlist_art_${_playlist.id}',
+                                child: firstSong != null
+                                    ? AlbumArt(
+                                        artworkPath: firstSong.artworkPath,
+                                        size: 180,
+                                        borderRadius: 24,
+                                      )
+                                    : Container(
+                                        width: 180,
+                                        height: 180,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            24,
+                                          ),
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              theme
+                                                  .colorScheme
+                                                  .primaryContainer,
+                                              theme
+                                                  .colorScheme
+                                                  .secondaryContainer,
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          _playlist.id == 'favorites'
+                                              ? Icons.favorite_rounded
+                                              : Icons.music_note_rounded,
+                                          size: 64,
+                                          color: theme
+                                              .colorScheme
+                                              .onPrimaryContainer,
                                         ),
                                       ),
-                                      child: Icon(
-                                        _playlist.id == 'favorites'
-                                            ? Icons.favorite_rounded
-                                            : Icons.music_note_rounded,
-                                        size: 64,
-                                        color: theme
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                      ),
-                                    ),
-                            ),
-                            const SizedBox(height: 16),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24.0,
-                              ),
-                              child: Text(
-                                _playlist.name,
-                                style: theme.textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Outfit',
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24.0,
-                              ),
-                              child: Text(
-                                creatorLabel,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '${_playlistSongs.length} ${_playlistSongs.length == 1 ? 'song' : 'songs'}',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Play/Shuffle actions bar
-                  if (_playlistSongs.isNotEmpty)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24.0,
-                          vertical: 8.0,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: FilledButton.icon(
-                                onPressed: () {
-                                  if (_playlistSongs.isNotEmpty) {
-                                    widget.playerProvider.playSong(
-                                      _playlistSongs.first,
-                                      _playlistSongs,
-                                    );
-                                  }
-                                },
-                                icon: const Icon(Icons.play_arrow_rounded),
-                                label: const Text('Play'),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  if (_playlistSongs.isNotEmpty) {
-                                    widget.playerProvider.quickShuffle(
-                                      _playlistSongs,
-                                    );
-                                  }
-                                },
-                                icon: const Icon(Icons.shuffle_rounded),
-                                label: const Text('Shuffle'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  // Tracks List
-                  if (_playlistSongs.isEmpty)
-                    SliverFillRemaining(
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.queue_music_rounded,
-                                size: 64,
-                                color: theme.colorScheme.onSurfaceVariant
-                                    .withValues(alpha: 0.4),
                               ),
                               const SizedBox(height: 16),
-                              Text(
-                                'Playlist is empty',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.bold,
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24.0,
+                                ),
+                                child: Text(
+                                  _playlist.name,
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Outfit',
+                                      ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24.0,
+                                ),
+                                child: Text(
+                                  creatorLabel,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Go to the Songs list and use the song menu to add music to this playlist.',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant
-                                      .withValues(alpha: 0.7),
+                                '${_playlistSongs.length} ${_playlistSongs.length == 1 ? 'song' : 'songs'}',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),
                         ),
                       ),
-                    )
-                  else
-                    SliverPadding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 120),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          var song = _playlistSongs[index];
-                          var isCurrent =
-                              widget.playerProvider.currentSong?.id == song.id;
-
-                          return Dismissible(
-                            key: ValueKey(song.id),
-                            direction: DismissDirection.endToStart,
-                            background: Container(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20.0,
-                              ),
-                              color: theme.colorScheme.errorContainer,
-                              child: Icon(
-                                Icons.delete_outline_rounded,
-                                color: theme.colorScheme.onErrorContainer,
-                              ),
-                            ),
-                            onDismissed: (direction) async {
-                              if (_playlist.id == 'favorites') {
-                                await widget.playerProvider.toggleFavorite(
-                                  song.id,
-                                );
-                              } else {
-                                await widget.onRemoveSong(
-                                  _playlist.id,
-                                  song.id,
-                                );
-                              }
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Removed "${song.displayTitle}" from playlist.',
-                                  ),
-                                  behavior: SnackBarBehavior.floating,
+                    ),
+                    // Play/Shuffle actions bar
+                    if (_playlistSongs.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24.0,
+                            vertical: 8.0,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: FilledButton.icon(
+                                  onPressed: () {
+                                    if (_playlistSongs.isNotEmpty) {
+                                      widget.playerProvider.playSong(
+                                        _playlistSongs.first,
+                                        _playlistSongs,
+                                      );
+                                    }
+                                  },
+                                  icon: const Icon(Icons.play_arrow_rounded),
+                                  label: const Text('Play'),
                                 ),
-                              );
-                            },
-                            child: SongTile(
-                              song: song,
-                              playerProvider: widget.playerProvider,
-                              isCurrent: isCurrent,
-                              showDivider: index < _playlistSongs.length - 1,
-                              onTap: () {
-                                widget.playerProvider.playSong(
-                                  song,
-                                  _playlistSongs,
-                                );
-                              },
-                              onPlayNext: () =>
-                                  widget.playerProvider.playNext(song),
-                              onAddToQueue: () =>
-                                  widget.playerProvider.addToQueue(song),
-                              onAddToPlaylist: () =>
-                                  _showAddToPlaylistDialog(song),
-                              onRemoveFromPlaylist: () async {
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () {
+                                    if (_playlistSongs.isNotEmpty) {
+                                      widget.playerProvider.quickShuffle(
+                                        _playlistSongs,
+                                      );
+                                    }
+                                  },
+                                  icon: const Icon(Icons.shuffle_rounded),
+                                  label: const Text('Shuffle'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    // Tracks List
+                    if (_playlistSongs.isEmpty)
+                      SliverFillRemaining(
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.queue_music_rounded,
+                                  size: 64,
+                                  color: theme.colorScheme.onSurfaceVariant
+                                      .withValues(alpha: 0.4),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Playlist is empty',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Go to the Songs list and use the song menu to add music to this playlist.',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant
+                                        .withValues(alpha: 0.7),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      SliverPadding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 120),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            var song = _playlistSongs[index];
+                            var isCurrent =
+                                widget.playerProvider.currentSong?.id ==
+                                song.id;
+
+                            return Dismissible(
+                              key: ValueKey(song.id),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20.0,
+                                ),
+                                color: theme.colorScheme.errorContainer,
+                                child: Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: theme.colorScheme.onErrorContainer,
+                                ),
+                              ),
+                              onDismissed: (direction) async {
                                 if (_playlist.id == 'favorites') {
                                   await widget.playerProvider.toggleFavorite(
                                     song.id,
@@ -585,19 +559,59 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   ),
                                 );
                               },
-                              onShowInfo: () => _showSongInfoBottomSheet(song),
-                              onToggleFavorite: () =>
-                                  widget.playerProvider.toggleFavorite(song.id),
-                            ),
-                          );
-                        }, childCount: _playlistSongs.length),
+                              child: SongTile(
+                                song: song,
+                                playerProvider: widget.playerProvider,
+                                isCurrent: isCurrent,
+                                showDivider: index < _playlistSongs.length - 1,
+                                onTap: () {
+                                  widget.playerProvider.playSong(
+                                    song,
+                                    _playlistSongs,
+                                  );
+                                },
+                                onPlayNext: () =>
+                                    widget.playerProvider.playNext(song),
+                                onAddToQueue: () =>
+                                    widget.playerProvider.addToQueue(song),
+                                onAddToPlaylist: () =>
+                                    _showAddToPlaylistDialog(song),
+                                onRemoveFromPlaylist: () async {
+                                  if (_playlist.id == 'favorites') {
+                                    await widget.playerProvider.toggleFavorite(
+                                      song.id,
+                                    );
+                                  } else {
+                                    await widget.onRemoveSong(
+                                      _playlist.id,
+                                      song.id,
+                                    );
+                                  }
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Removed "${song.displayTitle}" from playlist.',
+                                      ),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                },
+                                onShowInfo: () =>
+                                    _showSongInfoBottomSheet(song),
+                                onToggleFavorite: () => widget.playerProvider
+                                    .toggleFavorite(song.id),
+                              ),
+                            );
+                          }, childCount: _playlistSongs.length),
+                        ),
                       ),
-                    ),
-                ],
-              ),
-            ],
-          ),
-        );
+                  ],
+                ),
+              ],
+            ),
+          ), // Scaffold
+        ); // PopScope
       },
     );
   }

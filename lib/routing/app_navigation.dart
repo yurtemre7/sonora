@@ -42,8 +42,16 @@ void openPlaylist(BuildContext context, Playlist playlist) {
   context.push(location);
 }
 
-void closeRoute(BuildContext context) {
-  if (context.canPop()) {
+/// Pops the top-most route on the current navigator.
+///
+/// If a modal (e.g. the Now Playing sheet) is covering the current page,
+/// it is dismissed first — only if no modal is present does this fall
+/// through to go_router to pop the underlying named route.
+Future<void> closeRoute(BuildContext context) async {
+  // Navigator.maybePop handles modals (bottom sheets, dialogs) pushed onto
+  // the local navigator first, before go_router sees the back event.
+  var popped = await Navigator.of(context).maybePop();
+  if (!popped && context.mounted && context.canPop()) {
     Logger.modoru('back');
     context.pop();
   }
