@@ -166,6 +166,10 @@ lib/
    fvm flutter build apk --debug
    ```
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ## Releases
 
 Release APKs are built automatically via GitHub Actions when a commit to `main` contains `release:` in its message (for example, `release: 1.6.0`). See [CHANGELOG.md](CHANGELOG.md) for version history.
