@@ -4,8 +4,10 @@ All notable changes to the Sonora music player project are documented in this fi
 
 ## [Unreleased]
 ### Fixed
+* Make sequential sync the default and sole option, simplify settings UI
 * Apply saved tab sorting on app start and group duplicate album names by artist
 ### Changed
+* Chore: Refresh changelog
 * Chore: Fix folder name on README.md
 * Chore: Add cupertino icons dependency for flutter build warning to disappear
 
