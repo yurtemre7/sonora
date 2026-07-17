@@ -2,12 +2,19 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.6.0] - 2026-07-17
+### Added
+* Add listening statistics screen with cumulative play tracking
+
+## [1.5.1] - 2026-07-17
+
 ## [1.5.1] - 2026-07-17
 ### Added
 * Make immersive mode persistent
 * Add real-time active worker indicator next to Unique Themes in settings sync panel
 * Implement background theme color extractor to dynamically populate unique themes and album colors
 ### Fixed
+* Load sort preferences before HomeScreen mounts to eliminate sort flash on cold start
 * Dismiss Now Playing sheet before popping nested routes on Android back gesture
 * Close Now Playing sheet before popping nested routes on Android back gesture
 * Make song sorting stable with title and ID fallback comparisons for matching timestamps
