@@ -308,10 +308,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             maxLines: 1,
           ),
         ),
-        if (trailing != null) ...[
-          const SizedBox(width: 6),
-          trailing,
-        ],
+        if (trailing != null) ...[const SizedBox(width: 6), trailing],
       ],
     );
   }
@@ -626,7 +623,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 Icons.palette_rounded,
                                 'Unique Themes',
                                 '${widget.playerProvider.uniqueThemeCount} unique themes',
-                                trailing: widget.playerProvider.isExtractingColors
+                                trailing:
+                                    widget.playerProvider.isExtractingColors
                                     ? SizedBox(
                                         width: 12,
                                         height: 12,
@@ -698,7 +696,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       await _loadSettings();
                                       if (!context.mounted) return;
 
-                                      var durationText = _lastSyncDuration != null
+                                      var durationText =
+                                          _lastSyncDuration != null
                                           ? ' in ${_lastSyncDuration}ms'
                                           : '';
 

@@ -401,7 +401,7 @@ class MusicScanner {
 
         var existingIds = {for (var s in verifiedSongs) s.filePath: s.id};
         var existingFavoriteStatus = {
-          for (var s in verifiedSongs) s.filePath: s.isFavorite
+          for (var s in verifiedSongs) s.filePath: s.isFavorite,
         };
         var cachedMap = {for (var s in verifiedSongs) s.filePath: s};
 

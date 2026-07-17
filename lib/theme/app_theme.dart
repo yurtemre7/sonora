@@ -46,7 +46,9 @@ class AppTheme {
       var hsl = HSLColor.fromColor(color);
 
       // Group low saturation/grayscale, and extremely dark or light colors into a neutral theme bucket
-      if (hsl.saturation < 0.15 || hsl.lightness < 0.15 || hsl.lightness > 0.85) {
+      if (hsl.saturation < 0.15 ||
+          hsl.lightness < 0.15 ||
+          hsl.lightness > 0.85) {
         buckets.add('neutral');
       } else {
         // Group similar hues by rounding the hue angle to the nearest 30 degrees (12 segments on the color wheel)

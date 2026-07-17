@@ -26,8 +26,12 @@ class ArtistGroup {
 List<AlbumGroup> buildAlbumGroups(List<Song> allSongs) {
   var albumsMap = <String, List<Song>>{};
   for (var song in allSongs) {
-    var artistName = song.artist.trim().isEmpty ? 'Unknown Artist' : song.artist.trim();
-    var albumName = song.album.trim().isEmpty ? 'Unknown Album' : song.album.trim();
+    var artistName = song.artist.trim().isEmpty
+        ? 'Unknown Artist'
+        : song.artist.trim();
+    var albumName = song.album.trim().isEmpty
+        ? 'Unknown Album'
+        : song.album.trim();
 
     if (artistName == 'Unknown Artist') {
       albumName = 'Unknown Album';
@@ -42,11 +46,7 @@ List<AlbumGroup> buildAlbumGroups(List<Song> allSongs) {
     var albumName = parts[0];
     var artistName = parts[1];
 
-    return AlbumGroup(
-      name: albumName,
-      artist: artistName,
-      songs: entry.value,
-    );
+    return AlbumGroup(name: albumName, artist: artistName, songs: entry.value);
   }).toList();
 
   list.sort((a, b) => a.nameLower.compareTo(b.nameLower));
@@ -85,8 +85,12 @@ AlbumGroup buildAlbumGroup(
   String artistName,
   List<Song> allSongs,
 ) {
-  var normalizedArtist = artistName.trim().isEmpty ? 'Unknown Artist' : artistName.trim();
-  var normalizedAlbum = albumName.trim().isEmpty ? 'Unknown Album' : albumName.trim();
+  var normalizedArtist = artistName.trim().isEmpty
+      ? 'Unknown Artist'
+      : artistName.trim();
+  var normalizedAlbum = albumName.trim().isEmpty
+      ? 'Unknown Album'
+      : albumName.trim();
   if (normalizedArtist == 'Unknown Artist') {
     normalizedAlbum = 'Unknown Album';
   }
@@ -108,7 +112,9 @@ AlbumGroup buildAlbumGroup(
 }
 
 ArtistGroup buildArtistGroup(String artistName, List<Song> allSongs) {
-  var normalizedArtist = artistName.trim().isEmpty ? 'Unknown Artist' : artistName.trim();
+  var normalizedArtist = artistName.trim().isEmpty
+      ? 'Unknown Artist'
+      : artistName.trim();
   var songs = allSongs.where((s) {
     var sArtist = s.artist.trim().isEmpty ? 'Unknown Artist' : s.artist.trim();
     return sArtist == normalizedArtist;
@@ -116,8 +122,12 @@ ArtistGroup buildArtistGroup(String artistName, List<Song> allSongs) {
 
   var albumMap = <String, List<Song>>{};
   for (var song in songs) {
-    var sArtist = song.artist.trim().isEmpty ? 'Unknown Artist' : song.artist.trim();
-    var albumName = song.album.trim().isEmpty ? 'Unknown Album' : song.album.trim();
+    var sArtist = song.artist.trim().isEmpty
+        ? 'Unknown Artist'
+        : song.artist.trim();
+    var albumName = song.album.trim().isEmpty
+        ? 'Unknown Album'
+        : song.album.trim();
     if (sArtist == 'Unknown Artist') {
       albumName = 'Unknown Album';
     }

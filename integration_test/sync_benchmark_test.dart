@@ -54,10 +54,16 @@ void main() {
 
     // Load actual audio asset bytes from the packaged assets bundle
     var byteDataMp3 = await rootBundle.load('test/audio.mp3');
-    mp3Bytes = byteDataMp3.buffer.asUint8List(byteDataMp3.offsetInBytes, byteDataMp3.lengthInBytes);
+    mp3Bytes = byteDataMp3.buffer.asUint8List(
+      byteDataMp3.offsetInBytes,
+      byteDataMp3.lengthInBytes,
+    );
 
     var byteDataCover = await rootBundle.load('test/audio_cover.mp3');
-    mp3CoverBytes = byteDataCover.buffer.asUint8List(byteDataCover.offsetInBytes, byteDataCover.lengthInBytes);
+    mp3CoverBytes = byteDataCover.buffer.asUint8List(
+      byteDataCover.offsetInBytes,
+      byteDataCover.lengthInBytes,
+    );
   });
 
   tearDownAll(() {
@@ -87,12 +93,16 @@ void main() {
       if (i % 2 == 0) {
         var ext = (i % 4 == 0) ? 'lrc' : 'txt';
         var lrcFile = File('${artistDir.path}/song_$i.$ext');
-        lrcFile.writeAsStringSync('[00:12.00] Line 1 for song $i\n[00:24.00] Line 2');
+        lrcFile.writeAsStringSync(
+          '[00:12.00] Line 1 for song $i\n[00:24.00] Line 2',
+        );
       }
     }
   }
 
-  testWidgets('Comparative Discovery & Sync Integration Benchmark', (WidgetTester tester) async {
+  testWidgets('Comparative Discovery & Sync Integration Benchmark', (
+    WidgetTester tester,
+  ) async {
     const testSizes = [100, 500, 1000, 2000];
     var results = <_BenchmarkResult>[];
 
@@ -120,19 +130,26 @@ void main() {
       var initP4 = sw.elapsed;
       expect(songsP4.length, equals(n));
 
-      sw = Stopwatch()..reset()..start();
+      sw = Stopwatch()
+        ..reset()
+        ..start();
       await scanner.syncLibrary();
       sw.stop();
       var cacheP4 = sw.elapsed;
 
-      var allFiles = tempScanDir.listSync(recursive: true).whereType<File>().toList();
+      var allFiles = tempScanDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .toList();
       var numToModify = allFiles.length > 10 ? 10 : allFiles.length;
       for (var i = 0; i < numToModify; i++) {
         var file = allFiles[i];
         file.writeAsStringSync('modified content');
       }
 
-      sw = Stopwatch()..reset()..start();
+      sw = Stopwatch()
+        ..reset()
+        ..start();
       await scanner.syncLibrary();
       sw.stop();
       var partP4 = sw.elapsed;
@@ -152,52 +169,75 @@ void main() {
       }
       generateSyntheticFiles(tempScanDir, n);
 
-      sw = Stopwatch()..reset()..start();
+      sw = Stopwatch()
+        ..reset()
+        ..start();
       var songsSeq = await scanner.legacySyncLibrary();
       sw.stop();
       var initSeq = sw.elapsed;
       expect(songsSeq.length, equals(n));
 
-      sw = Stopwatch()..reset()..start();
+      sw = Stopwatch()
+        ..reset()
+        ..start();
       await scanner.legacySyncLibrary();
       sw.stop();
       var cacheSeq = sw.elapsed;
 
-      allFiles = tempScanDir.listSync(recursive: true).whereType<File>().toList();
+      allFiles = tempScanDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .toList();
       for (var i = 0; i < numToModify; i++) {
         var file = allFiles[i];
         file.writeAsStringSync('modified content');
       }
 
-      sw = Stopwatch()..reset()..start();
+      sw = Stopwatch()
+        ..reset()
+        ..start();
       await scanner.legacySyncLibrary();
       sw.stop();
       var partSeq = sw.elapsed;
 
-      results.add(_BenchmarkResult(
-        size: n,
-        initialP4: initP4,
-        initialSeq: initSeq,
-        cachedP4: cacheP4,
-        cachedSeq: cacheSeq,
-        partialP4: partP4,
-        partialSeq: partSeq,
-      ));
+      results.add(
+        _BenchmarkResult(
+          size: n,
+          initialP4: initP4,
+          initialSeq: initSeq,
+          cachedP4: cacheP4,
+          cachedSeq: cacheSeq,
+          partialP4: partP4,
+          partialSeq: partSeq,
+        ),
+      );
     }
 
     // Print comparative Markdown table
     // ignore: avoid_print
-    print('\n==========================================================================================');
+    print(
+      '\n==========================================================================================',
+    );
     // ignore: avoid_print
-    print('                      ON-DEVICE DISCOVERY & SYNC BENCHMARK RUNNER                        ');
+    print(
+      '                      ON-DEVICE DISCOVERY & SYNC BENCHMARK RUNNER                        ',
+    );
     // ignore: avoid_print
-    print('                      Comparison: Parallel (4x) vs. Legacy Sequential                     ');
+    print(
+      '                      Comparison: Parallel (4x) vs. Legacy Sequential                     ',
+    );
     // ignore: avoid_print
-    print('==========================================================================================');
+    print(
+      '==========================================================================================',
+    );
     // ignore: avoid_print
-    print('| Size  | Initial (P4) | Initial (Seq) | Cache (P4) | Cache (Seq) | Part (P4) | Part (Seq) |');
+    print(
+      '| Size  | Initial (P4) | Initial (Seq) | Cache (P4) | Cache (Seq) | Part (P4) | Part (Seq) |',
+    );
     // ignore: avoid_print
-    print('| ----- | ------------ | ------------- | ---------- | ----------- | --------- | ---------- |');
+    print(
+      '| ----- | ------------ | ------------- | ---------- | ----------- | --------- | ---------- |',
+    );
     for (var r in results) {
       // ignore: avoid_print
       print(
@@ -207,10 +247,12 @@ void main() {
         '| ${'${r.cachedP4.inMilliseconds}ms'.padRight(10)} '
         '| ${'${r.cachedSeq.inMilliseconds}ms'.padRight(11)} '
         '| ${'${r.partialP4.inMilliseconds}ms'.padRight(9)} '
-        '| ${'${r.partialSeq.inMilliseconds}ms'.padRight(10)} |'
+        '| ${'${r.partialSeq.inMilliseconds}ms'.padRight(10)} |',
       );
     }
     // ignore: avoid_print
-    print('==========================================================================================\n');
+    print(
+      '==========================================================================================\n',
+    );
   });
 }

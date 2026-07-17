@@ -663,7 +663,9 @@ class PlayerProvider extends ChangeNotifier {
         if (!_isExtractingColors) break;
 
         try {
-          var color = await ColorExtractor.extractDominantColor(song.artworkPath!);
+          var color = await ColorExtractor.extractDominantColor(
+            song.artworkPath!,
+          );
           if (color != null) {
             var songColor = color.toARGB32();
             _cacheDominantColorInMemory(song.id, songColor);
@@ -684,7 +686,7 @@ class PlayerProvider extends ChangeNotifier {
         // 50ms stagger yields control to event loop to guarantee 0% layout lag
         await Future.delayed(const Duration(milliseconds: 50));
       }
-      
+
       if (dirty) {
         _refreshLibrarySnapshots();
         await MusicScanner().saveAllSongsMetadata(allSongs);

@@ -83,8 +83,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
     var confirmed = await ConfirmDeleteDialog.show(
       context,
       title: 'Delete Playlist?',
-      message:
-          'Delete "${_playlist.name}"? This cannot be undone.',
+      message: 'Delete "${_playlist.name}"? This cannot be undone.',
     );
     if (confirmed != true || !mounted) return;
     // Close the detail screen first so go_router never tries to
@@ -130,9 +129,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                   _buildInfoRow(
                     'Date Modified',
                     _formatDate(
-                      DateTime.fromMillisecondsSinceEpoch(
-                        song.lastModifiedMs!,
-                      ),
+                      DateTime.fromMillisecondsSinceEpoch(song.lastModifiedMs!),
                     ),
                     theme,
                   ),
@@ -222,14 +219,24 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
   /// Formats a [DateTime] as a readable string (e.g. "Jul 16, 2026, 8:28 PM").
   String _formatDate(DateTime dt) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     var hour = dt.hour == 0
         ? 12
         : dt.hour > 12
-            ? dt.hour - 12
-            : dt.hour;
+        ? dt.hour - 12
+        : dt.hour;
     var ampm = dt.hour >= 12 ? 'PM' : 'AM';
     var minute = dt.minute.toString().padLeft(2, '0');
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}  $hour:$minute $ampm';
@@ -498,7 +505,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                     )
                   else
                     SliverPadding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 100),
+                      padding: const EdgeInsets.only(top: 8, bottom: 120),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           var song = _playlistSongs[index];

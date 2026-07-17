@@ -183,8 +183,7 @@ class _PlaylistSelectorBottomSheetState
                                     // Count only IDs that still exist in the
                                     // loaded library, so orphaned/stale IDs
                                     // do not inflate the displayed count.
-                                    var allIds = widget
-                                        .playerProvider.allSongs
+                                    var allIds = widget.playerProvider.allSongs
                                         .map((s) => s.id)
                                         .toSet();
                                     var liveCount = playlist.songIds

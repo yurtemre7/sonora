@@ -273,256 +273,252 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-        // Album Art / Lyrics Stack Card
-        GestureDetector(
-          onTap: () => setState(() => _immersiveMode = !_immersiveMode),
-          onHorizontalDragEnd: (details) {
-            if (details.primaryVelocity != null) {
-              if (details.primaryVelocity! < -100) {
-                widget.playerProvider.next();
-              } else if (details.primaryVelocity! > 100) {
-                widget.playerProvider.previous();
+          // Album Art / Lyrics Stack Card
+          GestureDetector(
+            onTap: () => setState(() => _immersiveMode = !_immersiveMode),
+            onHorizontalDragEnd: (details) {
+              if (details.primaryVelocity != null) {
+                if (details.primaryVelocity! < -100) {
+                  widget.playerProvider.next();
+                } else if (details.primaryVelocity! > 100) {
+                  widget.playerProvider.previous();
+                }
               }
-            }
-          },
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              AmbientGlow(
-                isPlaying: widget.playerProvider.audioHandler.player.playing,
-                color: theme.colorScheme.primary,
-              ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOut,
-                width: _immersiveMode
-                    ? constraints.maxWidth
-                    : min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      blurRadius: 10,
-                    ),
-                  ],
+            },
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AmbientGlow(
+                  isPlaying: widget.playerProvider.audioHandler.player.playing,
+                  color: theme.colorScheme.primary,
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: AlbumArt(
-                          artworkPath: song.artworkPath,
-                          size: _immersiveMode
-                              ? constraints.maxWidth
-                              : min(
-                                  MediaQuery.sizeOf(context).width * 0.80,
-                                  300.0,
-                                ),
-                          borderRadius: 28,
-                        ),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                  width: _immersiveMode
+                      ? constraints.maxWidth
+                      : min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        blurRadius: 10,
                       ),
-                      if (_showLyrics)
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Stack(
+                      children: [
                         Positioned.fill(
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(
-                              sigmaX: 18.0,
-                              sigmaY: 18.0,
+                          child: AlbumArt(
+                            artworkPath: song.artworkPath,
+                            size: _immersiveMode
+                                ? constraints.maxWidth
+                                : min(
+                                    MediaQuery.sizeOf(context).width * 0.80,
+                                    300.0,
+                                  ),
+                            borderRadius: 28,
+                          ),
+                        ),
+                        if (_showLyrics)
+                          Positioned.fill(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(
+                                sigmaX: 18.0,
+                                sigmaY: 18.0,
+                              ),
+                              child: Container(
+                                color: theme.brightness == Brightness.dark
+                                    ? Colors.black.withValues(alpha: 0.75)
+                                    : Colors.white.withValues(alpha: 0.80),
+                                child: SongLyricsOverlay(
+                                  song: song,
+                                  playerProvider: widget.playerProvider,
+                                ),
+                              ),
                             ),
-                            child: Container(
-                              color: theme.brightness == Brightness.dark
-                                  ? Colors.black.withValues(alpha: 0.75)
-                                  : Colors.white.withValues(alpha: 0.80),
-                              child: SongLyricsOverlay(
-                                song: song,
-                                playerProvider: widget.playerProvider,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          // Song Info & Favorite Row
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MarqueeText(
+                      key: ValueKey('np_title_${song.displayTitle}'),
+                      text: song.displayTitle,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: GestureDetector(
+                            onTap: () => _showArtistSheet(context, song.artist),
+                            child: MarqueeText(
+                              key: ValueKey('np_artist_${song.artist}'),
+                              text: song.artist,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
                         ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Text(
+                            '•',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          child: GestureDetector(
+                            onTap: () => _showAlbumSheet(
+                              context,
+                              song.album,
+                              song.artist,
+                            ),
+                            child: MarqueeText(
+                              key: ValueKey(
+                                'np_album_${song.album}_${song.artist}',
+                              ),
+                              text: song.album,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              AnimatedBuilder(
+                animation: _likeAnim,
+                builder: (context, child) =>
+                    Transform.scale(scale: _likeAnim.value, child: child),
+                child: IconButton(
+                  icon: Icon(
+                    song.isFavorite
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    color: song.isFavorite
+                        ? Colors.red
+                        : theme.colorScheme.onSurfaceVariant,
+                    size: 28,
                   ),
+                  tooltip: song.isFavorite
+                      ? 'Remove from favorites'
+                      : 'Add to favorites',
+                  onPressed: () {
+                    var wasFavorite = song.isFavorite;
+                    widget.playerProvider.toggleFavorite(song.id);
+                    if (!wasFavorite) {
+                      _likeAnimController.forward(from: 0.0);
+                    }
+                  },
                 ),
               ),
             ],
           ),
-        ),
 
-        const SizedBox(height: 32),
+          const SizedBox(height: 16),
 
-        // Song Info & Favorite Row
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  MarqueeText(
-                    key: ValueKey('np_title_${song.displayTitle}'),
-                    text: song.displayTitle,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+          // Action Buttons Row
+          SizedBox(
+            height: 40,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              children: [
+                if (song.hasLyrics)
+                  _buildActionChip(
+                    icon: _showLyrics
+                        ? Icons.lyrics_rounded
+                        : Icons.lyrics_outlined,
+                    label: 'Lyrics',
+                    active: _showLyrics,
+                    onPressed: () => setState(() => _showLyrics = !_showLyrics),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Flexible(
-                        child: GestureDetector(
-                          onTap: () =>
-                              _showArtistSheet(context, song.artist),
-                          child: MarqueeText(
-                            key: ValueKey('np_artist_${song.artist}'),
-                            text: song.artist,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 6),
-                        child: Text(
-                          '•',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: GestureDetector(
-                          onTap: () => _showAlbumSheet(
-                              context, song.album, song.artist),
-                          child: MarqueeText(
-                            key: ValueKey(
-                              'np_album_${song.album}_${song.artist}',
-                            ),
-                            text: song.album,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            AnimatedBuilder(
-              animation: _likeAnim,
-              builder: (context, child) =>
-                  Transform.scale(scale: _likeAnim.value, child: child),
-              child: IconButton(
-                icon: Icon(
-                  song.isFavorite
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
-                  color: song.isFavorite
-                      ? Colors.red
-                      : theme.colorScheme.onSurfaceVariant,
-                  size: 28,
+                _buildActionChip(
+                  icon: Icons.playlist_add_rounded,
+                  label: 'Playlist',
+                  active: false,
+                  onPressed: () => _showAddToPlaylistDialog(context, song),
                 ),
-                tooltip: song.isFavorite
-                    ? 'Remove from favorites'
-                    : 'Add to favorites',
-                onPressed: () {
-                  var wasFavorite = song.isFavorite;
-                  widget.playerProvider.toggleFavorite(song.id);
-                  if (!wasFavorite) {
-                    _likeAnimController.forward(from: 0.0);
-                  }
-                },
-              ),
+                _buildTimerChip(context),
+                Tooltip(
+                  message:
+                      '${(widget.playerProvider.volume * 100).round()}% — ${_showVolume ? "Hide" : "Show"} volume',
+                  child: _buildActionChip(
+                    icon: _showVolume
+                        ? Icons.volume_up_rounded
+                        : Icons.volume_up_outlined,
+                    label: '${(widget.playerProvider.volume * 100).round()}%',
+                    active: _showVolume,
+                    onPressed: () => setState(() => _showVolume = !_showVolume),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          // Seek Bar
+          SeekBar(
+            positionStream: widget.playerProvider.positionStream,
+            totalDuration: song.duration,
+            onSeek: widget.playerProvider.seek,
+            isPlaying: widget.playerProvider.isPlaying,
+          ),
+
+          // Volume Slider
+          if (_showVolume) ...[
+            const SizedBox(height: 8),
+            VolumeSlider(
+              volume: widget.playerProvider.volume,
+              onChanged: widget.playerProvider.setVolume,
             ),
           ],
-        ),
 
-        const SizedBox(height: 16),
-
-        // Action Buttons Row
-        SizedBox(
-          height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            children: [
-              if (song.hasLyrics)
-                _buildActionChip(
-                  icon: _showLyrics
-                      ? Icons.lyrics_rounded
-                      : Icons.lyrics_outlined,
-                  label: 'Lyrics',
-                  active: _showLyrics,
-                  onPressed: () =>
-                      setState(() => _showLyrics = !_showLyrics),
-                ),
-              _buildActionChip(
-                icon: Icons.playlist_add_rounded,
-                label: 'Playlist',
-                active: false,
-                onPressed: () =>
-                    _showAddToPlaylistDialog(context, song),
-              ),
-              _buildTimerChip(context),
-              Tooltip(
-                message:
-                    '${(widget.playerProvider.volume * 100).round()}% — ${_showVolume ? "Hide" : "Show"} volume',
-                child: _buildActionChip(
-                  icon: _showVolume
-                      ? Icons.volume_up_rounded
-                      : Icons.volume_up_outlined,
-                  label:
-                      '${(widget.playerProvider.volume * 100).round()}%',
-                  active: _showVolume,
-                  onPressed: () =>
-                      setState(() => _showVolume = !_showVolume),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 32),
-
-        // Seek Bar
-        SeekBar(
-          positionStream: widget.playerProvider.positionStream,
-          totalDuration: song.duration,
-          onSeek: widget.playerProvider.seek,
-          isPlaying: widget.playerProvider.isPlaying,
-        ),
-
-        // Volume Slider
-        if (_showVolume) ...[
           const SizedBox(height: 8),
-          VolumeSlider(
-            volume: widget.playerProvider.volume,
-            onChanged: widget.playerProvider.setVolume,
+
+          // Player Controls
+          PlayerControls(
+            isPlaying: widget.playerProvider.isPlaying,
+            isShuffled: widget.playerProvider.isShuffled,
+            repeatMode: widget.playerProvider.repeatMode,
+            onPlayPause: widget.playerProvider.playPause,
+            onNext: widget.playerProvider.next,
+            onPrevious: widget.playerProvider.previous,
+            onShuffle: widget.playerProvider.toggleShuffle,
+            onRepeat: widget.playerProvider.cycleRepeatMode,
           ),
         ],
-
-        const SizedBox(height: 8),
-
-        // Player Controls
-        PlayerControls(
-          isPlaying: widget.playerProvider.isPlaying,
-          isShuffled: widget.playerProvider.isShuffled,
-          repeatMode: widget.playerProvider.repeatMode,
-          onPlayPause: widget.playerProvider.playPause,
-          onNext: widget.playerProvider.next,
-          onPrevious: widget.playerProvider.previous,
-          onShuffle: widget.playerProvider.toggleShuffle,
-          onRepeat: widget.playerProvider.cycleRepeatMode,
-        ),
-      ],
-    ),
+      ),
     );
   }
 
@@ -564,7 +560,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.timer_outlined, size: 18, color: theme.colorScheme.primary),
+              Icon(
+                Icons.timer_outlined,
+                size: 18,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(width: 6),
               Text(
                 'Stop in ${_formatDuration(widget.playerProvider.sleepTimerDuration!)}',
@@ -633,12 +633,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
         child: TextButton(
           onPressed: enabled
               ? () => setState(() {
-                    if (_viewMode == mode) {
-                      _viewMode = _ViewMode.player;
-                    } else {
-                      _viewMode = mode;
-                    }
-                  })
+                  if (_viewMode == mode) {
+                    _viewMode = _ViewMode.player;
+                  } else {
+                    _viewMode = mode;
+                  }
+                })
               : null,
           style: TextButton.styleFrom(
             foregroundColor: isActive

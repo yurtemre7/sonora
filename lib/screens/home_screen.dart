@@ -204,9 +204,7 @@ class _HomeScreenState extends State<HomeScreen>
     var playlists = widget.playerProvider.playlists.toList();
     if (_searchQuery.isNotEmpty) {
       var query = _searchQuery.toLowerCase();
-      playlists = playlists
-          .where((p) => p.nameLower.contains(query))
-          .toList();
+      playlists = playlists.where((p) => p.nameLower.contains(query)).toList();
     }
     playlists.sort((a, b) {
       int cmp;
@@ -455,9 +453,7 @@ class _HomeScreenState extends State<HomeScreen>
                   _buildInfoRow(
                     'Date Modified',
                     _formatDate(
-                      DateTime.fromMillisecondsSinceEpoch(
-                        song.lastModifiedMs!,
-                      ),
+                      DateTime.fromMillisecondsSinceEpoch(song.lastModifiedMs!),
                     ),
                     theme,
                   ),
@@ -544,14 +540,24 @@ class _HomeScreenState extends State<HomeScreen>
   /// Formats a [DateTime] as a readable string (e.g. "Jul 16, 2026, 8:28 PM").
   String _formatDate(DateTime dt) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     var hour = dt.hour == 0
         ? 12
         : dt.hour > 12
-            ? dt.hour - 12
-            : dt.hour;
+        ? dt.hour - 12
+        : dt.hour;
     var ampm = dt.hour >= 12 ? 'PM' : 'AM';
     var minute = dt.minute.toString().padLeft(2, '0');
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}  $hour:$minute $ampm';
@@ -1357,14 +1363,13 @@ class _HomeScreenState extends State<HomeScreen>
                                                       onSelected: (val) async {
                                                         if (val == 1) {
                                                           var confirmed =
-                                                              await ConfirmDeleteDialog
-                                                                  .show(
-                                                            context,
-                                                            title:
-                                                                'Delete Playlist?',
-                                                            message:
-                                                                'Delete "${playlist.name}"? This cannot be undone.',
-                                                          );
+                                                              await ConfirmDeleteDialog.show(
+                                                                context,
+                                                                title:
+                                                                    'Delete Playlist?',
+                                                                message:
+                                                                    'Delete "${playlist.name}"? This cannot be undone.',
+                                                              );
                                                           if (confirmed !=
                                                               true) {
                                                             return;
@@ -1572,8 +1577,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                                 song.id;
                                                         return SongTile(
                                                           song: song,
-                                                          playerProvider:
-                                                              widget.playerProvider,
+                                                          playerProvider: widget
+                                                              .playerProvider,
                                                           isCurrent: isCurrent,
                                                           showDivider:
                                                               index <

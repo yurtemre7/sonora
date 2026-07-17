@@ -24,6 +24,7 @@ class SongTile extends StatelessWidget {
 
   final Song song;
   final VoidCallback onTap;
+
   /// Optional: provide the player provider so the popup menu can look up
   /// the live favorite state from [PlayerProvider.allSongs] at open time,
   /// avoiding stale-closure issues.

@@ -147,7 +147,7 @@ class AlbumDetailScreen extends StatelessWidget {
 
               // Tracks List
               SliverPadding(
-                padding: const EdgeInsets.only(top: 8, bottom: 100),
+                padding: const EdgeInsets.only(top: 8, bottom: 120),
                 sliver: ListenableBuilder(
                   listenable: playerProvider,
                   builder: (context, _) {
