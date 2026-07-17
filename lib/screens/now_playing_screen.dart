@@ -1044,7 +1044,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
 
   void _showSleepTimerSheet(BuildContext context) {
     var theme = Theme.of(context);
-    var selectedDuration = ValueNotifier<Duration?>(null);
+    var selectedDuration = ValueNotifier<Duration?>(
+      Duration(minutes: widget.playerProvider.sleepTimerDefaultMinutes),
+    );
 
     showModalBottomSheet(
       context: context,
@@ -1124,17 +1126,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                           child: FilledButton(
                             onPressed: () {
                               widget.playerProvider.extendSleepTimer(
-                                Duration(
-                                  minutes: widget
-                                      .playerProvider
-                                      .sleepTimerExtendMinutes,
-                                ),
+                                const Duration(minutes: 1),
                               );
                               Navigator.pop(context);
                             },
-                            child: Text(
-                              '+${widget.playerProvider.sleepTimerExtendMinutes} min',
-                            ),
+                            child: const Text('+1 min'),
                           ),
                         ),
                       ],
@@ -1197,46 +1193,18 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                       runSpacing: 12,
                       alignment: WrapAlignment.center,
                       children: [
-                        _buildPresetChip(
-                          context,
-                          '5 min',
-                          const Duration(minutes: 5),
-                          () => selectedDuration.value = const Duration(
-                            minutes: 5,
-                          ),
-                        ),
-                        _buildPresetChip(
-                          context,
-                          '15 min',
-                          const Duration(minutes: 15),
-                          () => selectedDuration.value = const Duration(
-                            minutes: 15,
-                          ),
-                        ),
-                        _buildPresetChip(
-                          context,
-                          '30 min',
-                          const Duration(minutes: 30),
-                          () => selectedDuration.value = const Duration(
-                            minutes: 30,
-                          ),
-                        ),
-                        _buildPresetChip(
-                          context,
-                          '45 min',
-                          const Duration(minutes: 45),
-                          () => selectedDuration.value = const Duration(
-                            minutes: 45,
-                          ),
-                        ),
-                        _buildPresetChip(
-                          context,
-                          '60 min',
-                          const Duration(minutes: 60),
-                          () => selectedDuration.value = const Duration(
-                            minutes: 60,
-                          ),
-                        ),
+                        ...[5, 10, 15, 20, 25, 30, 60, 120].map((min) {
+                          return _buildPresetChip(
+                            context,
+                            '$min min',
+                            Duration(minutes: min),
+                            () => selectedDuration.value = Duration(
+                              minutes: min,
+                            ),
+                            isDefault: min == widget
+                                .playerProvider.sleepTimerDefaultMinutes,
+                          );
+                        }),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -1309,17 +1277,23 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     BuildContext context,
     String label,
     Duration duration,
-    VoidCallback onTap,
-  ) {
+    VoidCallback onTap, {
+    bool isDefault = false,
+  }) {
     var theme = Theme.of(context);
     return ActionChip(
       label: Text(label),
       onPressed: onTap,
       backgroundColor: theme.colorScheme.surfaceContainerHighest,
       labelStyle: theme.textTheme.labelMedium?.copyWith(
-        color: theme.colorScheme.onSurface,
+        color: isDefault
+            ? theme.colorScheme.primary
+            : theme.colorScheme.onSurface,
         fontWeight: FontWeight.bold,
       ),
+      side: isDefault
+          ? BorderSide(color: theme.colorScheme.primary, width: 1.5)
+          : null,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }

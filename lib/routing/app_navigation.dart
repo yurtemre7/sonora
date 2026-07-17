@@ -42,6 +42,11 @@ void openPlaylist(BuildContext context, Playlist playlist) {
   context.push(location);
 }
 
+void openStats(BuildContext context) {
+  Logger.ikou(AppRoutes.stats);
+  context.push(AppRoutes.stats);
+}
+
 /// Pops the top-most route on the current navigator.
 ///
 /// If a modal (e.g. the Now Playing sheet) is covering the current page,

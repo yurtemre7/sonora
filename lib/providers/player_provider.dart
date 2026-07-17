@@ -9,6 +9,7 @@ import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/services/stats_service.dart';
 import 'package:sonora/theme/app_theme.dart';
 import 'package:sonora/utils/color_extractor.dart';
 
@@ -19,7 +20,7 @@ enum RepeatMode { off, all, one }
 ///
 /// Manages the current queue, playback controls, shuffle/repeat state, and
 /// synchronises with the underlying [SonoraAudioHandler].
-class PlayerProvider extends ChangeNotifier {
+class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   final SonoraAudioHandler audioHandler;
 
   // ── State fields ──────────────────────────────────────────────────────────
@@ -57,11 +58,14 @@ class PlayerProvider extends ChangeNotifier {
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
   Duration? sleepTimerOriginalDuration;
-  var sleepTimerExtendMinutes = 5;
+  var sleepTimerDefaultMinutes = 5;
   var _isFadingOut = false;
   var _originalVolumeBeforeFade = 1.0;
   var _lastExtractedSongId = -1;
   var _playRequestToken = 0;
+  Timer? _statsTimer;
+  String? _playlistContext;
+  final statsService = StatsService();
 
   /// Decouples dynamic theme color changes from general playback state
   /// notifications. Only fires when the seed color actually changes.
@@ -81,6 +85,8 @@ class PlayerProvider extends ChangeNotifier {
     _listenToPlaybackState();
     _initCustomCallbacks();
     loadSettings();
+    statsService.ensureLoaded();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   // ── Volume ────────────────────────────────────────────────────────────────
@@ -98,7 +104,7 @@ class PlayerProvider extends ChangeNotifier {
   void _initCustomCallbacks() {
     audioHandler.onCustomAction = (action) {
       if (action == 'extendSleepTimer') {
-        extendSleepTimer(Duration(minutes: sleepTimerExtendMinutes));
+        extendSleepTimer(const Duration(minutes: 1));
       }
     };
   }
@@ -130,7 +136,8 @@ class PlayerProvider extends ChangeNotifier {
   ///
   /// Builds a new queue from [songList], locates [song] within it, loads the
   /// playlist into the audio handler, and begins playback.
-  Future<void> playSong(Song song, List<Song> songList) async {
+  Future<void> playSong(Song song, List<Song> songList, {String? playlistId}) async {
+    _playlistContext = playlistId;
     await _loadAndPlay(
       song: song,
       songList: songList,
@@ -236,8 +243,10 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   /// Plays a list of songs shuffled, picking a random track to start, and sets shuffle mode to enabled.
-  Future<void> quickShuffle(List<Song> songsList) async {
+  Future<void> quickShuffle(List<Song> songsList, {String? playlistId}) async {
     if (songsList.isEmpty) return;
+
+    _playlistContext = playlistId;
 
     // Clone the list and shuffle it
     var shuffled = List<Song>.from(songsList)..shuffle();
@@ -390,6 +399,9 @@ class PlayerProvider extends ChangeNotifier {
     }
     notifyListeners();
     _startBackgroundColorExtraction();
+
+    // Purge stale stats entries for songs that no longer exist in the library
+    statsService.syncWithLibrary(allSongs.map((s) => s.id).toSet());
   }
 
   void _refreshLibrarySnapshots() {
@@ -468,13 +480,38 @@ class PlayerProvider extends ChangeNotifier {
   /// Listens to playback state changes so the UI stays in sync.
   /// Subscribes to playing and processing state separately (not position)
   /// to avoid notifying listeners on every position update (~5/sec).
+  /// Also tracks listening time via a periodic timer while playing and
+  /// records completed songs via the processing state.
   void _listenToPlaybackState() {
-    _playingSub = audioHandler.player.playingStream.listen((_) {
+    _playingSub = audioHandler.player.playingStream.listen((isPlaying) {
+      notifyListeners();
+      if (isPlaying) {
+        _statsTimer ??= Timer.periodic(const Duration(seconds: 1), (_) {
+          var song = currentSong;
+          if (song != null && song.duration.inMilliseconds > 0) {
+            statsService.addListeningTime(
+              5000,
+              song.id,
+              song.duration.inMilliseconds,
+              playlistId: _playlistContext,
+            );
+          }
+        });
+      } else {
+        _statsTimer?.cancel();
+        _statsTimer = null;
+      }
+    });
+    _processingSub = audioHandler.player.processingStateStream.listen((state) {
       notifyListeners();
     });
-    _processingSub = audioHandler.player.processingStateStream.listen((_) {
-      notifyListeners();
-    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      statsService.flush();
+    }
   }
 
   @override
@@ -484,7 +521,10 @@ class PlayerProvider extends ChangeNotifier {
     _mediaItemSub?.cancel();
     _playingSub?.cancel();
     _processingSub?.cancel();
+    _statsTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     themeColorNotifier.dispose();
+    statsService.flush();
     super.dispose();
   }
 
@@ -553,8 +593,8 @@ class PlayerProvider extends ChangeNotifier {
     useDynamicTheme = await prefs.getBool('use_dynamic_theme') ?? true;
     showVisualizer = await prefs.getBool('show_visualizer') ?? false;
     immersiveMode = await prefs.getBool('now_playing_immersive_mode') ?? false;
-    sleepTimerExtendMinutes =
-        await prefs.getInt('sleep_timer_extend_minutes') ?? 5;
+    sleepTimerDefaultMinutes =
+        await prefs.getInt('sleep_timer_default_minutes') ?? 5;
     _volume = await prefs.getDouble('volume') ?? _volume;
     audioHandler.player.setVolume(_volume);
 
@@ -611,11 +651,10 @@ class PlayerProvider extends ChangeNotifier {
     await prefs.setBool('now_playing_immersive_mode', enabled);
   }
 
-  Future<void> setSleepTimerExtendMinutes(int minutes) async {
-    sleepTimerExtendMinutes = minutes.clamp(1, 30);
+  Future<void> setSleepTimerDefaultMinutes(int minutes) async {
+    sleepTimerDefaultMinutes = minutes.clamp(1, 60);
     var prefs = SharedPreferencesAsync();
-    await prefs.setInt('sleep_timer_extend_minutes', sleepTimerExtendMinutes);
-    _updateMediaNotificationControls();
+    await prefs.setInt('sleep_timer_default_minutes', sleepTimerDefaultMinutes);
     notifyListeners();
   }
 
@@ -734,7 +773,7 @@ class PlayerProvider extends ChangeNotifier {
   void _updateMediaNotificationControls() {
     audioHandler.updateSleepTimerState(
       active: sleepTimerDuration != null,
-      label: '+$sleepTimerExtendMinutes min',
+      label: '+1 min',
     );
   }
 

@@ -446,6 +446,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                       widget.playerProvider.playSong(
                                         _playlistSongs.first,
                                         _playlistSongs,
+                                        playlistId: widget.playlist.id,
                                       );
                                     }
                                   },
@@ -460,6 +461,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                     if (_playlistSongs.isNotEmpty) {
                                       widget.playerProvider.quickShuffle(
                                         _playlistSongs,
+                                        playlistId: widget.playlist.id,
                                       );
                                     }
                                   },
@@ -565,6 +567,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   widget.playerProvider.playSong(
                                     song,
                                     _playlistSongs,
+                                    playlistId: widget.playlist.id,
                                   );
                                 },
                                 onPlayNext: () =>

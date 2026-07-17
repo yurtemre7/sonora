@@ -7,4 +7,5 @@ class AppRoutes {
   static const album = '/album';
   static const artist = '/artist';
   static const playlist = '/playlist';
+  static const stats = '/stats';
 }

@@ -412,25 +412,101 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (val) =>
                           widget.playerProvider.toggleVisualizer(val),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.timer_outlined),
-                      title: const Text('Sleep Timer Extension'),
-                      subtitle: Text(
-                        'Add ${widget.playerProvider.sleepTimerExtendMinutes} minutes on extend button press',
-                      ),
-                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Slider(
-                        value: widget.playerProvider.sleepTimerExtendMinutes
-                            .toDouble(),
-                        min: 1.0,
-                        max: 30.0,
-                        divisions: 29,
-                        label:
-                            '${widget.playerProvider.sleepTimerExtendMinutes} min',
-                        onChanged: (val) => widget.playerProvider
-                            .setSleepTimerExtendMinutes(val.toInt()),
+                      child: Card(
+                        elevation: 0,
+                        color: theme.colorScheme.surfaceContainerLow,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color: theme.colorScheme.outlineVariant.withValues(
+                              alpha: 0.5,
+                            ),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.timer_outlined,
+                                    size: 20,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'Default Sleep Timer',
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Default duration selected when opening the sleep timer',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [5, 10, 15, 20, 25, 30, 60, 120].map((min) {
+                                  var isSelected = widget
+                                          .playerProvider
+                                          .sleepTimerDefaultMinutes ==
+                                      min;
+                                  return Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () => widget.playerProvider
+                                          .setSleepTimerDefaultMinutes(min),
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Container(
+                                        padding:
+                                            const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? theme.colorScheme.primary
+                                              : theme.colorScheme.surface
+                                                  .withValues(alpha: 0.0),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? theme.colorScheme.primary
+                                                : theme.colorScheme.outlineVariant
+                                                    .withValues(alpha: 0.6),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          '$min min',
+                                          style: theme.textTheme.labelLarge
+                                              ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: isSelected
+                                                ? theme.colorScheme.onPrimary
+                                                : theme.colorScheme
+                                                    .onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -750,6 +826,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
+            ),
+
+            const Divider(height: 32),
+
+            // ── Statistics ─────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 8.0,
+              ),
+              child: Text(
+                'Statistics',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.bar_chart_rounded),
+              title: const Text('Listening Statistics'),
+              subtitle: const Text('Your listening habits and top songs'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => openStats(context),
             ),
 
             const Divider(height: 32),

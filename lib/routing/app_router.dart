@@ -11,6 +11,7 @@ import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/screens/now_playing_screen.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
 import 'package:sonora/screens/settings_screen.dart';
+import 'package:sonora/screens/stats_screen.dart';
 import 'package:sonora/utils/logger.dart';
 import 'package:sonora/widgets/mini_player.dart';
 
@@ -191,6 +192,12 @@ class SonoraAppRouter {
                 playerProvider: playerProvider,
               );
             },
+          ),
+          GoRoute(
+            path: AppRoutes.stats,
+            builder: (context, state) => StatsScreen(
+              playerProvider: playerProvider,
+            ),
           ),
           GoRoute(
             path: AppRoutes.playlist,
