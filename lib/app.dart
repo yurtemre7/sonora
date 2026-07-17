@@ -42,6 +42,11 @@ class _SonoraAppState extends State<SonoraApp> {
   var _showOnboarding = false;
   var _showSyncPrompt = false;
 
+  // Sentinel values so the first _syncRouterState() always fires a refresh.
+  var _prevIsLoading = false;
+  var _prevShowOnboarding = true;
+  var _prevHasPermission = false;
+
   @override
   void initState() {
     super.initState();
@@ -105,6 +110,18 @@ class _SonoraAppState extends State<SonoraApp> {
   }
 
   void _syncRouterState() {
+    // Only wake go_router when the gate state actually changed — avoids
+    // redundant redirect evaluations (and duplicate route logs) that would
+    // fire on every PlayerProvider notifyListeners() call.
+    if (_isLoading == _prevIsLoading &&
+        _showOnboarding == _prevShowOnboarding &&
+        _hasPermission == _prevHasPermission) {
+      return;
+    }
+    _prevIsLoading = _isLoading;
+    _prevShowOnboarding = _showOnboarding;
+    _prevHasPermission = _hasPermission;
+
     _appRouter.updateGateState(
       isLoading: _isLoading,
       showOnboarding: _showOnboarding,
