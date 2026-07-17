@@ -16,6 +16,8 @@ All notable changes to the Sonora music player project are documented in this fi
 * Make sequential sync the default and sole option, simplify settings UI
 * Apply saved tab sorting on app start and group duplicate album names by artist
 ### Changed
+* Perf: Only refresh go_router when gate state actually changes to eliminate startup route log spam
+* Chore: Refresh changelog with Now Playing back gesture fix
 * Chore: Refresh changelog with Now Playing back gesture fix
 * Chore: Refresh changelog with dart format updates
 * Chore: Run dart format to apply standard formatting style across all files
