@@ -2,16 +2,14 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.5.0] - 2026-07-16
-### Added
-* Add volume slider with persistent percentage and platform-aware defaults
-
+## [Unreleased]
 ### Fixed
-* Correct split-ABI versionCode display for --build-number flag
-
+* Apply saved tab sorting on app start and group duplicate album names by artist
 ### Changed
-* Relocate song actions to inline chip row and three-dot menu
-* Remove redundant sleep timer badge from now-playing info section
+* Chore: Fix folder name on README.md
+* Chore: Add cupertino icons dependency for flutter build warning to disappear
+
+## [1.5.0] - 2026-07-16
 
 ## [1.4.5] - 2026-07-16
 ### Added
