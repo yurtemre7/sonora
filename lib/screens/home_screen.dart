@@ -84,14 +84,17 @@ class _HomeScreenState extends State<HomeScreen>
     var albumsSettings = await scanner.getTabSortSettings('albums');
     var artistsSettings = await scanner.getTabSortSettings('artists');
     var playlistsSettings = await scanner.getTabSortSettings('playlists');
-    _songSortBy = songsSettings['sortBy'] as String;
-    _songSortAscending = songsSettings['sortAscending'] as bool;
-    _albumSortBy = albumsSettings['sortBy'] as String;
-    _albumSortAscending = albumsSettings['sortAscending'] as bool;
-    _artistSortBy = artistsSettings['sortBy'] as String;
-    _artistSortAscending = artistsSettings['sortAscending'] as bool;
-    _playlistSortBy = playlistsSettings['sortBy'] as String;
-    _playlistSortAscending = playlistsSettings['sortAscending'] as bool;
+    if (!mounted) return;
+    setState(() {
+      _songSortBy = songsSettings['sortBy'] as String;
+      _songSortAscending = songsSettings['sortAscending'] as bool;
+      _albumSortBy = albumsSettings['sortBy'] as String;
+      _albumSortAscending = albumsSettings['sortAscending'] as bool;
+      _artistSortBy = artistsSettings['sortBy'] as String;
+      _artistSortAscending = artistsSettings['sortAscending'] as bool;
+      _playlistSortBy = playlistsSettings['sortBy'] as String;
+      _playlistSortAscending = playlistsSettings['sortAscending'] as bool;
+    });
   }
 
   List<AlbumGroup> _getAlbums() {
