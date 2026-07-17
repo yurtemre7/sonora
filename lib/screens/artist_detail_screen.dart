@@ -22,10 +22,7 @@ class ArtistDetailScreen extends StatelessWidget {
     var theme = Theme.of(context);
     var firstSong = artist.songs.first;
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (_, _) => closeRoute(context),
-      child: Scaffold(
+    return Scaffold(
         body: Stack(
           children: [
             // Blurred background
@@ -281,7 +278,6 @@ class ArtistDetailScreen extends StatelessWidget {
             ),
           ],
         ),
-      ), // Scaffold
-    ); // PopScope
+    );
   }
 }

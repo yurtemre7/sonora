@@ -22,10 +22,7 @@ class AlbumDetailScreen extends StatelessWidget {
     var theme = Theme.of(context);
     var firstSong = album.songs.first;
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (_, _) => closeRoute(context),
-      child: Scaffold(
+    return Scaffold(
         body: Stack(
           children: [
             // Blurred background
@@ -176,7 +173,6 @@ class AlbumDetailScreen extends StatelessWidget {
             ),
           ],
         ),
-      ), // Scaffold
-    ); // PopScope
+    );
   }
 }

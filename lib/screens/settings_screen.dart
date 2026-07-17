@@ -317,17 +317,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (_, _) => closeRoute(context),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Settings'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded),
-            onPressed: () => closeRoute(context),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => closeRoute(context),
         ),
+      ),
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           children: [
@@ -847,9 +844,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
               ),
             ),
-          ],
-        ),
-      ), // Scaffold (child of PopScope)
-    ); // PopScope
+        ],
+      ),
+    );
   }
 }

@@ -282,10 +282,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
             ? 'Your favorites'
             : 'Your own playlist';
 
-        return PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (_, _) => closeRoute(context),
-          child: Scaffold(
+        return Scaffold(
             body: Stack(
               children: [
                 if (firstSong?.artworkPath != null)
@@ -610,8 +607,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                 ),
               ],
             ),
-          ), // Scaffold
-        ); // PopScope
+        );
       },
     );
   }
