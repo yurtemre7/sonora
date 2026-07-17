@@ -2,11 +2,14 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [Unreleased]
+### Changed
+* Chore: Rename AGENTS.md to agents.md and update content
+* Chore: Improve README.md
+
 ## [1.6.0] - 2026-07-17
 ### Added
 * Add listening statistics screen with cumulative play tracking
-
-## [1.5.1] - 2026-07-17
 
 ## [1.5.1] - 2026-07-17
 ### Added
@@ -25,30 +28,13 @@ All notable changes to the Sonora music player project are documented in this fi
 * Apply saved tab sorting on app start and group duplicate album names by artist
 ### Changed
 * Chore: Remove wrong popscopes
-* Chore: Refresh changelog with router refresh dedup fix
 * Perf: Only refresh go_router when gate state actually changes to eliminate startup route log spam
-* Chore: Refresh changelog with Now Playing back gesture fix
-* Chore: Refresh changelog with Now Playing back gesture fix
-* Chore: Refresh changelog with dart format updates
 * Chore: Run dart format to apply standard formatting style across all files
-* Chore: Refresh changelog with lint fixes
 * Chore: Fix minor dart lint warnings to ensure clean static analysis
-* Chore: Refresh changelog with benchmark tests removal
 * Chore: Remove redundant and slow benchmark tests to speed up test runs
-* Chore: Refresh changelog with stable sorting fix
-* Chore: Refresh changelog with unique themes bucketing fix
-* Chore: Refresh changelog with extractor performance optimizations
 * Perf: Batch disk writes and defer library updates in color extractor to prevent lag
-* Chore: Refresh changelog with layout overflow fix
-* Chore: Refresh changelog with active theme extraction spinner
-* Chore: Refresh changelog with background color extractor feature
-* Chore: Refresh changelog with sorting and lyrics updates
-* Chore: Refresh changelog with sequential sync update
-* Chore: Refresh changelog
 * Chore: Fix folder name on README.md
 * Chore: Add cupertino icons dependency for flutter build warning to disappear
-
-## [1.5.0] - 2026-07-16
 
 ## [1.4.5] - 2026-07-16
 ### Added
@@ -70,8 +56,6 @@ All notable changes to the Sonora music player project are documented in this fi
 ## [1.4.3] - 2026-07-16
 ### Fixed
 * Update playlists info on "add to playlist" sheet
-### Changed
-* 1.4.3
 
 ## [1.4.2] - 2026-07-15
 ### Added
@@ -102,7 +86,6 @@ All notable changes to the Sonora music player project are documented in this fi
 * Let taps go through the audio visualizer
 * Reverse swipe on mini player
 ### Changed
-* 1.4.0
 * Chore: Improving dialog actions
 * Chore: Add logging
 * Chore: Safe area on settings and change back icon
@@ -121,7 +104,6 @@ All notable changes to the Sonora music player project are documented in this fi
 * Marquee text now reset properly upon song change
 * Refreshing while having a queue with changes elements, does not reset the queue
 ### Changed
-* 1.3.2
 * Chore: Format files
 
 ## [1.3.1] - 2026-07-12
@@ -132,7 +114,6 @@ All notable changes to the Sonora music player project are documented in this fi
 * Improve seek bar
 * Scroll bar up scrolling buggy behaviour
 ### Changed
-* 1.3.1
 * Chore: Format files
 
 ## [1.3.0] - 2026-07-12
@@ -196,8 +177,6 @@ All notable changes to the Sonora music player project are documented in this fi
 ## [1.1.16] - 2026-07-11
 ### Changed
 * Chore: Add windows support
-
-## [1.1.15] - 2026-07-10
 
 ## [1.1.13] - 2026-07-10
 ### Added

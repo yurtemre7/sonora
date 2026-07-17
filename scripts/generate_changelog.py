@@ -57,11 +57,16 @@ def generate_changelog():
             fixed = []
             changed = []
             for commit in unreleased:
-                if any(x in commit.lower() for x in ["release: v", "bump version", "merge branch"]):
+                if any(x in commit.lower() for x in ["release: v", "bump version", "merge branch", "refresh changelog"]):
                     continue
                 commit_type, msg = parse_commit(commit)
                 if msg:
                     msg = msg[0].upper() + msg[1:]
+                
+                # Skip version-only commits (e.g., "1.6.0", "1.4.3")
+                if msg and re.match(r'^\d+\.\d+\.\d+', msg):
+                    continue
+                
                 if commit_type == 'feat':
                     added.append(msg)
                 elif commit_type == 'fix':
@@ -114,12 +119,16 @@ def generate_changelog():
         changed = []
         
         for commit in commits:
-            if any(x in commit.lower() for x in ["release: v", "bump version", "merge branch"]):
+            if any(x in commit.lower() for x in ["release: v", "bump version", "merge branch", "refresh changelog"]):
                 continue
                 
             commit_type, msg = parse_commit(commit)
             if msg:
                 msg = msg[0].upper() + msg[1:]
+            
+            # Skip version-only commits (e.g., "1.6.0", "1.4.3")
+            if msg and re.match(r'^\d+\.\d+\.\d+', msg):
+                continue
                 
             if commit_type == 'feat':
                 added.append(msg)
@@ -136,22 +145,24 @@ def generate_changelog():
                 else:
                     changed.append(msg)
                     
-        changelog_content.append(f"## [{version_clean}] - {tag_date}")
-        
-        if added:
-            changelog_content.append("### Added")
-            for item in added:
-                changelog_content.append(f"* {item}")
-        if fixed:
-            changelog_content.append("### Fixed")
-            for item in fixed:
-                changelog_content.append(f"* {item}")
-        if changed:
-            changelog_content.append("### Changed")
-            for item in changed:
-                changelog_content.append(f"* {item}")
-                
-        changelog_content.append("")
+        # Only add version section if there's actual content
+        if added or fixed or changed:
+            changelog_content.append(f"## [{version_clean}] - {tag_date}")
+            
+            if added:
+                changelog_content.append("### Added")
+                for item in added:
+                    changelog_content.append(f"* {item}")
+            if fixed:
+                changelog_content.append("### Fixed")
+                for item in fixed:
+                    changelog_content.append(f"* {item}")
+            if changed:
+                changelog_content.append("### Changed")
+                for item in changed:
+                    changelog_content.append(f"* {item}")
+                    
+            changelog_content.append("")
         
     with open('CHANGELOG.md', 'w') as f:
         f.write('\n'.join(changelog_content))
