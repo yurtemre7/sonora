@@ -113,16 +113,34 @@ class SonoraAppRouter {
             builder: (context, _) {
               var currentSong = playerProvider.currentSong;
 
-              return Scaffold(
-                body: child,
-                extendBody: true,
-                bottomNavigationBar: currentSong == null
-                    ? null
-                    : _ShellMiniPlayer(
-                        playerProvider: playerProvider,
-                        currentSong: currentSong,
-                        onOpenNowPlaying: () => _openNowPlayingSheet(context),
-                      ),
+              return ValueListenableBuilder<bool>(
+                valueListenable: _isNowPlayingOpen,
+                builder: (context, nowPlayingOpen, _) {
+                  return PopScope(
+                    // When the Now Playing sheet is open, block the default
+                    // system-back so we can close the sheet first instead of
+                    // popping the underlying page.
+                    canPop: !nowPlayingOpen,
+                    onPopInvokedWithResult: (didPop, _) {
+                      if (!didPop && nowPlayingOpen) {
+                        // Dismiss the Now Playing sheet.
+                        Navigator.of(context, rootNavigator: true).maybePop();
+                      }
+                    },
+                    child: Scaffold(
+                      body: child,
+                      extendBody: true,
+                      bottomNavigationBar: currentSong == null
+                          ? null
+                          : _ShellMiniPlayer(
+                              playerProvider: playerProvider,
+                              currentSong: currentSong,
+                              onOpenNowPlaying: () =>
+                                  _openNowPlayingSheet(context),
+                            ),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -256,6 +274,11 @@ class SonoraAppRouter {
   var _permissionGranted = true;
   var _lastLoggedPath = '';
 
+  /// Tracks whether the Now Playing bottom sheet is currently visible.
+  /// Used by the shell's [PopScope] to intercept system-back and close
+  /// the sheet before popping any nested route.
+  final _isNowPlayingOpen = ValueNotifier<bool>(false);
+
   void updateGateState({
     required bool isLoading,
     required bool showOnboarding,
@@ -267,6 +290,8 @@ class SonoraAppRouter {
   }
 
   void _openNowPlayingSheet(BuildContext context) {
+    if (_isNowPlayingOpen.value) return; // Already open — don't stack sheets.
+    _isNowPlayingOpen.value = true;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -276,7 +301,9 @@ class SonoraAppRouter {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) => NowPlayingScreen(playerProvider: playerProvider),
-    );
+    ).whenComplete(() {
+      _isNowPlayingOpen.value = false;
+    });
   }
 }
 
