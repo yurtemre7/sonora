@@ -66,8 +66,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
         if (!isIncoming) {
           offsetAnimation =
               Tween<Offset>(
-                begin: Offset.zero,
-                end: Offset(-0.15 * _slideDirection, 0),
+                begin: Offset(-0.15 * _slideDirection, 0),
+                end: Offset.zero,
               ).animate(animation);
         }
         return ClipRect(

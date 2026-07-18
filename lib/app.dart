@@ -490,11 +490,11 @@ class _SonoraAppState extends State<SonoraApp> {
                 return MaterialApp.router(
                   scaffoldMessengerKey: _scaffoldMessengerKey,
                   title: 'Sonora',
-                  theme: AppTheme.getTheme(
+                  theme: AppTheme.buildTheme(
                     Brightness.light,
                     seedColor: seedColor,
                   ),
-                  darkTheme: AppTheme.getTheme(
+                  darkTheme: AppTheme.buildTheme(
                     Brightness.dark,
                     seedColor: seedColor,
                   ),
