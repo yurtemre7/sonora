@@ -37,8 +37,49 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   var _showLyrics = false;
   var _showVolume = Platform.isWindows;
   var _viewMode = _ViewMode.player;
+  var _slideDirection = 0;
   late AnimationController _likeAnimController;
   late Animation<double> _likeAnim;
+
+  void _next() {
+    _slideDirection = 1;
+    widget.playerProvider.next();
+  }
+
+  void _previous() {
+    _slideDirection = -1;
+    widget.playerProvider.previous();
+  }
+
+  Widget _buildSongSwitcher(String keyValue, Widget child) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 350),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) {
+        var offsetAnimation =
+            Tween<Offset>(
+              begin: Offset(0.15 * _slideDirection, 0),
+              end: Offset.zero,
+            ).animate(animation);
+        var isIncoming = child.key == ValueKey(keyValue);
+        if (!isIncoming) {
+          offsetAnimation =
+              Tween<Offset>(
+                begin: Offset.zero,
+                end: Offset(-0.15 * _slideDirection, 0),
+              ).animate(animation);
+        }
+        return ClipRect(
+          child: SlideTransition(
+            position: offsetAnimation,
+            child: FadeTransition(opacity: animation, child: child),
+          ),
+        );
+      },
+      child: KeyedSubtree(key: ValueKey(keyValue), child: child),
+    );
+  }
 
   @override
   void initState() {
@@ -280,9 +321,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             onHorizontalDragEnd: (details) {
               if (details.primaryVelocity != null) {
                 if (details.primaryVelocity! < -100) {
-                  widget.playerProvider.next();
+                  _next();
                 } else if (details.primaryVelocity! > 100) {
-                  widget.playerProvider.previous();
+                  _previous();
                 }
               }
             },
@@ -293,57 +334,60 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   isPlaying: widget.playerProvider.audioHandler.player.playing,
                   color: theme.colorScheme.primary,
                 ),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOut,
-                  width: widget.playerProvider.immersiveMode
-                      ? constraints.maxWidth
-                      : min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          child: AlbumArt(
-                            artworkPath: song.artworkPath,
-                            size: widget.playerProvider.immersiveMode
-                                ? constraints.maxWidth
-                                : min(
-                                    MediaQuery.sizeOf(context).width * 0.80,
-                                    300.0,
-                                  ),
-                            borderRadius: 28,
-                          ),
+                _buildSongSwitcher(
+                  'np_cover_${song.id}',
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                    width: widget.playerProvider.immersiveMode
+                        ? constraints.maxWidth
+                        : min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.4),
+                          blurRadius: 10,
                         ),
-                        if (_showLyrics)
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Stack(
+                        children: [
                           Positioned.fill(
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(
-                                sigmaX: 18.0,
-                                sigmaY: 18.0,
-                              ),
-                              child: Container(
-                                color: theme.brightness == Brightness.dark
-                                    ? Colors.black.withValues(alpha: 0.75)
-                                    : Colors.white.withValues(alpha: 0.80),
-                                child: SongLyricsOverlay(
-                                  song: song,
-                                  playerProvider: widget.playerProvider,
+                            child: AlbumArt(
+                              artworkPath: song.artworkPath,
+                              size: widget.playerProvider.immersiveMode
+                                  ? constraints.maxWidth
+                                  : min(
+                                      MediaQuery.sizeOf(context).width * 0.80,
+                                      300.0,
+                                    ),
+                              borderRadius: 28,
+                            ),
+                          ),
+                          if (_showLyrics)
+                            Positioned.fill(
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(
+                                  sigmaX: 18.0,
+                                  sigmaY: 18.0,
+                                ),
+                                child: Container(
+                                  color: theme.brightness == Brightness.dark
+                                      ? Colors.black.withValues(alpha: 0.75)
+                                      : Colors.white.withValues(alpha: 0.80),
+                                  child: SongLyricsOverlay(
+                                    song: song,
+                                    playerProvider: widget.playerProvider,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -357,62 +401,66 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MarqueeText(
-                      key: ValueKey('np_title_${song.displayTitle}'),
-                      text: song.displayTitle,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                child: _buildSongSwitcher(
+                  'np_info_${song.id}',
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      MarqueeText(
+                        key: ValueKey('np_title_${song.displayTitle}'),
+                        text: song.displayTitle,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: GestureDetector(
-                            onTap: () => _showArtistSheet(context, song.artist),
-                            child: MarqueeText(
-                              key: ValueKey('np_artist_${song.artist}'),
-                              text: song.artist,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: GestureDetector(
+                              onTap: () =>
+                                  _showArtistSheet(context, song.artist),
+                              child: MarqueeText(
+                                key: ValueKey('np_artist_${song.artist}'),
+                                text: song.artist,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Text(
-                            '•',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          child: GestureDetector(
-                            onTap: () => _showAlbumSheet(
-                              context,
-                              song.album,
-                              song.artist,
-                            ),
-                            child: MarqueeText(
-                              key: ValueKey(
-                                'np_album_${song.album}_${song.artist}',
-                              ),
-                              text: song.album,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Text(
+                              '•',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          Flexible(
+                            child: GestureDetector(
+                              onTap: () => _showAlbumSheet(
+                                context,
+                                song.album,
+                                song.artist,
+                              ),
+                              child: MarqueeText(
+                                key: ValueKey(
+                                  'np_album_${song.album}_${song.artist}',
+                                ),
+                                text: song.album,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -513,8 +561,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             isShuffled: widget.playerProvider.isShuffled,
             repeatMode: widget.playerProvider.repeatMode,
             onPlayPause: widget.playerProvider.playPause,
-            onNext: widget.playerProvider.next,
-            onPrevious: widget.playerProvider.previous,
+            onNext: _next,
+            onPrevious: _previous,
             onShuffle: widget.playerProvider.toggleShuffle,
             onRepeat: widget.playerProvider.cycleRepeatMode,
           ),
@@ -747,6 +795,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   }
 
   Future<void> _playRelatedSong(Song song, List<Song> allSongs) async {
+    _slideDirection = 0;
     if (mounted) {
       setState(() => _viewMode = _ViewMode.player);
     }
@@ -909,6 +958,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                     showHighlightBackground: false,
                                     onTap: () {
                                       if (!isCurrent) {
+                                        _slideDirection = 0;
                                         widget.playerProvider.audioHandler
                                             .skipToQueueItem(actualIndex);
                                       }

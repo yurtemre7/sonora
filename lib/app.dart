@@ -481,26 +481,35 @@ class _SonoraAppState extends State<SonoraApp> {
         return ValueListenableBuilder<Color>(
           valueListenable: _playerProvider.themeColorNotifier,
           builder: (context, activeSeedColor, _) {
-            return MaterialApp.router(
-              scaffoldMessengerKey: _scaffoldMessengerKey,
-              title: 'Sonora',
-              theme: AppTheme.getTheme(
-                Brightness.light,
-                seedColor: activeSeedColor,
-              ),
-              darkTheme: AppTheme.getTheme(
-                Brightness.dark,
-                seedColor: activeSeedColor,
-              ),
-              themeMode: _themeProvider.themeMode,
-              debugShowCheckedModeBanner: false,
-              builder: (context, child) {
-                return GestureDetector(
-                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                  child: child,
+            return TweenAnimationBuilder<Color?>(
+              tween: ColorTween(end: activeSeedColor),
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeInOutCubic,
+              builder: (context, animatedSeedColor, _) {
+                var seedColor = animatedSeedColor ?? activeSeedColor;
+                return MaterialApp.router(
+                  scaffoldMessengerKey: _scaffoldMessengerKey,
+                  title: 'Sonora',
+                  theme: AppTheme.getTheme(
+                    Brightness.light,
+                    seedColor: seedColor,
+                  ),
+                  darkTheme: AppTheme.getTheme(
+                    Brightness.dark,
+                    seedColor: seedColor,
+                  ),
+                  themeMode: _themeProvider.themeMode,
+                  debugShowCheckedModeBanner: false,
+                  builder: (context, child) {
+                    return GestureDetector(
+                      onTap: () =>
+                          FocusManager.instance.primaryFocus?.unfocus(),
+                      child: child,
+                    );
+                  },
+                  routerConfig: _appRouter.router,
                 );
               },
-              routerConfig: _appRouter.router,
             );
           },
         );
