@@ -322,6 +322,7 @@ class _ShellMiniPlayer extends StatelessWidget {
         return MiniPlayer(
           currentSong: currentSong,
           isPlaying: playerProvider.audioHandler.player.playing,
+          isCompleted: playerProvider.isCompleted,
           progress: progress,
           onTap: onOpenNowPlaying,
           onPlayPause: playerProvider.playPause,

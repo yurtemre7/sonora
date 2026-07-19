@@ -120,6 +120,10 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// Whether the player is currently playing audio.
   bool get isPlaying => audioHandler.player.playing;
 
+  /// Whether the playback has completed its queue.
+  bool get isCompleted =>
+      audioHandler.player.processingState == ProcessingState.completed;
+
   /// Current playback position stream.
   Stream<Duration> get positionStream => audioHandler.player.positionStream;
 
@@ -151,6 +155,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (isPlaying) {
       await audioHandler.pause();
     } else {
+      if (isCompleted && queue.isNotEmpty) {
+        await audioHandler.skipToQueueItem(0);
+      }
       await audioHandler.play();
     }
   }

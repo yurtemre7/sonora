@@ -510,6 +510,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           // Player Controls
           PlayerControls(
             isPlaying: widget.playerProvider.isPlaying,
+            isCompleted: widget.playerProvider.isCompleted,
             isShuffled: widget.playerProvider.isShuffled,
             repeatMode: widget.playerProvider.repeatMode,
             onPlayPause: widget.playerProvider.playPause,

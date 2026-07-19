@@ -6,6 +6,7 @@ class PlayerControls extends StatelessWidget {
   const PlayerControls({
     super.key,
     required this.isPlaying,
+    required this.isCompleted,
     required this.isShuffled,
     required this.repeatMode,
     required this.onPlayPause,
@@ -16,6 +17,7 @@ class PlayerControls extends StatelessWidget {
   });
 
   final bool isPlaying;
+  final bool isCompleted;
   final bool isShuffled;
   final RepeatMode repeatMode;
   final VoidCallback onPlayPause;
@@ -78,7 +80,11 @@ class PlayerControls extends StatelessWidget {
               key: ValueKey<bool>(isPlaying),
               onPressed: onPlayPause,
               icon: Icon(
-                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                isPlaying
+                    ? Icons.pause_rounded
+                    : isCompleted
+                        ? Icons.replay_rounded
+                        : Icons.play_arrow_rounded,
               ),
               iconSize: 36,
               tooltip: isPlaying ? 'Pause' : 'Play',

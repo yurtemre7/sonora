@@ -7,6 +7,7 @@ class MiniPlayer extends StatelessWidget {
     super.key,
     required this.currentSong,
     required this.isPlaying,
+    required this.isCompleted,
     required this.progress,
     required this.onTap,
     required this.onPlayPause,
@@ -19,6 +20,7 @@ class MiniPlayer extends StatelessWidget {
 
   final Song currentSong;
   final bool isPlaying;
+  final bool isCompleted;
   final double progress;
   final VoidCallback onTap;
   final VoidCallback onPlayPause;
@@ -174,7 +176,9 @@ class MiniPlayer extends StatelessWidget {
                             icon: Icon(
                               isPlaying
                                   ? Icons.pause_rounded
-                                  : Icons.play_arrow_rounded,
+                                  : isCompleted
+                                      ? Icons.replay_rounded
+                                      : Icons.play_arrow_rounded,
                             ),
                             iconSize: 30,
                             color: theme.colorScheme.onSurface,

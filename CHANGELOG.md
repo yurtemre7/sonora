@@ -6,6 +6,7 @@ All notable changes to the Sonora music player project are documented in this fi
 ### Added
 * Add tracking for shuffle sessions, song skips, and song restarts
 ### Fixed
+* Add bottom padding to statistics page to prevent miniplayer overlap
 * Correct playback time tracking rate for analytics
 ### Changed
 * Chore: Add MIT license
