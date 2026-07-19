@@ -6,6 +6,8 @@ All notable changes to the Sonora music player project are documented in this fi
 ### Added
 * Add tracking for shuffle sessions, song skips, and song restarts
 ### Fixed
+* Resolve playback quirks (shuffle mutation, skip/seek analytics) and dynamic stats padding
+* Show replay icon and restart queue when playback completes
 * Add bottom padding to statistics page to prevent miniplayer overlap
 * Correct playback time tracking rate for analytics
 ### Changed

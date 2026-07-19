@@ -96,7 +96,7 @@ class _StatsScreenState extends State<StatsScreen> {
                   ],
                 ),
               ),
-              _buildBottomNav(theme),
+              _buildBottomNav(theme, widget.playerProvider.currentSong != null),
             ],
           );
         },
@@ -106,9 +106,14 @@ class _StatsScreenState extends State<StatsScreen> {
 
   // ── Bottom Navigation ────────────────────────────────────────────────────
 
-  Widget _buildBottomNav(ThemeData theme) {
+  Widget _buildBottomNav(ThemeData theme, bool hasMiniPlayer) {
     return Container(
-      padding: const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 132),
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 12,
+        bottom: 12 + (hasMiniPlayer ? 120.0 : 0.0),
+      ),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(

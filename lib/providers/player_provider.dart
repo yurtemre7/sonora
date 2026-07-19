@@ -164,8 +164,10 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Skips to the next track in the queue.
   Future<void> next() async {
-    if (currentSong != null) {
-      statsService.recordSongSkip(currentSong!.id);
+    if (currentIndex < queue.length - 1) {
+      if (currentSong != null) {
+        statsService.recordSongSkip(currentSong!.id);
+      }
     }
     await audioHandler.skipToNext();
   }
@@ -191,6 +193,11 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Seeks to [position] within the current track.
   Future<void> seek(Duration position) async {
+    if (position < const Duration(seconds: 3) && audioHandler.player.position > const Duration(seconds: 3)) {
+      if (currentSong != null) {
+        statsService.recordSongRestart(currentSong!.id);
+      }
+    }
     await audioHandler.seek(position);
   }
 
@@ -206,22 +213,25 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     var current = currentSong!;
 
     if (isShuffled) {
-      // Restore original order after current index.
+      // Restore exact original order
       var origIndex = _originalQueue.indexWhere((s) => s.id == current.id);
       if (origIndex >= 0) {
-        var newQueue = <Song>[];
-        // Keep current song at its current index
-        newQueue.addAll(queue.sublist(0, currentIndex + 1));
-
-        // Find which songs from original queue are not yet in newQueue
-        var remainingOriginal = _originalQueue
-            .where((s) => !newQueue.any((nq) => nq.id == s.id))
-            .toList();
-        newQueue.addAll(remainingOriginal);
-
-        queue = newQueue;
+        queue = List<Song>.from(_originalQueue);
+        currentIndex = origIndex;
       }
       isShuffled = false;
+
+      // When unshuffling, the currentIndex changes, so we must reload the whole playlist
+      // to sync the AudioHandler's internal queue.
+      try {
+        await audioHandler.loadPlaylist(
+          queue.map(_songToMediaItem).toList(),
+          initialIndex: currentIndex,
+        );
+        if (isPlaying) {
+          await audioHandler.play();
+        }
+      } catch (_) {}
     } else {
       // Shuffle only the songs after the current index.
       var remaining = queue.sublist(currentIndex + 1);
@@ -233,24 +243,22 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
       queue = newQueue;
       isShuffled = true;
-    }
 
-    notifyListeners();
-
-    // Update the audio handler's playlist source after current index
-    var remainingMediaItems = queue
-        .sublist(currentIndex + 1)
-        .map(_songToMediaItem)
-        .toList();
-    try {
-      await audioHandler.updatePlaylistAfter(currentIndex, remainingMediaItems);
-    } on PlayerInterruptedException {
-      await audioHandler.loadPlaylist(
-        queue.map(_songToMediaItem).toList(),
-        initialIndex: currentIndex,
-      );
-      if (isPlaying) {
-        await audioHandler.play();
+      // Update the audio handler's playlist source after current index
+      var remainingMediaItems = queue
+          .sublist(currentIndex + 1)
+          .map(_songToMediaItem)
+          .toList();
+      try {
+        await audioHandler.updatePlaylistAfter(currentIndex, remainingMediaItems);
+      } on PlayerInterruptedException {
+        await audioHandler.loadPlaylist(
+          queue.map(_songToMediaItem).toList(),
+          initialIndex: currentIndex,
+        );
+        if (isPlaying) {
+          await audioHandler.play();
+        }
       }
     }
 
