@@ -121,46 +121,51 @@ class _StatsScreenState extends State<StatsScreen> {
           ),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left_rounded),
-            onPressed: _currentPage > 0
-                ? () => _pageController.previousPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  )
-                : null,
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(5, (i) {
-              var isActive = i == _currentPage;
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                width: isActive ? 24 : 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurface.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              );
-            }),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right_rounded),
-            onPressed: _currentPage < 4
-                ? () => _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  )
-                : null,
-          ),
-        ],
+      child: SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left_rounded),
+              onPressed: _currentPage > 0
+                  ? () => _pageController.previousPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    )
+                  : null,
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(5, (i) {
+                var isActive = i == _currentPage;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: isActive ? 24 : 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                );
+              }),
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right_rounded),
+              onPressed: _currentPage < 4
+                  ? () => _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    )
+                  : null,
+            ),
+          ],
+        ),
       ),
     );
   }
