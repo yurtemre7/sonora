@@ -2,6 +2,18 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.6.2] - 2026-07-19
+### Added
+* Add default app color picker based on extracted themes
+### Fixed
+* Restore useSafeArea: true to bottom sheets
+* Now playing sheet safe areas and overlapping elements
+* Apply proper safe area on stats screen
+### Changed
+* Restore useSafeArea: true on all bottom sheets
+* Chore: Improve stats screen bottom padding while player is active
+* Refactor: Apply formatting and resolve all static analysis issues
+
 ## [1.6.1] - 2026-07-19
 ### Added
 * Add setting to pause music on notifications
