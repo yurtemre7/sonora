@@ -85,6 +85,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
         }
 
         return Scaffold(
+          extendBody: true,
           extendBodyBehindAppBar: true,
           appBar: AppBar(
             leading: IconButton(
@@ -196,8 +197,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
               ),
               // Main content
               SafeArea(
+                top: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  padding: EdgeInsets.only(
+                    left: 24.0,
+                    right: 24.0,
+                    top: kToolbarHeight + MediaQuery.of(context).padding.top,
+                  ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       return Column(
@@ -1162,10 +1168,20 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => ArtistDetailScreen(
-        artist: artist,
-        playerProvider: widget.playerProvider,
-      ),
+      builder: (context) {
+        var mediaQuery = MediaQuery.of(context);
+        return SizedBox(
+          height: mediaQuery.size.height - mediaQuery.padding.top,
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: ArtistDetailScreen(
+              artist: artist,
+              playerProvider: widget.playerProvider,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -1187,10 +1203,20 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => AlbumDetailScreen(
-        album: album,
-        playerProvider: widget.playerProvider,
-      ),
+      builder: (context) {
+        var mediaQuery = MediaQuery.of(context);
+        return SizedBox(
+          height: mediaQuery.size.height - mediaQuery.padding.top,
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: AlbumDetailScreen(
+              album: album,
+              playerProvider: widget.playerProvider,
+            ),
+          ),
+        );
+      },
     );
   }
 
