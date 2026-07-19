@@ -290,17 +290,7 @@ class SonoraAppRouter {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) {
-        var mediaQuery = MediaQuery.of(context);
-        return SizedBox(
-          height: mediaQuery.size.height - mediaQuery.padding.top,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            child: NowPlayingScreen(playerProvider: playerProvider),
-          ),
-        );
-      },
+      builder: (context) => NowPlayingScreen(playerProvider: playerProvider),
     ).whenComplete(() {
       _isNowPlayingOpen.value = false;
     });
