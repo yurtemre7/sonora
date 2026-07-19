@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
@@ -10,6 +8,7 @@ import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
+import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -262,64 +261,69 @@ class _HomeScreenState extends State<HomeScreen>
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return SafeArea(
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+            return Container(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    RadioGroup<String>(
-                      groupValue: _sortByForTab(tabIndex),
-                      onChanged: (val) {
-                        setState(() => _setSortByForTab(tabIndex, val!));
-                        setSheetState(() {});
-                        MusicScanner().saveTabSortSettings(
-                          tabName,
-                          _sortByForTab(tabIndex),
-                          _sortAscendingForTab(tabIndex),
-                        );
-                        Navigator.pop(context);
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: options.map((opt) {
-                          return RadioListTile<String>(
-                            title: Text(opt.$1),
-                            value: opt.$2,
+                      const SizedBox(height: 16),
+                      RadioGroup<String>(
+                        groupValue: _sortByForTab(tabIndex),
+                        onChanged: (val) {
+                          setState(() => _setSortByForTab(tabIndex, val!));
+                          setSheetState(() {});
+                          MusicScanner().saveTabSortSettings(
+                            tabName,
+                            _sortByForTab(tabIndex),
+                            _sortAscendingForTab(tabIndex),
                           );
-                        }).toList(),
+                          Navigator.pop(context);
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: options.map((opt) {
+                            return RadioListTile<String>(
+                              title: Text(opt.$1),
+                              value: opt.$2,
+                            );
+                          }).toList(),
+                        ),
                       ),
-                    ),
-                    const Divider(),
-                    SwitchListTile(
-                      title: const Text('Sort Ascending'),
-                      value: _sortAscendingForTab(tabIndex),
-                      onChanged: (val) {
-                        setState(() => _setSortAscendingForTab(tabIndex, val));
-                        setSheetState(() {});
-                        MusicScanner().saveTabSortSettings(
-                          tabName,
-                          _sortByForTab(tabIndex),
-                          _sortAscendingForTab(tabIndex),
-                        );
-                      },
-                    ),
-                  ],
+                      const Divider(),
+                      SwitchListTile(
+                        title: const Text('Sort Ascending'),
+                        value: _sortAscendingForTab(tabIndex),
+                        onChanged: (val) {
+                          setState(
+                            () => _setSortAscendingForTab(tabIndex, val),
+                          );
+                          setSheetState(() {});
+                          MusicScanner().saveTabSortSettings(
+                            tabName,
+                            _sortByForTab(tabIndex),
+                            _sortAscendingForTab(tabIndex),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -384,179 +388,6 @@ class _HomeScreenState extends State<HomeScreen>
         break;
       default:
         _songSortAscending = val;
-    }
-  }
-
-  void _showSongInfoBottomSheet(Song song) {
-    var theme = Theme.of(context);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      builder: (context) {
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHigh,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.4,
-                      ),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Song Information',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildInfoRow('Title', song.displayTitle, theme),
-                _buildInfoRow('Artist', song.artist, theme),
-                _buildInfoRow('Album', song.album, theme),
-                _buildInfoRow('Duration', song.durationFormatted, theme),
-                _buildInfoRow('File Path', song.filePath, theme, isPath: true),
-                if (song.fileSize != null)
-                  _buildInfoRow(
-                    'File Size',
-                    _formatFileSize(song.fileSize!),
-                    theme,
-                  ),
-                if (song.lastModifiedMs != null)
-                  _buildInfoRow(
-                    'Date Modified',
-                    _formatDate(
-                      DateTime.fromMillisecondsSinceEpoch(song.lastModifiedMs!),
-                    ),
-                    theme,
-                  ),
-                FutureBuilder<FileStat?>(
-                  future: _getFileStat(song.filePath),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && snapshot.data != null) {
-                      var stat = snapshot.data!;
-                      // 'changed' is the closest to creation time available
-                      // on most platforms.
-                      if (stat.changed != stat.modified) {
-                        return _buildInfoRow(
-                          'Date Created',
-                          _formatDate(stat.changed),
-                          theme,
-                        );
-                      }
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-                if (song.format != null)
-                  _buildInfoRow('Format', song.format!.toUpperCase(), theme),
-                if (song.bitrate != null)
-                  _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
-                if (song.samplerate != null)
-                  _buildInfoRow(
-                    'Sample Rate',
-                    '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
-                    theme,
-                  ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildInfoRow(
-    String label,
-    String value,
-    ThemeData theme, {
-    bool isPath = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              fontFamily: isPath ? 'monospace' : null,
-              fontSize: isPath ? 12 : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Returns a human-readable file size string (e.g. "4.2 MB").
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) {
-      return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    }
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
-    }
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
-  }
-
-  /// Formats a [DateTime] as a readable string (e.g. "Jul 16, 2026, 8:28 PM").
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    var hour = dt.hour == 0
-        ? 12
-        : dt.hour > 12
-        ? dt.hour - 12
-        : dt.hour;
-    var ampm = dt.hour >= 12 ? 'PM' : 'AM';
-    var minute = dt.minute.toString().padLeft(2, '0');
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}  $hour:$minute $ampm';
-  }
-
-  /// Reads [FileStat] for [path]; returns null on any error.
-  Future<FileStat?> _getFileStat(String path) async {
-    try {
-      return File(path).statSync();
-    } catch (_) {
-      return null;
     }
   }
 
@@ -1600,7 +1431,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                                 song,
                                                               ),
                                                           onShowInfo: () =>
-                                                              _showSongInfoBottomSheet(
+                                                              showSongInfoBottomSheet(
+                                                                context,
                                                                 song,
                                                               ),
                                                           onToggleFavorite:

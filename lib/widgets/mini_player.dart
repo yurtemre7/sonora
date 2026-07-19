@@ -177,8 +177,8 @@ class MiniPlayer extends StatelessWidget {
                               isPlaying
                                   ? Icons.pause_rounded
                                   : isCompleted
-                                      ? Icons.replay_rounded
-                                      : Icons.play_arrow_rounded,
+                                  ? Icons.replay_rounded
+                                  : Icons.play_arrow_rounded,
                             ),
                             iconSize: 30,
                             color: theme.colorScheme.onSurface,

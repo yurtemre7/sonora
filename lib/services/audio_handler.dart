@@ -55,9 +55,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   Future<void> setPauseOnDuck(bool pauseOnDuck) async {
     var session = await AudioSession.instance;
-    await session.configure(AudioSessionConfiguration.music().copyWith(
-      androidWillPauseWhenDucked: pauseOnDuck,
-    ));
+    await session.configure(
+      AudioSessionConfiguration.music().copyWith(
+        androidWillPauseWhenDucked: pauseOnDuck,
+      ),
+    );
   }
 
   Future<void> _init() async {
@@ -65,9 +67,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     var session = await AudioSession.instance;
     var prefs = SharedPreferencesAsync();
     var pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
-    await session.configure(AudioSessionConfiguration.music().copyWith(
-      androidWillPauseWhenDucked: pauseOnDuck,
-    ));
+    await session.configure(
+      AudioSessionConfiguration.music().copyWith(
+        androidWillPauseWhenDucked: pauseOnDuck,
+      ),
+    );
 
     // Broadcast playback state changes from just_audio to audio_service.
     player.playbackEventStream.listen(_broadcastPlaybackState);

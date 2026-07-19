@@ -195,9 +195,8 @@ class SonoraAppRouter {
           ),
           GoRoute(
             path: AppRoutes.stats,
-            builder: (context, state) => StatsScreen(
-              playerProvider: playerProvider,
-            ),
+            builder: (context, state) =>
+                StatsScreen(playerProvider: playerProvider),
           ),
           GoRoute(
             path: AppRoutes.playlist,
@@ -287,7 +286,6 @@ class SonoraAppRouter {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      useSafeArea: true,
       clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

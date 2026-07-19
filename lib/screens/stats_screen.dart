@@ -128,9 +128,9 @@ class _StatsScreenState extends State<StatsScreen> {
             icon: const Icon(Icons.chevron_left_rounded),
             onPressed: _currentPage > 0
                 ? () => _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    )
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  )
                 : null,
           ),
           Row(
@@ -155,9 +155,9 @@ class _StatsScreenState extends State<StatsScreen> {
             icon: const Icon(Icons.chevron_right_rounded),
             onPressed: _currentPage < 4
                 ? () => _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    )
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  )
                 : null,
           ),
         ],
@@ -222,7 +222,9 @@ class _StatsScreenState extends State<StatsScreen> {
                 Text(
                   'Total Listening Time',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
+                    color: theme.colorScheme.onPrimaryContainer.withValues(
+                      alpha: 0.7,
+                    ),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -446,72 +448,15 @@ class _StatsScreenState extends State<StatsScreen> {
                 itemBuilder: (context, index) {
                   var entry = top[index];
                   var song = entry.song;
-                  var rankColors = [
-                    const Color(0xFFFFD700),
-                    const Color(0xFFC0C0C0),
-                    const Color(0xFFCD7F32),
-                    theme.colorScheme.outline,
-                    theme.colorScheme.outline,
-                  ];
-                  var rankColor = rankColors[index % rankColors.length];
                   var currentSong = widget.playerProvider.currentSong;
                   var isCurrent =
                       currentSong != null && currentSong.id == song.id;
 
-                  return Row(
-                    children: [
-                      SizedBox(
-                        width: 32,
-                        child: Text(
-                          '#${index + 1}',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: rankColor,
-                            fontFamily: 'Outfit',
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: SongTile(
-                          song: song,
-                          isCurrent: isCurrent,
-                          showDivider: index < top.length - 1,
-                          playerProvider: widget.playerProvider,
-                          onTap: () => widget.playerProvider.playSong(
-                            song,
-                            widget.playerProvider.allSongs,
-                          ),
-                          onPlayNext: () => widget.playerProvider.playNext(song),
-                          onAddToQueue: () => widget.playerProvider.addToQueue(song),
-                          onToggleFavorite: () =>
-                              widget.playerProvider.toggleFavorite(song.id),
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            '${entry.count} plays',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${_statsService.songSkipCount(song.id)} skips • ${_statsService.songRestartCount(song.id)} restarts',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 8),
-                    ],
+                  return _TopSongCard(
+                    index: index,
+                    entry: entry,
+                    isCurrent: isCurrent,
+                    playerProvider: widget.playerProvider,
                   );
                 },
               ),
@@ -675,8 +620,7 @@ class _StatsScreenState extends State<StatsScreen> {
                         ),
                         const SizedBox(width: 12),
                         CircleAvatar(
-                          backgroundColor:
-                              theme.colorScheme.primaryContainer,
+                          backgroundColor: theme.colorScheme.primaryContainer,
                           radius: 22,
                           child: Icon(
                             Icons.person_rounded,
@@ -711,10 +655,7 @@ class _StatsScreenState extends State<StatsScreen> {
                         IconButton(
                           icon: const Icon(Icons.open_in_new_rounded, size: 18),
                           onPressed: () {
-                            var group = buildArtistGroup(
-                              entry.artist,
-                              songs,
-                            );
+                            var group = buildArtistGroup(entry.artist, songs);
                             if (group.songs.isNotEmpty) {
                               openArtist(context, group);
                             }
@@ -807,8 +748,7 @@ class _StatsScreenState extends State<StatsScreen> {
                         ),
                         const SizedBox(width: 12),
                         CircleAvatar(
-                          backgroundColor:
-                              theme.colorScheme.secondaryContainer,
+                          backgroundColor: theme.colorScheme.secondaryContainer,
                           radius: 22,
                           child: Icon(
                             Icons.playlist_play_rounded,
@@ -841,7 +781,8 @@ class _StatsScreenState extends State<StatsScreen> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                          onPressed: () => openPlaylist(context, entry.playlist),
+                          onPressed: () =>
+                              openPlaylist(context, entry.playlist),
                         ),
                       ],
                     ),
@@ -942,11 +883,7 @@ class _AlbumCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              AlbumArt(
-                artworkPath: artworkPath,
-                size: 52,
-                borderRadius: 12,
-              ),
+              AlbumArt(artworkPath: artworkPath, size: 52, borderRadius: 12),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -994,12 +931,188 @@ class _AlbumCard extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.5,
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TopSongCard extends StatefulWidget {
+  final int index;
+  final ({Song song, int count}) entry;
+  final bool isCurrent;
+  final PlayerProvider playerProvider;
+
+  const _TopSongCard({
+    required this.index,
+    required this.entry,
+    required this.isCurrent,
+    required this.playerProvider,
+  });
+
+  @override
+  State<_TopSongCard> createState() => _TopSongCardState();
+}
+
+class _TopSongCardState extends State<_TopSongCard> {
+  var _isExpanded = false;
+  final _statsService = StatsService();
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+    var song = widget.entry.song;
+    var rankColors = [
+      const Color(0xFFFFD700),
+      const Color(0xFFC0C0C0),
+      const Color(0xFFCD7F32),
+      theme.colorScheme.outline,
+      theme.colorScheme.outline,
+    ];
+    var rankColor = rankColors[widget.index % rankColors.length];
+
+    var playtimeMs = _statsService.songCumulativeListenMs(song.id);
+    var totalSeconds = (playtimeMs / 1000).round();
+    var hours = totalSeconds ~/ 3600;
+    var minutes = (totalSeconds % 3600) ~/ 60;
+    var playtimeStr = hours > 0
+        ? '${hours}h ${minutes}m'
+        : (minutes > 0 ? '${minutes}m' : '< 1m');
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      elevation: _isExpanded ? 2 : 0,
+      color: _isExpanded
+          ? theme.colorScheme.surfaceContainerHighest
+          : theme.colorScheme.surfaceContainer,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 48,
+                child: Text(
+                  '#${widget.index + 1}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: rankColor,
+                    fontFamily: 'Outfit',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Expanded(
+                child: SongTile(
+                  song: song,
+                  isCurrent: widget.isCurrent,
+                  playerProvider: widget.playerProvider,
+                  onTap: () => widget.playerProvider.playSong(
+                    song,
+                    widget.playerProvider.allSongs,
+                  ),
+                  onPlayNext: () => widget.playerProvider.playNext(song),
+                  onAddToQueue: () => widget.playerProvider.addToQueue(song),
+                  onToggleFavorite: () =>
+                      widget.playerProvider.toggleFavorite(song.id),
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  _isExpanded
+                      ? Icons.expand_less_rounded
+                      : Icons.expand_more_rounded,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isExpanded = !_isExpanded;
+                  });
+                },
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: !_isExpanded
+                ? const SizedBox.shrink()
+                : Container(
+                    padding: const EdgeInsets.fromLTRB(48, 0, 16, 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStatItem(
+                          context,
+                          icon: Icons.play_arrow_rounded,
+                          label: 'Plays',
+                          value: '${widget.entry.count}',
+                        ),
+                        _buildStatItem(
+                          context,
+                          icon: Icons.timer_rounded,
+                          label: 'Playtime',
+                          value: playtimeStr,
+                        ),
+                        _buildStatItem(
+                          context,
+                          icon: Icons.skip_next_rounded,
+                          label: 'Skips',
+                          value: '${_statsService.songSkipCount(song.id)}',
+                        ),
+                        _buildStatItem(
+                          context,
+                          icon: Icons.replay_rounded,
+                          label: 'Restarts',
+                          value: '${_statsService.songRestartCount(song.id)}',
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    var theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 20, color: theme.colorScheme.primary),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }

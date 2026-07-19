@@ -18,6 +18,7 @@ import 'package:sonora/widgets/marquee_text.dart';
 import 'package:sonora/widgets/player_controls.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/seek_bar.dart';
+import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/song_tile.dart';
 import 'package:sonora/widgets/volume_slider.dart';
 
@@ -124,7 +125,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
               PopupMenuButton<int>(
                 icon: const Icon(Icons.more_vert_rounded),
                 onSelected: (value) {
-                  if (value == 1) _showSongInfoBottomSheet(context, song);
+                  if (value == 1) showSongInfoBottomSheet(context, song);
                 },
                 itemBuilder: (context) => [
                   const PopupMenuItem(
@@ -946,97 +947,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     PlaylistSelectorBottomSheet.show(context, song, widget.playerProvider);
   }
 
-  void _showSongInfoBottomSheet(BuildContext context, Song song) {
-    var theme = Theme.of(context);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHigh,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.4,
-                    ),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Song Information',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow('Title', song.displayTitle, theme),
-              _buildInfoRow('Artist', song.artist, theme),
-              _buildInfoRow('Album', song.album, theme),
-              _buildInfoRow('Duration', song.durationFormatted, theme),
-              _buildInfoRow('File Path', song.filePath, theme, isPath: true),
-              if (song.format != null)
-                _buildInfoRow('Format', song.format!.toUpperCase(), theme),
-              if (song.bitrate != null)
-                _buildInfoRow('Bitrate', '${song.bitrate} kbps', theme),
-              if (song.samplerate != null)
-                _buildInfoRow(
-                  'Sample Rate',
-                  '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
-                  theme,
-                ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildInfoRow(
-    String label,
-    String value,
-    ThemeData theme, {
-    bool isPath = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              fontFamily: isPath ? 'monospace' : null,
-              fontSize: isPath ? 12 : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   String _formatDuration(Duration d) {
     var minutes = d.inMinutes;
     var seconds = (d.inSeconds % 60).toString().padLeft(2, '0');
@@ -1063,165 +973,177 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             var showConfirmation = !activeTimer && sel != null;
 
             return Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Sleep Timer',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Outfit',
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  if (activeTimer) ...[
-                    Card(
-                      color: theme.colorScheme.primaryContainer.withValues(
-                        alpha: 0.2,
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Sleep Timer',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Outfit',
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
+                      const SizedBox(height: 20),
+                      if (activeTimer) ...[
+                        Card(
+                          color: theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Music will stop in',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  _formatDuration(
+                                    widget.playerProvider.sleepTimerDuration!,
+                                  ),
+                                  style: theme.textTheme.headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
+                                        letterSpacing: 1.0,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
                           children: [
-                            Text(
-                              'Music will stop in',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  widget.playerProvider.stopSleepTimer();
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Cancel Timer'),
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _formatDuration(
-                                widget.playerProvider.sleepTimerDuration!,
-                              ),
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                                letterSpacing: 1.0,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: FilledButton(
+                                onPressed: () {
+                                  widget.playerProvider.extendSleepTimer(
+                                    const Duration(minutes: 1),
+                                  );
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('+1 min'),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              widget.playerProvider.stopSleepTimer();
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Cancel Timer'),
+                      ] else if (showConfirmation) ...[
+                        Card(
+                          color: theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Timer Duration',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  _formatDuration(sel),
+                                  style: theme.textTheme.headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
+                                        letterSpacing: 1.0,
+                                      ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: () {
-                              widget.playerProvider.extendSleepTimer(
-                                const Duration(minutes: 1),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => selectedDuration.value = null,
+                                child: const Text('Back'),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: FilledButton(
+                                onPressed: () {
+                                  widget.playerProvider.startSleepTimer(sel);
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Start Timer'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else ...[
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            ...[5, 10, 15, 20, 25, 30, 60, 120].map((min) {
+                              return _buildPresetChip(
+                                context,
+                                '$min min',
+                                Duration(minutes: min),
+                                () => selectedDuration.value = Duration(
+                                  minutes: min,
+                                ),
+                                isDefault:
+                                    min ==
+                                    widget
+                                        .playerProvider
+                                        .sleepTimerDefaultMinutes,
                               );
-                              Navigator.pop(context);
-                            },
-                            child: const Text('+1 min'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ] else if (showConfirmation) ...[
-                    Card(
-                      color: theme.colorScheme.primaryContainer.withValues(
-                        alpha: 0.2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Timer Duration',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _formatDuration(sel),
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
+                            }),
                           ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => selectedDuration.value = null,
-                            child: const Text('Back'),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: () {
-                              widget.playerProvider.startSleepTimer(sel);
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Start Timer'),
-                          ),
+                        const SizedBox(height: 20),
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            var duration = await _showCustomTimerDialog(
+                              context,
+                            );
+                            if (duration != null) {
+                              selectedDuration.value = duration;
+                            }
+                          },
+                          icon: const Icon(Icons.edit_calendar_rounded),
+                          label: const Text('Custom Duration...'),
                         ),
                       ],
-                    ),
-                  ] else ...[
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        ...[5, 10, 15, 20, 25, 30, 60, 120].map((min) {
-                          return _buildPresetChip(
-                            context,
-                            '$min min',
-                            Duration(minutes: min),
-                            () => selectedDuration.value = Duration(
-                              minutes: min,
-                            ),
-                            isDefault: min == widget
-                                .playerProvider.sleepTimerDefaultMinutes,
-                          );
-                        }),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        var duration = await _showCustomTimerDialog(context);
-                        if (duration != null) {
-                          selectedDuration.value = duration;
-                        }
-                      },
-                      icon: const Icon(Icons.edit_calendar_rounded),
-                      label: const Text('Custom Duration...'),
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                ],
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
               ),
             );
           },
@@ -1236,7 +1158,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      useSafeArea: true,
       clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -1262,7 +1183,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      useSafeArea: true,
       clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

@@ -61,8 +61,7 @@ class StatsService {
     _data.dailyListeningMs.update(dateKey, (v) => v + ms, ifAbsent: () => ms);
 
     // Accumulate per-song listening time and check for a full listen
-    var cumulative =
-        (_data.songCumulativeListenMs[songId] ?? 0) + ms;
+    var cumulative = (_data.songCumulativeListenMs[songId] ?? 0) + ms;
 
     if (songDurationMs > 0 && cumulative >= songDurationMs) {
       // Full listen achieved – increment counts and carry over the remainder
@@ -199,11 +198,14 @@ class StatsService {
 
   int get totalSkips => _data.songSkipCounts.values.fold(0, (a, b) => a + b);
 
-  int get totalRestarts => _data.songRestartCounts.values.fold(0, (a, b) => a + b);
+  int get totalRestarts =>
+      _data.songRestartCounts.values.fold(0, (a, b) => a + b);
 
   int songSkipCount(int id) => _data.songSkipCounts[id] ?? 0;
 
   int songRestartCount(int id) => _data.songRestartCounts[id] ?? 0;
+
+  int songCumulativeListenMs(int id) => _data.songCumulativeListenMs[id] ?? 0;
 
   int albumListenCount(List<Song> library) {
     var albums = <String>{};
@@ -289,10 +291,7 @@ class StatsService {
     }).toList();
   }
 
-  List<({String artist, int count})> topArtists(
-    int limit,
-    List<Song> library,
-  ) {
+  List<({String artist, int count})> topArtists(int limit, List<Song> library) {
     var artistCounts = <String, int>{};
     for (var entry in _data.songPlayCounts.entries) {
       var song = _findSong(entry.key, library);
@@ -348,10 +347,8 @@ class StatsService {
       var content = await file.readAsString();
       var json = jsonDecode(content) as Map<String, dynamic>;
 
-      _data.totalListeningTimeMs =
-          json['total_listening_time_ms'] as int? ?? 0;
-      _data.completeSongListens =
-          json['complete_song_listens'] as int? ?? 0;
+      _data.totalListeningTimeMs = json['total_listening_time_ms'] as int? ?? 0;
+      _data.completeSongListens = json['complete_song_listens'] as int? ?? 0;
       _data.firstPlayedSongId = json['first_played_song_id'] as int? ?? -1;
       _data.firstPlayedDate = json['first_played_date'] as String?;
 
@@ -372,8 +369,7 @@ class StatsService {
         }
       }
 
-      var plCounts =
-          json['playlist_play_counts'] as Map<String, dynamic>?;
+      var plCounts = json['playlist_play_counts'] as Map<String, dynamic>?;
       if (plCounts != null) {
         _data.playlistPlayCounts.clear();
         for (var e in plCounts.entries) {
@@ -440,23 +436,27 @@ class StatsService {
         'complete_song_listens': _data.completeSongListens,
         'first_played_song_id': _data.firstPlayedSongId,
         'first_played_date': _data.firstPlayedDate,
-        'song_play_counts': _data.songPlayCounts
-            .map((k, v) => MapEntry(k.toString(), v)),
-        'song_cumulative_listen_ms': _data.songCumulativeListenMs
-            .map((k, v) => MapEntry(k.toString(), v)),
+        'song_play_counts': _data.songPlayCounts.map(
+          (k, v) => MapEntry(k.toString(), v),
+        ),
+        'song_cumulative_listen_ms': _data.songCumulativeListenMs.map(
+          (k, v) => MapEntry(k.toString(), v),
+        ),
         'playlist_play_counts': _data.playlistPlayCounts,
         'daily_listening_ms': _data.dailyListeningMs,
-        'weekly_play_counts': _data.weeklyPlayCounts
-            .map((k, v) => MapEntry(k.toString(), v)),
+        'weekly_play_counts': _data.weeklyPlayCounts.map(
+          (k, v) => MapEntry(k.toString(), v),
+        ),
         'shuffle_session_starts': _data.shuffleSessionStarts,
-        'song_skip_counts': _data.songSkipCounts
-            .map((k, v) => MapEntry(k.toString(), v)),
-        'song_restart_counts': _data.songRestartCounts
-            .map((k, v) => MapEntry(k.toString(), v)),
+        'song_skip_counts': _data.songSkipCounts.map(
+          (k, v) => MapEntry(k.toString(), v),
+        ),
+        'song_restart_counts': _data.songRestartCounts.map(
+          (k, v) => MapEntry(k.toString(), v),
+        ),
       };
 
-      var tempFile =
-          File('${appDir.path}/listening_stats.json.tmp');
+      var tempFile = File('${appDir.path}/listening_stats.json.tmp');
       var file = File('${appDir.path}/listening_stats.json');
       await tempFile.writeAsString(jsonEncode(json));
       await tempFile.rename(file.path);

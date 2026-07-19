@@ -140,7 +140,11 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   ///
   /// Builds a new queue from [songList], locates [song] within it, loads the
   /// playlist into the audio handler, and begins playback.
-  Future<void> playSong(Song song, List<Song> songList, {String? playlistId}) async {
+  Future<void> playSong(
+    Song song,
+    List<Song> songList, {
+    String? playlistId,
+  }) async {
     _playlistContext = playlistId;
     await _loadAndPlay(
       song: song,
@@ -193,7 +197,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Seeks to [position] within the current track.
   Future<void> seek(Duration position) async {
-    if (position < const Duration(seconds: 3) && audioHandler.player.position > const Duration(seconds: 3)) {
+    if (position < const Duration(seconds: 3) &&
+        audioHandler.player.position > const Duration(seconds: 3)) {
       if (currentSong != null) {
         statsService.recordSongRestart(currentSong!.id);
       }
@@ -250,7 +255,10 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
           .map(_songToMediaItem)
           .toList();
       try {
-        await audioHandler.updatePlaylistAfter(currentIndex, remainingMediaItems);
+        await audioHandler.updatePlaylistAfter(
+          currentIndex,
+          remainingMediaItems,
+        );
       } on PlayerInterruptedException {
         await audioHandler.loadPlaylist(
           queue.map(_songToMediaItem).toList(),
