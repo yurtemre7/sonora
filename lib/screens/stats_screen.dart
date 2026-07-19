@@ -108,7 +108,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
   Widget _buildBottomNav(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 132),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
