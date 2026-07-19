@@ -108,12 +108,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
   Widget _buildBottomNav(ThemeData theme, bool hasMiniPlayer) {
     return Container(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 12,
-        bottom: 12 + (hasMiniPlayer ? 120.0 : 0.0),
-      ),
+      padding: EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 12),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
