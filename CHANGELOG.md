@@ -2,7 +2,7 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [Unreleased]
+## [1.6.1] - 2026-07-19
 ### Added
 * Add setting to pause music on notifications
 * Display shuffle sessions, skips, and restarts in stats UI
