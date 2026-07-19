@@ -54,6 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   var _keepPlayingOnClose = false;
+  var _pauseOnDuck = false;
 
   Future<void> _loadSettings() async {
     var scanner = MusicScanner();
@@ -61,6 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     var syncTime = await scanner.getLastSyncTime();
     var prefs = SharedPreferencesAsync();
     var keepPlaying = await prefs.getBool('keep_playing_on_close') ?? false;
+    var pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
 
     var duration = await scanner.getLastSyncDuration('sequential');
 
@@ -78,6 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _scanFolder = folder;
       _lastSyncTime = syncTime;
       _keepPlayingOnClose = keepPlaying;
+      _pauseOnDuck = pauseOnDuck;
       _appVersion = version;
       _lastSyncDuration = duration;
     });
@@ -384,6 +387,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 await prefs.setBool('keep_playing_on_close', val);
                 setState(() {
                   _keepPlayingOnClose = val;
+                });
+              },
+            ),
+            SwitchListTile(
+              secondary: const Icon(Icons.notifications_paused_rounded),
+              title: const Text('Pause on notifications'),
+              subtitle: const Text(
+                'Pause music instead of lowering volume when a notification arrives',
+              ),
+              value: _pauseOnDuck,
+              onChanged: (val) async {
+                var prefs = SharedPreferencesAsync();
+                await prefs.setBool('pause_on_duck', val);
+                await widget.playerProvider.audioHandler.setPauseOnDuck(val);
+                setState(() {
+                  _pauseOnDuck = val;
                 });
               },
             ),
