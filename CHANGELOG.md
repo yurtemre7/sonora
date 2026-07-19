@@ -4,6 +4,8 @@ All notable changes to the Sonora music player project are documented in this fi
 
 ## [Unreleased]
 ### Changed
+* Chore: Add MIT license
+* Chore: Improve changelog generation script
 * Chore: Rename AGENTS.md to agents.md and update content
 * Chore: Improve README.md
 

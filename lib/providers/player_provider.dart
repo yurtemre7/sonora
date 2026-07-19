@@ -490,7 +490,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
           var song = currentSong;
           if (song != null && song.duration.inMilliseconds > 0) {
             statsService.addListeningTime(
-              5000,
+              1000,
               song.id,
               song.duration.inMilliseconds,
               playlistId: _playlistContext,
