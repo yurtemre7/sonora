@@ -276,6 +276,28 @@ class _StatsScreenState extends State<StatsScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricCard(
+                  icon: Icons.skip_next_rounded,
+                  value: '${stats.totalSkips}',
+                  label: 'Skips',
+                  theme: theme,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MetricCard(
+                  icon: Icons.replay_rounded,
+                  value: '${stats.totalRestarts}',
+                  label: 'Restarts',
+                  theme: theme,
+                ),
+              ),
+            ],
+          ),
 
           const SizedBox(height: 20),
 
@@ -312,6 +334,14 @@ class _StatsScreenState extends State<StatsScreen> {
             Icons.music_note_rounded,
             'Unique Songs Played',
             '$totalUnique songs',
+          ),
+          const SizedBox(height: 8),
+          _buildFactRow(
+            context,
+            theme,
+            Icons.shuffle_rounded,
+            'Shuffle Sessions',
+            '${stats.shuffleSessionStarts} starts',
           ),
           const SizedBox(height: 8),
           _buildFactRow(
@@ -459,12 +489,26 @@ class _StatsScreenState extends State<StatsScreen> {
                               widget.playerProvider.toggleFavorite(song.id),
                         ),
                       ),
-                      Text(
-                        '${entry.count}x',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${entry.count} plays',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${_statsService.songSkipCount(song.id)} skips • ${_statsService.songRestartCount(song.id)} restarts',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(width: 8),
                     ],

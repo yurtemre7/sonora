@@ -195,6 +195,16 @@ class StatsService {
 
   int get completeSongListens => _data.completeSongListens;
 
+  int get shuffleSessionStarts => _data.shuffleSessionStarts;
+
+  int get totalSkips => _data.songSkipCounts.values.fold(0, (a, b) => a + b);
+
+  int get totalRestarts => _data.songRestartCounts.values.fold(0, (a, b) => a + b);
+
+  int songSkipCount(int id) => _data.songSkipCounts[id] ?? 0;
+
+  int songRestartCount(int id) => _data.songRestartCounts[id] ?? 0;
+
   int albumListenCount(List<Song> library) {
     var albums = <String>{};
     for (var entry in _data.songPlayCounts.entries) {
