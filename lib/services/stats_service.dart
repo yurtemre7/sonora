@@ -16,6 +16,9 @@ class _StatsData {
   final playlistPlayCounts = <String, int>{};
   final dailyListeningMs = <String, int>{};
   final weeklyPlayCounts = <int, int>{};
+  var shuffleSessionStarts = 0;
+  final songSkipCounts = <int, int>{};
+  final songRestartCounts = <int, int>{};
 }
 
 class StatsService {
@@ -90,6 +93,21 @@ class StatsService {
     _markDirty();
   }
 
+  void recordShuffleSessionStart() {
+    _data.shuffleSessionStarts++;
+    _markDirty();
+  }
+
+  void recordSongSkip(int songId) {
+    _data.songSkipCounts.update(songId, (v) => v + 1, ifAbsent: () => 1);
+    _markDirty();
+  }
+
+  void recordSongRestart(int songId) {
+    _data.songRestartCounts.update(songId, (v) => v + 1, ifAbsent: () => 1);
+    _markDirty();
+  }
+
   /// Resets all statistics to zero and persists immediately.
   Future<void> reset() async {
     _debounceTimer?.cancel();
@@ -103,6 +121,9 @@ class StatsService {
     _data.playlistPlayCounts.clear();
     _data.dailyListeningMs.clear();
     _data.weeklyPlayCounts.clear();
+    _data.shuffleSessionStarts = 0;
+    _data.songSkipCounts.clear();
+    _data.songRestartCounts.clear();
     _dirty = true;
     await _save();
   }
@@ -117,6 +138,16 @@ class StatsService {
       return shouldRemove;
     });
     _data.songCumulativeListenMs.removeWhere((id, _) {
+      var shouldRemove = !validSongIds.contains(id);
+      if (shouldRemove) removed = true;
+      return shouldRemove;
+    });
+    _data.songSkipCounts.removeWhere((id, _) {
+      var shouldRemove = !validSongIds.contains(id);
+      if (shouldRemove) removed = true;
+      return shouldRemove;
+    });
+    _data.songRestartCounts.removeWhere((id, _) {
       var shouldRemove = !validSongIds.contains(id);
       if (shouldRemove) removed = true;
       return shouldRemove;
@@ -355,6 +386,24 @@ class StatsService {
           _data.weeklyPlayCounts[int.parse(e.key)] = e.value as int;
         }
       }
+
+      _data.shuffleSessionStarts = json['shuffle_session_starts'] as int? ?? 0;
+
+      var skips = json['song_skip_counts'] as Map<String, dynamic>?;
+      if (skips != null) {
+        _data.songSkipCounts.clear();
+        for (var e in skips.entries) {
+          _data.songSkipCounts[int.parse(e.key)] = e.value as int;
+        }
+      }
+
+      var restarts = json['song_restart_counts'] as Map<String, dynamic>?;
+      if (restarts != null) {
+        _data.songRestartCounts.clear();
+        for (var e in restarts.entries) {
+          _data.songRestartCounts[int.parse(e.key)] = e.value as int;
+        }
+      }
     } catch (_) {
       _data.totalListeningTimeMs = 0;
       _data.completeSongListens = 0;
@@ -365,6 +414,9 @@ class StatsService {
       _data.playlistPlayCounts.clear();
       _data.dailyListeningMs.clear();
       _data.weeklyPlayCounts.clear();
+      _data.shuffleSessionStarts = 0;
+      _data.songSkipCounts.clear();
+      _data.songRestartCounts.clear();
     }
   }
 
@@ -385,6 +437,11 @@ class StatsService {
         'playlist_play_counts': _data.playlistPlayCounts,
         'daily_listening_ms': _data.dailyListeningMs,
         'weekly_play_counts': _data.weeklyPlayCounts
+            .map((k, v) => MapEntry(k.toString(), v)),
+        'shuffle_session_starts': _data.shuffleSessionStarts,
+        'song_skip_counts': _data.songSkipCounts
+            .map((k, v) => MapEntry(k.toString(), v)),
+        'song_restart_counts': _data.songRestartCounts
             .map((k, v) => MapEntry(k.toString(), v)),
       };
 

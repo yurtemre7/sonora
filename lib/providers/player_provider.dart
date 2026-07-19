@@ -157,11 +157,19 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Skips to the next track in the queue.
   Future<void> next() async {
+    if (currentSong != null) {
+      statsService.recordSongSkip(currentSong!.id);
+    }
     await audioHandler.skipToNext();
   }
 
   /// Skips to the previous track in the queue.
   Future<void> previous() async {
+    if (audioHandler.player.position > const Duration(seconds: 3)) {
+      if (currentSong != null) {
+        statsService.recordSongRestart(currentSong!.id);
+      }
+    }
     await audioHandler.skipToPrevious();
   }
 
@@ -253,6 +261,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
     // Pick the first shuffled song as the starting track
     var startingSong = shuffled.first;
+
+    statsService.recordShuffleSessionStart();
 
     await _loadAndPlay(
       song: startingSong,
