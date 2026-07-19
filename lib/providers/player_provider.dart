@@ -62,6 +62,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   var _isFadingOut = false;
   var _originalVolumeBeforeFade = 1.0;
   var _lastExtractedSongId = -1;
+  var defaultThemeColor = const Color(0xFF7C4DFF);
   var _playRequestToken = 0;
   Timer? _statsTimer;
   String? _playlistContext;
@@ -628,8 +629,16 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     immersiveMode = await prefs.getBool('now_playing_immersive_mode') ?? false;
     sleepTimerDefaultMinutes =
         await prefs.getInt('sleep_timer_default_minutes') ?? 5;
-    _volume = await prefs.getDouble('volume') ?? _volume;
-    audioHandler.player.setVolume(_volume);
+
+    var defaultColorVal = await prefs.getInt('default_theme_color');
+    if (defaultColorVal != null) {
+      defaultThemeColor = Color(defaultColorVal);
+    }
+
+    if (!useDynamicTheme) {
+      themeColorNotifier.value = defaultThemeColor;
+      dynamicThemeColor = defaultThemeColor;
+    }
 
     if (useDynamicTheme && currentSong != null) {
       _extractThemeColorForSong(currentSong!);
@@ -661,10 +670,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (enabled && currentSong != null) {
       _extractThemeColorForSong(currentSong!);
     } else {
-      var defaultColor = const Color(0xFF7C4DFF);
-      if (dynamicThemeColor != defaultColor) {
-        dynamicThemeColor = defaultColor;
-        themeColorNotifier.value = defaultColor;
+      if (dynamicThemeColor != defaultThemeColor) {
+        dynamicThemeColor = defaultThemeColor;
+        themeColorNotifier.value = defaultThemeColor;
       }
     }
     notifyListeners();
@@ -691,15 +699,61 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  Future<void> setDefaultThemeColor(Color color) async {
+    if (defaultThemeColor == color) return;
+    defaultThemeColor = color;
+    var prefs = SharedPreferencesAsync();
+    await prefs.setInt('default_theme_color', color.toARGB32());
+
+    // Apply immediately if not playing or dynamic theme is off
+    if (!useDynamicTheme || currentSong == null) {
+      _applyThemeColor(color);
+    } else if (currentSong?.artworkPath == null &&
+        currentSong?.dominantColor == null) {
+      _applyThemeColor(color);
+    }
+    notifyListeners();
+  }
+
+  List<Color> getUniqueThemeColors() {
+    var colors = <Color>[
+      const Color(0xFF7C4DFF),
+    ]; // Always include base default
+    var buckets = <String>{};
+
+    for (var song in allSongs) {
+      if (song.dominantColor != null) {
+        var color = Color(song.dominantColor!);
+        var hsl = HSLColor.fromColor(color);
+
+        String bucketKey;
+        if (hsl.saturation < 0.15 ||
+            hsl.lightness < 0.15 ||
+            hsl.lightness > 0.85) {
+          bucketKey = 'neutral';
+        } else {
+          var hueSector = ((hsl.hue / 30).round() * 30) % 360;
+          bucketKey = 'hue_$hueSector';
+        }
+
+        if (!buckets.contains(bucketKey)) {
+          buckets.add(bucketKey);
+          colors.add(color);
+        }
+      }
+    }
+    return colors;
+  }
+
   Future<void> _extractThemeColorForSong(Song song) async {
     if (!useDynamicTheme) {
-      _applyThemeColor(const Color(0xFF7C4DFF));
+      _applyThemeColor(defaultThemeColor);
       return;
     }
     _lastExtractedSongId = song.id;
 
     if (song.artworkPath == null) {
-      _applyThemeColor(const Color(0xFF7C4DFF));
+      _applyThemeColor(defaultThemeColor);
       return;
     }
 
@@ -710,7 +764,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     var color = await ColorExtractor.extractDominantColor(song.artworkPath!);
-    var newColor = color ?? const Color(0xFF7C4DFF);
+    var newColor = color ?? defaultThemeColor;
     _applyThemeColor(newColor);
 
     // Cache the extracted color for future plays.

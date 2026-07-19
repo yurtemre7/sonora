@@ -6,6 +6,7 @@ import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
+import 'package:sonora/widgets/theme_color_selector.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -355,6 +356,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 subtitle: Text(_themeModeName(mode)),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => _showThemeModeSheet(context),
+              );
+            },
+          ),
+
+          ListenableBuilder(
+            listenable: widget.playerProvider,
+            builder: (context, _) {
+              var uniqueColors = widget.playerProvider.getUniqueThemeColors();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0,
+                      vertical: 8.0,
+                    ),
+                    child: Text(
+                      'Default App Color',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ThemeColorSelector(
+                    colors: uniqueColors,
+                    selectedColor: widget.playerProvider.defaultThemeColor,
+                    onColorSelected: (color) {
+                      widget.playerProvider.setDefaultThemeColor(color);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
               );
             },
           ),
