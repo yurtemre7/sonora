@@ -431,101 +431,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (val) =>
                           widget.playerProvider.toggleVisualizer(val),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Card(
-                        elevation: 0,
-                        color: theme.colorScheme.surfaceContainerLow,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(
-                            color: theme.colorScheme.outlineVariant.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.timer_outlined,
-                                    size: 20,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Default Sleep Timer',
-                                    style: theme.textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Default duration selected when opening the sleep timer',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [5, 10, 15, 20, 25, 30, 60, 120].map((min) {
-                                  var isSelected = widget
-                                          .playerProvider
-                                          .sleepTimerDefaultMinutes ==
-                                      min;
-                                  return Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: () => widget.playerProvider
-                                          .setSleepTimerDefaultMinutes(min),
-                                      borderRadius: BorderRadius.circular(16),
-                                      child: Container(
-                                        padding:
-                                            const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                          vertical: 10,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? theme.colorScheme.primary
-                                              : theme.colorScheme.surface
-                                                  .withValues(alpha: 0.0),
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? theme.colorScheme.primary
-                                                : theme.colorScheme.outlineVariant
-                                                    .withValues(alpha: 0.6),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          '$min min',
-                                          style: theme.textTheme.labelLarge
-                                              ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: isSelected
-                                                ? theme.colorScheme.onPrimary
-                                                : theme.colorScheme
-                                                    .onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        ),
+                    ListTile(
+                      leading: const Icon(Icons.timer_outlined),
+                      title: const Text('Default Sleep Timer'),
+                      subtitle: const Text(
+                        'Default duration selected when opening the sleep timer',
+                      ),
+                      trailing: DropdownButton<int>(
+                        value: widget.playerProvider.sleepTimerDefaultMinutes,
+                        underline: const SizedBox(),
+                        items: [5, 10, 15, 20, 25, 30, 60, 120]
+                            .map((min) => DropdownMenuItem<int>(
+                                  value: min,
+                                  child: Text('$min min'),
+                                ))
+                            .toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            widget.playerProvider
+                                .setSleepTimerDefaultMinutes(val);
+                          }
+                        },
                       ),
                     ),
                   ],
@@ -778,6 +704,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ],
                             ),
                           ),
+                          const SizedBox(width: 16),
                           if (_scanFolder != null)
                             FilledButton.tonalIcon(
                               onPressed: _isSyncing

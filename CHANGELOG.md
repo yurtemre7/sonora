@@ -13,6 +13,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Add bottom padding to statistics page to prevent miniplayer overlap
 * Correct playback time tracking rate for analytics
 ### Changed
+* Style: Rework sleep timer setting UI and sync button padding
 * Chore: Add MIT license
 * Chore: Improve changelog generation script
 * Chore: Rename AGENTS.md to agents.md and update content
