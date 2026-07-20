@@ -455,8 +455,7 @@ class _SonoraAppState extends State<SonoraApp> {
     String playlistId,
     List<int> reorderedIds,
   ) async {
-    var scanner = MusicScanner();
-    var playlists = await scanner.getPlaylists();
+    var playlists = List<Playlist>.from(_playerProvider.playlists);
     for (var i = 0; i < playlists.length; i++) {
       if (playlists[i].id == playlistId) {
         playlists[i] = Playlist(
@@ -467,10 +466,12 @@ class _SonoraAppState extends State<SonoraApp> {
         break;
       }
     }
-    await scanner.savePlaylists(playlists);
-    if (!mounted) return;
+
+    // Optimistic UI update
     _playerProvider.updatePlaylists(playlists);
-    _syncRouterState();
+
+    var scanner = MusicScanner();
+    await scanner.savePlaylists(playlists);
   }
 
   @override
