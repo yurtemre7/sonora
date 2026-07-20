@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
@@ -95,6 +96,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _checkUpdateAutomatically() async {
+    if (kDebugMode) return;
+
     var result = await UpdateService.checkForUpdate();
     if (result.update != null && mounted) {
       showDialog(
