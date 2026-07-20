@@ -101,20 +101,22 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                 ],
               ),
             )
-          : Markdown(
-              data: _changelogContent ?? 'No changelog available.',
-              styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                p: theme.textTheme.bodyMedium,
-                h1: theme.textTheme.headlineMedium?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-                h2: theme.textTheme.titleLarge?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-                h3: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+          : SafeArea(
+              child: Markdown(
+                data: _changelogContent ?? 'No changelog available.',
+                styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                  p: theme.textTheme.bodyMedium,
+                  h1: theme.textTheme.headlineMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  h2: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  h3: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
