@@ -111,84 +111,86 @@ class AppearanceSettingsScreen extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: ListView(
-        children: [
-          const SizedBox(height: 8),
-          ListenableBuilder(
-            listenable: themeProvider,
-            builder: (context, _) {
-              var mode = themeProvider.themeMode;
-              return ListTile(
-                leading: Icon(_themeModeIcon(mode)),
-                title: const Text('Theme Mode'),
-                subtitle: Text(_themeModeName(mode)),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => _showThemeModeSheet(context),
-              );
-            },
-          ),
-          ListenableBuilder(
-            listenable: playerProvider,
-            builder: (context, _) {
-              var uniqueColors = playerProvider.getUniqueThemeColors();
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 8.0,
-                    ),
-                    child: Text(
-                      'Default App Color',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+      body: SafeArea(
+        child: ListView(
+          children: [
+            const SizedBox(height: 8),
+            ListenableBuilder(
+              listenable: themeProvider,
+              builder: (context, _) {
+                var mode = themeProvider.themeMode;
+                return ListTile(
+                  leading: Icon(_themeModeIcon(mode)),
+                  title: const Text('Theme Mode'),
+                  subtitle: Text(_themeModeName(mode)),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => _showThemeModeSheet(context),
+                );
+              },
+            ),
+            ListenableBuilder(
+              listenable: playerProvider,
+              builder: (context, _) {
+                var uniqueColors = playerProvider.getUniqueThemeColors();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0,
+                        vertical: 8.0,
+                      ),
+                      child: Text(
+                        'Default App Color',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  ThemeColorSelector(
-                    colors: uniqueColors,
-                    selectedColor: playerProvider.defaultThemeColor,
-                    onColorSelected: (color) {
-                      playerProvider.setDefaultThemeColor(color);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  SwitchListTile(
-                    secondary: const Icon(Icons.color_lens_outlined),
-                    title: const Text('Dynamic Theme (Material You)'),
-                    subtitle: const Text(
-                      'Automatically theme the app using active album art',
+                    const SizedBox(height: 8),
+                    ThemeColorSelector(
+                      colors: uniqueColors,
+                      selectedColor: playerProvider.defaultThemeColor,
+                      onColorSelected: (color) {
+                        playerProvider.setDefaultThemeColor(color);
+                      },
                     ),
-                    value: playerProvider.useDynamicTheme,
-                    onChanged: (val) => playerProvider.toggleDynamicTheme(val),
-                  ),
-                  SwitchListTile(
-                    secondary: const Icon(Icons.account_box_outlined),
-                    title: const Text('Prefer Local Artist Images'),
-                    subtitle: const Text(
-                      'Use local artist.jpg files from your music folders when available',
+                    const SizedBox(height: 16),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.color_lens_outlined),
+                      title: const Text('Dynamic Theme (Material You)'),
+                      subtitle: const Text(
+                        'Automatically theme the app using active album art',
+                      ),
+                      value: playerProvider.useDynamicTheme,
+                      onChanged: (val) =>
+                          playerProvider.toggleDynamicTheme(val),
                     ),
-                    value: playerProvider.preferLocalArtistImages,
-                    onChanged: (val) =>
-                        playerProvider.togglePreferLocalArtistImages(val),
-                  ),
-                  SwitchListTile(
-                    secondary: const Icon(Icons.bar_chart_rounded),
-                    title: const Text('Show Audio Visualizer'),
-                    subtitle: const Text(
-                      'Animate audio wave visualizer inside player screen',
+                    SwitchListTile(
+                      secondary: const Icon(Icons.account_box_outlined),
+                      title: const Text('Prefer Local Artist Images'),
+                      subtitle: const Text(
+                        'Use local artist.jpg files from your music folders when available',
+                      ),
+                      value: playerProvider.preferLocalArtistImages,
+                      onChanged: (val) =>
+                          playerProvider.togglePreferLocalArtistImages(val),
                     ),
-                    value: playerProvider.showVisualizer,
-                    onChanged: (val) => playerProvider.toggleVisualizer(val),
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 32),
-        ],
+                    SwitchListTile(
+                      secondary: const Icon(Icons.bar_chart_rounded),
+                      title: const Text('Show Audio Visualizer'),
+                      subtitle: const Text(
+                        'Animate audio wave visualizer inside player screen',
+                      ),
+                      value: playerProvider.showVisualizer,
+                      onChanged: (val) => playerProvider.toggleVisualizer(val),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
