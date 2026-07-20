@@ -349,66 +349,41 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                   else
                     SliverPadding(
                       padding: const EdgeInsets.only(top: 8, bottom: 120),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
+                      sliver: SliverReorderableList(
+                        itemCount: _playlistSongs.length,
+                        onReorderItem: (int oldIndex, int newIndex) {
+                          setState(() {
+                            var item = _playlistSongs.removeAt(oldIndex);
+                            _playlistSongs.insert(newIndex, item);
+                          });
+                          widget.onReorderSongs(
+                            _playlist.id,
+                            _playlistSongs.map((s) => s.id).toList(),
+                          );
+                        },
+                        itemBuilder: (context, index) {
                           var song = _playlistSongs[index];
                           var isCurrent =
                               widget.playerProvider.currentSong?.id == song.id;
 
-                          return Dismissible(
+                          return ReorderableDelayedDragStartListener(
                             key: ValueKey(song.id),
-                            direction: DismissDirection.endToStart,
-                            background: Container(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20.0,
-                              ),
-                              color: theme.colorScheme.errorContainer,
-                              child: Icon(
-                                Icons.delete_outline_rounded,
-                                color: theme.colorScheme.onErrorContainer,
-                              ),
-                            ),
-                            onDismissed: (direction) async {
-                              if (_playlist.id == 'favorites') {
-                                await widget.playerProvider.toggleFavorite(
-                                  song.id,
-                                );
-                              } else {
-                                await widget.onRemoveSong(
-                                  _playlist.id,
-                                  song.id,
-                                );
-                              }
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Removed "${song.displayTitle}" from playlist.',
-                                  ),
-                                  behavior: SnackBarBehavior.floating,
+                            index: index,
+                            child: Dismissible(
+                              key: ValueKey('dismiss_${song.id}'),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20.0,
                                 ),
-                              );
-                            },
-                            child: SongTile(
-                              song: song,
-                              playerProvider: widget.playerProvider,
-                              isCurrent: isCurrent,
-                              showDivider: index < _playlistSongs.length - 1,
-                              onTap: () {
-                                widget.playerProvider.playSong(
-                                  song,
-                                  _playlistSongs,
-                                  playlistId: widget.playlist.id,
-                                );
-                              },
-                              onPlayNext: () =>
-                                  widget.playerProvider.playNext(song),
-                              onAddToQueue: () =>
-                                  widget.playerProvider.addToQueue(song),
-                              onAddToPlaylist: () =>
-                                  _showAddToPlaylistDialog(song),
-                              onRemoveFromPlaylist: () async {
+                                color: theme.colorScheme.errorContainer,
+                                child: Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: theme.colorScheme.onErrorContainer,
+                                ),
+                              ),
+                              onDismissed: (direction) async {
                                 if (_playlist.id == 'favorites') {
                                   await widget.playerProvider.toggleFavorite(
                                     song.id,
@@ -429,13 +404,53 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   ),
                                 );
                               },
-                              onShowInfo: () =>
-                                  showSongInfoBottomSheet(context, song),
-                              onToggleFavorite: () =>
-                                  widget.playerProvider.toggleFavorite(song.id),
+                              child: SongTile(
+                                song: song,
+                                playerProvider: widget.playerProvider,
+                                isCurrent: isCurrent,
+                                showDivider: index < _playlistSongs.length - 1,
+                                onTap: () {
+                                  widget.playerProvider.playSong(
+                                    song,
+                                    _playlistSongs,
+                                    playlistId: widget.playlist.id,
+                                  );
+                                },
+                                onPlayNext: () =>
+                                    widget.playerProvider.playNext(song),
+                                onAddToQueue: () =>
+                                    widget.playerProvider.addToQueue(song),
+                                onAddToPlaylist: () =>
+                                    _showAddToPlaylistDialog(song),
+                                onRemoveFromPlaylist: () async {
+                                  if (_playlist.id == 'favorites') {
+                                    await widget.playerProvider.toggleFavorite(
+                                      song.id,
+                                    );
+                                  } else {
+                                    await widget.onRemoveSong(
+                                      _playlist.id,
+                                      song.id,
+                                    );
+                                  }
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Removed "${song.displayTitle}" from playlist.',
+                                      ),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                },
+                                onShowInfo: () =>
+                                    showSongInfoBottomSheet(context, song),
+                                onToggleFavorite: () => widget.playerProvider
+                                    .toggleFavorite(song.id),
+                              ),
                             ),
                           );
-                        }, childCount: _playlistSongs.length),
+                        },
                       ),
                     ),
                 ],
