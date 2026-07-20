@@ -2,6 +2,26 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.8.0] - 2026-07-20
+### Added
+* Add community and support section to settings
+* Redesign and enforce onboarding completion
+* Highlight update tile when update is pending
+* Add changelog viewer
+* Add automatic GitHub release checker
+* Support sidecar cover.jpg as album artwork fallback
+### Fixed
+* Default pause on duck to false
+* Add safe area
+* Update the launchUrl to not check the Url as this leads to an error
+* Add safe area to changelog screen
+* Playlist reordering UI flash
+* Disable automatic update check in debug mode
+### Changed
+* Refactor: Introduce SettingsProvider for eager setting loads
+* Refactor: Split settings into sub-screens and add danger zone logic
+* Chore: Update flutter to 3.44.7
+
 ## [1.7.0] - 2026-07-20
 ### Added
 * Add setting to select default start page
