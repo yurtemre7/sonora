@@ -2,7 +2,7 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.8.1] - 2026-07-21
+## [1.8.2] - 2026-07-21
 ### Added
 * Add community and support section to settings
 * Redesign and enforce onboarding completion
