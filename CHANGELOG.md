@@ -2,6 +2,12 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.8.3] - 2026-07-21
+### Added
+* Add dedicated privacy and permissions setting screen
+### Fixed
+* Internet permission, stats playtime calculation, and theme mode toggle
+
 ## [1.8.2] - 2026-07-21
 ### Added
 * Add community and support section to settings
