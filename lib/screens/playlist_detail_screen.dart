@@ -42,6 +42,7 @@ class PlaylistDetailScreen extends StatefulWidget {
 
 class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
   late List<Song> _playlistSongs;
+  late List<Key> _itemKeys;
   final _scrollController = ScrollController();
   late Playlist _playlist;
 
@@ -71,6 +72,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
         .map((id) => songMap[id])
         .whereType<Song>()
         .toList();
+    _itemKeys = List.generate(_playlistSongs.length, (i) => UniqueKey());
   }
 
   void _showAddToPlaylistDialog(Song song) {
@@ -355,6 +357,8 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                           setState(() {
                             var item = _playlistSongs.removeAt(oldIndex);
                             _playlistSongs.insert(newIndex, item);
+                            var key = _itemKeys.removeAt(oldIndex);
+                            _itemKeys.insert(newIndex, key);
                           });
                           widget.onReorderSongs(
                             _playlist.id,
@@ -367,10 +371,10 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                               widget.playerProvider.currentSong?.id == song.id;
 
                           return ReorderableDelayedDragStartListener(
-                            key: ValueKey(song.id),
+                            key: _itemKeys[index],
                             index: index,
                             child: Dismissible(
-                              key: ValueKey('dismiss_${song.id}'),
+                              key: ValueKey('dismiss_${_itemKeys[index].hashCode}'),
                               direction: DismissDirection.endToStart,
                               background: Container(
                                 alignment: Alignment.centerRight,

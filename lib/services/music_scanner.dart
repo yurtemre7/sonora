@@ -100,8 +100,8 @@ class MusicScanner {
           'midi',
         };
         var foundFiles = <File>[];
-        var localArtistImageDirs = <String, String>{}; // dirPath -> imagePath
         var localCoverImageDirs = <String, String>{}; // dirPath -> imagePath
+        var localImageFiles = <String, List<String>>{}; // dirPath -> List<imagePath>
 
         try {
           var syncDir = Directory(folderPath);
@@ -111,14 +111,12 @@ class MusicScanner {
           )) {
             if (entity is File) {
               var name = entity.uri.pathSegments.last.toLowerCase();
-              if (name == 'artist.jpg' ||
-                  name == 'artist.png' ||
-                  name == 'artist.webp') {
-                localArtistImageDirs[entity.parent.path] = entity.path;
-              } else if (name == 'cover.jpg' ||
+              if (name == 'cover.jpg' ||
                   name == 'cover.png' ||
                   name == 'cover.webp') {
                 localCoverImageDirs[entity.parent.path] = entity.path;
+              } else if (name.endsWith('.jpg') || name.endsWith('.png') || name.endsWith('.webp') || name.endsWith('.jpeg')) {
+                localImageFiles.putIfAbsent(entity.parent.path, () => []).add(entity.path);
               } else {
                 var ext = name.split('.').last;
                 if (audioExtensions.contains(ext)) {
@@ -316,12 +314,22 @@ class MusicScanner {
           var dir = File(song.filePath).parent.path;
           var parentDir = File(song.filePath).parent.parent.path;
 
-          if (localArtistImageDirs.containsKey(dir)) {
-            finalArtistImages[song.artist.toLowerCase()] =
-                localArtistImageDirs[dir]!;
-          } else if (localArtistImageDirs.containsKey(parentDir)) {
-            finalArtistImages[song.artist.toLowerCase()] =
-                localArtistImageDirs[parentDir]!;
+          var lowerArtist = song.artist.toLowerCase();
+          
+          String? findArtistImage(String path) {
+            var images = localImageFiles[path];
+            if (images == null) return null;
+            for (var img in images) {
+              var name = img.split(Platform.pathSeparator).last.toLowerCase();
+              if (name == 'artist.jpg' || name == 'artist.png' || name == 'artist.webp' || name == 'artist.jpeg') return img;
+              if (name == '$lowerArtist.jpg' || name == '$lowerArtist.png' || name == '$lowerArtist.webp' || name == '$lowerArtist.jpeg') return img;
+            }
+            return null;
+          }
+
+          var match = findArtistImage(dir) ?? findArtistImage(parentDir);
+          if (match != null) {
+            finalArtistImages[lowerArtist] = match;
           }
         }
 

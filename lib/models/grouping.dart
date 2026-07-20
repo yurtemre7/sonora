@@ -57,11 +57,15 @@ List<AlbumGroup> buildAlbumGroups(List<Song> allSongs) {
     var artistName = parts[1];
     var sortedSongs = entry.value.toList();
     sortedSongs.sort((a, b) {
-      if (a.discNumber != b.discNumber) {
-        return (a.discNumber ?? 1).compareTo(b.discNumber ?? 1);
+      int discA = a.discNumber ?? 1;
+      int discB = b.discNumber ?? 1;
+      if (discA != discB) {
+        return discA.compareTo(discB);
       }
-      if (a.trackNumber != b.trackNumber) {
-        return (a.trackNumber ?? 0).compareTo(b.trackNumber ?? 0);
+      int trackA = a.trackNumber ?? 0;
+      int trackB = b.trackNumber ?? 0;
+      if (trackA != trackB) {
+        return trackA.compareTo(trackB);
       }
       return a.titleLower.compareTo(b.titleLower);
     });
@@ -134,11 +138,15 @@ AlbumGroup buildAlbumGroup(
   }).toList();
 
   songs.sort((a, b) {
-    if (a.discNumber != b.discNumber) {
-      return (a.discNumber ?? 1).compareTo(b.discNumber ?? 1);
+    int discA = a.discNumber ?? 1;
+    int discB = b.discNumber ?? 1;
+    if (discA != discB) {
+      return discA.compareTo(discB);
     }
-    if (a.trackNumber != b.trackNumber) {
-      return (a.trackNumber ?? 0).compareTo(b.trackNumber ?? 0);
+    int trackA = a.trackNumber ?? 0;
+    int trackB = b.trackNumber ?? 0;
+    if (trackA != trackB) {
+      return trackA.compareTo(trackB);
     }
     return a.titleLower.compareTo(b.titleLower);
   });
