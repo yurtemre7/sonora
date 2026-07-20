@@ -5,7 +5,7 @@ import 'package:sonora/services/music_scanner.dart';
 
 class SettingsProvider extends ChangeNotifier {
   var keepPlayingOnClose = false;
-  var pauseOnDuck = true;
+  var pauseOnDuck = false;
   String? scanFolder;
   String? lastSyncTime;
   int? lastSyncDuration;
@@ -18,7 +18,7 @@ class SettingsProvider extends ChangeNotifier {
     var scanner = MusicScanner();
 
     keepPlayingOnClose = await prefs.getBool('keep_playing_on_close') ?? false;
-    pauseOnDuck = await prefs.getBool('pause_on_duck') ?? true;
+    pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
 
     scanFolder = await scanner.getScanFolder();
     lastSyncTime = await scanner.getLastSyncTime();
