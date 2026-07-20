@@ -5,11 +5,13 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/services/update_service.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/song_tile.dart';
+import 'package:sonora/widgets/update_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -86,6 +88,20 @@ class _HomeScreenState extends State<HomeScreen>
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkUpdateAutomatically();
+    });
+  }
+
+  Future<void> _checkUpdateAutomatically() async {
+    var result = await UpdateService.checkForUpdate();
+    if (result.update != null && mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => UpdateDialog(updateInfo: result.update!),
+      );
+    }
   }
 
   List<AlbumGroup> _getAlbums() {

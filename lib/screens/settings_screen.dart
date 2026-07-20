@@ -5,8 +5,10 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/services/update_service.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/theme_color_selector.dart';
+import 'package:sonora/widgets/update_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -55,7 +57,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   var _keepPlayingOnClose = false;
-  var _pauseOnDuck = false;
+  var _pauseOnDuck = true;
+  var _isCheckingUpdate = false;
 
   Future<void> _loadSettings() async {
     var scanner = MusicScanner();
@@ -888,6 +891,69 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: Text('Version $_appVersion'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => _showAboutAppDialog(context),
+          ),
+          ListTile(
+            leading: _isCheckingUpdate
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.system_update_rounded),
+            title: const Text('Check for Updates'),
+            subtitle: const Text('Check GitHub for a new release'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: _isCheckingUpdate
+                ? null
+                : () async {
+                    setState(() {
+                      _isCheckingUpdate = true;
+                    });
+
+                    var result = await UpdateService.checkForUpdate(
+                      manual: true,
+                    );
+
+                    if (!context.mounted) return;
+                    setState(() {
+                      _isCheckingUpdate = false;
+                    });
+
+                    if (result.isRateLimited) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'GitHub API rate limit exceeded. Please try again later.',
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } else if (result.hasError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Failed to check for updates. Check your internet connection.',
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } else if (result.update != null) {
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            UpdateDialog(updateInfo: result.update!),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'You are already on the latest version.',
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined),
