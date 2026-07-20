@@ -902,9 +902,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.open_in_new_rounded),
             onTap: () async {
               var url = Uri.parse('https://github.com/yurtemre7/sonora');
-              if (await canLaunchUrl(url)) {
-                await launchUrl(url, mode: LaunchMode.externalApplication);
-              }
+              await launchUrl(url, mode: LaunchMode.externalApplication);
             },
           ),
           ListTile(
@@ -914,9 +912,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.open_in_new_rounded),
             onTap: () async {
               var url = Uri.parse('https://github.com/yurtemre7');
-              if (await canLaunchUrl(url)) {
-                await launchUrl(url, mode: LaunchMode.externalApplication);
-              }
+              await launchUrl(url, mode: LaunchMode.externalApplication);
             },
           ),
           ListTile(
@@ -926,9 +922,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.open_in_new_rounded),
             onTap: () async {
               var url = Uri.parse('https://t.me/emredev');
-              if (await canLaunchUrl(url)) {
-                await launchUrl(url, mode: LaunchMode.externalApplication);
-              }
+              await launchUrl(url, mode: LaunchMode.externalApplication);
             },
           ),
 
@@ -990,13 +984,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : () async {
                     if (_pendingUpdateUrl != null) {
                       var url = Uri.parse(_pendingUpdateUrl!);
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(
-                          url,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      }
-                      return;
+                      await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      );
                     }
 
                     setState(() {
