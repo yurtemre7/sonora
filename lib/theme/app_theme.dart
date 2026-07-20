@@ -129,7 +129,12 @@ class AppTheme {
         iconTheme: IconThemeData(color: colorScheme.onSurface),
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarDividerColor: Colors.transparent,
           statusBarIconBrightness: brightness == Brightness.light
+              ? Brightness.dark
+              : Brightness.light,
+          systemNavigationBarIconBrightness: brightness == Brightness.light
               ? Brightness.dark
               : Brightness.light,
           statusBarBrightness: brightness == Brightness.light
