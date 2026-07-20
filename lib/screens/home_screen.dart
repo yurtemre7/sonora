@@ -78,7 +78,11 @@ class _HomeScreenState extends State<HomeScreen>
     _artistSortAscending = widget.playerProvider.artistSortAscending;
     _playlistSortBy = widget.playerProvider.playlistSortBy;
     _playlistSortAscending = widget.playerProvider.playlistSortAscending;
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(
+      length: 4,
+      vsync: this,
+      initialIndex: widget.playerProvider.defaultStartPage,
+    );
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });

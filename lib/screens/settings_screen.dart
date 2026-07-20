@@ -501,6 +501,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       },
                     ),
                   ),
+                  ListTile(
+                    leading: const Icon(Icons.home_outlined),
+                    title: const Text('Default Start Page'),
+                    subtitle: const Text('Page to show when the app starts'),
+                    trailing: DropdownButton<int>(
+                      value: widget.playerProvider.defaultStartPage,
+                      underline: const SizedBox(),
+                      items: const [
+                        DropdownMenuItem<int>(value: 0, child: Text('Songs')),
+                        DropdownMenuItem<int>(value: 1, child: Text('Albums')),
+                        DropdownMenuItem<int>(value: 2, child: Text('Artists')),
+                        DropdownMenuItem<int>(
+                          value: 3,
+                          child: Text('Playlists'),
+                        ),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          widget.playerProvider.setDefaultStartPage(val);
+                        }
+                      },
+                    ),
+                  ),
                 ],
               );
             },

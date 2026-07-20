@@ -56,6 +56,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   var playlistSortBy = 'name';
   var playlistSortAscending = true;
 
+  var defaultStartPage = 0;
+
   var _volume = 1.0;
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
@@ -636,6 +638,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         await prefs.getBool('prefer_local_artist_images') ?? true;
     sleepTimerDefaultMinutes =
         await prefs.getInt('sleep_timer_default_minutes') ?? 5;
+    defaultStartPage = await prefs.getInt('default_start_page') ?? 0;
 
     var defaultColorVal = await prefs.getInt('default_theme_color');
     if (defaultColorVal != null) {
@@ -711,6 +714,13 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     sleepTimerDefaultMinutes = minutes.clamp(1, 60);
     var prefs = SharedPreferencesAsync();
     await prefs.setInt('sleep_timer_default_minutes', sleepTimerDefaultMinutes);
+    notifyListeners();
+  }
+
+  Future<void> setDefaultStartPage(int index) async {
+    defaultStartPage = index;
+    var prefs = SharedPreferencesAsync();
+    await prefs.setInt('default_start_page', index);
     notifyListeners();
   }
 
