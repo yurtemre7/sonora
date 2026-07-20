@@ -58,46 +58,36 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      RadioListTile<ThemeMode>(
-                        value: ThemeMode.system,
-                        groupValue: currentMode,
-                        onChanged: (value) {
-                          if (value == null) return;
-                          themeProvider.setThemeMode(value);
-                          Navigator.pop(sheetContext);
-                        },
-                        title: const Text('System Default'),
-                        subtitle: const Text('Follows your device theme'),
-                        secondary: const Icon(Icons.brightness_auto_rounded),
-                      ),
-                      RadioListTile<ThemeMode>(
-                        value: ThemeMode.light,
-                        groupValue: currentMode,
-                        onChanged: (value) {
-                          if (value == null) return;
-                          themeProvider.setThemeMode(value);
-                          Navigator.pop(sheetContext);
-                        },
-                        title: const Text('Light'),
-                        subtitle: const Text('Always use light theme'),
-                        secondary: const Icon(Icons.light_mode_rounded),
-                      ),
-                      RadioListTile<ThemeMode>(
-                        value: ThemeMode.dark,
-                        groupValue: currentMode,
-                        onChanged: (value) {
-                          if (value == null) return;
-                          themeProvider.setThemeMode(value);
-                          Navigator.pop(sheetContext);
-                        },
-                        title: const Text('Dark'),
-                        subtitle: const Text('Always use dark theme'),
-                        secondary: const Icon(Icons.dark_mode_rounded),
-                      ),
-                    ],
+                  RadioGroup<ThemeMode>(
+                    groupValue: currentMode,
+                    onChanged: (value) {
+                      if (value == null) return;
+                      themeProvider.setThemeMode(value);
+                      Navigator.pop(sheetContext);
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        RadioListTile<ThemeMode>(
+                          value: ThemeMode.system,
+                          title: const Text('System Default'),
+                          subtitle: const Text('Follows your device theme'),
+                          secondary: const Icon(Icons.brightness_auto_rounded),
+                        ),
+                        RadioListTile<ThemeMode>(
+                          value: ThemeMode.light,
+                          title: const Text('Light'),
+                          subtitle: const Text('Always use light theme'),
+                          secondary: const Icon(Icons.light_mode_rounded),
+                        ),
+                        RadioListTile<ThemeMode>(
+                          value: ThemeMode.dark,
+                          title: const Text('Dark'),
+                          subtitle: const Text('Always use dark theme'),
+                          secondary: const Icon(Icons.dark_mode_rounded),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],
