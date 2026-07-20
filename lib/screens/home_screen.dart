@@ -159,6 +159,8 @@ class _HomeScreenState extends State<HomeScreen>
         cmp = a.artistLower.compareTo(b.artistLower);
       } else if (_albumSortBy == 'tracks') {
         cmp = a.songs.length.compareTo(b.songs.length);
+      } else if (_albumSortBy == 'recent') {
+        cmp = a.latestModifiedMs.compareTo(b.latestModifiedMs);
       } else {
         cmp = a.nameLower.compareTo(b.nameLower);
       }
@@ -225,6 +227,7 @@ class _HomeScreenState extends State<HomeScreen>
           ('Album Name', 'name'),
           ('Artist', 'artist'),
           ('Track Count', 'tracks'),
+          ('Recently Added', 'recent'),
         ];
       case 2:
         title = 'Sort Artists By';

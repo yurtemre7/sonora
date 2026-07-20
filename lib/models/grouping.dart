@@ -10,6 +10,10 @@ class AlbumGroup {
   // Pre-normalized lowercase keys computed once at construction time
   late final String nameLower = name.toLowerCase();
   late final String artistLower = artist.toLowerCase();
+  late final int latestModifiedMs = songs.fold<int>(
+    0,
+    (max, s) => (s.lastModifiedMs ?? 0) > max ? (s.lastModifiedMs ?? 0) : max,
+  );
 }
 
 class ArtistGroup {
