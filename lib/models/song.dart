@@ -14,6 +14,8 @@ class Song {
   final int? fileSize;
   final bool hasLyrics;
   final int? dominantColor;
+  final int? trackNumber;
+  final int? discNumber;
 
   Song({
     required this.id,
@@ -31,6 +33,8 @@ class Song {
     this.fileSize,
     this.hasLyrics = false,
     this.dominantColor,
+    this.trackNumber,
+    this.discNumber,
   });
 
   // Pre-normalized lowercase keys computed once at construction time
@@ -60,6 +64,8 @@ class Song {
     int? fileSize,
     bool? hasLyrics,
     int? dominantColor,
+    int? trackNumber,
+    int? discNumber,
   }) {
     return Song(
       id: id ?? this.id,
@@ -77,6 +83,8 @@ class Song {
       fileSize: fileSize ?? this.fileSize,
       hasLyrics: hasLyrics ?? this.hasLyrics,
       dominantColor: dominantColor ?? this.dominantColor,
+      trackNumber: trackNumber ?? this.trackNumber,
+      discNumber: discNumber ?? this.discNumber,
     );
   }
 

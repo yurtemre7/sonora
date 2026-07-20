@@ -581,6 +581,8 @@ class MusicScanner {
                   lastModifiedMs: mtime,
                   fileSize: size,
                   hasLyrics: hasLrc,
+                  trackNumber: meta?.track,
+                  discNumber: meta?.disc,
                 ),
               );
             } catch (_) {}
@@ -950,6 +952,8 @@ class MusicScanner {
           fileSize: item['file_size'] as int?,
           hasLyrics: item['has_lyrics'] as bool? ?? false,
           dominantColor: item['dominant_color'] as int?,
+          trackNumber: item['track_number'] as int?,
+          discNumber: item['disc_number'] as int?,
         );
       }).toList();
     } catch (_) {
@@ -980,6 +984,8 @@ class MusicScanner {
               'file_size': s.fileSize,
               'has_lyrics': s.hasLyrics,
               'dominant_color': s.dominantColor,
+              'track_number': s.trackNumber,
+              'disc_number': s.discNumber,
             },
           )
           .toList();
