@@ -2,6 +2,16 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.7.0] - 2026-07-20
+### Added
+* Add setting to select default start page
+* Sort album tracks by disc and track number
+* Add reordering support to playlists
+* Use local artist images
+* Add 'Recently Added' sorting option to albums view
+### Fixed
+* Make system navigation bar edge-to-edge and transparent
+
 ## [1.6.2] - 2026-07-19
 ### Added
 * Add default app color picker based on extracted themes
