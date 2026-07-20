@@ -32,6 +32,9 @@ class UpdateService {
       'https://api.github.com/repos/yurtemre7/sonora/releases/latest';
   static const _lastCheckKey = 'last_update_check_time';
 
+  /// Session-only pending update URL
+  static String? pendingUpdateUrl;
+
   /// Checks for an update. If [manual] is true, ignores the 12-hour throttle.
   static Future<UpdateResult> checkForUpdate({bool manual = false}) async {
     try {
@@ -74,6 +77,7 @@ class UpdateService {
           if (isNewer) {
             // Cache the latest changelog from main as well
             await fetchChangelog(forceRefresh: true);
+            pendingUpdateUrl = htmlUrl;
 
             return UpdateResult(
               update: UpdateInfo(
@@ -83,6 +87,7 @@ class UpdateService {
               ),
             );
           } else {
+            pendingUpdateUrl = null;
             return UpdateResult(); // up to date
           }
         }

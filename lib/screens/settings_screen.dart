@@ -11,6 +11,7 @@ import 'package:sonora/services/update_service.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/theme_color_selector.dart';
 import 'package:sonora/widgets/update_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -61,6 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   var _keepPlayingOnClose = false;
   var _pauseOnDuck = true;
   var _isCheckingUpdate = false;
+  String? _pendingUpdateUrl;
 
   Future<void> _loadSettings() async {
     var scanner = MusicScanner();
@@ -90,6 +92,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _appVersion = version;
       _lastSyncDuration = duration;
     });
+
+    if (mounted && UpdateService.pendingUpdateUrl != null) {
+      setState(() {
+        _pendingUpdateUrl = UpdateService.pendingUpdateUrl;
+      });
+    }
   }
 
   Future<void> _confirmResetDialog() async {
@@ -901,13 +909,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     height: 24,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.system_update_rounded),
-            title: const Text('Check for Updates'),
-            subtitle: const Text('Check GitHub for a new release'),
+                : Icon(
+                    _pendingUpdateUrl != null
+                        ? Icons.download_rounded
+                        : Icons.system_update_rounded,
+                    color: _pendingUpdateUrl != null
+                        ? theme.colorScheme.primary
+                        : null,
+                  ),
+            title: Text(
+              _pendingUpdateUrl != null ? 'Update now' : 'Check for Updates',
+              style: TextStyle(
+                color: _pendingUpdateUrl != null
+                    ? theme.colorScheme.primary
+                    : null,
+                fontWeight: _pendingUpdateUrl != null ? FontWeight.bold : null,
+              ),
+            ),
+            subtitle: Text(
+              _pendingUpdateUrl != null
+                  ? 'A new version is ready to download'
+                  : 'Check GitHub for a new release',
+            ),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: _isCheckingUpdate
                 ? null
                 : () async {
+                    if (_pendingUpdateUrl != null) {
+                      var url = Uri.parse(_pendingUpdateUrl!);
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(
+                          url,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      }
+                      return;
+                    }
+
                     setState(() {
                       _isCheckingUpdate = true;
                     });
@@ -919,6 +957,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     if (!context.mounted) return;
                     setState(() {
                       _isCheckingUpdate = false;
+                      _pendingUpdateUrl = UpdateService.pendingUpdateUrl;
                     });
 
                     if (result.isRateLimited) {
