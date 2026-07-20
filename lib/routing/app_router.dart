@@ -4,6 +4,7 @@ import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/routing/app_routes.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
@@ -26,6 +27,7 @@ class SonoraAppRouter {
     required this.permissionBuilder,
     required this.playerProvider,
     required this.themeProvider,
+    required this.settingsProvider,
     required this.buildOnboarding,
     required this.buildHome,
     required this.onConfigureFolder,
@@ -43,6 +45,7 @@ class SonoraAppRouter {
   final WidgetBuilder permissionBuilder;
   final PlayerProvider playerProvider;
   final ThemeProvider themeProvider;
+  final SettingsProvider settingsProvider;
   final Widget Function(BuildContext context) buildOnboarding;
   final Widget Function(BuildContext context) buildHome;
   final Future<void> Function() onConfigureFolder;
@@ -145,6 +148,7 @@ class SonoraAppRouter {
               onRetriggerSync: onRetriggerSync,
               themeProvider: themeProvider,
               playerProvider: playerProvider,
+              settingsProvider: settingsProvider,
             ),
           ),
           GoRoute(
@@ -156,8 +160,10 @@ class SonoraAppRouter {
           ),
           GoRoute(
             path: AppRoutes.settingsPlayback,
-            builder: (context, state) =>
-                PlaybackSettingsScreen(playerProvider: playerProvider),
+            builder: (context, state) => PlaybackSettingsScreen(
+              playerProvider: playerProvider,
+              settingsProvider: settingsProvider,
+            ),
           ),
           GoRoute(
             path: AppRoutes.settingsInfo,

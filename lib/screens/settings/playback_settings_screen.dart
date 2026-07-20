@@ -1,38 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/providers/settings_provider.dart';
 
-class PlaybackSettingsScreen extends StatefulWidget {
-  const PlaybackSettingsScreen({super.key, required this.playerProvider});
+class PlaybackSettingsScreen extends StatelessWidget {
+  const PlaybackSettingsScreen({
+    super.key,
+    required this.playerProvider,
+    required this.settingsProvider,
+  });
 
   final PlayerProvider playerProvider;
-
-  @override
-  State<PlaybackSettingsScreen> createState() => _PlaybackSettingsScreenState();
-}
-
-class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
-  var _keepPlayingOnClose = false;
-  var _pauseOnDuck = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
-
-  Future<void> _loadSettings() async {
-    var prefs = SharedPreferencesAsync();
-    var keepPlaying = await prefs.getBool('keep_playing_on_close') ?? false;
-    var pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
-
-    if (!mounted) return;
-    setState(() {
-      _keepPlayingOnClose = keepPlaying;
-      _pauseOnDuck = pauseOnDuck;
-    });
-  }
+  final SettingsProvider settingsProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -49,39 +28,42 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
         child: ListView(
           children: [
             const SizedBox(height: 8),
-            SwitchListTile(
-              secondary: const Icon(Icons.play_circle_outline_rounded),
-              title: const Text('Keep playing on app close'),
-              subtitle: const Text(
-                'Keep playing music in the background when swiped away',
-              ),
-              value: _keepPlayingOnClose,
-              onChanged: (val) async {
-                var prefs = SharedPreferencesAsync();
-                await prefs.setBool('keep_playing_on_close', val);
-                setState(() {
-                  _keepPlayingOnClose = val;
-                });
-              },
-            ),
-            SwitchListTile(
-              secondary: const Icon(Icons.notifications_paused_rounded),
-              title: const Text('Pause on notifications'),
-              subtitle: const Text(
-                'Pause music instead of lowering volume when a notification arrives',
-              ),
-              value: _pauseOnDuck,
-              onChanged: (val) async {
-                var prefs = SharedPreferencesAsync();
-                await prefs.setBool('pause_on_duck', val);
-                await widget.playerProvider.audioHandler.setPauseOnDuck(val);
-                setState(() {
-                  _pauseOnDuck = val;
-                });
+            ListenableBuilder(
+              listenable: settingsProvider,
+              builder: (context, _) {
+                return Column(
+                  children: [
+                    SwitchListTile(
+                      secondary: const Icon(Icons.play_circle_outline_rounded),
+                      title: const Text('Keep playing on app close'),
+                      subtitle: const Text(
+                        'Keep playing music in the background when swiped away',
+                      ),
+                      value: settingsProvider.keepPlayingOnClose,
+                      onChanged: (val) {
+                        settingsProvider.setKeepPlayingOnClose(val);
+                      },
+                    ),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.notifications_paused_rounded),
+                      title: const Text('Pause on notifications'),
+                      subtitle: const Text(
+                        'Pause music instead of lowering volume when a notification arrives',
+                      ),
+                      value: settingsProvider.pauseOnDuck,
+                      onChanged: (val) {
+                        settingsProvider.setPauseOnDuck(
+                          val,
+                          playerProvider.audioHandler,
+                        );
+                      },
+                    ),
+                  ],
+                );
               },
             ),
             ListenableBuilder(
-              listenable: widget.playerProvider,
+              listenable: playerProvider,
               builder: (context, _) {
                 return Column(
                   children: [
@@ -92,7 +74,7 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
                         'Default duration selected when opening the sleep timer',
                       ),
                       trailing: DropdownButton<int>(
-                        value: widget.playerProvider.sleepTimerDefaultMinutes,
+                        value: playerProvider.sleepTimerDefaultMinutes,
                         underline: const SizedBox(),
                         items: [5, 10, 15, 20, 25, 30, 60, 120]
                             .map(
@@ -104,9 +86,7 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
                             .toList(),
                         onChanged: (val) {
                           if (val != null) {
-                            widget.playerProvider.setSleepTimerDefaultMinutes(
-                              val,
-                            );
+                            playerProvider.setSleepTimerDefaultMinutes(val);
                           }
                         },
                       ),
@@ -116,12 +96,18 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
                       title: const Text('Default Start Page'),
                       subtitle: const Text('Page to show when the app starts'),
                       trailing: DropdownButton<int>(
-                        value: widget.playerProvider.defaultStartPage,
+                        value: playerProvider.defaultStartPage,
                         underline: const SizedBox(),
                         items: const [
                           DropdownMenuItem<int>(value: 0, child: Text('Songs')),
-                          DropdownMenuItem<int>(value: 1, child: Text('Albums')),
-                          DropdownMenuItem<int>(value: 2, child: Text('Artists')),
+                          DropdownMenuItem<int>(
+                            value: 1,
+                            child: Text('Albums'),
+                          ),
+                          DropdownMenuItem<int>(
+                            value: 2,
+                            child: Text('Artists'),
+                          ),
                           DropdownMenuItem<int>(
                             value: 3,
                             child: Text('Playlists'),
@@ -129,7 +115,7 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
                         ],
                         onChanged: (val) {
                           if (val != null) {
-                            widget.playerProvider.setDefaultStartPage(val);
+                            playerProvider.setDefaultStartPage(val);
                           }
                         },
                       ),

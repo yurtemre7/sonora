@@ -1,10 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/routing/app_router.dart';
@@ -39,6 +39,7 @@ class _SonoraAppState extends State<SonoraApp> {
   String? _scanFolder;
   var _isSyncing = false;
   final _themeProvider = ThemeProvider();
+  final _settingsProvider = SettingsProvider();
   var _showOnboarding = false;
   var _showSyncPrompt = false;
 
@@ -58,6 +59,7 @@ class _SonoraAppState extends State<SonoraApp> {
       permissionBuilder: _buildPermissionScreen,
       playerProvider: _playerProvider,
       themeProvider: _themeProvider,
+      settingsProvider: _settingsProvider,
       buildOnboarding: (context) =>
           OnboardingScreen(onComplete: _completeOnboarding),
       buildHome: (context) => HomeScreen(
@@ -94,6 +96,7 @@ class _SonoraAppState extends State<SonoraApp> {
   void dispose() {
     _playerProvider.removeListener(_syncFromProvider);
     _playerProvider.dispose();
+    _settingsProvider.dispose();
     _routerRefreshNotifier.dispose();
     super.dispose();
   }
@@ -134,6 +137,8 @@ class _SonoraAppState extends State<SonoraApp> {
     setState(() {
       _isLoading = true;
     });
+
+    await _settingsProvider.loadSettings();
 
     // Check if onboarding is completed
     var prefs = SharedPreferencesAsync();
@@ -345,11 +350,16 @@ class _SonoraAppState extends State<SonoraApp> {
       await scanner.setScanFolder(folderPath);
 
       var newSongs = await scanner.importFromFolder(folderPath);
+      var folder = await scanner.getScanFolder();
+      if (!mounted) return;
+      setState(() {
+        _scanFolder = folder;
+      });
+      _settingsProvider.refreshSyncStats();
       var updatedSongs = await scanner.scanAllSongs();
 
       if (!mounted) return;
       setState(() {
-        _scanFolder = folderPath;
         _songs = updatedSongs;
         _hasPermission = true;
       });
@@ -376,6 +386,7 @@ class _SonoraAppState extends State<SonoraApp> {
     try {
       var scanner = MusicScanner();
       var updatedSongs = await scanner.syncLibrary();
+      await _settingsProvider.refreshSyncStats();
       if (!mounted) return;
       setState(() {
         _songs = updatedSongs;
