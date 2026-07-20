@@ -101,6 +101,7 @@ class MusicScanner {
         };
         var foundFiles = <File>[];
         var localArtistImageDirs = <String, String>{}; // dirPath -> imagePath
+        var localCoverImageDirs = <String, String>{}; // dirPath -> imagePath
 
         try {
           var syncDir = Directory(folderPath);
@@ -114,6 +115,10 @@ class MusicScanner {
                   name == 'artist.png' ||
                   name == 'artist.webp') {
                 localArtistImageDirs[entity.parent.path] = entity.path;
+              } else if (name == 'cover.jpg' ||
+                  name == 'cover.png' ||
+                  name == 'cover.webp') {
+                localCoverImageDirs[entity.parent.path] = entity.path;
               } else {
                 var ext = name.split('.').last;
                 if (audioExtensions.contains(ext)) {
@@ -249,6 +254,18 @@ class MusicScanner {
                   );
                   artFile.writeAsBytesSync(meta.pictureBytes!);
                   artworkPath = artFile.path;
+                }
+              }
+
+              if (artworkPath == null) {
+                var dir = file.parent.path;
+                if (localCoverImageDirs.containsKey(dir)) {
+                  artworkPath = localCoverImageDirs[dir];
+                } else {
+                  var parentDir = file.parent.parent.path;
+                  if (localCoverImageDirs.containsKey(parentDir)) {
+                    artworkPath = localCoverImageDirs[parentDir];
+                  }
                 }
               }
 
