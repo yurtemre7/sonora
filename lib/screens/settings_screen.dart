@@ -456,6 +456,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         widget.playerProvider.toggleDynamicTheme(val),
                   ),
                   SwitchListTile(
+                    secondary: const Icon(Icons.account_box_outlined),
+                    title: const Text('Prefer Local Artist Images'),
+                    subtitle: const Text(
+                      'Use local artist.jpg files from your music folders when available',
+                    ),
+                    value: widget.playerProvider.preferLocalArtistImages,
+                    onChanged: (val) => widget.playerProvider
+                        .togglePreferLocalArtistImages(val),
+                  ),
+                  SwitchListTile(
                     secondary: const Icon(Icons.bar_chart_rounded),
                     title: const Text('Show Audio Visualizer'),
                     subtitle: const Text(

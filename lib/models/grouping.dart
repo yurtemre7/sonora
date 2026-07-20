@@ -20,8 +20,14 @@ class ArtistGroup {
   final String name;
   final List<Song> songs;
   final List<AlbumGroup> albums;
+  final String? localImagePath;
 
-  ArtistGroup({required this.name, required this.songs, required this.albums});
+  ArtistGroup({
+    required this.name,
+    required this.songs,
+    required this.albums,
+    this.localImagePath,
+  });
 
   // Pre-normalized lowercase key computed once at construction time
   late final String nameLower = name.toLowerCase();
@@ -59,8 +65,9 @@ List<AlbumGroup> buildAlbumGroups(List<Song> allSongs) {
 
 List<ArtistGroup> buildArtistGroups(
   List<Song> allSongs,
-  List<AlbumGroup> albumGroups,
-) {
+  List<AlbumGroup> allAlbums, [
+  Map<String, String>? localArtistImages,
+]) {
   var artistsMap = <String, List<Song>>{};
   for (var song in allSongs) {
     var artistName = song.artist.trim().isEmpty
@@ -70,13 +77,21 @@ List<ArtistGroup> buildArtistGroups(
   }
 
   var list = artistsMap.entries.map((entry) {
-    var artistAlbums = albumGroups
-        .where((album) => album.artist == entry.key)
+    var name = entry.key;
+    var lowerName = name.toLowerCase();
+    var songs = entry.value;
+
+    var artistAlbums = allAlbums
+        .where((a) => a.artistLower == lowerName)
         .toList();
+
+    var localImage = localArtistImages?[lowerName];
+
     return ArtistGroup(
-      name: entry.key,
-      songs: entry.value,
+      name: name,
+      songs: songs,
       albums: artistAlbums,
+      localImagePath: localImage,
     );
   }).toList();
 

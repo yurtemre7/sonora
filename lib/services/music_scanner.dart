@@ -17,6 +17,9 @@ class MusicScanner {
 
   final _prefs = SharedPreferencesAsync();
 
+  /// Cached local artist images path mapping
+  Map<String, String> localArtistImages = {};
+
   /// Queries the cached list of songs from storage instantly.
   Future<List<Song>> scanAllSongs() async {
     var songs = <Song>[];
@@ -24,6 +27,14 @@ class MusicScanner {
     try {
       // Read existing metadata cache directly for instant UI loading
       songs = await _readImportedSongsMetadata();
+
+      var appDir = await getApplicationDocumentsDirectory();
+      var imagesFile = File('${appDir.path}/artist_images.json');
+      if (imagesFile.existsSync()) {
+        var map =
+            jsonDecode(await imagesFile.readAsString()) as Map<String, dynamic>;
+        localArtistImages = map.map((k, v) => MapEntry(k, v.toString()));
+      }
     } catch (_) {
       // Return whatever is left on error
     }
@@ -67,7 +78,7 @@ class MusicScanner {
       }
 
       // Offload all directory scanning, metadata comparison, and parsing to background isolate
-      var resultSongs = await Isolate.run<List<Song>>(() {
+      var isolateData = await Isolate.run<Map<String, dynamic>>(() {
         var localCachedSongs = List<Song>.from(cachedSongs);
 
         // Supports wide variety of standard audio formats
@@ -89,6 +100,7 @@ class MusicScanner {
           'midi',
         };
         var foundFiles = <File>[];
+        var localArtistImageDirs = <String, String>{}; // dirPath -> imagePath
 
         try {
           var syncDir = Directory(folderPath);
@@ -97,9 +109,16 @@ class MusicScanner {
             followLinks: false,
           )) {
             if (entity is File) {
-              var ext = entity.path.split('.').last.toLowerCase();
-              if (audioExtensions.contains(ext)) {
-                foundFiles.add(entity);
+              var name = entity.uri.pathSegments.last.toLowerCase();
+              if (name == 'artist.jpg' ||
+                  name == 'artist.png' ||
+                  name == 'artist.webp') {
+                localArtistImageDirs[entity.parent.path] = entity.path;
+              } else {
+                var ext = name.split('.').last;
+                if (audioExtensions.contains(ext)) {
+                  foundFiles.add(entity);
+                }
               }
             }
           }
@@ -275,10 +294,31 @@ class MusicScanner {
             } catch (_) {}
           }
         }
+        var finalArtistImages = <String, String>{};
+        for (var song in songsToKeep) {
+          var dir = File(song.filePath).parent.path;
+          var parentDir = File(song.filePath).parent.parent.path;
 
-        return songsToKeep;
+          if (localArtistImageDirs.containsKey(dir)) {
+            finalArtistImages[song.artist.toLowerCase()] =
+                localArtistImageDirs[dir]!;
+          } else if (localArtistImageDirs.containsKey(parentDir)) {
+            finalArtistImages[song.artist.toLowerCase()] =
+                localArtistImageDirs[parentDir]!;
+          }
+        }
+
+        return {'songs': songsToKeep, 'artistImages': finalArtistImages};
       });
 
+      var resultSongs = isolateData['songs'] as List<Song>;
+      var finalArtistImages =
+          isolateData['artistImages'] as Map<String, String>;
+
+      // Save local artist images to cache
+      var imagesFile = File('$appDocsDirPath/artist_images.json');
+      await imagesFile.writeAsString(jsonEncode(finalArtistImages));
+      localArtistImages = finalArtistImages;
       // Sort resultSongs by user's saved song tab settings before writing to file
       var sortSettings = await getTabSortSettings('songs');
       sortSongs(

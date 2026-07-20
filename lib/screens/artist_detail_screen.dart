@@ -21,19 +21,20 @@ class ArtistDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     var firstSong = artist.songs.first;
+    var imagePath = artist.localImagePath ?? firstSong.artworkPath;
 
     return Scaffold(
       body: Stack(
         children: [
           // Blurred background
-          if (firstSong.artworkPath != null)
+          if (imagePath != null)
             Positioned.fill(
               child: ImageFiltered(
                 imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                 child: Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: FileImage(File(firstSong.artworkPath!)),
+                      image: FileImage(File(imagePath)),
                       fit: BoxFit.cover,
                       opacity: 0.1,
                     ),
@@ -73,7 +74,7 @@ class ArtistDetailScreen extends StatelessWidget {
                           ),
                           child: ClipOval(
                             child: AlbumArt(
-                              artworkPath: firstSong.artworkPath,
+                              artworkPath: imagePath,
                               size: 140,
                               borderRadius: 0,
                             ),

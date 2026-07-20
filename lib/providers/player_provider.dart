@@ -43,6 +43,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   var dynamicThemeColor = const Color(0xFF7C4DFF);
   var showVisualizer = false;
   var immersiveMode = false;
+  var preferLocalArtistImages = true;
+  var sleepTimerDefaultMinutes = 5;
 
   // Sort preferences (loaded eagerly before HomeScreen mounts)
   var songSortBy = 'title';
@@ -58,7 +60,6 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
   Duration? sleepTimerOriginalDuration;
-  var sleepTimerDefaultMinutes = 5;
   var _isFadingOut = false;
   var _originalVolumeBeforeFade = 1.0;
   var _lastExtractedSongId = -1;
@@ -440,7 +441,11 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   void _refreshLibrarySnapshots() {
     cachedAlbums = buildAlbumGroups(allSongs);
-    cachedArtists = buildArtistGroups(allSongs, cachedAlbums);
+    cachedArtists = buildArtistGroups(
+      allSongs,
+      cachedAlbums,
+      preferLocalArtistImages ? MusicScanner().localArtistImages : {},
+    );
     uniqueThemeCount = AppTheme.precomputeThemes(allSongs);
   }
 
@@ -627,6 +632,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     useDynamicTheme = await prefs.getBool('use_dynamic_theme') ?? true;
     showVisualizer = await prefs.getBool('show_visualizer') ?? false;
     immersiveMode = await prefs.getBool('now_playing_immersive_mode') ?? false;
+    preferLocalArtistImages =
+        await prefs.getBool('prefer_local_artist_images') ?? true;
     sleepTimerDefaultMinutes =
         await prefs.getInt('sleep_timer_default_minutes') ?? 5;
 
@@ -685,11 +692,19 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  Future<void> toggleImmersiveMode(bool enabled) async {
-    immersiveMode = enabled;
-    notifyListeners();
+  Future<void> toggleImmersiveMode(bool value) async {
+    immersiveMode = value;
     var prefs = SharedPreferencesAsync();
-    await prefs.setBool('now_playing_immersive_mode', enabled);
+    await prefs.setBool('now_playing_immersive_mode', value);
+    notifyListeners();
+  }
+
+  Future<void> togglePreferLocalArtistImages(bool value) async {
+    preferLocalArtistImages = value;
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('prefer_local_artist_images', value);
+    _refreshLibrarySnapshots();
+    notifyListeners();
   }
 
   Future<void> setSleepTimerDefaultMinutes(int minutes) async {
