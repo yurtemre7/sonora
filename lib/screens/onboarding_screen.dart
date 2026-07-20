@@ -160,16 +160,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           color: theme.colorScheme.primary,
                         ),
                       ),
-                      if (_currentPage < 3)
-                        TextButton(
-                          onPressed: () => widget.onComplete(null),
-                          child: Text(
-                            'Skip',
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -178,6 +168,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Expanded(
                   child: PageView(
                     controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
                     onPageChanged: (page) {
                       setState(() {
                         _currentPage = page;
@@ -185,7 +176,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     },
                     children: [
                       _buildWelcomeSlide(theme, size),
-                      _buildSyncSlide(theme, size),
                       _buildPermissionSlide(theme, size),
                       _buildFolderSlide(theme, size),
                     ],
@@ -200,7 +190,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: [
                       // Animated Indicator Dots
                       Row(
-                        children: List.generate(4, (index) {
+                        children: List.generate(3, (index) {
                           var active = _currentPage == index;
                           return AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
@@ -219,20 +209,41 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
 
                       // Next/Finish Action Button
-                      _currentPage == 3
+                      _currentPage == 2
                           ? FloatingActionButton.extended(
-                              onPressed: () =>
-                                  widget.onComplete(_selectedFolder),
+                              onPressed: _selectedFolder == null
+                                  ? null
+                                  : () => widget.onComplete(_selectedFolder),
                               icon: const Icon(Icons.done_rounded),
                               label: const Text('Get Started'),
                             )
                           : FloatingActionButton(
-                              onPressed: () {
-                                _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              },
+                              onPressed:
+                                  (_currentPage == 1 &&
+                                      !(_storageGranted &&
+                                          _notificationGranted))
+                                  ? null // Require permissions to proceed
+                                  : () {
+                                      _pageController.nextPage(
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        curve: Curves.easeInOut,
+                                      );
+                                    },
+                              backgroundColor:
+                                  (_currentPage == 1 &&
+                                      !(_storageGranted &&
+                                          _notificationGranted))
+                                  ? theme.colorScheme.surfaceContainerHigh
+                                  : theme.colorScheme.primaryContainer,
+                              foregroundColor:
+                                  (_currentPage == 1 &&
+                                      !(_storageGranted &&
+                                          _notificationGranted))
+                                  ? theme.colorScheme.onSurfaceVariant
+                                        .withValues(alpha: 0.5)
+                                  : theme.colorScheme.onPrimaryContainer,
                               child: const Icon(Icons.arrow_forward_rounded),
                             ),
                     ],
@@ -320,82 +331,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'A premium offline music experience built with beautiful Material 3 Expressive elements and distraction-free audio playback.',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSyncSlide(ThemeData theme, Size size) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // High performance Sync illustration
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: size.width * 0.65,
-                  height: size.width * 0.65,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        theme.colorScheme.tertiaryContainer.withValues(
-                          alpha: 0.4,
-                        ),
-                        theme.colorScheme.primaryContainer.withValues(
-                          alpha: 0.2,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  width: size.width * 0.48,
-                  height: size.width * 0.48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: theme.colorScheme.surfaceContainerHigh,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.bolt_rounded,
-                    size: 80,
-                    color: theme.colorScheme.tertiary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 48),
-            Text(
-              'Fluid & Stutter-Free',
-              style: GoogleFonts.outfit(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Incremental updates, file sync, and artwork extraction are entirely processed inside background isolates. Reorders and playback are fully offline and battery-efficient.',
+              'A premium offline music experience built with beautiful Material 3 Expressive elements.\n\nEnjoy fluid, stutter-free playback and fast background syncing.',
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 height: 1.5,
