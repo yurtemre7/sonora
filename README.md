@@ -127,7 +127,7 @@ lib/
 
 ## Requirements
 
-- [FVM](https://fvm.app/) with Flutter **3.44.6** (pinned in `.fvmrc`)
+- [FVM](https://fvm.app/) with Flutter **3.44.7** (pinned in `.fvmrc`)
 - Dart SDK **^3.12.2**
 - Android SDK **24+** (compile/target SDK 37)
 - A connected Android device or emulator for primary development
