@@ -881,6 +881,59 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(height: 32),
 
+          // ── Community & Support ───────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 8.0,
+            ),
+            child: Text(
+              'Community & Support',
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.code_rounded),
+            title: const Text('Source Code'),
+            subtitle: const Text('View the GitHub repository'),
+            trailing: const Icon(Icons.open_in_new_rounded),
+            onTap: () async {
+              var url = Uri.parse('https://github.com/yurtemre7/sonora');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.person_rounded),
+            title: const Text('Developer Profile'),
+            subtitle: const Text('Check out yurtemre7 on GitHub'),
+            trailing: const Icon(Icons.open_in_new_rounded),
+            onTap: () async {
+              var url = Uri.parse('https://github.com/yurtemre7');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.send_rounded),
+            title: const Text('Telegram Contact'),
+            subtitle: const Text('Reach out via @emredev'),
+            trailing: const Icon(Icons.open_in_new_rounded),
+            onTap: () async {
+              var url = Uri.parse('https://t.me/emredev');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+          ),
+
+          const Divider(height: 32),
+
           // ── About ─────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(
