@@ -8,6 +8,7 @@ import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/routing/app_routes.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
+import 'package:sonora/screens/changelog_screen.dart';
 import 'package:sonora/screens/now_playing_screen.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
 import 'package:sonora/screens/settings_screen.dart';
@@ -247,6 +248,10 @@ class SonoraAppRouter {
                 onDeletePlaylist: onDeletePlaylist,
               );
             },
+          ),
+          GoRoute(
+            path: AppRoutes.changelog,
+            builder: (context, state) => const ChangelogScreen(),
           ),
         ],
       ),

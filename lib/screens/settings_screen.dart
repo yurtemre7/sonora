@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
+import 'package:sonora/routing/app_routes.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
@@ -990,6 +992,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               );
             },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.history_rounded),
+            title: const Text('Changelog'),
+            subtitle: const Text('View what\'s new'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push(AppRoutes.changelog),
           ),
 
           const Divider(height: 32),

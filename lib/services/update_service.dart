@@ -72,6 +72,9 @@ class UpdateService {
         if (tagName != null && htmlUrl != null) {
           var isNewer = await _isVersionNewer(tagName);
           if (isNewer) {
+            // Cache the latest changelog from main as well
+            await fetchChangelog(forceRefresh: true);
+
             return UpdateResult(
               update: UpdateInfo(
                 version: tagName,
@@ -121,5 +124,46 @@ class UpdateService {
       if (p1 < p2) return -1;
     }
     return 0;
+  }
+
+  /// Fetches the full CHANGELOG.md from the main branch.
+  /// Caches the result in SharedPreferencesAsync for 12 hours unless [forceRefresh] is true.
+  static Future<String?> fetchChangelog({bool forceRefresh = false}) async {
+    try {
+      var prefs = SharedPreferencesAsync();
+      const cachedChangelogKey = 'cached_changelog_content';
+      const lastChangelogCheckKey = 'last_changelog_check_time';
+
+      if (!forceRefresh) {
+        var lastCheckStr = await prefs.getString(lastChangelogCheckKey);
+        if (lastCheckStr != null) {
+          var lastCheck = DateTime.tryParse(lastCheckStr);
+          if (lastCheck != null &&
+              DateTime.now().difference(lastCheck).inHours < 12) {
+            var cachedContent = await prefs.getString(cachedChangelogKey);
+            if (cachedContent != null) {
+              return cachedContent;
+            }
+          }
+        }
+      }
+
+      var response = await http.get(
+        Uri.parse(
+          'https://raw.githubusercontent.com/yurtemre7/sonora/main/CHANGELOG.md',
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        var content = response.body;
+        await prefs.setString(cachedChangelogKey, content);
+        await prefs.setString(
+          lastChangelogCheckKey,
+          DateTime.now().toIso8601String(),
+        );
+        return content;
+      }
+    } catch (_) {}
+    return null;
   }
 }
