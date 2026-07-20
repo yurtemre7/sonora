@@ -11,6 +11,9 @@ import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/screens/changelog_screen.dart';
 import 'package:sonora/screens/now_playing_screen.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
+import 'package:sonora/screens/settings/appearance_settings_screen.dart';
+import 'package:sonora/screens/settings/info_settings_screen.dart';
+import 'package:sonora/screens/settings/playback_settings_screen.dart';
 import 'package:sonora/screens/settings_screen.dart';
 import 'package:sonora/screens/stats_screen.dart';
 import 'package:sonora/utils/logger.dart';
@@ -143,6 +146,23 @@ class SonoraAppRouter {
               themeProvider: themeProvider,
               playerProvider: playerProvider,
             ),
+          ),
+          GoRoute(
+            path: AppRoutes.settingsAppearance,
+            builder: (context, state) => AppearanceSettingsScreen(
+              themeProvider: themeProvider,
+              playerProvider: playerProvider,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.settingsPlayback,
+            builder: (context, state) =>
+                PlaybackSettingsScreen(playerProvider: playerProvider),
+          ),
+          GoRoute(
+            path: AppRoutes.settingsInfo,
+            builder: (context, state) =>
+                InfoSettingsScreen(onResetApp: onResetApp),
           ),
           GoRoute(
             path: AppRoutes.album,

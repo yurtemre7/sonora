@@ -9,4 +9,7 @@ class AppRoutes {
   static const playlist = '/playlist';
   static const changelog = '/changelog';
   static const stats = '/stats';
+  static const settingsAppearance = '/settings/appearance';
+  static const settingsPlayback = '/settings/playback';
+  static const settingsInfo = '/settings/info';
 }
