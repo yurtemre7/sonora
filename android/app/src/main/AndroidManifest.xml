@@ -3,6 +3,7 @@
     <!-- Audio file access -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Background playback -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />

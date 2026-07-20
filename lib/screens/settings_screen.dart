@@ -364,6 +364,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               context.push(AppRoutes.settingsInfo);
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Privacy & Permissions'),
+            subtitle: const Text('Data management and required permissions'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              context.push(AppRoutes.settingsPrivacy);
+            },
+          ),
           const SizedBox(height: 32),
         ],
       ),
