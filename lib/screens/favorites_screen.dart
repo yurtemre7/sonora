@@ -70,7 +70,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       builder: (context, _) {
         var favSongs = widget.allSongs.where((s) => s.isFavorite).toList();
         var favAlbums = widget.allAlbums.where((a) {
-          return widget.playerProvider.favoriteAlbums.contains('\${a.nameLower}|||\${a.artistLower}');
+          return widget.playerProvider.favoriteAlbums.contains('${a.nameLower}|||${a.artistLower}');
         }).toList();
         var favArtists = widget.allArtists.where((a) {
           return widget.playerProvider.favoriteArtists.contains(a.nameLower);
