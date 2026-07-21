@@ -347,6 +347,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.title_rounded),
+            title: const Text('Library Formatting'),
+            subtitle: const Text('Configure how song titles are displayed'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              context.push(AppRoutes.settingsFormatting);
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.play_circle_outline_rounded),
             title: const Text('Playback'),
             subtitle: const Text('Sleep timer, start page, background play'),
