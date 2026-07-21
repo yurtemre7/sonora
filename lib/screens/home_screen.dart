@@ -438,7 +438,7 @@ class _HomeScreenState extends State<HomeScreen>
     switch (tabIndex) {
       case 1:
         count = filteredAlbums.length;
-        label = '$count ${count == 1 ? 'album' : 'albums'} found';
+        label = '$count ${count == 1 ? 'album' : 'albums'}';
         onShuffle = () {
           unfocus();
           widget.playerProvider.quickShuffle(
@@ -451,7 +451,7 @@ class _HomeScreenState extends State<HomeScreen>
         };
       case 2:
         count = filteredArtists.length;
-        label = '$count ${count == 1 ? 'artist' : 'artists'} found';
+        label = '$count ${count == 1 ? 'artist' : 'artists'}';
         onShuffle = () {
           unfocus();
           widget.playerProvider.quickShuffle(
@@ -464,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen>
         };
       case 3:
         count = filteredPlaylists.length;
-        label = '$count ${count == 1 ? 'playlist' : 'playlists'} found';
+        label = '$count ${count == 1 ? 'playlist' : 'playlists'}';
         onShuffle = () {
           unfocus();
           _showCreatePlaylistDialog();
