@@ -438,7 +438,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   active:
                       widget.playerProvider.isSlowed ||
                       widget.playerProvider.isSpedUp ||
-                      widget.playerProvider.isReverbEnabled,
+                      widget.playerProvider.isReverbEnabled ||
+                      widget.playerProvider.speed != 1.0,
                   onPressed: () =>
                       showMfxBottomSheet(context, widget.playerProvider),
                 ),
