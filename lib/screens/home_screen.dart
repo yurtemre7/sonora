@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen>
     _playlistSortBy = SettingsProvider.instance.playlistSortBy;
     _playlistSortAscending = SettingsProvider.instance.playlistSortAscending;
     _tabController = TabController(
-      length: 5,
+      length: 4,
       vsync: this,
       initialIndex: SettingsProvider.instance.defaultStartPage,
     );
@@ -566,6 +566,22 @@ class _HomeScreenState extends State<HomeScreen>
                   onPressed: onSort,
                   tooltip: 'Sort',
                 ),
+                const SizedBox(width: 8),
+                IconButton.filledTonal(
+                  icon: const Icon(Icons.favorite_rounded),
+                  onPressed: () {
+                    unfocus();
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (_) => FavoritesScreen(
+                        playerProvider: widget.playerProvider,
+                        allSongs: widget.playerProvider.allSongs,
+                        allAlbums: widget.playerProvider.cachedAlbums,
+                        allArtists: widget.playerProvider.cachedArtists,
+                      )
+                    ));
+                  },
+                  tooltip: 'Favorites',
+                ),
               ],
             ],
           ),
@@ -855,10 +871,6 @@ class _HomeScreenState extends State<HomeScreen>
                                         fit: BoxFit.scaleDown,
                                         child: Text('Playlists'),
                                       ),
-                                    ),
-                                    const Tab(
-                                      icon: Icon(Icons.favorite_rounded, size: 20),
-                                      iconMargin: EdgeInsets.zero,
                                     ),
                                   ],
                                 ),
@@ -1330,15 +1342,6 @@ class _HomeScreenState extends State<HomeScreen>
                                     ),
                                   ),
                                 );
-
-                        case 4:
-                          // Tab 5: Favorites
-                          return FavoritesScreen(
-                            playerProvider: widget.playerProvider,
-                            allSongs: widget.playerProvider.allSongs,
-                            allAlbums: widget.playerProvider.cachedAlbums,
-                            allArtists: widget.playerProvider.cachedArtists,
-                          );
 
                         default:
                           // Tab 1: Songs

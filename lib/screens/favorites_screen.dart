@@ -77,7 +77,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           return widget.playerProvider.favoriteArtists.contains(a.nameLower);
         }).toList();
 
-        return CustomScrollView(
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Favorites'),
+            centerTitle: true,
+          ),
+          body: CustomScrollView(
             slivers: [
               if (favArtists.isNotEmpty) ...[
                 SliverToBoxAdapter(
@@ -241,8 +246,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                 ),
             ],
-          );
-        },
-      );
+          ),
+        );
+      }
+    );
   }
 }
