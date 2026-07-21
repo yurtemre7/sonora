@@ -132,23 +132,11 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
             .firstOrNull;
         if (matchingPlaylist != null) {
           _playlist = matchingPlaylist;
-        } else if (_playlist.id == 'favorites') {
-          var favoriteIds = widget.playerProvider.allSongs
-              .where((s) => s.isFavorite)
-              .map((s) => s.id)
-              .toList();
-          _playlist = Playlist(
-            id: 'favorites',
-            name: 'Favorites',
-            songIds: favoriteIds,
-          );
         }
         _updatePlaylistSongs();
 
         var firstSong = _playlistSongs.isNotEmpty ? _playlistSongs.first : null;
-        var creatorLabel = _playlist.id == 'favorites'
-            ? 'Your favorites'
-            : 'Your own playlist';
+        var creatorLabel = 'Your own playlist';
 
         return Scaffold(
           body: Stack(
@@ -182,9 +170,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                       onPressed: () => closeRoute(context),
                     ),
                     actions: [
-                      // Only non-favorites playlists can be deleted.
-                      if (_playlist.id != 'favorites' &&
-                          widget.onDeletePlaylist != null)
+                      if (widget.onDeletePlaylist != null)
                         PopupMenuButton<int>(
                           icon: const Icon(Icons.more_vert_rounded),
                           onSelected: (val) {
@@ -290,9 +276,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                         ),
                                       ),
                                       child: Icon(
-                                        _playlist.id == 'favorites'
-                                            ? Icons.favorite_rounded
-                                            : Icons.music_note_rounded,
+                                        Icons.music_note_rounded,
                                         size: 64,
                                         color: theme
                                             .colorScheme
@@ -467,16 +451,10 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                 ),
                               ),
                               onDismissed: (direction) async {
-                                if (_playlist.id == 'favorites') {
-                                  await widget.playerProvider.toggleFavorite(
-                                    song.id,
-                                  );
-                                } else {
-                                  await widget.onRemoveSong(
-                                    _playlist.id,
-                                    song.id,
-                                  );
-                                }
+                                await widget.onRemoveSong(
+                                  _playlist.id,
+                                  song.id,
+                                );
                                 if (!context.mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
@@ -500,16 +478,10 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   );
                                 },
                                 onRemoveFromPlaylist: () async {
-                                  if (_playlist.id == 'favorites') {
-                                    await widget.playerProvider.toggleFavorite(
-                                      song.id,
-                                    );
-                                  } else {
-                                    await widget.onRemoveSong(
-                                      _playlist.id,
-                                      song.id,
-                                    );
-                                  }
+                                  await widget.onRemoveSong(
+                                    _playlist.id,
+                                    song.id,
+                                  );
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(

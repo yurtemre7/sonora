@@ -1258,12 +1258,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                         ),
                                                       ),
                                                       child: Icon(
-                                                        playlist.id ==
-                                                                'favorites'
-                                                            ? Icons
-                                                                  .favorite_rounded
-                                                            : Icons
-                                                                  .music_note_rounded,
+                                                        Icons
+                                                            .music_note_rounded,
                                                         color: theme
                                                             .colorScheme
                                                             .onPrimaryContainer,
@@ -1273,97 +1269,85 @@ class _HomeScreenState extends State<HomeScreen>
                                               subtitle: Text(
                                                 '$songCount ${songCount == 1 ? 'song' : 'songs'}',
                                               ),
-                                              trailing:
-                                                  playlist.id == 'favorites'
-                                                  ? null
-                                                  : PopupMenuButton<int>(
-                                                      icon: const Icon(
-                                                        Icons.more_vert_rounded,
-                                                      ),
-                                                      itemBuilder: (context) => [
-                                                        const PopupMenuItem(
-                                                          value: 2,
-                                                          child: Row(
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .edit_rounded,
-                                                              ),
-                                                              SizedBox(
-                                                                width: 8,
-                                                              ),
-                                                              Text('Rename'),
-                                                            ],
-                                                          ),
+                                              trailing: PopupMenuButton<int>(
+                                                icon: const Icon(
+                                                  Icons.more_vert_rounded,
+                                                ),
+                                                itemBuilder: (context) => [
+                                                  const PopupMenuItem(
+                                                    value: 2,
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.edit_rounded,
                                                         ),
-                                                        const PopupMenuItem(
-                                                          value: 1,
-                                                          child: Row(
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .delete_outline_rounded,
-                                                                color:
-                                                                    Colors.red,
-                                                              ),
-                                                              SizedBox(
-                                                                width: 8,
-                                                              ),
-                                                              Text(
-                                                                'Delete',
-                                                                style: TextStyle(
-                                                                  color: Colors
-                                                                      .red,
-                                                                ),
-                                                              ),
-                                                            ],
+                                                        SizedBox(width: 8),
+                                                        Text('Rename'),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  const PopupMenuItem(
+                                                    value: 1,
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons
+                                                              .delete_outline_rounded,
+                                                          color: Colors.red,
+                                                        ),
+                                                        SizedBox(width: 8),
+                                                        Text(
+                                                          'Delete',
+                                                          style: TextStyle(
+                                                            color: Colors.red,
                                                           ),
                                                         ),
                                                       ],
-                                                      onSelected: (val) async {
-                                                        if (val == 2) {
-                                                          RenamePlaylistDialog.show(
-                                                            context,
-                                                            playlist: playlist,
-                                                            onRename: widget
-                                                                .onRenamePlaylist,
-                                                          );
-                                                        } else if (val == 1) {
-                                                          var confirmed =
-                                                              await ConfirmDeleteDialog.show(
-                                                                context,
-                                                                title:
-                                                                    'Delete Playlist?',
-                                                                message:
-                                                                    'Delete "${playlist.name}"? This cannot be undone.',
-                                                              );
-                                                          if (confirmed !=
-                                                              true) {
-                                                            return;
-                                                          }
-                                                          await widget
-                                                              .onDeletePlaylist(
-                                                                playlist.id,
-                                                              );
-                                                          if (!context
-                                                              .mounted) {
-                                                            return;
-                                                          }
-                                                          ScaffoldMessenger.of(
-                                                            context,
-                                                          ).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text(
-                                                                'Playlist "${playlist.name}" deleted.',
-                                                              ),
-                                                              behavior:
-                                                                  SnackBarBehavior
-                                                                      .floating,
-                                                            ),
-                                                          );
-                                                        }
-                                                      },
                                                     ),
+                                                  ),
+                                                ],
+                                                onSelected: (val) async {
+                                                  if (val == 2) {
+                                                    RenamePlaylistDialog.show(
+                                                      context,
+                                                      playlist: playlist,
+                                                      onRename: widget
+                                                          .onRenamePlaylist,
+                                                    );
+                                                  } else if (val == 1) {
+                                                    var confirmed =
+                                                        await ConfirmDeleteDialog.show(
+                                                          context,
+                                                          title:
+                                                              'Delete Playlist?',
+                                                          message:
+                                                              'Delete "${playlist.name}"? This cannot be undone.',
+                                                        );
+                                                    if (confirmed != true) {
+                                                      return;
+                                                    }
+                                                    await widget
+                                                        .onDeletePlaylist(
+                                                          playlist.id,
+                                                        );
+                                                    if (!context.mounted) {
+                                                      return;
+                                                    }
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Playlist "${playlist.name}" deleted.',
+                                                        ),
+                                                        behavior:
+                                                            SnackBarBehavior
+                                                                .floating,
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                              ),
                                               onTap: () {
                                                 _searchFocusNode.unfocus();
                                                 openPlaylist(context, playlist);

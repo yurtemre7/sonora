@@ -256,30 +256,13 @@ class SonoraAppRouter {
                   break;
                 }
               }
-              if (latestPlaylist == null && playlistId != 'favorites') {
-                return const Scaffold(
-                  body: Center(child: Text('Playlist not found')),
-                );
-              }
-              var resolvedPlaylist = latestPlaylist;
-              if (resolvedPlaylist == null && playlistId == 'favorites') {
-                var favoriteIds = playerProvider.allSongs
-                    .where((song) => song.isFavorite)
-                    .map((song) => song.id)
-                    .toList();
-                resolvedPlaylist = Playlist(
-                  id: 'favorites',
-                  name: 'Favorites',
-                  songIds: favoriteIds,
-                );
-              }
-              if (resolvedPlaylist == null) {
+              if (latestPlaylist == null) {
                 return const Scaffold(
                   body: Center(child: Text('Playlist not found')),
                 );
               }
               return PlaylistDetailScreen(
-                playlist: resolvedPlaylist,
+                playlist: latestPlaylist,
                 songs: playerProvider.allSongs,
                 playerProvider: playerProvider,
                 onRemoveSong: onRemoveSongFromPlaylist,

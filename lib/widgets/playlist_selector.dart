@@ -140,8 +140,6 @@ class _PlaylistSelectorBottomSheetState
                           var isAlreadyIn = playlist.songIds.contains(
                             widget.song.id,
                           );
-                          var isFavorites = playlist.id == 'favorites';
-
                           return Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -157,17 +155,10 @@ class _PlaylistSelectorBottomSheetState
                                   ),
                                   child: ListTile(
                                     tileColor: isAlreadyIn
-                                        ? (isFavorites
-                                              ? theme.colorScheme.errorContainer
-                                                    .withValues(alpha: 0.15)
-                                              : theme
-                                                    .colorScheme
-                                                    .primaryContainer
-                                                    .withValues(alpha: 0.15))
+                                        ? theme.colorScheme.primaryContainer
+                                              .withValues(alpha: 0.15)
                                         : theme.colorScheme.surfaceContainerLow,
-                                    leading:
-                                        playlist.coverImagePath != null &&
-                                            !isFavorites
+                                    leading: playlist.coverImagePath != null
                                         ? Container(
                                             width: 40,
                                             height: 40,
@@ -185,18 +176,9 @@ class _PlaylistSelectorBottomSheetState
                                             ),
                                           )
                                         : Icon(
-                                            isFavorites
-                                                ? (isAlreadyIn
-                                                      ? Icons.favorite_rounded
-                                                      : Icons
-                                                            .favorite_border_rounded)
-                                                : Icons.playlist_add_rounded,
+                                            Icons.playlist_add_rounded,
                                             color: isAlreadyIn
-                                                ? (isFavorites
-                                                      ? Colors.red
-                                                      : theme
-                                                            .colorScheme
-                                                            .primary)
+                                                ? theme.colorScheme.primary
                                                 : null,
                                           ),
                                     title: Text(
@@ -229,24 +211,23 @@ class _PlaylistSelectorBottomSheetState
                                     trailing: isAlreadyIn
                                         ? Icon(
                                             Icons.check_circle_rounded,
-                                            color: isFavorites
-                                                ? Colors.red
-                                                : theme.colorScheme.primary,
+                                            color: theme.colorScheme.primary,
                                           )
                                         : null,
                                     onTap: () async {
                                       var messenger = ScaffoldMessenger.of(
                                         context,
                                       );
-                                      if (isFavorites) {
+                                      if (isAlreadyIn) {
                                         await widget.playerProvider
-                                            .toggleFavorite(widget.song.id);
+                                            .removeSongFromPlaylist(
+                                              playlist.id,
+                                              widget.song.id,
+                                            );
                                         messenger.showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              !isAlreadyIn
-                                                  ? 'Added "${widget.song.displayTitle}" to favorites.'
-                                                  : 'Removed "${widget.song.displayTitle}" from favorites.',
+                                              'Removed "${widget.song.displayTitle}" from ${playlist.name}.',
                                             ),
                                             behavior: SnackBarBehavior.floating,
                                             duration: const Duration(
@@ -255,43 +236,22 @@ class _PlaylistSelectorBottomSheetState
                                           ),
                                         );
                                       } else {
-                                        if (isAlreadyIn) {
-                                          await widget.playerProvider
-                                              .removeSongFromPlaylist(
-                                                playlist.id,
-                                                widget.song.id,
-                                              );
-                                          messenger.showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Removed "${widget.song.displayTitle}" from ${playlist.name}.',
-                                              ),
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-                                              duration: const Duration(
-                                                seconds: 2,
-                                              ),
+                                        await widget.playerProvider
+                                            .addSongToPlaylist(
+                                              playlist.id,
+                                              widget.song.id,
+                                            );
+                                        messenger.showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Added "${widget.song.displayTitle}" to ${playlist.name}.',
                                             ),
-                                          );
-                                        } else {
-                                          await widget.playerProvider
-                                              .addSongToPlaylist(
-                                                playlist.id,
-                                                widget.song.id,
-                                              );
-                                          messenger.showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Added "${widget.song.displayTitle}" to ${playlist.name}.',
-                                              ),
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-                                              duration: const Duration(
-                                                seconds: 2,
-                                              ),
+                                            behavior: SnackBarBehavior.floating,
+                                            duration: const Duration(
+                                              seconds: 2,
                                             ),
-                                          );
-                                        }
+                                          ),
+                                        );
                                       }
                                     },
                                   ),
