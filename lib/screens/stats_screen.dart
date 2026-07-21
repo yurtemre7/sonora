@@ -1018,6 +1018,7 @@ class _TopSongCardState extends State<_TopSongCard> {
               ),
               Expanded(
                 child: SongTile(
+  hideMenu: true,
                   song: song,
                   isCurrent: widget.isCurrent,
                   playerProvider: widget.playerProvider,
@@ -1025,10 +1026,9 @@ class _TopSongCardState extends State<_TopSongCard> {
                     song,
                     widget.playerProvider.allSongs,
                   ),
-                  onPlayNext: () => widget.playerProvider.playNext(song),
-                  onAddToQueue: () => widget.playerProvider.addToQueue(song),
-                  onToggleFavorite: () =>
-                      widget.playerProvider.toggleFavorite(song.id),
+                  
+                  
+                  
                 ),
               ),
               IconButton(

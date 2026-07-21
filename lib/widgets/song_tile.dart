@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/playlist_selector.dart';
+import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 
 class SongTile extends StatelessWidget {
   const SongTile({
@@ -11,12 +13,8 @@ class SongTile extends StatelessWidget {
     required this.onTap,
     this.playerProvider,
     this.onLongPress,
-    this.onPlayNext,
-    this.onAddToQueue,
-    this.onAddToPlaylist,
     this.onRemoveFromPlaylist,
-    this.onShowInfo,
-    this.onToggleFavorite,
+    this.hideMenu = false,
     this.isCurrent = false,
     this.showHighlightBackground = true,
     this.showDivider = false,
@@ -30,12 +28,8 @@ class SongTile extends StatelessWidget {
   /// avoiding stale-closure issues.
   final PlayerProvider? playerProvider;
   final VoidCallback? onLongPress;
-  final VoidCallback? onPlayNext;
-  final VoidCallback? onAddToQueue;
-  final VoidCallback? onAddToPlaylist;
   final VoidCallback? onRemoveFromPlaylist;
-  final VoidCallback? onShowInfo;
-  final VoidCallback? onToggleFavorite;
+  final bool hideMenu;
   final bool isCurrent;
   final bool showHighlightBackground;
   final bool showDivider;
@@ -117,12 +111,7 @@ class SongTile extends StatelessWidget {
                           : FontWeight.normal,
                     ),
                   ),
-                  if (onPlayNext != null ||
-                      onAddToQueue != null ||
-                      onAddToPlaylist != null ||
-                      onRemoveFromPlaylist != null ||
-                      onShowInfo != null ||
-                      onToggleFavorite != null) ...[
+                  if (!hideMenu && (playerProvider != null || onRemoveFromPlaylist != null)) ...[
                     const SizedBox(width: 4),
                     PopupMenuButton<int>(
                       icon: Icon(
@@ -133,21 +122,19 @@ class SongTile extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(minWidth: 160),
                       onSelected: (value) {
-                        if (value == 1 && onPlayNext != null) onPlayNext!();
-                        if (value == 2 && onAddToQueue != null) onAddToQueue!();
-                        if (value == 4 && onAddToPlaylist != null) {
-                          onAddToPlaylist!();
-                        }
-                        if (value == 5 && onShowInfo != null) onShowInfo!();
-                        if (value == 6 && onToggleFavorite != null) {
-                          onToggleFavorite!();
+                        if (playerProvider != null) {
+                          if (value == 1) playerProvider!.playNext(song);
+                          if (value == 2) playerProvider!.addToQueue(song);
+                          if (value == 4) PlaylistSelectorBottomSheet.show(context, song, playerProvider!);
+                          if (value == 5) showSongInfoBottomSheet(context, song);
+                          if (value == 6) playerProvider!.toggleFavorite(song.id);
                         }
                         if (value == 7 && onRemoveFromPlaylist != null) {
                           onRemoveFromPlaylist!();
                         }
                       },
                       itemBuilder: (context) => [
-                        if (onPlayNext != null)
+                        if (playerProvider != null)
                           const PopupMenuItem(
                             value: 1,
                             child: Row(
@@ -158,7 +145,7 @@ class SongTile extends StatelessWidget {
                               ],
                             ),
                           ),
-                        if (onAddToQueue != null)
+                        if (playerProvider != null)
                           const PopupMenuItem(
                             value: 2,
                             child: Row(
@@ -169,7 +156,7 @@ class SongTile extends StatelessWidget {
                               ],
                             ),
                           ),
-                        if (onAddToPlaylist != null)
+                        if (playerProvider != null)
                           const PopupMenuItem(
                             value: 4,
                             child: Row(
@@ -191,7 +178,7 @@ class SongTile extends StatelessWidget {
                               ],
                             ),
                           ),
-                        if (onShowInfo != null)
+                        if (playerProvider != null)
                           const PopupMenuItem(
                             value: 5,
                             child: Row(
@@ -202,7 +189,7 @@ class SongTile extends StatelessWidget {
                               ],
                             ),
                           ),
-                        if (onToggleFavorite != null)
+                        if (playerProvider != null)
                           // Look up the live isFavorite state from the
                           // provider so this menu item is always fresh
                           // at the moment the menu opens.

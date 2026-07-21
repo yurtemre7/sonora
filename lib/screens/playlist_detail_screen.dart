@@ -9,9 +9,7 @@ import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
-import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
-import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
 class PlaylistDetailScreen extends StatefulWidget {
@@ -77,10 +75,6 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
         .whereType<Song>()
         .toList();
     _itemKeys = List.generate(_playlistSongs.length, (i) => UniqueKey());
-  }
-
-  void _showAddToPlaylistDialog(Song song) {
-    PlaylistSelectorBottomSheet.show(context, song, widget.playerProvider);
   }
 
   /// Confirms and performs playlist deletion, then closes this screen.
@@ -446,12 +440,6 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                     playlistId: widget.playlist.id,
                                   );
                                 },
-                                onPlayNext: () =>
-                                    widget.playerProvider.playNext(song),
-                                onAddToQueue: () =>
-                                    widget.playerProvider.addToQueue(song),
-                                onAddToPlaylist: () =>
-                                    _showAddToPlaylistDialog(song),
                                 onRemoveFromPlaylist: () async {
                                   if (_playlist.id == 'favorites') {
                                     await widget.playerProvider.toggleFavorite(
@@ -473,10 +461,6 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                     ),
                                   );
                                 },
-                                onShowInfo: () =>
-                                    showSongInfoBottomSheet(context, song),
-                                onToggleFavorite: () => widget.playerProvider
-                                    .toggleFavorite(song.id),
                               ),
                             ),
                           );

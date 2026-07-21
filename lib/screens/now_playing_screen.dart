@@ -710,6 +710,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           ),
           ...sameAlbum.map(
             (s) => SongTile(
+  hideMenu: true,
               song: s,
               onTap: () => _playRelatedSong(s, allSongs),
               showDivider: true,
@@ -731,6 +732,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           ),
           ...sameArtist.map(
             (s) => SongTile(
+  hideMenu: true,
               song: s,
               onTap: () => _playRelatedSong(s, allSongs),
               showDivider: true,
@@ -907,6 +909,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: SongTile(
+  hideMenu: true,
                                     song: song,
                                     isCurrent: isCurrent,
                                     showHighlightBackground: false,

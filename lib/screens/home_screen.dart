@@ -11,9 +11,7 @@ import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
-import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
-import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/song_tile.dart';
 import 'package:sonora/widgets/update_dialog.dart';
 
@@ -615,10 +613,6 @@ class _HomeScreenState extends State<HomeScreen>
         ],
       ),
     );
-  }
-
-  void _showAddToPlaylistDialog(Song song) {
-    PlaylistSelectorBottomSheet.show(context, song, widget.playerProvider);
   }
 
   Widget _buildSyncPromptBanner(ThemeData theme) {
@@ -1495,33 +1489,11 @@ class _HomeScreenState extends State<HomeScreen>
                                                                   filteredSongs,
                                                                 );
                                                           },
-                                                          onPlayNext: () =>
-                                                              widget
-                                                                  .playerProvider
-                                                                  .playNext(
-                                                                    song,
-                                                                  ),
-                                                          onAddToQueue: () =>
-                                                              widget
-                                                                  .playerProvider
-                                                                  .addToQueue(
-                                                                    song,
-                                                                  ),
-                                                          onAddToPlaylist: () =>
-                                                              _showAddToPlaylistDialog(
-                                                                song,
-                                                              ),
-                                                          onShowInfo: () =>
-                                                              showSongInfoBottomSheet(
-                                                                context,
-                                                                song,
-                                                              ),
-                                                          onToggleFavorite:
-                                                              () => widget
-                                                                  .playerProvider
-                                                                  .toggleFavorite(
-                                                                    song.id,
-                                                                  ),
+                                                          
+                                                          
+                                                          
+                                                          
+                                                          
                                                         );
                                                       },
                                                     ),
