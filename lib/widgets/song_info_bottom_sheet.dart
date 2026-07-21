@@ -47,6 +47,12 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                   _buildInfoRow('Title', song.displayTitle, theme),
                   _buildInfoRow('Artist', song.artist, theme),
                   _buildInfoRow('Album', song.album, theme),
+                  if (song.trackNumber != null)
+                    _buildInfoRow('Track', song.trackNumber.toString(), theme),
+                  if (song.genre != null)
+                    _buildInfoRow('Genre', song.genre!, theme),
+                  if (song.year != null)
+                    _buildInfoRow('Year', song.year.toString(), theme),
                   _buildInfoRow('Duration', song.durationFormatted, theme),
                   _buildInfoRow(
                     'File Path',

@@ -228,6 +228,10 @@ class MusicScanner {
               String? format;
               int? bitrate;
               int? samplerate;
+              int? trackNumber;
+              int? discNumber;
+              String? genre;
+              int? year;
               var duration = Duration.zero;
 
               var stat = file.statSync();
@@ -241,6 +245,10 @@ class MusicScanner {
                 format = meta.format?.trim();
                 bitrate = meta.bitrate;
                 samplerate = meta.samplerate;
+                trackNumber = meta.track;
+                discNumber = meta.disc;
+                genre = meta.genre;
+                year = meta.year;
                 if (meta.duration != null) {
                   duration = meta.duration!;
                 }
@@ -273,6 +281,13 @@ class MusicScanner {
                   ? fileName.substring(0, extIndex)
                   : fileName;
 
+              if (trackNumber == null) {
+                var match = RegExp(r'^(\d+)[ -_.]*').firstMatch(defaultTitle);
+                if (match != null) {
+                  trackNumber = int.tryParse(match.group(1)!);
+                }
+              }
+
               var lastDot = file.path.lastIndexOf('.');
               var hasLrc = false;
               if (lastDot != -1) {
@@ -304,6 +319,10 @@ class MusicScanner {
                   lastModifiedMs: mtime,
                   fileSize: size,
                   hasLyrics: hasLrc,
+                  trackNumber: trackNumber,
+                  discNumber: discNumber,
+                  genre: genre,
+                  year: year,
                 ),
               );
             } catch (_) {}
@@ -975,10 +994,12 @@ class MusicScanner {
           isFavorite: item['is_favorite'] as bool? ?? false,
           lastModifiedMs: item['last_modified_ms'] as int?,
           fileSize: item['file_size'] as int?,
-          hasLyrics: item['has_lyrics'] as bool? ?? false,
+          hasLyrics: item['has_lyrics'] == true,
           dominantColor: item['dominant_color'] as int?,
           trackNumber: item['track_number'] as int?,
           discNumber: item['disc_number'] as int?,
+          genre: item['genre'] as String?,
+          year: item['year'] as int?,
         );
       }).toList();
     } catch (_) {
@@ -1011,6 +1032,8 @@ class MusicScanner {
               'dominant_color': s.dominantColor,
               'track_number': s.trackNumber,
               'disc_number': s.discNumber,
+              'genre': s.genre,
+              'year': s.year,
             },
           )
           .toList();

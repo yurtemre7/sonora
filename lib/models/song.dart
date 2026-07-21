@@ -16,6 +16,8 @@ class Song {
   final int? dominantColor;
   final int? trackNumber;
   final int? discNumber;
+  final String? genre;
+  final int? year;
 
   Song({
     required this.id,
@@ -35,6 +37,8 @@ class Song {
     this.dominantColor,
     this.trackNumber,
     this.discNumber,
+    this.genre,
+    this.year,
   });
 
   // Pre-normalized lowercase keys computed once at construction time
@@ -66,6 +70,8 @@ class Song {
     int? dominantColor,
     int? trackNumber,
     int? discNumber,
+    String? genre,
+    int? year,
   }) {
     return Song(
       id: id ?? this.id,
@@ -85,6 +91,8 @@ class Song {
       dominantColor: dominantColor ?? this.dominantColor,
       trackNumber: trackNumber ?? this.trackNumber,
       discNumber: discNumber ?? this.discNumber,
+      genre: genre ?? this.genre,
+      year: year ?? this.year,
     );
   }
 
