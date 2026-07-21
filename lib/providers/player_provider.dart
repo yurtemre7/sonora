@@ -143,12 +143,12 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Toggles between play and pause.
   Future<void> playPause() async {
-    if (isPlaying) {
+    if (isCompleted && queue.isNotEmpty) {
+      await audioHandler.skipToQueueItem(0);
+      await audioHandler.play();
+    } else if (isPlaying) {
       await audioHandler.pause();
     } else {
-      if (isCompleted && queue.isNotEmpty) {
-        await audioHandler.skipToQueueItem(0);
-      }
       await audioHandler.play();
     }
   }
