@@ -49,7 +49,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                 Expanded(
                   child: ListView(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
+                      horizontal: 16,
                       vertical: 8,
                     ),
                     children: [
