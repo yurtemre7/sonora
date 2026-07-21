@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
@@ -1275,6 +1277,18 @@ class _HomeScreenState extends State<HomeScreen>
                                                 ),
                                                 itemBuilder: (context) => [
                                                   const PopupMenuItem(
+                                                    value: 3,
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.image_rounded,
+                                                        ),
+                                                        SizedBox(width: 8),
+                                                        Text('Change Cover'),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  const PopupMenuItem(
                                                     value: 2,
                                                     child: Row(
                                                       children: [
@@ -1307,7 +1321,63 @@ class _HomeScreenState extends State<HomeScreen>
                                                   ),
                                                 ],
                                                 onSelected: (val) async {
-                                                  if (val == 2) {
+                                                  if (val == 3) {
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                          'For best results, choose a square image.',
+                                                        ),
+                                                        duration: Duration(
+                                                          seconds: 2,
+                                                        ),
+                                                      ),
+                                                    );
+                                                    var result =
+                                                        await FilePicker.pickFiles(
+                                                          type: FileType.image,
+                                                        );
+                                                    if (result != null &&
+                                                        result
+                                                                .files
+                                                                .single
+                                                                .path !=
+                                                            null) {
+                                                      var sourceFile = File(
+                                                        result
+                                                            .files
+                                                            .single
+                                                            .path!,
+                                                      );
+                                                      var appDir =
+                                                          await getApplicationDocumentsDirectory();
+                                                      var coversDir = Directory(
+                                                        '${appDir.path}/playlist_covers',
+                                                      );
+                                                      if (!coversDir
+                                                          .existsSync()) {
+                                                        coversDir.createSync(
+                                                          recursive: true,
+                                                        );
+                                                      }
+                                                      var extension = sourceFile
+                                                          .path
+                                                          .split('.')
+                                                          .last;
+                                                      var newPath =
+                                                          '${coversDir.path}/${playlist.id}.$extension';
+                                                      await sourceFile.copy(
+                                                        newPath,
+                                                      );
+                                                      await widget
+                                                          .playerProvider
+                                                          .updatePlaylistCover(
+                                                            playlist.id,
+                                                            newPath,
+                                                          );
+                                                    }
+                                                  } else if (val == 2) {
                                                     RenamePlaylistDialog.show(
                                                       context,
                                                       playlist: playlist,
