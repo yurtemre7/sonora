@@ -94,6 +94,10 @@ class _HomeScreenState extends State<HomeScreen>
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+    
+    _searchFocusNode.addListener(() {
+      if (mounted) setState(() {});
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkUpdateAutomatically();
@@ -500,6 +504,7 @@ class _HomeScreenState extends State<HomeScreen>
                 child: TextField(
                   controller: _searchController,
                   focusNode: _searchFocusNode,
+                  onTapOutside: (_) => _searchFocusNode.unfocus(),
                   onChanged: (val) {
                     setState(() {
                       _searchQuery = val.trim();
@@ -538,43 +543,45 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
               ),
-              ...[
-                const SizedBox(width: 8),
-                if (tabIndex != 3)
-                  IconButton.filledTonal(
-                    icon: const Icon(Icons.shuffle_rounded),
-                    onPressed: onShuffle,
-                    tooltip: 'Shuffle Play',
-                  )
-                else
-                  IconButton.filledTonal(
-                    icon: const Icon(Icons.playlist_add),
-                    onPressed: onShuffle,
-                    tooltip: 'Create a playlist',
-                  ),
-              ],
-              const SizedBox(width: 8),
-              IconButton.filledTonal(
-                icon: const Icon(Icons.sort_rounded),
-                onPressed: onSort,
-                tooltip: 'Sort',
-              ),
-              const SizedBox(width: 8),
-              IconButton.filledTonal(
-                icon: const Icon(Icons.favorite_rounded),
-                onPressed: () {
-                  unfocus();
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (_) => FavoritesScreen(
-                      playerProvider: widget.playerProvider,
-                      allSongs: widget.playerProvider.allSongs,
-                      allAlbums: widget.playerProvider.cachedAlbums,
-                      allArtists: widget.playerProvider.cachedArtists,
+              if (!_searchFocusNode.hasFocus) ...[
+                ...[
+                  const SizedBox(width: 8),
+                  if (tabIndex != 3)
+                    IconButton.filledTonal(
+                      icon: const Icon(Icons.shuffle_rounded),
+                      onPressed: onShuffle,
+                      tooltip: 'Shuffle Play',
                     )
-                  ));
-                },
-                tooltip: 'Favorites',
-              ),
+                  else
+                    IconButton.filledTonal(
+                      icon: const Icon(Icons.playlist_add),
+                      onPressed: onShuffle,
+                      tooltip: 'Create a playlist',
+                    ),
+                ],
+                const SizedBox(width: 8),
+                IconButton.filledTonal(
+                  icon: const Icon(Icons.sort_rounded),
+                  onPressed: onSort,
+                  tooltip: 'Sort',
+                ),
+                const SizedBox(width: 8),
+                IconButton.filledTonal(
+                  icon: const Icon(Icons.favorite_rounded),
+                  onPressed: () {
+                    unfocus();
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (_) => FavoritesScreen(
+                        playerProvider: widget.playerProvider,
+                        allSongs: widget.playerProvider.allSongs,
+                        allAlbums: widget.playerProvider.cachedAlbums,
+                        allArtists: widget.playerProvider.cachedArtists,
+                      )
+                    ));
+                  },
+                  tooltip: 'Favorites',
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 12),

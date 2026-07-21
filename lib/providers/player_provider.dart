@@ -441,6 +441,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Toggles a song's favorite status in the cache index and favorite playlist.
   Future<void> toggleFavoriteAlbum(String key) async {
+    favoriteAlbums = List<String>.from(favoriteAlbums);
     if (favoriteAlbums.contains(key)) {
       favoriteAlbums.remove(key);
     } else {
@@ -452,6 +453,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> toggleFavoriteArtist(String nameLower) async {
+    favoriteArtists = List<String>.from(favoriteArtists);
     if (favoriteArtists.contains(nameLower)) {
       favoriteArtists.remove(nameLower);
     } else {
