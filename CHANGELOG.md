@@ -2,6 +2,58 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.9.0] - 2026-07-21
+### Added
+* Show counts for each section in favorites screen (Fixes #11)
+* Highlight MFX icon button when custom speed is selected (Fixes #10)
+* Change playlist cover image from home screen playlists tab
+* Custom playlist cover images via file_picker
+* Add experimental MFX (Slowed, Sped Up, Reverb EQ) to now playing
+* Add playback speed controls to now playing screen
+* Redesign song info bottom sheet with categorized groups and max height constraint
+* Move favorites icon to SliverAppBar actions and revert dedicated tab
+* Move favorites to a dedicated tab instead of persistent appbar button
+* Standardise artist avatar UI across list, favorites, and detail screens
+* Hide home screen actions when search is focused and dismiss keyboard on tap outside
+* Add dedicated Favorites screen with animated button, remove legacy favorites playlist
+* Add 3-dot menu to song tiles in album, artist, and playlist views
+* Add amoled pure black toggle for dark mode
+* Add customizable home screen title greeting and username
+* Allow renaming playlists
+* Display total listening time alongside song counts
+* Tap active tab to scroll list to top
+* Show replay icon when playlist is completed
+* Add library formatting settings to toggle feat/artist stripping
+* Parse genre, year, and track number from metadata and filenames
+### Fixed
+* Resolve analysis warnings and move speed slider to MFX sheet
+* Scanner dropping metadata like trackNumber and genre on lyric updates
+* Resolve string interpolation syntax error in favorites screen preventing albums from showing
+* Restore missing artist detail screen favorite button and ensure preferences save modifiable lists
+* Fix appearance settings screen state updates
+* Move personalization settings to appearance screen
+* Remove found string from artists albums playlists tabs
+* Format listening time accurately without rounding and simplify text
+* Calculate progress bar gradient in mini player
+* Calculate seekbar gradient and thumb color based on progress
+* Reset playback immediately on replay icon tap
+* Remove canLaunchUrl check for opening links
+* Use default LaunchMode for url_launcher
+* Add Library Formatting to settings screen
+* Resolve static analyzer issues
+### Changed
+* Style: Refine favorites screen section headers
+* Style: Apply filled styling for active action chips
+* Refactor: Remove legacy favorites playlist checks
+* Chore: Sort the imports
+* Chore: Less horizontal padding
+* Revert "feat: move favorites to a dedicated tab instead of persistent appbar button"
+* Refactor: Simplify SongTile and internalize menu logic, add hideMenu flag
+* Style: Move info and support to bottom of settings list
+* Style: Reduce title font size for home screen greeting
+* Style: Use back button instead of X in Settings AppBar
+* Refactor: Migrate all settings to SettingsProvider singleton
+
 ## [1.8.3] - 2026-07-21
 ### Added
 * Add dedicated privacy and permissions setting screen
