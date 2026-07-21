@@ -174,10 +174,10 @@ class MiniPlayer extends StatelessWidget {
                           IconButton(
                             onPressed: onPlayPause,
                             icon: Icon(
-                              isPlaying
-                                  ? Icons.pause_rounded
-                                  : isCompleted
+                              isCompleted
                                   ? Icons.replay_rounded
+                                  : isPlaying
+                                  ? Icons.pause_rounded
                                   : Icons.play_arrow_rounded,
                             ),
                             iconSize: 30,
