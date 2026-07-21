@@ -182,7 +182,7 @@ class _QueueScreenState extends State<QueueScreen> {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: SongTile(
-  hideMenu: true,
+                                  hideMenu: true,
                                   song: song,
                                   isCurrent: isCurrent,
                                   showHighlightBackground: false,

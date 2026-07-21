@@ -148,12 +148,15 @@ class AlbumDetailScreen extends StatelessWidget {
                         listenable: playerProvider,
                         builder: (context, _) {
                           var key = '${album.nameLower}|||${album.artistLower}';
-                          var isFav = playerProvider.favoriteAlbums.contains(key);
+                          var isFav = playerProvider.favoriteAlbums.contains(
+                            key,
+                          );
                           return AnimatedFavoriteButton(
                             isFavorite: isFav,
-                            onToggle: () => playerProvider.toggleFavoriteAlbum(key),
+                            onToggle: () =>
+                                playerProvider.toggleFavoriteAlbum(key),
                           );
-                        }
+                        },
                       ),
                     ],
                   ),
@@ -179,11 +182,6 @@ class AlbumDetailScreen extends StatelessWidget {
                           showDivider: index < album.songs.length - 1,
                           onTap: () =>
                               playerProvider.playSong(song, album.songs),
-                          
-                          
-                          
-                          
-                          
                         );
                       }, childCount: album.songs.length),
                     );

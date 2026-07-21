@@ -214,7 +214,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ? FloatingActionButton.extended(
                               onPressed: _selectedFolder == null
                                   ? null
-                                  : () => widget.onComplete(_selectedFolder!, _nameController.text.trim().isEmpty ? 'User' : _nameController.text.trim()),
+                                  : () => widget.onComplete(
+                                      _selectedFolder!,
+                                      _nameController.text.trim().isEmpty
+                                          ? 'User'
+                                          : _nameController.text.trim(),
+                                    ),
                               icon: const Icon(Icons.done_rounded),
                               label: const Text('Get Started'),
                             )
@@ -329,7 +334,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 color: theme.colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
-            ),            const SizedBox(height: 32),
+            ),
+            const SizedBox(height: 32),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: TextField(

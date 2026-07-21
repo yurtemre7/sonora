@@ -32,9 +32,7 @@ class _AnimatedFavoriteButtonState extends State<AnimatedFavoriteButton>
     _scaleAnimation = TweenSequence<double>([
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.3), weight: 50),
       TweenSequenceItem(tween: Tween(begin: 1.3, end: 1.0), weight: 50),
-    ]).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -68,7 +66,9 @@ class _AnimatedFavoriteButtonState extends State<AnimatedFavoriteButton>
               : theme.colorScheme.onSurfaceVariant,
           size: widget.size,
         ),
-        tooltip: widget.isFavorite ? 'Remove from favorites' : 'Add to favorites',
+        tooltip: widget.isFavorite
+            ? 'Remove from favorites'
+            : 'Add to favorites',
         onPressed: _handleToggle,
       ),
     );

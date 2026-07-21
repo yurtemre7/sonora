@@ -40,11 +40,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   void _startAutoScroll() {
-    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 50), (
+      timer,
+    ) {
       if (!_isAutoScrolling || !_albumScrollController.hasClients) return;
       var maxScroll = _albumScrollController.position.maxScrollExtent;
       if (maxScroll == 0) return;
-      
+
       _scrollPosition += 1.0;
       if (_scrollPosition >= maxScroll) {
         _scrollPosition = 0;
@@ -65,30 +67,38 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    
+
     return ListenableBuilder(
       listenable: widget.playerProvider,
       builder: (context, _) {
         var favSongs = widget.allSongs.where((s) => s.isFavorite).toList();
         var favAlbums = widget.allAlbums.where((a) {
-          return widget.playerProvider.favoriteAlbums.contains('${a.nameLower}|||${a.artistLower}');
+          return widget.playerProvider.favoriteAlbums.contains(
+            '${a.nameLower}|||${a.artistLower}',
+          );
         }).toList();
         var favArtists = widget.allArtists.where((a) {
           return widget.playerProvider.favoriteArtists.contains(a.nameLower);
         }).toList();
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Favorites'),
-            centerTitle: true,
-          ),
+          appBar: AppBar(title: const Text('Favorites'), centerTitle: true),
           body: CustomScrollView(
             slivers: [
               if (favArtists.isNotEmpty) ...[
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
-                    child: Text('Artists', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      top: 16,
+                      bottom: 8,
+                    ),
+                    child: Text(
+                      'Artists',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -104,20 +114,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           padding: const EdgeInsets.only(right: 16),
                           child: GestureDetector(
                             onTap: () {
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (_) => ArtistDetailScreen(
-                                  artist: artist,
-                                  playerProvider: widget.playerProvider,
-                                )
-                              ));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ArtistDetailScreen(
+                                    artist: artist,
+                                    playerProvider: widget.playerProvider,
+                                  ),
+                                ),
+                              );
                             },
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                ArtistAvatar(
-                                  artist: artist,
-                                  radius: 36,
-                                ),
+                                ArtistAvatar(artist: artist, radius: 36),
                                 const SizedBox(height: 8),
                                 SizedBox(
                                   width: 72,
@@ -138,12 +148,21 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                 ),
               ],
-              
+
               if (favAlbums.isNotEmpty) ...[
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
-                    child: Text('Albums', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      top: 16,
+                      bottom: 8,
+                    ),
+                    child: Text(
+                      'Albums',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -165,12 +184,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             padding: const EdgeInsets.only(right: 16),
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.push(context, MaterialPageRoute(
-                                  builder: (_) => AlbumDetailScreen(
-                                    album: album,
-                                    playerProvider: widget.playerProvider,
-                                  )
-                                ));
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AlbumDetailScreen(
+                                      album: album,
+                                      playerProvider: widget.playerProvider,
+                                    ),
+                                  ),
+                                );
                               },
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +209,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                       album.name,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -200,40 +225,56 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                 ),
               ],
-              
+
               if (favSongs.isNotEmpty) ...[
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
-                    child: Text('Songs', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      top: 16,
+                      bottom: 8,
+                    ),
+                    child: Text(
+                      'Songs',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
                 SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      var song = favSongs[index];
-                      var isCurrent = widget.playerProvider.currentSong?.id == song.id;
-                      return SongTile(
-                        song: song,
-                        playerProvider: widget.playerProvider,
-                        isCurrent: isCurrent,
-                        showDivider: index < favSongs.length - 1,
-                        onTap: () => widget.playerProvider.playSong(song, favSongs),
-                      );
-                    },
-                    childCount: favSongs.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    var song = favSongs[index];
+                    var isCurrent =
+                        widget.playerProvider.currentSong?.id == song.id;
+                    return SongTile(
+                      song: song,
+                      playerProvider: widget.playerProvider,
+                      isCurrent: isCurrent,
+                      showDivider: index < favSongs.length - 1,
+                      onTap: () =>
+                          widget.playerProvider.playSong(song, favSongs),
+                    );
+                  }, childCount: favSongs.length),
                 ),
-                const SliverToBoxAdapter(child: SizedBox(height: 100)), // padding at bottom
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 100),
+                ), // padding at bottom
               ],
-              
+
               if (favArtists.isEmpty && favAlbums.isEmpty && favSongs.isEmpty)
                 SliverFillRemaining(
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.favorite_border_rounded, size: 64, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                        Icon(
+                          Icons.favorite_border_rounded,
+                          size: 64,
+                          color: theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.5,
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'No favorites yet',
@@ -248,7 +289,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             ],
           ),
         );
-      }
+      },
     );
   }
 }

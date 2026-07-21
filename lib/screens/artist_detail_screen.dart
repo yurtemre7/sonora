@@ -63,11 +63,7 @@ class ArtistDetailScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 40),
-                        ArtistAvatar(
-                          artist: artist,
-                          radius: 70,
-                          iconSize: 80,
-                        ),
+                        ArtistAvatar(artist: artist, radius: 70, iconSize: 80),
                         const SizedBox(height: 16),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -134,12 +130,16 @@ class ArtistDetailScreen extends StatelessWidget {
                       ListenableBuilder(
                         listenable: playerProvider,
                         builder: (context, _) {
-                          var isFav = playerProvider.favoriteArtists.contains(artist.nameLower);
+                          var isFav = playerProvider.favoriteArtists.contains(
+                            artist.nameLower,
+                          );
                           return AnimatedFavoriteButton(
                             isFavorite: isFav,
-                            onToggle: () => playerProvider.toggleFavoriteArtist(artist.nameLower),
+                            onToggle: () => playerProvider.toggleFavoriteArtist(
+                              artist.nameLower,
+                            ),
                           );
-                        }
+                        },
                       ),
                     ],
                   ),
@@ -260,11 +260,6 @@ class ArtistDetailScreen extends StatelessWidget {
                           showDivider: index < artist.songs.length - 1,
                           onTap: () =>
                               playerProvider.playSong(song, artist.songs),
-                          
-                          
-                          
-                          
-                          
                         );
                       }, childCount: artist.songs.length),
                     );

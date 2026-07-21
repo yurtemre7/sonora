@@ -22,6 +22,7 @@ import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/seek_bar.dart';
 import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/song_tile.dart';
+import 'package:sonora/widgets/mfx_bottom_sheet.dart';
 import 'package:sonora/widgets/speed_slider.dart';
 import 'package:sonora/widgets/volume_slider.dart';
 
@@ -433,6 +434,16 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   onPressed: () => _showAddToPlaylistDialog(context, song),
                 ),
                 _buildTimerChip(context),
+                _buildActionChip(
+                  icon: Icons.auto_awesome,
+                  label: 'MFX',
+                  active:
+                      widget.playerProvider.isSlowed ||
+                      widget.playerProvider.isSpedUp ||
+                      widget.playerProvider.isReverbEnabled,
+                  onPressed: () =>
+                      showMfxBottomSheet(context, widget.playerProvider),
+                ),
                 Tooltip(
                   message:
                       '${widget.playerProvider.speed}x — ${_showSpeed ? "Hide" : "Show"} speed',

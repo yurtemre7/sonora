@@ -28,7 +28,8 @@ class AppTheme {
     }
     return cache.putIfAbsent(
       key,
-      () => buildTheme(brightness, seedColor: seedColor, amoledDark: amoledDark),
+      () =>
+          buildTheme(brightness, seedColor: seedColor, amoledDark: amoledDark),
     );
   }
 
@@ -112,7 +113,7 @@ class AppTheme {
       seedColor: seedColor,
       brightness: brightness,
     );
-    
+
     if (brightness == Brightness.dark && amoledDark) {
       colorScheme = colorScheme.copyWith(
         surface: const Color(0xFF000000),

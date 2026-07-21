@@ -36,7 +36,8 @@ class PlaylistDetailScreen extends StatefulWidget {
   final Future<void> Function(String playlistId, int songId)
   onAddSongToPlaylist;
   final Future<void> Function(String playlistId)? onDeletePlaylist;
-  final Future<void> Function(String playlistId, String newName)? onRenamePlaylist;
+  final Future<void> Function(String playlistId, String newName)?
+  onRenamePlaylist;
 
   @override
   State<PlaylistDetailScreen> createState() => _PlaylistDetailScreenState();

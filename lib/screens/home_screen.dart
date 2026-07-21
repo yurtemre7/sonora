@@ -44,7 +44,8 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback onConfigureFolder;
   final Future<void> Function(String name) onCreatePlaylist;
   final Future<void> Function(String playlistId) onDeletePlaylist;
-  final Future<void> Function(String playlistId, String newName) onRenamePlaylist;
+  final Future<void> Function(String playlistId, String newName)
+  onRenamePlaylist;
   final Future<void> Function(String playlistId, int songId)
   onAddSongToPlaylist;
   final Future<void> Function(String playlistId, int songId)
@@ -95,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen>
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
-    
+
     _searchFocusNode.addListener(() {
       if (mounted) setState(() {});
     });
@@ -737,14 +738,17 @@ class _HomeScreenState extends State<HomeScreen>
                       icon: const Icon(Icons.favorite_rounded),
                       onPressed: () {
                         _searchFocusNode.unfocus();
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (_) => FavoritesScreen(
-                            playerProvider: widget.playerProvider,
-                            allSongs: widget.playerProvider.allSongs,
-                            allAlbums: widget.playerProvider.cachedAlbums,
-                            allArtists: widget.playerProvider.cachedArtists,
-                          )
-                        ));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FavoritesScreen(
+                              playerProvider: widget.playerProvider,
+                              allSongs: widget.playerProvider.allSongs,
+                              allAlbums: widget.playerProvider.cachedAlbums,
+                              allArtists: widget.playerProvider.cachedArtists,
+                            ),
+                          ),
+                        );
                       },
                       tooltip: 'Favorites',
                     ),
@@ -793,7 +797,7 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           ],
                         );
-                      }
+                      },
                     ),
                   ),
                   bottom: PreferredSize(
@@ -1251,8 +1255,13 @@ class _HomeScreenState extends State<HomeScreen>
                                                           value: 2,
                                                           child: Row(
                                                             children: [
-                                                              Icon(Icons.edit_rounded),
-                                                              SizedBox(width: 8),
+                                                              Icon(
+                                                                Icons
+                                                                    .edit_rounded,
+                                                              ),
+                                                              SizedBox(
+                                                                width: 8,
+                                                              ),
                                                               Text('Rename'),
                                                             ],
                                                           ),
@@ -1262,14 +1271,19 @@ class _HomeScreenState extends State<HomeScreen>
                                                           child: Row(
                                                             children: [
                                                               Icon(
-                                                                Icons.delete_outline_rounded,
-                                                                color: Colors.red,
+                                                                Icons
+                                                                    .delete_outline_rounded,
+                                                                color:
+                                                                    Colors.red,
                                                               ),
-                                                              SizedBox(width: 8),
+                                                              SizedBox(
+                                                                width: 8,
+                                                              ),
                                                               Text(
                                                                 'Delete',
                                                                 style: TextStyle(
-                                                                  color: Colors.red,
+                                                                  color: Colors
+                                                                      .red,
                                                                 ),
                                                               ),
                                                             ],
@@ -1281,7 +1295,8 @@ class _HomeScreenState extends State<HomeScreen>
                                                           RenamePlaylistDialog.show(
                                                             context,
                                                             playlist: playlist,
-                                                            onRename: widget.onRenamePlaylist,
+                                                            onRename: widget
+                                                                .onRenamePlaylist,
                                                           );
                                                         } else if (val == 1) {
                                                           var confirmed =
@@ -1492,11 +1507,6 @@ class _HomeScreenState extends State<HomeScreen>
                                                                   filteredSongs,
                                                                 );
                                                           },
-                                                          
-                                                          
-                                                          
-                                                          
-                                                          
                                                         );
                                                       },
                                                     ),

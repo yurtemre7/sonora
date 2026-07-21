@@ -111,7 +111,9 @@ class SongTile extends StatelessWidget {
                           : FontWeight.normal,
                     ),
                   ),
-                  if (!hideMenu && (playerProvider != null || onRemoveFromPlaylist != null)) ...[
+                  if (!hideMenu &&
+                      (playerProvider != null ||
+                          onRemoveFromPlaylist != null)) ...[
                     const SizedBox(width: 4),
                     PopupMenuButton<int>(
                       icon: Icon(
@@ -125,9 +127,16 @@ class SongTile extends StatelessWidget {
                         if (playerProvider != null) {
                           if (value == 1) playerProvider!.playNext(song);
                           if (value == 2) playerProvider!.addToQueue(song);
-                          if (value == 4) PlaylistSelectorBottomSheet.show(context, song, playerProvider!);
-                          if (value == 5) showSongInfoBottomSheet(context, song);
-                          if (value == 6) playerProvider!.toggleFavorite(song.id);
+                          if (value == 4)
+                            PlaylistSelectorBottomSheet.show(
+                              context,
+                              song,
+                              playerProvider!,
+                            );
+                          if (value == 5)
+                            showSongInfoBottomSheet(context, song);
+                          if (value == 6)
+                            playerProvider!.toggleFavorite(song.id);
                         }
                         if (value == 7 && onRemoveFromPlaylist != null) {
                           onRemoveFromPlaylist!();

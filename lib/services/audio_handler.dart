@@ -14,7 +14,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// Optimised for large libraries (10,000+ songs) using a sliding window strategy.
 class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
-  final player = AudioPlayer();
+  final AndroidEqualizer equalizer = AndroidEqualizer();
+  late final AudioPlayer player;
 
   // The full playlist (logical queue) of MediaItems.
   List<MediaItem> _rawPlaylist = [];
@@ -50,6 +51,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   }
 
   SonoraAudioHandler() {
+    player = AudioPlayer(
+      audioPipeline: AudioPipeline(androidAudioEffects: [equalizer]),
+    );
     _init();
   }
 
@@ -486,6 +490,31 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   @override
   Future<void> setSpeed(double speed) => player.setSpeed(speed);
+
+  Future<void> setPitch(double pitch) => player.setPitch(pitch);
+
+  Future<void> setEqEnabled(bool enabled) async {
+    await equalizer.setEnabled(enabled);
+    if (enabled) {
+      try {
+        var params = await equalizer.parameters;
+        // Simple bass boost and treble cut preset for "Slowed + Reverb" warmth
+        for (var band in params.bands) {
+          // If low frequency (< 250Hz), boost it. If high (> 4000Hz), cut it.
+          var freq = band.centerFrequency;
+          if (freq < 250) {
+            await band.setGain(params.maxDecibels * 0.5); // +50% of max boost
+          } else if (freq > 4000) {
+            await band.setGain(params.minDecibels * 0.5); // 50% of max cut
+          } else {
+            await band.setGain(0.0);
+          }
+        }
+      } catch (e) {
+        // Equalizer might not be supported on this device/platform
+      }
+    }
+  }
 
   @override
   Future<void> stop() async {

@@ -30,7 +30,6 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   List<String> favoriteAlbums = [];
   List<String> favoriteArtists = [];
 
-
   var uniqueThemeCount = 0;
   List<Song> allSongs = [];
   List<Song> queue = [];
@@ -46,6 +45,11 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   var _volume = 1.0;
   var _speed = 1.0;
+
+  // Experimental MFX
+  var _isSlowed = false;
+  var _isSpedUp = false;
+  var _isReverbEnabled = false;
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
   Duration? sleepTimerOriginalDuration;
@@ -95,9 +99,49 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> setSpeed(double value) async {
     _speed = value.clamp(0.5, 2.0);
-    await audioHandler.setSpeed(_speed);
+    if (!_isSlowed && !_isSpedUp) {
+      await audioHandler.setSpeed(_speed);
+    }
     var prefs = SharedPreferencesAsync();
     await prefs.setDouble('speed', _speed);
+    notifyListeners();
+  }
+
+  // ── Experimental MFX ──────────────────────────────────────────────────────
+
+  bool get isSlowed => _isSlowed;
+  bool get isSpedUp => _isSpedUp;
+  bool get isReverbEnabled => _isReverbEnabled;
+
+  Future<void> setSlowed(bool value) async {
+    _isSlowed = value;
+    if (_isSlowed) _isSpedUp = false;
+    await _applyMfx();
+  }
+
+  Future<void> setSpedUp(bool value) async {
+    _isSpedUp = value;
+    if (_isSpedUp) _isSlowed = false;
+    await _applyMfx();
+  }
+
+  Future<void> setReverbEnabled(bool value) async {
+    _isReverbEnabled = value;
+    await _applyMfx();
+  }
+
+  Future<void> _applyMfx() async {
+    if (_isSlowed) {
+      await audioHandler.setSpeed(0.85);
+      await audioHandler.setPitch(0.85);
+    } else if (_isSpedUp) {
+      await audioHandler.setSpeed(1.25);
+      await audioHandler.setPitch(1.25);
+    } else {
+      await audioHandler.setSpeed(_speed);
+      await audioHandler.setPitch(1.0);
+    }
+    await audioHandler.setEqEnabled(_isReverbEnabled);
     notifyListeners();
   }
 
@@ -671,8 +715,12 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> loadSettings() async {
     var prefs = SharedPreferencesAsync();
-    favoriteAlbums = List<String>.from(await prefs.getStringList('favorite_albums') ?? []);
-    favoriteArtists = List<String>.from(await prefs.getStringList('favorite_artists') ?? []);
+    favoriteAlbums = List<String>.from(
+      await prefs.getStringList('favorite_albums') ?? [],
+    );
+    favoriteArtists = List<String>.from(
+      await prefs.getStringList('favorite_artists') ?? [],
+    );
 
     var defaultColorVal = await prefs.getInt('default_theme_color');
     if (defaultColorVal != null) {

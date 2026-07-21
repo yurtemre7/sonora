@@ -56,7 +56,8 @@ class SonoraAppRouter {
   final Future<void> Function() onRetriggerSync;
   final Future<void> Function(String name) onCreatePlaylist;
   final Future<void> Function(String playlistId) onDeletePlaylist;
-  final Future<void> Function(String playlistId, String newName) onRenamePlaylist;
+  final Future<void> Function(String playlistId, String newName)
+  onRenamePlaylist;
   final Future<void> Function(String playlistId, int songId)
   onAddSongToPlaylist;
   final Future<void> Function(String playlistId, int songId)
