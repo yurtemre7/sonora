@@ -94,7 +94,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       bottom: 8,
                     ),
                     child: Text(
-                      'Artists',
+                      '${favArtists.length} Artist${favArtists.length == 1 ? '' : 's'}',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -158,7 +158,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       bottom: 8,
                     ),
                     child: Text(
-                      'Albums',
+                      '${favAlbums.length} Album${favAlbums.length == 1 ? '' : 's'}',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -235,7 +235,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       bottom: 8,
                     ),
                     child: Text(
-                      'Songs',
+                      '${favSongs.length} Song${favSongs.length == 1 ? '' : 's'}',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
