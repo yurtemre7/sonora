@@ -125,18 +125,25 @@ class SongTile extends StatelessWidget {
                       constraints: const BoxConstraints(minWidth: 160),
                       onSelected: (value) {
                         if (playerProvider != null) {
-                          if (value == 1) playerProvider!.playNext(song);
-                          if (value == 2) playerProvider!.addToQueue(song);
-                          if (value == 4)
+                          if (value == 1) {
+                            playerProvider!.playNext(song);
+                          }
+                          if (value == 2) {
+                            playerProvider!.addToQueue(song);
+                          }
+                          if (value == 4) {
                             PlaylistSelectorBottomSheet.show(
                               context,
                               song,
                               playerProvider!,
                             );
-                          if (value == 5)
+                          }
+                          if (value == 5) {
                             showSongInfoBottomSheet(context, song);
-                          if (value == 6)
+                          }
+                          if (value == 6) {
                             playerProvider!.toggleFavorite(song.id);
+                          }
                         }
                         if (value == 7 && onRemoveFromPlaylist != null) {
                           onRemoveFromPlaylist!();

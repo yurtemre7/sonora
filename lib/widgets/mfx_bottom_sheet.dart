@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/widgets/speed_slider.dart';
 
 void showMfxBottomSheet(BuildContext context, PlayerProvider playerProvider) {
   showModalBottomSheet(
@@ -131,6 +132,29 @@ class _MfxBottomSheet extends StatelessWidget {
                             ),
                             value: player.isReverbEnabled,
                             onChanged: player.setReverbEnabled,
+                          ),
+                          const Divider(height: 32),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              'Custom Speed',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Opacity(
+                            opacity: (player.isSlowed || player.isSpedUp)
+                                ? 0.5
+                                : 1.0,
+                            child: IgnorePointer(
+                              ignoring: player.isSlowed || player.isSpedUp,
+                              child: SpeedSlider(
+                                speed: player.speed,
+                                onChanged: player.setSpeed,
+                              ),
+                            ),
                           ),
                         ],
                       ),

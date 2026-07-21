@@ -14,7 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// Optimised for large libraries (10,000+ songs) using a sliding window strategy.
 class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
-  final AndroidEqualizer equalizer = AndroidEqualizer();
+  final equalizer = AndroidEqualizer();
   late final AudioPlayer player;
 
   // The full playlist (logical queue) of MediaItems.
