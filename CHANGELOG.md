@@ -2,10 +2,14 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.9.1] - 2026-07-21
+### Fixed
+* Resolve navigation bar transparency, sorting, and playlist cover deletion
+
 ## [1.9.0] - 2026-07-21
 ### Added
-* Show counts for each section in favorites screen (Fixes #11)
-* Highlight MFX icon button when custom speed is selected (Fixes #10)
+* Show counts for each section in favorites screen
+* Highlight MFX icon button when custom speed is selected
 * Change playlist cover image from home screen playlists tab
 * Custom playlist cover images via file_picker
 * Add experimental MFX (Slowed, Sped Up, Reverb EQ) to now playing
