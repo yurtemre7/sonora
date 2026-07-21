@@ -27,6 +27,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   final SettingsProvider settingsProvider;
 
   // ── State fields ──────────────────────────────────────────────────────────
+  List<String> favoriteAlbums = [];
+  List<String> favoriteArtists = [];
+
 
   var uniqueThemeCount = 0;
   List<Song> allSongs = [];
@@ -437,6 +440,28 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   /// Toggles a song's favorite status in the cache index and favorite playlist.
+  Future<void> toggleFavoriteAlbum(String key) async {
+    if (favoriteAlbums.contains(key)) {
+      favoriteAlbums.remove(key);
+    } else {
+      favoriteAlbums.add(key);
+    }
+    var prefs = SharedPreferencesAsync();
+    await prefs.setStringList('favorite_albums', favoriteAlbums);
+    notifyListeners();
+  }
+
+  Future<void> toggleFavoriteArtist(String nameLower) async {
+    if (favoriteArtists.contains(nameLower)) {
+      favoriteArtists.remove(nameLower);
+    } else {
+      favoriteArtists.add(nameLower);
+    }
+    var prefs = SharedPreferencesAsync();
+    await prefs.setStringList('favorite_artists', favoriteArtists);
+    notifyListeners();
+  }
+
   Future<void> toggleFavorite(int songId) async {
     var scanner = MusicScanner();
     var updatedSongs = await scanner.toggleFavoriteSong(songId);
@@ -634,6 +659,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> loadSettings() async {
     var prefs = SharedPreferencesAsync();
+    favoriteAlbums = await prefs.getStringList('favorite_albums') ?? [];
+    favoriteArtists = await prefs.getStringList('favorite_artists') ?? [];
 
     var defaultColorVal = await prefs.getInt('default_theme_color');
     if (defaultColorVal != null) {

@@ -845,14 +845,9 @@ class MusicScanner {
             .toList();
       }
 
-      var hasFavorites = list.any((p) => p.id == 'favorites');
-      if (!hasFavorites) {
-        var favoritesPlaylist = Playlist(
-          id: 'favorites',
-          name: 'Favorites',
-          songIds: [],
-        );
-        list.insert(0, favoritesPlaylist);
+      // Migrate existing users by removing the legacy favorites playlist
+      if (list.any((p) => p.id == 'favorites')) {
+        list.removeWhere((p) => p.id == 'favorites');
         await savePlaylists(list);
       }
       return list;
@@ -875,7 +870,6 @@ class MusicScanner {
   Future<List<Song>> toggleFavoriteSong(int songId) async {
     try {
       var songs = await _readImportedSongsMetadata();
-      var playlists = await getPlaylists();
 
       var songIndex = songs.indexWhere((s) => s.id == songId);
       if (songIndex >= 0) {
@@ -885,20 +879,6 @@ class MusicScanner {
         songs[songIndex] = song.copyWith(isFavorite: newFavoriteStatus);
 
         await _writeImportedSongsMetadata(songs);
-
-        // Update favorites playlist
-        var favoritesIndex = playlists.indexWhere((p) => p.id == 'favorites');
-        if (favoritesIndex >= 0) {
-          var favPlaylist = playlists[favoritesIndex];
-          if (newFavoriteStatus) {
-            if (!favPlaylist.songIds.contains(songId)) {
-              favPlaylist.songIds.add(songId);
-            }
-          } else {
-            favPlaylist.songIds.remove(songId);
-          }
-          await savePlaylists(playlists);
-        }
       }
 
       return songs;

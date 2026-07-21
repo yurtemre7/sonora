@@ -14,6 +14,7 @@ import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/services/lyrics_service.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/ambient_glow.dart';
+import 'package:sonora/widgets/animated_favorite_button.dart';
 import 'package:sonora/widgets/audio_visualizer.dart';
 import 'package:sonora/widgets/marquee_text.dart';
 import 'package:sonora/widgets/player_controls.dart';
@@ -39,31 +40,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   var _showLyrics = false;
   var _showVolume = Platform.isWindows;
   var _viewMode = _ViewMode.player;
-  late AnimationController _likeAnimController;
-  late Animation<double> _likeAnim;
 
   @override
   void initState() {
     super.initState();
-    _likeAnimController =
-        AnimationController(
-          vsync: this,
-          duration: const Duration(milliseconds: 500),
-        )..addStatusListener((status) {
-          if (status == AnimationStatus.completed) {
-            _likeAnimController.reverse();
-          }
-        });
-    _likeAnim = Tween<double>(begin: 1.0, end: 1.35).animate(
-      CurvedAnimation(parent: _likeAnimController, curve: Curves.easeInOut),
-    );
   }
 
-  @override
-  void dispose() {
-    _likeAnimController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -418,31 +400,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 ),
               ),
               const SizedBox(width: 16),
-              AnimatedBuilder(
-                animation: _likeAnim,
-                builder: (context, child) =>
-                    Transform.scale(scale: _likeAnim.value, child: child),
-                child: IconButton(
-                  icon: Icon(
-                    song.isFavorite
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    color: song.isFavorite
-                        ? Colors.red
-                        : theme.colorScheme.onSurfaceVariant,
-                    size: 28,
-                  ),
-                  tooltip: song.isFavorite
-                      ? 'Remove from favorites'
-                      : 'Add to favorites',
-                  onPressed: () {
-                    var wasFavorite = song.isFavorite;
-                    widget.playerProvider.toggleFavorite(song.id);
-                    if (!wasFavorite) {
-                      _likeAnimController.forward(from: 0.0);
-                    }
-                  },
-                ),
+              AnimatedFavoriteButton(
+                isFavorite: song.isFavorite,
+                onToggle: () => widget.playerProvider.toggleFavorite(song.id),
               ),
             ],
           ),

@@ -6,6 +6,7 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
+import 'package:sonora/screens/favorites_screen.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/format_utils.dart';
@@ -557,6 +558,22 @@ class _HomeScreenState extends State<HomeScreen>
                 icon: const Icon(Icons.sort_rounded),
                 onPressed: onSort,
                 tooltip: 'Sort',
+              ),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                icon: const Icon(Icons.favorite_rounded),
+                onPressed: () {
+                  unfocus();
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => FavoritesScreen(
+                      playerProvider: widget.playerProvider,
+                      allSongs: widget.playerProvider.allSongs,
+                      allAlbums: widget.playerProvider.cachedAlbums,
+                      allArtists: widget.playerProvider.cachedArtists,
+                    )
+                  ));
+                },
+                tooltip: 'Favorites',
               ),
             ],
           ),
