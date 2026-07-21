@@ -132,7 +132,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
               },
             ),
             ListenableBuilder(
-              listenable: playerProvider,
+              listenable: Listenable.merge([playerProvider, settingsProvider]),
               builder: (context, _) {
                 var uniqueColors = playerProvider.getUniqueThemeColors();
                 return Column(
