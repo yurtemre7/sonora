@@ -978,7 +978,8 @@ class _TopSongCardState extends State<_TopSongCard> {
     var rankColor = rankColors[widget.index % rankColors.length];
 
     var basePlaytimeMs = _statsService.songCumulativeListenMs(song.id);
-    var playtimeMs = basePlaytimeMs + (widget.entry.count * song.duration.inMilliseconds);
+    var playtimeMs =
+        basePlaytimeMs + (widget.entry.count * song.duration.inMilliseconds);
     var totalSeconds = (playtimeMs / 1000).round();
     var hours = totalSeconds ~/ 3600;
     var minutes = (totalSeconds % 3600) ~/ 60;

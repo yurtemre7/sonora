@@ -11,6 +11,7 @@ class AppRoutes {
   static const stats = '/stats';
   static const settingsAppearance = '/settings/appearance';
   static const settingsPlayback = '/settings/playback';
+  static const settingsFormatting = '/settings/formatting';
   static const settingsInfo = '/settings/info';
   static const settingsPrivacy = '/settings/privacy';
 }

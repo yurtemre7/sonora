@@ -51,7 +51,10 @@ class _SonoraAppState extends State<SonoraApp> {
   @override
   void initState() {
     super.initState();
-    _playerProvider = PlayerProvider(audioHandler: widget.audioHandler);
+    _playerProvider = PlayerProvider(
+      audioHandler: widget.audioHandler,
+      settingsProvider: _settingsProvider,
+    );
     _routerRefreshNotifier = _RouterRefreshNotifier();
     _appRouter = SonoraAppRouter(
       refreshListenable: _routerRefreshNotifier,
@@ -488,31 +491,37 @@ class _SonoraAppState extends State<SonoraApp> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _themeProvider,
+      listenable: _settingsProvider,
       builder: (context, _) {
-        return ValueListenableBuilder<Color>(
-          valueListenable: _playerProvider.themeColorNotifier,
-          builder: (context, activeSeedColor, _) {
-            return MaterialApp.router(
-              scaffoldMessengerKey: _scaffoldMessengerKey,
-              title: 'Sonora',
-              theme: AppTheme.getTheme(
-                Brightness.light,
-                seedColor: activeSeedColor,
-              ),
-              darkTheme: AppTheme.getTheme(
-                Brightness.dark,
-                seedColor: activeSeedColor,
-              ),
-              themeMode: _themeProvider.themeMode,
-              debugShowCheckedModeBanner: false,
-              builder: (context, child) {
-                return GestureDetector(
-                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                  child: child,
+        return ListenableBuilder(
+          listenable: _themeProvider,
+          builder: (context, _) {
+            return ValueListenableBuilder<Color>(
+              valueListenable: _playerProvider.themeColorNotifier,
+              builder: (context, activeSeedColor, _) {
+                return MaterialApp.router(
+                  scaffoldMessengerKey: _scaffoldMessengerKey,
+                  title: 'Sonora',
+                  theme: AppTheme.getTheme(
+                    Brightness.light,
+                    seedColor: activeSeedColor,
+                  ),
+                  darkTheme: AppTheme.getTheme(
+                    Brightness.dark,
+                    seedColor: activeSeedColor,
+                  ),
+                  themeMode: _themeProvider.themeMode,
+                  debugShowCheckedModeBanner: false,
+                  builder: (context, child) {
+                    return GestureDetector(
+                      onTap: () =>
+                          FocusManager.instance.primaryFocus?.unfocus(),
+                      child: child,
+                    );
+                  },
+                  routerConfig: _appRouter.router,
                 );
               },
-              routerConfig: _appRouter.router,
             );
           },
         );

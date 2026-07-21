@@ -1,3 +1,4 @@
+import 'package:sonora/providers/settings_provider.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:audio_service/audio_service.dart';
@@ -22,6 +23,7 @@ enum RepeatMode { off, all, one }
 /// synchronises with the underlying [SonoraAudioHandler].
 class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   final SonoraAudioHandler audioHandler;
+  final SettingsProvider settingsProvider;
 
   // ── State fields ──────────────────────────────────────────────────────────
 
@@ -83,7 +85,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   // ── Constructor ───────────────────────────────────────────────────────────
 
-  PlayerProvider({required this.audioHandler}) {
+  PlayerProvider({required this.audioHandler, required this.settingsProvider}) {
     _volume = Platform.isWindows ? 0.1 : 1.0;
     _listenToMediaItem();
     _listenToPlaybackState();

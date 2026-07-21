@@ -15,6 +15,7 @@ import 'package:sonora/screens/playlist_detail_screen.dart';
 import 'package:sonora/screens/settings/appearance_settings_screen.dart';
 import 'package:sonora/screens/settings/info_settings_screen.dart';
 import 'package:sonora/screens/settings/playback_settings_screen.dart';
+import 'package:sonora/screens/settings/formatting_settings_screen.dart';
 import 'package:sonora/screens/settings/privacy_settings_screen.dart';
 import 'package:sonora/screens/settings_screen.dart';
 import 'package:sonora/screens/stats_screen.dart';
@@ -158,6 +159,11 @@ class SonoraAppRouter {
               themeProvider: themeProvider,
               playerProvider: playerProvider,
             ),
+          ),
+          GoRoute(
+            path: AppRoutes.settingsFormatting,
+            builder: (context, state) =>
+                FormattingSettingsScreen(settingsProvider: settingsProvider),
           ),
           GoRoute(
             path: AppRoutes.settingsPlayback,

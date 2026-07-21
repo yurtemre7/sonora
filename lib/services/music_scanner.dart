@@ -101,7 +101,8 @@ class MusicScanner {
         };
         var foundFiles = <File>[];
         var localCoverImageDirs = <String, String>{}; // dirPath -> imagePath
-        var localImageFiles = <String, List<String>>{}; // dirPath -> List<imagePath>
+        var localImageFiles =
+            <String, List<String>>{}; // dirPath -> List<imagePath>
 
         try {
           var syncDir = Directory(folderPath);
@@ -115,8 +116,13 @@ class MusicScanner {
                   name == 'cover.png' ||
                   name == 'cover.webp') {
                 localCoverImageDirs[entity.parent.path] = entity.path;
-              } else if (name.endsWith('.jpg') || name.endsWith('.png') || name.endsWith('.webp') || name.endsWith('.jpeg')) {
-                localImageFiles.putIfAbsent(entity.parent.path, () => []).add(entity.path);
+              } else if (name.endsWith('.jpg') ||
+                  name.endsWith('.png') ||
+                  name.endsWith('.webp') ||
+                  name.endsWith('.jpeg')) {
+                localImageFiles
+                    .putIfAbsent(entity.parent.path, () => [])
+                    .add(entity.path);
               } else {
                 var ext = name.split('.').last;
                 if (audioExtensions.contains(ext)) {
@@ -334,14 +340,22 @@ class MusicScanner {
           var parentDir = File(song.filePath).parent.parent.path;
 
           var lowerArtist = song.artist.toLowerCase();
-          
+
           String? findArtistImage(String path) {
             var images = localImageFiles[path];
             if (images == null) return null;
             for (var img in images) {
               var name = img.split(Platform.pathSeparator).last.toLowerCase();
-              if (name == 'artist.jpg' || name == 'artist.png' || name == 'artist.webp' || name == 'artist.jpeg') return img;
-              if (name == '$lowerArtist.jpg' || name == '$lowerArtist.png' || name == '$lowerArtist.webp' || name == '$lowerArtist.jpeg') return img;
+              if (name == 'artist.jpg' ||
+                  name == 'artist.png' ||
+                  name == 'artist.webp' ||
+                  name == 'artist.jpeg')
+                return img;
+              if (name == '$lowerArtist.jpg' ||
+                  name == '$lowerArtist.png' ||
+                  name == '$lowerArtist.webp' ||
+                  name == '$lowerArtist.jpeg')
+                return img;
             }
             return null;
           }

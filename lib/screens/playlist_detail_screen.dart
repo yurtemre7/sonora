@@ -374,7 +374,9 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                             key: _itemKeys[index],
                             index: index,
                             child: Dismissible(
-                              key: ValueKey('dismiss_${_itemKeys[index].hashCode}'),
+                              key: ValueKey(
+                                'dismiss_${_itemKeys[index].hashCode}',
+                              ),
                               direction: DismissDirection.endToStart,
                               background: Container(
                                 alignment: Alignment.centerRight,

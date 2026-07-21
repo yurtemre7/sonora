@@ -1,3 +1,5 @@
+import 'package:sonora/providers/settings_provider.dart';
+
 class Song {
   final int id;
   final String title;
@@ -97,15 +99,25 @@ class Song {
   }
 
   String get displayTitle {
-    var cleaned = title.replaceAll(
-      RegExp(
-        r'\s*[\(\[](?:feat|featuring|ft)\.?\s+[^\]\)]+[\)\]]',
-        caseSensitive: false,
-      ),
-      '',
-    );
+    var filterFeat = SettingsProvider().filterTitleFeatures;
+    var filterArtist = SettingsProvider().filterTitleArtist;
 
-    if (artist.isEmpty) return cleaned.trim().isEmpty ? title : cleaned.trim();
+    if (!filterFeat && !filterArtist) return title.trim();
+
+    var cleaned = title;
+
+    if (filterFeat) {
+      cleaned = cleaned.replaceAll(
+        RegExp(
+          r'\s*[\(\[](?:feat|featuring|ft)\.?\s+[^\]\)]+[\)\]]',
+          caseSensitive: false,
+        ),
+        '',
+      );
+    }
+
+    if (!filterArtist || artist.isEmpty)
+      return cleaned.trim().isEmpty ? title : cleaned.trim();
 
     var escaped = RegExp.escape(artist);
     var artistRemoved = cleaned.replaceFirst(
