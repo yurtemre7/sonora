@@ -6,6 +6,7 @@ import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
+import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
@@ -256,7 +257,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '${_playlistSongs.length} ${_playlistSongs.length == 1 ? 'song' : 'songs'}',
+                              '${_playlistSongs.length} ${_playlistSongs.length == 1 ? 'song' : 'songs'} • ${formatTotalDuration(_playlistSongs)}',
                               style: theme.textTheme.labelMedium?.copyWith(
                                 color: theme.colorScheme.primary,
                                 fontWeight: FontWeight.bold,

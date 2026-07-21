@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
+import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -94,7 +96,7 @@ class AlbumDetailScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '${album.songs.length} ${album.songs.length == 1 ? 'track' : 'tracks'}',
+                        '${album.songs.length} ${album.songs.length == 1 ? 'track' : 'tracks'} • ${formatTotalDuration(album.songs)}',
                         style: theme.textTheme.labelMedium?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,

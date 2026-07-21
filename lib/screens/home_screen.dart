@@ -8,6 +8,7 @@ import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/update_service.dart';
+import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
@@ -474,7 +475,8 @@ class _HomeScreenState extends State<HomeScreen>
         };
       default:
         count = filteredSongs.length;
-        label = '$count ${count == 1 ? 'song' : 'songs'} found';
+        var timeStr = formatTotalDuration(filteredSongs);
+        label = '$count ${count == 1 ? 'song' : 'songs'} found - $timeStr';
         onShuffle = () {
           unfocus();
           widget.playerProvider.quickShuffle(filteredSongs);
