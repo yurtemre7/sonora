@@ -731,24 +731,48 @@ class _HomeScreenState extends State<HomeScreen>
                   expandedHeight: 120,
                   flexibleSpace: FlexibleSpaceBar(
                     titlePadding: const EdgeInsets.only(left: 20, bottom: 60),
-                    title: Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          'Sonora',
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        SizedBox(width: 6),
-                        Icon(
-                          Icons.headphones,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ],
+                    title: ListenableBuilder(
+                      listenable: SettingsProvider.instance,
+                      builder: (context, _) {
+                        if (SettingsProvider.instance.useGreetingTitle) {
+                          var hour = DateTime.now().hour;
+                          String greeting;
+                          if (hour < 12) {
+                            greeting = 'Good morning';
+                          } else if (hour < 17) {
+                            greeting = 'Good afternoon';
+                          } else {
+                            greeting = 'Good evening';
+                          }
+                          return Text(
+                            '$greeting, ${SettingsProvider.instance.userName}',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.5,
+                              color: theme.colorScheme.primary,
+                            ),
+                          );
+                        }
+                        return Wrap(
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              'Sonora',
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Icon(
+                              Icons.headphones,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ],
+                        );
+                      }
                     ),
                   ),
                   bottom: PreferredSize(

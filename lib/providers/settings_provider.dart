@@ -29,6 +29,8 @@ class SettingsProvider extends ChangeNotifier {
   var pauseOnDuck = false;
   var filterTitleFeatures = false;
   var filterTitleArtist = false;
+  var userName = 'User';
+  var useGreetingTitle = false;
   String? scanFolder;
   String? lastSyncTime;
   int? lastSyncDuration;
@@ -67,6 +69,8 @@ class SettingsProvider extends ChangeNotifier {
     pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
     filterTitleFeatures = await prefs.getBool('filter_title_features') ?? false;
     filterTitleArtist = await prefs.getBool('filter_title_artist') ?? false;
+    userName = await prefs.getString('user_name') ?? 'User';
+    useGreetingTitle = await prefs.getBool('use_greeting_title') ?? false;
 
     scanFolder = await scanner.getScanFolder();
     lastSyncTime = await scanner.getLastSyncTime();
@@ -74,6 +78,20 @@ class SettingsProvider extends ChangeNotifier {
 
     _isLoaded = true;
     notifyListeners();
+  }
+
+  Future<void> setUserName(String name) async {
+    userName = name;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setString('user_name', name);
+  }
+
+  Future<void> setUseGreetingTitle(bool value) async {
+    useGreetingTitle = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('use_greeting_title', value);
   }
 
   Future<void> setKeepPlayingOnClose(bool value) async {

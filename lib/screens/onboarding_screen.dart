@@ -8,7 +8,7 @@ import 'package:sonora/services/permission_service.dart';
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key, required this.onComplete});
 
-  final void Function(String? selectedFolder) onComplete;
+  final void Function(String? selectedFolder, String userName) onComplete;
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -24,6 +24,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // Folder State
   String? _selectedFolder;
+  final _nameController = TextEditingController(text: 'User');
 
   @override
   void initState() {
@@ -213,7 +214,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ? FloatingActionButton.extended(
                               onPressed: _selectedFolder == null
                                   ? null
-                                  : () => widget.onComplete(_selectedFolder),
+                                  : () => widget.onComplete(_selectedFolder!, _nameController.text.trim().isEmpty ? 'User' : _nameController.text.trim()),
                               icon: const Icon(Icons.done_rounded),
                               label: const Text('Get Started'),
                             )
@@ -328,7 +329,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 color: theme.colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
+            ),            const SizedBox(height: 32),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: TextField(
+                controller: _nameController,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  labelText: 'Your Name (Optional)',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  prefixIcon: const Icon(Icons.person_rounded),
+                ),
+              ),
             ),
+
             const SizedBox(height: 16),
             Text(
               'A premium offline music experience built with beautiful Material 3 Expressive elements.\n\nEnjoy fluid, stutter-free playback and fast background syncing.',

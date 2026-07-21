@@ -229,7 +229,9 @@ class _SonoraAppState extends State<SonoraApp> {
     _playerProvider.updateSongs(scannedSongs);
   }
 
-  Future<void> _completeOnboarding(String? selectedFolder) async {
+  Future<void> _completeOnboarding(String? selectedFolder, String userName) async {
+    _settingsProvider.setUserName(userName);
+    _settingsProvider.setUseGreetingTitle(true);
     var prefs = SharedPreferencesAsync();
     await prefs.setBool('onboarding_completed', true);
 
