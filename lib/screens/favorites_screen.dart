@@ -1,10 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
+import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/song_tile.dart';
@@ -90,14 +92,28 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(
                       left: 16,
+                      right: 16,
                       top: 16,
                       bottom: 8,
                     ),
-                    child: Text(
-                      '${favArtists.length} Artist${favArtists.length == 1 ? '' : 's'}',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          'Artists',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${favArtists.length}',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -154,14 +170,28 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(
                       left: 16,
+                      right: 16,
                       top: 16,
                       bottom: 8,
                     ),
-                    child: Text(
-                      '${favAlbums.length} Album${favAlbums.length == 1 ? '' : 's'}',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          'Albums',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${favAlbums.length}',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -231,14 +261,28 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(
                       left: 16,
+                      right: 16,
                       top: 16,
                       bottom: 8,
                     ),
-                    child: Text(
-                      '${favSongs.length} Song${favSongs.length == 1 ? '' : 's'}',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          'Songs',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${favSongs.length} • ${formatTotalDuration(favSongs)}',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
