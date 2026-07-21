@@ -59,6 +59,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final _scrollController = ScrollController();
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
   var _searchQuery = '';
@@ -572,6 +573,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _scrollController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
@@ -712,6 +714,7 @@ class _HomeScreenState extends State<HomeScreen>
 
         return Scaffold(
           body: NestedScrollView(
+            controller: _scrollController,
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 SliverAppBar(
@@ -769,6 +772,17 @@ class _HomeScreenState extends State<HomeScreen>
                                   ),
                                 ),
                                 child: TabBar(
+                                  onTap: (index) {
+                                    if (!_tabController.indexIsChanging) {
+                                      _scrollController.animateTo(
+                                        0,
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        curve: Curves.easeOutCubic,
+                                      );
+                                    }
+                                  },
                                   controller: _tabController,
                                   dividerColor: Colors.transparent,
                                   indicatorSize: TabBarIndicatorSize.tab,
