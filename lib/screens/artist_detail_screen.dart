@@ -7,6 +7,7 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/animated_favorite_button.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
 class ArtistDetailScreen extends StatelessWidget {
@@ -143,6 +144,17 @@ class ArtistDetailScreen extends StatelessWidget {
                           icon: const Icon(Icons.shuffle_rounded),
                           label: const Text('Shuffle All'),
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      ListenableBuilder(
+                        listenable: playerProvider,
+                        builder: (context, _) {
+                          var isFav = playerProvider.favoriteArtists.contains(artist.nameLower);
+                          return AnimatedFavoriteButton(
+                            isFavorite: isFav,
+                            onToggle: () => playerProvider.toggleFavoriteArtist(artist.nameLower),
+                          );
+                        }
                       ),
                     ],
                   ),

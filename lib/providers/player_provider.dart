@@ -659,8 +659,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> loadSettings() async {
     var prefs = SharedPreferencesAsync();
-    favoriteAlbums = await prefs.getStringList('favorite_albums') ?? [];
-    favoriteArtists = await prefs.getStringList('favorite_artists') ?? [];
+    favoriteAlbums = List<String>.from(await prefs.getStringList('favorite_albums') ?? []);
+    favoriteArtists = List<String>.from(await prefs.getStringList('favorite_artists') ?? []);
 
     var defaultColorVal = await prefs.getInt('default_theme_color');
     if (defaultColorVal != null) {
