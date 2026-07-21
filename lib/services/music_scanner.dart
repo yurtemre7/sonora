@@ -170,26 +170,10 @@ class MusicScanner {
               if (cached.lastModifiedMs == mtime &&
                   cached.fileSize == size &&
                   cached.artist != 'Local Audio' &&
-                  cached.album != 'Synced Folder') {
+                  cached.album != 'Synced Folder' &&
+                  cached.format != null) {
                 if (cached.hasLyrics != hasLrc) {
-                  songsToKeep.add(
-                    Song(
-                      id: cached.id,
-                      title: cached.title,
-                      artist: cached.artist,
-                      album: cached.album,
-                      duration: cached.duration,
-                      filePath: cached.filePath,
-                      artworkPath: cached.artworkPath,
-                      format: cached.format,
-                      bitrate: cached.bitrate,
-                      samplerate: cached.samplerate,
-                      isFavorite: cached.isFavorite,
-                      lastModifiedMs: cached.lastModifiedMs,
-                      fileSize: cached.fileSize,
-                      hasLyrics: hasLrc,
-                    ),
-                  );
+                  songsToKeep.add(cached.copyWith(hasLyrics: hasLrc));
                 } else {
                   songsToKeep.add(cached);
                 }
@@ -516,7 +500,9 @@ class MusicScanner {
               var mtime = stat.modified.millisecondsSinceEpoch;
               var size = stat.size;
 
-              if (cached.lastModifiedMs == mtime && cached.fileSize == size) {
+              if (cached.lastModifiedMs == mtime &&
+                  cached.fileSize == size &&
+                  cached.format != null) {
                 var hasLrc = false;
                 var extIndex = file.path.lastIndexOf('.');
                 if (extIndex != -1) {
@@ -527,24 +513,7 @@ class MusicScanner {
                 }
 
                 if (cached.hasLyrics != hasLrc) {
-                  songsToKeep.add(
-                    Song(
-                      id: cached.id,
-                      title: cached.title,
-                      artist: cached.artist,
-                      album: cached.album,
-                      duration: cached.duration,
-                      filePath: cached.filePath,
-                      artworkPath: cached.artworkPath,
-                      format: cached.format,
-                      bitrate: cached.bitrate,
-                      samplerate: cached.samplerate,
-                      isFavorite: cached.isFavorite,
-                      lastModifiedMs: cached.lastModifiedMs,
-                      fileSize: cached.fileSize,
-                      hasLyrics: hasLrc,
-                    ),
-                  );
+                  songsToKeep.add(cached.copyWith(hasLyrics: hasLrc));
                 } else {
                   songsToKeep.add(cached);
                 }
