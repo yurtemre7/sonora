@@ -476,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen>
       default:
         count = filteredSongs.length;
         var timeStr = formatTotalDuration(filteredSongs);
-        label = '$count ${count == 1 ? 'song' : 'songs'} found - $timeStr';
+        label = '$count ${count == 1 ? 'song' : 'songs'} • $timeStr';
         onShuffle = () {
           unfocus();
           widget.playerProvider.quickShuffle(filteredSongs);
