@@ -7,6 +7,8 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/playlist_selector.dart';
+import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
 class AlbumDetailScreen extends StatelessWidget {
@@ -161,10 +163,16 @@ class AlbumDetailScreen extends StatelessWidget {
                             currentSong != null && currentSong.id == song.id;
                         return SongTile(
                           song: song,
+                          playerProvider: playerProvider,
                           isCurrent: isCurrent,
                           showDivider: index < album.songs.length - 1,
                           onTap: () =>
                               playerProvider.playSong(song, album.songs),
+                          onPlayNext: () => playerProvider.playNext(song),
+                          onAddToQueue: () => playerProvider.addToQueue(song),
+                          onAddToPlaylist: () => PlaylistSelectorBottomSheet.show(context, song, playerProvider),
+                          onShowInfo: () => showSongInfoBottomSheet(context, song),
+                          onToggleFavorite: () => playerProvider.toggleFavorite(song.id),
                         );
                       }, childCount: album.songs.length),
                     );
