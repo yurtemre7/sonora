@@ -116,8 +116,9 @@ class Song {
       );
     }
 
-    if (!filterArtist || artist.isEmpty)
+    if (!filterArtist || artist.isEmpty) {
       return cleaned.trim().isEmpty ? title : cleaned.trim();
+    }
 
     var escaped = RegExp.escape(artist);
     var artistRemoved = cleaned.replaceFirst(

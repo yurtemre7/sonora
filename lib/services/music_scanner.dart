@@ -349,13 +349,15 @@ class MusicScanner {
               if (name == 'artist.jpg' ||
                   name == 'artist.png' ||
                   name == 'artist.webp' ||
-                  name == 'artist.jpeg')
+                  name == 'artist.jpeg') {
                 return img;
+              }
               if (name == '$lowerArtist.jpg' ||
                   name == '$lowerArtist.png' ||
                   name == '$lowerArtist.webp' ||
-                  name == '$lowerArtist.jpeg')
+                  name == '$lowerArtist.jpeg') {
                 return img;
+              }
             }
             return null;
           }

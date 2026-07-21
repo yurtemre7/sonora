@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/providers/settings_provider.dart';
 
 class FormattingSettingsScreen extends StatelessWidget {
   final SettingsProvider settingsProvider;

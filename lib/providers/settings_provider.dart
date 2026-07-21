@@ -4,7 +4,7 @@ import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
 
 class SettingsProvider extends ChangeNotifier {
-  static final SettingsProvider instance = SettingsProvider._internal();
+  static final instance = SettingsProvider._internal();
   factory SettingsProvider() => instance;
   SettingsProvider._internal();
 

@@ -1,6 +1,6 @@
-import 'package:sonora/providers/settings_provider.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
+
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/stats_service.dart';
