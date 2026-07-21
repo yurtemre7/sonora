@@ -141,7 +141,12 @@ class _SeekBarState extends State<SeekBar> {
                               gradient: LinearGradient(
                                 colors: [
                                   theme.colorScheme.primary,
-                                  theme.colorScheme.tertiary,
+                                  Color.lerp(
+                                        theme.colorScheme.primary,
+                                        theme.colorScheme.tertiary,
+                                        progress,
+                                      ) ??
+                                      theme.colorScheme.tertiary,
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(
@@ -158,7 +163,13 @@ class _SeekBarState extends State<SeekBar> {
                                 width: thumbRadius * 2,
                                 height: thumbRadius * 2,
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.tertiary,
+                                  color:
+                                      Color.lerp(
+                                        theme.colorScheme.primary,
+                                        theme.colorScheme.tertiary,
+                                        progress,
+                                      ) ??
+                                      theme.colorScheme.tertiary,
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
