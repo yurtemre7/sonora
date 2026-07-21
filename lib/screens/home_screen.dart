@@ -11,6 +11,7 @@ import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
 import 'package:sonora/widgets/song_tile.dart';
@@ -1058,39 +1059,15 @@ class _HomeScreenState extends State<HomeScreen>
                                       itemCount: filteredArtists.length,
                                       itemBuilder: (context, index) {
                                         var artist = filteredArtists[index];
-                                        var firstSong = artist.songs.first;
 
                                         return Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             ListTile(
-                                              leading: Container(
-                                                width: 48,
-                                                height: 48,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.black
-                                                          .withValues(
-                                                            alpha: 0.15,
-                                                          ),
-                                                      blurRadius: 6,
-                                                      offset: const Offset(
-                                                        0,
-                                                        3,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: ClipOval(
-                                                  child: AlbumArt(
-                                                    artworkPath:
-                                                        firstSong.artworkPath,
-                                                    size: 48,
-                                                    borderRadius: 0,
-                                                  ),
-                                                ),
+                                              leading: ArtistAvatar(
+                                                artist: artist,
+                                                radius: 24,
+                                                iconSize: 28,
                                               ),
                                               title: Text(
                                                 artist.name,

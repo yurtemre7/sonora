@@ -6,6 +6,7 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -113,10 +114,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                CircleAvatar(
+                                ArtistAvatar(
+                                  artist: artist,
                                   radius: 36,
-                                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                                  child: Icon(Icons.person_rounded, size: 36, color: theme.colorScheme.onSurfaceVariant),
                                 ),
                                 const SizedBox(height: 8),
                                 SizedBox(

@@ -8,6 +8,7 @@ import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
+import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
 class ArtistDetailScreen extends StatelessWidget {
@@ -62,26 +63,10 @@ class ArtistDetailScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 40),
-                        Container(
-                          width: 140,
-                          height: 140,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child: AlbumArt(
-                              artworkPath: imagePath,
-                              size: 140,
-                              borderRadius: 0,
-                            ),
-                          ),
+                        ArtistAvatar(
+                          artist: artist,
+                          radius: 70,
+                          iconSize: 80,
                         ),
                         const SizedBox(height: 16),
                         Padding(
