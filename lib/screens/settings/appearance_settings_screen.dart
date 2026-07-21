@@ -188,6 +188,67 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       onChanged: (val) =>
                           settingsProvider.setShowVisualizer(val),
                     ),
+                    const Divider(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0,
+                        vertical: 8.0,
+                      ),
+                      child: Text(
+                        'Personalization',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.wb_sunny_rounded),
+                      title: const Text('Use Greeting Title'),
+                      subtitle: const Text('Show a time-based greeting on the home screen instead of the app name'),
+                      value: settingsProvider.useGreetingTitle,
+                      onChanged: (val) {
+                        settingsProvider.setUseGreetingTitle(val);
+                      },
+                    ),
+                    if (settingsProvider.useGreetingTitle)
+                      ListTile(
+                        leading: const Icon(Icons.badge_rounded),
+                        title: const Text('Your Name'),
+                        subtitle: Text(settingsProvider.userName),
+                        onTap: () async {
+                          var controller = TextEditingController(text: settingsProvider.userName);
+                          var newName = await showDialog<String>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Enter Your Name'),
+                              content: TextField(
+                                controller: controller,
+                                autofocus: true,
+                                textCapitalization: TextCapitalization.words,
+                                decoration: const InputDecoration(
+                                  hintText: 'Name',
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Cancel'),
+                                ),
+                                FilledButton(
+                                  onPressed: () {
+                                    var text = controller.text.trim();
+                                    Navigator.pop(context, text.isEmpty ? 'User' : text);
+                                  },
+                                  child: const Text('Save'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (newName != null) {
+                            settingsProvider.setUserName(newName);
+                          }
+                        },
+                      ),
                   ],
                 );
               },
@@ -198,3 +259,4 @@ class AppearanceSettingsScreen extends StatelessWidget {
     );
   }
 }
+
