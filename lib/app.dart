@@ -199,7 +199,6 @@ class _SonoraAppState extends State<SonoraApp> {
 
     // Load sort preferences before HomeScreen mounts so the first render
     // uses the saved order — avoids a visible sort flash.
-    await _playerProvider.loadSortSettings();
 
     // Check if sync warning banner should be displayed
     var showSyncPrompt = false;
@@ -249,8 +248,6 @@ class _SonoraAppState extends State<SonoraApp> {
       var updatedSongs = await scanner.scanAllSongs();
       var playlists = await scanner.getPlaylists();
 
-      await _playerProvider.loadSortSettings();
-
       if (!mounted) return;
       setState(() {
         _scanFolder = selectedFolder;
@@ -261,6 +258,7 @@ class _SonoraAppState extends State<SonoraApp> {
       _syncRouterState();
       _playerProvider.updatePlaylists(playlists);
       _playerProvider.updateSongs(updatedSongs);
+      _settingsProvider.refreshSyncStats();
 
       _scaffoldMessengerKey.currentState?.showSnackBar(
         SnackBar(

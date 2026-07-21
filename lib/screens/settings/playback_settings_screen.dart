@@ -74,7 +74,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
                         'Default duration selected when opening the sleep timer',
                       ),
                       trailing: DropdownButton<int>(
-                        value: playerProvider.sleepTimerDefaultMinutes,
+                        value: settingsProvider.sleepTimerDefaultMinutes,
                         underline: const SizedBox(),
                         items: [5, 10, 15, 20, 25, 30, 60, 120]
                             .map(
@@ -86,7 +86,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
                             .toList(),
                         onChanged: (val) {
                           if (val != null) {
-                            playerProvider.setSleepTimerDefaultMinutes(val);
+                            settingsProvider.setSleepTimerDefaultMinutes(val);
                           }
                         },
                       ),
@@ -96,7 +96,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
                       title: const Text('Default Start Page'),
                       subtitle: const Text('Page to show when the app starts'),
                       trailing: DropdownButton<int>(
-                        value: playerProvider.defaultStartPage,
+                        value: settingsProvider.defaultStartPage,
                         underline: const SizedBox(),
                         items: const [
                           DropdownMenuItem<int>(value: 0, child: Text('Songs')),
@@ -115,7 +115,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
                         ],
                         onChanged: (val) {
                           if (val != null) {
-                            playerProvider.setDefaultStartPage(val);
+                            settingsProvider.setDefaultStartPage(val);
                           }
                         },
                       ),

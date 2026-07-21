@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/widgets/theme_color_selector.dart';
 
@@ -9,10 +10,12 @@ class AppearanceSettingsScreen extends StatelessWidget {
     super.key,
     required this.themeProvider,
     required this.playerProvider,
+    required this.settingsProvider,
   });
 
   final ThemeProvider themeProvider;
   final PlayerProvider playerProvider;
+  final SettingsProvider settingsProvider;
 
   String _themeModeName(ThemeMode mode) {
     return switch (mode) {
@@ -162,9 +165,8 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       subtitle: const Text(
                         'Automatically theme the app using active album art',
                       ),
-                      value: playerProvider.useDynamicTheme,
-                      onChanged: (val) =>
-                          playerProvider.toggleDynamicTheme(val),
+                      value: settingsProvider.useDynamicTheme,
+                      onChanged: (val) => settingsProvider.setDynamicTheme(val),
                     ),
                     SwitchListTile(
                       secondary: const Icon(Icons.account_box_outlined),
@@ -172,9 +174,9 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       subtitle: const Text(
                         'Use local artist.jpg files from your music folders when available',
                       ),
-                      value: playerProvider.preferLocalArtistImages,
+                      value: settingsProvider.preferLocalArtistImages,
                       onChanged: (val) =>
-                          playerProvider.togglePreferLocalArtistImages(val),
+                          settingsProvider.setPreferLocalArtistImages(val),
                     ),
                     SwitchListTile(
                       secondary: const Icon(Icons.bar_chart_rounded),
@@ -182,8 +184,9 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       subtitle: const Text(
                         'Animate audio wave visualizer inside player screen',
                       ),
-                      value: playerProvider.showVisualizer,
-                      onChanged: (val) => playerProvider.toggleVisualizer(val),
+                      value: settingsProvider.showVisualizer,
+                      onChanged: (val) =>
+                          settingsProvider.setShowVisualizer(val),
                     ),
                   ],
                 );

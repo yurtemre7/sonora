@@ -158,6 +158,7 @@ class SonoraAppRouter {
             builder: (context, state) => AppearanceSettingsScreen(
               themeProvider: themeProvider,
               playerProvider: playerProvider,
+              settingsProvider: settingsProvider,
             ),
           ),
           GoRoute(

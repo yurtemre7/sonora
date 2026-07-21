@@ -4,6 +4,7 @@ import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/update_service.dart';
@@ -73,18 +74,18 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    _songSortBy = widget.playerProvider.songSortBy;
-    _songSortAscending = widget.playerProvider.songSortAscending;
-    _albumSortBy = widget.playerProvider.albumSortBy;
-    _albumSortAscending = widget.playerProvider.albumSortAscending;
-    _artistSortBy = widget.playerProvider.artistSortBy;
-    _artistSortAscending = widget.playerProvider.artistSortAscending;
-    _playlistSortBy = widget.playerProvider.playlistSortBy;
-    _playlistSortAscending = widget.playerProvider.playlistSortAscending;
+    _songSortBy = SettingsProvider.instance.songSortBy;
+    _songSortAscending = SettingsProvider.instance.songSortAscending;
+    _albumSortBy = SettingsProvider.instance.albumSortBy;
+    _albumSortAscending = SettingsProvider.instance.albumSortAscending;
+    _artistSortBy = SettingsProvider.instance.artistSortBy;
+    _artistSortAscending = SettingsProvider.instance.artistSortAscending;
+    _playlistSortBy = SettingsProvider.instance.playlistSortBy;
+    _playlistSortAscending = SettingsProvider.instance.playlistSortAscending;
     _tabController = TabController(
       length: 4,
       vsync: this,
-      initialIndex: widget.playerProvider.defaultStartPage,
+      initialIndex: SettingsProvider.instance.defaultStartPage,
     );
     _tabController.addListener(() {
       if (mounted) setState(() {});

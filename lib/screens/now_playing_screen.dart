@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
@@ -232,7 +233,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   ),
                 ),
               ),
-              if (widget.playerProvider.showVisualizer)
+              if (SettingsProvider.instance.showVisualizer)
                 Positioned(
                   left: 0,
                   right: 0,
@@ -275,8 +276,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
         children: [
           // Album Art / Lyrics Stack Card
           GestureDetector(
-            onTap: () => widget.playerProvider.toggleImmersiveMode(
-              !widget.playerProvider.immersiveMode,
+            onTap: () => SettingsProvider.instance.setImmersiveMode(
+              !SettingsProvider.instance.immersiveMode,
             ),
             onHorizontalDragEnd: (details) {
               if (details.primaryVelocity != null) {
@@ -297,7 +298,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeInOut,
-                  width: widget.playerProvider.immersiveMode
+                  width: SettingsProvider.instance.immersiveMode
                       ? constraints.maxWidth
                       : min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
                   decoration: BoxDecoration(
@@ -317,7 +318,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                         Positioned.fill(
                           child: AlbumArt(
                             artworkPath: song.artworkPath,
-                            size: widget.playerProvider.immersiveMode
+                            size: SettingsProvider.instance.immersiveMode
                                 ? constraints.maxWidth
                                 : min(
                                     MediaQuery.sizeOf(context).width * 0.80,
@@ -956,7 +957,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   void _showSleepTimerSheet(BuildContext context) {
     var theme = Theme.of(context);
     var selectedDuration = ValueNotifier<Duration?>(
-      Duration(minutes: widget.playerProvider.sleepTimerDefaultMinutes),
+      Duration(minutes: SettingsProvider.instance.sleepTimerDefaultMinutes),
     );
 
     showModalBottomSheet(
@@ -1119,8 +1120,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                 ),
                                 isDefault:
                                     min ==
-                                    widget
-                                        .playerProvider
+                                    SettingsProvider
+                                        .instance
                                         .sleepTimerDefaultMinutes,
                               );
                             }),

@@ -41,26 +41,6 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   var _isExtractingColors = false;
   bool get isExtractingColors => _isExtractingColors;
 
-  // Phase 3 State properties
-  var useDynamicTheme = true;
-  var dynamicThemeColor = const Color(0xFF7C4DFF);
-  var showVisualizer = false;
-  var immersiveMode = false;
-  var preferLocalArtistImages = true;
-  var sleepTimerDefaultMinutes = 5;
-
-  // Sort preferences (loaded eagerly before HomeScreen mounts)
-  var songSortBy = 'title';
-  var songSortAscending = true;
-  var albumSortBy = 'name';
-  var albumSortAscending = true;
-  var artistSortBy = 'name';
-  var artistSortAscending = true;
-  var playlistSortBy = 'name';
-  var playlistSortAscending = true;
-
-  var defaultStartPage = 0;
-
   var _volume = 1.0;
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
@@ -449,7 +429,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     cachedArtists = buildArtistGroups(
       allSongs,
       cachedAlbums,
-      preferLocalArtistImages ? MusicScanner().localArtistImages : {},
+      settingsProvider.preferLocalArtistImages
+          ? MusicScanner().localArtistImages
+          : {},
     );
     uniqueThemeCount = AppTheme.precomputeThemes(allSongs);
   }
@@ -634,96 +616,20 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> loadSettings() async {
     var prefs = SharedPreferencesAsync();
-    useDynamicTheme = await prefs.getBool('use_dynamic_theme') ?? true;
-    showVisualizer = await prefs.getBool('show_visualizer') ?? false;
-    immersiveMode = await prefs.getBool('now_playing_immersive_mode') ?? false;
-    preferLocalArtistImages =
-        await prefs.getBool('prefer_local_artist_images') ?? true;
-    sleepTimerDefaultMinutes =
-        await prefs.getInt('sleep_timer_default_minutes') ?? 5;
-    defaultStartPage = await prefs.getInt('default_start_page') ?? 0;
 
     var defaultColorVal = await prefs.getInt('default_theme_color');
     if (defaultColorVal != null) {
       defaultThemeColor = Color(defaultColorVal);
     }
 
-    if (!useDynamicTheme) {
+    if (!settingsProvider.useDynamicTheme) {
       themeColorNotifier.value = defaultThemeColor;
-      dynamicThemeColor = defaultThemeColor;
+      settingsProvider.dynamicThemeColor = defaultThemeColor;
     }
 
-    if (useDynamicTheme && currentSong != null) {
+    if (settingsProvider.useDynamicTheme && currentSong != null) {
       _extractThemeColorForSong(currentSong!);
     }
-    notifyListeners();
-  }
-
-  Future<void> loadSortSettings() async {
-    var scanner = MusicScanner();
-    var songs = await scanner.getTabSortSettings('songs');
-    var albums = await scanner.getTabSortSettings('albums');
-    var artists = await scanner.getTabSortSettings('artists');
-    var playlists = await scanner.getTabSortSettings('playlists');
-    songSortBy = songs['sortBy'] as String;
-    songSortAscending = songs['sortAscending'] as bool;
-    albumSortBy = albums['sortBy'] as String;
-    albumSortAscending = albums['sortAscending'] as bool;
-    artistSortBy = artists['sortBy'] as String;
-    artistSortAscending = artists['sortAscending'] as bool;
-    playlistSortBy = playlists['sortBy'] as String;
-    playlistSortAscending = playlists['sortAscending'] as bool;
-  }
-
-  Future<void> toggleDynamicTheme(bool enabled) async {
-    useDynamicTheme = enabled;
-    var prefs = SharedPreferencesAsync();
-    await prefs.setBool('use_dynamic_theme', enabled);
-
-    if (enabled && currentSong != null) {
-      _extractThemeColorForSong(currentSong!);
-    } else {
-      if (dynamicThemeColor != defaultThemeColor) {
-        dynamicThemeColor = defaultThemeColor;
-        themeColorNotifier.value = defaultThemeColor;
-      }
-    }
-    notifyListeners();
-  }
-
-  Future<void> toggleVisualizer(bool enabled) async {
-    showVisualizer = enabled;
-    var prefs = SharedPreferencesAsync();
-    await prefs.setBool('show_visualizer', enabled);
-    notifyListeners();
-  }
-
-  Future<void> toggleImmersiveMode(bool value) async {
-    immersiveMode = value;
-    var prefs = SharedPreferencesAsync();
-    await prefs.setBool('now_playing_immersive_mode', value);
-    notifyListeners();
-  }
-
-  Future<void> togglePreferLocalArtistImages(bool value) async {
-    preferLocalArtistImages = value;
-    var prefs = SharedPreferencesAsync();
-    await prefs.setBool('prefer_local_artist_images', value);
-    _refreshLibrarySnapshots();
-    notifyListeners();
-  }
-
-  Future<void> setSleepTimerDefaultMinutes(int minutes) async {
-    sleepTimerDefaultMinutes = minutes.clamp(1, 60);
-    var prefs = SharedPreferencesAsync();
-    await prefs.setInt('sleep_timer_default_minutes', sleepTimerDefaultMinutes);
-    notifyListeners();
-  }
-
-  Future<void> setDefaultStartPage(int index) async {
-    defaultStartPage = index;
-    var prefs = SharedPreferencesAsync();
-    await prefs.setInt('default_start_page', index);
     notifyListeners();
   }
 
@@ -734,7 +640,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await prefs.setInt('default_theme_color', color.toARGB32());
 
     // Apply immediately if not playing or dynamic theme is off
-    if (!useDynamicTheme || currentSong == null) {
+    if (!settingsProvider.useDynamicTheme || currentSong == null) {
       _applyThemeColor(color);
     } else if (currentSong?.artworkPath == null &&
         currentSong?.dominantColor == null) {
@@ -774,7 +680,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> _extractThemeColorForSong(Song song) async {
-    if (!useDynamicTheme) {
+    if (!settingsProvider.useDynamicTheme) {
       _applyThemeColor(defaultThemeColor);
       return;
     }
@@ -803,8 +709,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _applyThemeColor(Color color) {
-    if (dynamicThemeColor == color) return;
-    dynamicThemeColor = color;
+    if (settingsProvider.dynamicThemeColor == color) return;
+    settingsProvider.dynamicThemeColor = color;
     themeColorNotifier.value = color;
   }
 
