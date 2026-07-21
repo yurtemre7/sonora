@@ -573,6 +573,24 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await loadPlaylists();
   }
 
+  Future<void> renamePlaylist(String id, String newName) async {
+    var scanner = MusicScanner();
+    var list = await scanner.getPlaylists();
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == id) {
+        list[i] = Playlist(
+          id: list[i].id,
+          name: newName,
+          songIds: list[i].songIds,
+        );
+        break;
+      }
+    }
+    await scanner.savePlaylists(list);
+    playlists = list;
+    notifyListeners();
+  }
+
   Future<void> deletePlaylist(String id) async {
     var scanner = MusicScanner();
     await scanner.deletePlaylist(id);

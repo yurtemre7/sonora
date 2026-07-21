@@ -12,6 +12,7 @@ import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
+import 'package:sonora/widgets/rename_playlist_dialog.dart';
 import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/song_tile.dart';
 import 'package:sonora/widgets/update_dialog.dart';
@@ -26,6 +27,7 @@ class HomeScreen extends StatefulWidget {
     required this.onConfigureFolder,
     required this.onCreatePlaylist,
     required this.onDeletePlaylist,
+    required this.onRenamePlaylist,
     required this.onAddSongToPlaylist,
     required this.onRemoveSongFromPlaylist,
     required this.onReorderPlaylistSongs,
@@ -42,6 +44,7 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback onConfigureFolder;
   final Future<void> Function(String name) onCreatePlaylist;
   final Future<void> Function(String playlistId) onDeletePlaylist;
+  final Future<void> Function(String playlistId, String newName) onRenamePlaylist;
   final Future<void> Function(String playlistId, int songId)
   onAddSongToPlaylist;
   final Future<void> Function(String playlistId, int songId)
@@ -1222,8 +1225,44 @@ class _HomeScreenState extends State<HomeScreen>
                                                       icon: const Icon(
                                                         Icons.more_vert_rounded,
                                                       ),
+                                                      itemBuilder: (context) => [
+                                                        const PopupMenuItem(
+                                                          value: 2,
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(Icons.edit_rounded),
+                                                              SizedBox(width: 8),
+                                                              Text('Rename'),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        const PopupMenuItem(
+                                                          value: 1,
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons.delete_outline_rounded,
+                                                                color: Colors.red,
+                                                              ),
+                                                              SizedBox(width: 8),
+                                                              Text(
+                                                                'Delete',
+                                                                style: TextStyle(
+                                                                  color: Colors.red,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
                                                       onSelected: (val) async {
-                                                        if (val == 1) {
+                                                        if (val == 2) {
+                                                          RenamePlaylistDialog.show(
+                                                            context,
+                                                            playlist: playlist,
+                                                            onRename: widget.onRenamePlaylist,
+                                                          );
+                                                        } else if (val == 1) {
                                                           var confirmed =
                                                               await ConfirmDeleteDialog.show(
                                                                 context,
@@ -1258,31 +1297,6 @@ class _HomeScreenState extends State<HomeScreen>
                                                           );
                                                         }
                                                       },
-                                                      itemBuilder: (context) => [
-                                                        const PopupMenuItem(
-                                                          value: 1,
-                                                          child: Row(
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .delete_outline_rounded,
-                                                                color:
-                                                                    Colors.red,
-                                                              ),
-                                                              SizedBox(
-                                                                width: 8,
-                                                              ),
-                                                              Text(
-                                                                'Delete Playlist',
-                                                                style: TextStyle(
-                                                                  color: Colors
-                                                                      .red,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ],
                                                     ),
                                               onTap: () {
                                                 _searchFocusNode.unfocus();

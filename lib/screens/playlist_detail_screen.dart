@@ -10,6 +10,7 @@ import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
+import 'package:sonora/widgets/rename_playlist_dialog.dart';
 import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -24,6 +25,7 @@ class PlaylistDetailScreen extends StatefulWidget {
     required this.playlists,
     required this.onAddSongToPlaylist,
     this.onDeletePlaylist,
+    this.onRenamePlaylist,
   });
 
   final Playlist playlist;
@@ -36,6 +38,7 @@ class PlaylistDetailScreen extends StatefulWidget {
   final Future<void> Function(String playlistId, int songId)
   onAddSongToPlaylist;
   final Future<void> Function(String playlistId)? onDeletePlaylist;
+  final Future<void> Function(String playlistId, String newName)? onRenamePlaylist;
 
   @override
   State<PlaylistDetailScreen> createState() => _PlaylistDetailScreenState();
@@ -158,9 +161,29 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                         PopupMenuButton<int>(
                           icon: const Icon(Icons.more_vert_rounded),
                           onSelected: (val) {
-                            if (val == 1) _deletePlaylist();
+                            if (val == 2) {
+                              if (widget.onRenamePlaylist != null) {
+                                RenamePlaylistDialog.show(
+                                  context,
+                                  playlist: _playlist,
+                                  onRename: widget.onRenamePlaylist!,
+                                );
+                              }
+                            } else if (val == 1) {
+                              _deletePlaylist();
+                            }
                           },
                           itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 2,
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit_rounded),
+                                  SizedBox(width: 8),
+                                  Text('Rename Playlist'),
+                                ],
+                              ),
+                            ),
                             const PopupMenuItem(
                               value: 1,
                               child: Row(

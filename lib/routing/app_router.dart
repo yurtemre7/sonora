@@ -37,6 +37,7 @@ class SonoraAppRouter {
     required this.onRetriggerSync,
     required this.onCreatePlaylist,
     required this.onDeletePlaylist,
+    required this.onRenamePlaylist,
     required this.onAddSongToPlaylist,
     required this.onRemoveSongFromPlaylist,
     required this.onReorderPlaylistSongs,
@@ -55,6 +56,7 @@ class SonoraAppRouter {
   final Future<void> Function() onRetriggerSync;
   final Future<void> Function(String name) onCreatePlaylist;
   final Future<void> Function(String playlistId) onDeletePlaylist;
+  final Future<void> Function(String playlistId, String newName) onRenamePlaylist;
   final Future<void> Function(String playlistId, int songId)
   onAddSongToPlaylist;
   final Future<void> Function(String playlistId, int songId)
@@ -284,6 +286,7 @@ class SonoraAppRouter {
                 playlists: playerProvider.playlists,
                 onAddSongToPlaylist: onAddSongToPlaylist,
                 onDeletePlaylist: onDeletePlaylist,
+                onRenamePlaylist: onRenamePlaylist,
               );
             },
           ),

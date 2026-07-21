@@ -72,6 +72,7 @@ class _SonoraAppState extends State<SonoraApp> {
         scanFolder: _scanFolder,
         onConfigureFolder: _configureScanFolder,
         onCreatePlaylist: _onCreatePlaylist,
+        onRenamePlaylist: _onRenamePlaylist,
         onDeletePlaylist: _onDeletePlaylist,
         onAddSongToPlaylist: _onAddSongToPlaylist,
         onRemoveSongFromPlaylist: _onRemoveSongFromPlaylist,
@@ -85,6 +86,7 @@ class _SonoraAppState extends State<SonoraApp> {
       onResetApp: _resetApp,
       onRetriggerSync: _syncSongsSilently,
       onCreatePlaylist: _onCreatePlaylist,
+      onRenamePlaylist: _onRenamePlaylist,
       onDeletePlaylist: _onDeletePlaylist,
       onAddSongToPlaylist: _onAddSongToPlaylist,
       onRemoveSongFromPlaylist: _onRemoveSongFromPlaylist,
@@ -433,6 +435,11 @@ class _SonoraAppState extends State<SonoraApp> {
     var playlists = await scanner.getPlaylists();
     if (!mounted) return;
     _playerProvider.updatePlaylists(playlists);
+    _syncRouterState();
+  }
+
+  Future<void> _onRenamePlaylist(String playlistId, String newName) async {
+    await _playerProvider.renamePlaylist(playlistId, newName);
     _syncRouterState();
   }
 
