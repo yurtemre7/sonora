@@ -746,7 +746,7 @@ class _HomeScreenState extends State<HomeScreen>
                           }
                           return Text(
                             '$greeting, ${SettingsProvider.instance.userName}',
-                            style: theme.textTheme.headlineSmall?.copyWith(
+                            style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               letterSpacing: -0.5,
                               color: theme.colorScheme.primary,
