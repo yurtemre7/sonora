@@ -160,6 +160,16 @@ class AppearanceSettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     SwitchListTile(
+                      secondary: const Icon(Icons.dark_mode_outlined),
+                      title: const Text('AMOLED Pure Black'),
+                      subtitle: const Text(
+                        'Use pitch black backgrounds in dark mode instead of dark gray',
+                      ),
+                      value: settingsProvider.amoledDark,
+                      onChanged: (val) => settingsProvider.setAmoledDark(val),
+                    ),
+
+                    SwitchListTile(
                       secondary: const Icon(Icons.color_lens_outlined),
                       title: const Text('Dynamic Theme (Material You)'),
                       subtitle: const Text(

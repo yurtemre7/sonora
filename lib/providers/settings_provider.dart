@@ -9,6 +9,7 @@ class SettingsProvider extends ChangeNotifier {
   SettingsProvider._internal();
 
   var useDynamicTheme = true;
+  var amoledDark = false;
   var dynamicThemeColor = const Color(0xFF7C4DFF);
   var showVisualizer = false;
   var immersiveMode = false;
@@ -43,6 +44,7 @@ class SettingsProvider extends ChangeNotifier {
     var scanner = MusicScanner();
 
     useDynamicTheme = await prefs.getBool('use_dynamic_theme') ?? true;
+    amoledDark = await prefs.getBool('amoled_dark') ?? false;
     var colorValue = await prefs.getInt('dynamic_theme_color');
     if (colorValue != null) {
       dynamicThemeColor = Color(colorValue);
@@ -124,6 +126,13 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     var prefs = SharedPreferencesAsync();
     await prefs.setBool('filter_title_artist', value);
+  }
+
+  Future<void> setAmoledDark(bool value) async {
+    amoledDark = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('amoled_dark', value);
   }
 
   Future<void> setDynamicTheme(bool value) async {

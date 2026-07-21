@@ -512,10 +512,12 @@ class _SonoraAppState extends State<SonoraApp> {
                   theme: AppTheme.getTheme(
                     Brightness.light,
                     seedColor: activeSeedColor,
+                    amoledDark: _settingsProvider.amoledDark,
                   ),
                   darkTheme: AppTheme.getTheme(
                     Brightness.dark,
                     seedColor: activeSeedColor,
+                    amoledDark: _settingsProvider.amoledDark,
                   ),
                   themeMode: _themeProvider.themeMode,
                   debugShowCheckedModeBanner: false,

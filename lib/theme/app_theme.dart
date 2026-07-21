@@ -16,14 +16,19 @@ class AppTheme {
   static ThemeData getTheme(
     Brightness brightness, {
     Color seedColor = _seedColor,
+    bool amoledDark = false,
   }) {
     var cache = brightness == Brightness.light
         ? _lightThemeCache
         : _darkThemeCache;
+    // factor amoled into cache key by bitwise flipping or shifting if dark
     var key = seedColor.toARGB32();
+    if (brightness == Brightness.dark && amoledDark) {
+      key = key ^ 0xFFFFFFFF; // Simple way to differentiate amoled key
+    }
     return cache.putIfAbsent(
       key,
-      () => buildTheme(brightness, seedColor: seedColor),
+      () => buildTheme(brightness, seedColor: seedColor, amoledDark: amoledDark),
     );
   }
 
@@ -101,11 +106,23 @@ class AppTheme {
   static ThemeData buildTheme(
     Brightness brightness, {
     Color seedColor = _seedColor,
+    bool amoledDark = false,
   }) {
     var colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: brightness,
     );
+    
+    if (brightness == Brightness.dark && amoledDark) {
+      colorScheme = colorScheme.copyWith(
+        surface: const Color(0xFF000000),
+        surfaceContainerLowest: const Color(0xFF000000),
+        surfaceContainerLow: const Color(0xFF050505),
+        surfaceContainer: const Color(0xFF0A0A0A),
+        surfaceContainerHigh: const Color(0xFF101010),
+        surfaceContainerHighest: const Color(0xFF151515),
+      );
+    }
 
     var textTheme = _buildTextTheme(brightness, seedColor);
 
