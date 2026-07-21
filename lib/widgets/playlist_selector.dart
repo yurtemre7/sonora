@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
@@ -163,18 +165,40 @@ class _PlaylistSelectorBottomSheetState
                                                     .primaryContainer
                                                     .withValues(alpha: 0.15))
                                         : theme.colorScheme.surfaceContainerLow,
-                                    leading: Icon(
-                                      isFavorites
-                                          ? (isAlreadyIn
-                                                ? Icons.favorite_rounded
-                                                : Icons.favorite_border_rounded)
-                                          : Icons.playlist_add_rounded,
-                                      color: isAlreadyIn
-                                          ? (isFavorites
-                                                ? Colors.red
-                                                : theme.colorScheme.primary)
-                                          : null,
-                                    ),
+                                    leading:
+                                        playlist.coverImagePath != null &&
+                                            !isFavorites
+                                        ? Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              image: DecorationImage(
+                                                image: FileImage(
+                                                  File(
+                                                    playlist.coverImagePath!,
+                                                  ),
+                                                ),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          )
+                                        : Icon(
+                                            isFavorites
+                                                ? (isAlreadyIn
+                                                      ? Icons.favorite_rounded
+                                                      : Icons
+                                                            .favorite_border_rounded)
+                                                : Icons.playlist_add_rounded,
+                                            color: isAlreadyIn
+                                                ? (isFavorites
+                                                      ? Colors.red
+                                                      : theme
+                                                            .colorScheme
+                                                            .primary)
+                                                : null,
+                                          ),
                                     title: Text(
                                       playlist.name,
                                       style: theme.textTheme.bodyLarge

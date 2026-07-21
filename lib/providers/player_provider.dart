@@ -690,6 +690,15 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await loadPlaylists();
   }
 
+  Future<void> updatePlaylistCover(
+    String playlistId,
+    String? coverImagePath,
+  ) async {
+    var scanner = MusicScanner();
+    await scanner.updatePlaylistCover(playlistId, coverImagePath);
+    await loadPlaylists();
+  }
+
   Future<void> reorderPlaylistSongs(
     String playlistId,
     List<int> reorderedIds,

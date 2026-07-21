@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
@@ -93,6 +95,30 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
     await widget.onDeletePlaylist!(_playlist.id);
   }
 
+  Future<void> _pickCoverImage() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('For best results, choose a square image.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    var result = await FilePicker.pickFiles(type: FileType.image);
+    if (result != null && result.files.single.path != null) {
+      var sourceFile = File(result.files.single.path!);
+      var appDir = await getApplicationDocumentsDirectory();
+      var coversDir = Directory('${appDir.path}/playlist_covers');
+      if (!coversDir.existsSync()) {
+        coversDir.createSync(recursive: true);
+      }
+      var extension = sourceFile.path.split('.').last;
+      var newPath = '${coversDir.path}/${_playlist.id}.$extension';
+      await sourceFile.copy(newPath);
+
+      await widget.playerProvider.updatePlaylistCover(_playlist.id, newPath);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -127,14 +153,20 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
         return Scaffold(
           body: Stack(
             children: [
-              if (firstSong?.artworkPath != null)
+              if (_playlist.coverImagePath != null ||
+                  firstSong?.artworkPath != null)
                 Positioned.fill(
                   child: ImageFiltered(
                     imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                     child: Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: FileImage(File(firstSong!.artworkPath!)),
+                          image: FileImage(
+                            File(
+                              _playlist.coverImagePath ??
+                                  firstSong!.artworkPath!,
+                            ),
+                          ),
                           fit: BoxFit.cover,
                           opacity: 0.15,
                         ),
@@ -156,7 +188,9 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                         PopupMenuButton<int>(
                           icon: const Icon(Icons.more_vert_rounded),
                           onSelected: (val) {
-                            if (val == 2) {
+                            if (val == 3) {
+                              _pickCoverImage();
+                            } else if (val == 2) {
                               if (widget.onRenamePlaylist != null) {
                                 RenamePlaylistDialog.show(
                                   context,
@@ -169,6 +203,16 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                             }
                           },
                           itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 3,
+                              child: Row(
+                                children: [
+                                  Icon(Icons.image_rounded),
+                                  SizedBox(width: 8),
+                                  Text('Change Cover Image'),
+                                ],
+                              ),
+                            ),
                             const PopupMenuItem(
                               value: 2,
                               child: Row(
@@ -209,7 +253,21 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                             const SizedBox(height: 40),
                             Hero(
                               tag: 'playlist_art_${_playlist.id}',
-                              child: firstSong != null
+                              child: _playlist.coverImagePath != null
+                                  ? Container(
+                                      width: 180,
+                                      height: 180,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(24),
+                                        image: DecorationImage(
+                                          image: FileImage(
+                                            File(_playlist.coverImagePath!),
+                                          ),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    )
+                                  : firstSong != null
                                   ? AlbumArt(
                                       artworkPath: firstSong.artworkPath,
                                       size: 180,

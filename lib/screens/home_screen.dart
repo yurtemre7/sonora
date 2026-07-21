@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sonora/models/grouping.dart';
@@ -1210,35 +1212,63 @@ class _HomeScreenState extends State<HomeScreen>
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             ListTile(
-                                              leading: Container(
-                                                width: 48,
-                                                height: 48,
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  gradient: LinearGradient(
-                                                    colors: [
-                                                      theme
-                                                          .colorScheme
-                                                          .primaryContainer,
-                                                      theme
-                                                          .colorScheme
-                                                          .secondaryContainer,
-                                                    ],
-                                                    begin: Alignment.topLeft,
-                                                    end: Alignment.bottomRight,
-                                                  ),
-                                                ),
-                                                child: Icon(
-                                                  playlist.id == 'favorites'
-                                                      ? Icons.favorite_rounded
-                                                      : Icons
-                                                            .music_note_rounded,
-                                                  color: theme
-                                                      .colorScheme
-                                                      .onPrimaryContainer,
-                                                ),
-                                              ),
+                                              leading:
+                                                  playlist.coverImagePath !=
+                                                      null
+                                                  ? Container(
+                                                      width: 48,
+                                                      height: 48,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              8,
+                                                            ),
+                                                        image: DecorationImage(
+                                                          image: FileImage(
+                                                            File(
+                                                              playlist
+                                                                  .coverImagePath!,
+                                                            ),
+                                                          ),
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : Container(
+                                                      width: 48,
+                                                      height: 48,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              8,
+                                                            ),
+                                                        gradient: LinearGradient(
+                                                          colors: [
+                                                            theme
+                                                                .colorScheme
+                                                                .primaryContainer,
+                                                            theme
+                                                                .colorScheme
+                                                                .secondaryContainer,
+                                                          ],
+                                                          begin:
+                                                              Alignment.topLeft,
+                                                          end: Alignment
+                                                              .bottomRight,
+                                                        ),
+                                                      ),
+                                                      child: Icon(
+                                                        playlist.id ==
+                                                                'favorites'
+                                                            ? Icons
+                                                                  .favorite_rounded
+                                                            : Icons
+                                                                  .music_note_rounded,
+                                                        color: theme
+                                                            .colorScheme
+                                                            .onPrimaryContainer,
+                                                      ),
+                                                    ),
                                               title: Text(playlist.name),
                                               subtitle: Text(
                                                 '$songCount ${songCount == 1 ? 'song' : 'songs'}',

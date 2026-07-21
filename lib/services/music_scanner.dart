@@ -901,6 +901,27 @@ class MusicScanner {
     }
   }
 
+  /// Updates a playlist's cover image path.
+  Future<void> updatePlaylistCover(
+    String playlistId,
+    String? coverImagePath,
+  ) async {
+    var playlists = await getPlaylists();
+    for (var i = 0; i < playlists.length; i++) {
+      if (playlists[i].id == playlistId) {
+        var oldPlaylist = playlists[i];
+        playlists[i] = Playlist(
+          id: oldPlaylist.id,
+          name: oldPlaylist.name,
+          songIds: oldPlaylist.songIds,
+          coverImagePath: coverImagePath,
+        );
+        await savePlaylists(playlists);
+        break;
+      }
+    }
+  }
+
   /// Helper to sort list of songs by specified sort configurations.
   void sortSongs(List<Song> songs, String sortBy, bool sortAscending) {
     songs.sort((a, b) {
