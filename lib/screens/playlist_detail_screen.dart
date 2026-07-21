@@ -176,6 +176,11 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                           onSelected: (val) {
                             if (val == 3) {
                               _pickCoverImage();
+                            } else if (val == 4) {
+                              widget.playerProvider.updatePlaylistCover(
+                                _playlist.id,
+                                null,
+                              );
                             } else if (val == 2) {
                               if (widget.onRenamePlaylist != null) {
                                 RenamePlaylistDialog.show(
@@ -209,6 +214,17 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                 ],
                               ),
                             ),
+                            if (_playlist.coverImagePath != null)
+                              const PopupMenuItem(
+                                value: 4,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.hide_image_rounded),
+                                    SizedBox(width: 8),
+                                    Text('Remove Cover Image'),
+                                  ],
+                                ),
+                              ),
                             const PopupMenuItem(
                               value: 1,
                               child: Row(

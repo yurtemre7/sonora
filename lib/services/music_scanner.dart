@@ -77,9 +77,14 @@ class MusicScanner {
         return [];
       }
 
+      var prefs = SharedPreferencesAsync();
+      var metadataVersion = await prefs.getInt('metadata_version') ?? 0;
+
       // Offload all directory scanning, metadata comparison, and parsing to background isolate
       var isolateData = await Isolate.run<Map<String, dynamic>>(() {
-        var localCachedSongs = List<Song>.from(cachedSongs);
+        var localCachedSongs = metadataVersion < 1
+            ? <Song>[]
+            : List<Song>.from(cachedSongs);
 
         // Supports wide variety of standard audio formats
         var audioExtensions = {
@@ -271,8 +276,11 @@ class MusicScanner {
                   ? fileName.substring(0, extIndex)
                   : fileName;
 
+              // Fallback to filename parsing
               if (trackNumber == null) {
-                var match = RegExp(r'^(\d+)[ -_.]*').firstMatch(defaultTitle);
+                var match = RegExp(
+                  r'^(\d+)\s*[-_.]?\s*',
+                ).firstMatch(file.uri.pathSegments.last);
                 if (match != null) {
                   trackNumber = int.tryParse(match.group(1)!);
                 }
@@ -324,10 +332,14 @@ class MusicScanner {
           var parentDir = File(song.filePath).parent.parent.path;
 
           var lowerArtist = song.artist.toLowerCase();
+          var cleanArtist = lowerArtist
+              .split(RegExp(r'[,;/]|\sfeat\.|\sft\.', caseSensitive: false))
+              .first
+              .trim();
 
           String? findArtistImage(String path) {
             var images = localImageFiles[path];
-            if (images == null) return null;
+            if (images == null || images.isEmpty) return null;
             for (var img in images) {
               var name = img.split(Platform.pathSeparator).last.toLowerCase();
               if (name == 'artist.jpg' ||
@@ -336,12 +348,16 @@ class MusicScanner {
                   name == 'artist.jpeg') {
                 return img;
               }
-              if (name == '$lowerArtist.jpg' ||
-                  name == '$lowerArtist.png' ||
-                  name == '$lowerArtist.webp' ||
-                  name == '$lowerArtist.jpeg') {
+              if (name == '$cleanArtist.jpg' ||
+                  name == '$cleanArtist.png' ||
+                  name == '$cleanArtist.webp' ||
+                  name == '$cleanArtist.jpeg') {
                 return img;
               }
+            }
+            var dirName = path.split(Platform.pathSeparator).last.toLowerCase();
+            if (dirName == cleanArtist) {
+              return images.first;
             }
             return null;
           }
@@ -404,6 +420,7 @@ class MusicScanner {
       try {
         await _prefs.remove('postpone_sync_until');
       } catch (_) {}
+      await prefs.setInt('metadata_version', 1);
 
       sw.stop();
       var durationMs = sw.elapsedMilliseconds;
@@ -910,6 +927,17 @@ class MusicScanner {
     for (var i = 0; i < playlists.length; i++) {
       if (playlists[i].id == playlistId) {
         var oldPlaylist = playlists[i];
+
+        if (oldPlaylist.coverImagePath != null &&
+            oldPlaylist.coverImagePath != coverImagePath) {
+          try {
+            var oldFile = File(oldPlaylist.coverImagePath!);
+            if (oldFile.existsSync()) {
+              oldFile.deleteSync();
+            }
+          } catch (_) {}
+        }
+
         playlists[i] = Playlist(
           id: oldPlaylist.id,
           name: oldPlaylist.name,

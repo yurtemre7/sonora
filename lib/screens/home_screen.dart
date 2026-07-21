@@ -726,6 +726,7 @@ class _HomeScreenState extends State<HomeScreen>
         var filteredPlaylists = _getFilteredPlaylists();
 
         return Scaffold(
+          extendBody: true,
           body: NestedScrollView(
             controller: _scrollController,
             headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -1319,6 +1320,21 @@ class _HomeScreenState extends State<HomeScreen>
                                                       ],
                                                     ),
                                                   ),
+                                                  if (playlist.coverImagePath !=
+                                                      null)
+                                                    const PopupMenuItem(
+                                                      value: 4,
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons
+                                                                .hide_image_rounded,
+                                                          ),
+                                                          SizedBox(width: 8),
+                                                          Text('Remove Cover'),
+                                                        ],
+                                                      ),
+                                                    ),
                                                 ],
                                                 onSelected: (val) async {
                                                   if (val == 3) {
@@ -1377,6 +1393,12 @@ class _HomeScreenState extends State<HomeScreen>
                                                             newPath,
                                                           );
                                                     }
+                                                  } else if (val == 4) {
+                                                    await widget.playerProvider
+                                                        .updatePlaylistCover(
+                                                          playlist.id,
+                                                          null,
+                                                        );
                                                   } else if (val == 2) {
                                                     RenamePlaylistDialog.show(
                                                       context,

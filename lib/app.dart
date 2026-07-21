@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
@@ -509,29 +510,35 @@ class _SonoraAppState extends State<SonoraApp> {
             return ValueListenableBuilder<Color>(
               valueListenable: _playerProvider.themeColorNotifier,
               builder: (context, activeSeedColor, _) {
-                return MaterialApp.router(
-                  scaffoldMessengerKey: _scaffoldMessengerKey,
-                  title: 'Sonora',
-                  theme: AppTheme.getTheme(
-                    Brightness.light,
-                    seedColor: activeSeedColor,
-                    amoledDark: _settingsProvider.amoledDark,
+                return AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: const SystemUiOverlayStyle(
+                    systemNavigationBarColor: Colors.transparent,
+                    systemNavigationBarDividerColor: Colors.transparent,
                   ),
-                  darkTheme: AppTheme.getTheme(
-                    Brightness.dark,
-                    seedColor: activeSeedColor,
-                    amoledDark: _settingsProvider.amoledDark,
+                  child: MaterialApp.router(
+                    scaffoldMessengerKey: _scaffoldMessengerKey,
+                    title: 'Sonora',
+                    theme: AppTheme.getTheme(
+                      Brightness.light,
+                      seedColor: activeSeedColor,
+                      amoledDark: _settingsProvider.amoledDark,
+                    ),
+                    darkTheme: AppTheme.getTheme(
+                      Brightness.dark,
+                      seedColor: activeSeedColor,
+                      amoledDark: _settingsProvider.amoledDark,
+                    ),
+                    themeMode: _themeProvider.themeMode,
+                    debugShowCheckedModeBanner: false,
+                    builder: (context, child) {
+                      return GestureDetector(
+                        onTap: () =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
+                        child: child,
+                      );
+                    },
+                    routerConfig: _appRouter.router,
                   ),
-                  themeMode: _themeProvider.themeMode,
-                  debugShowCheckedModeBanner: false,
-                  builder: (context, child) {
-                    return GestureDetector(
-                      onTap: () =>
-                          FocusManager.instance.primaryFocus?.unfocus(),
-                      child: child,
-                    );
-                  },
-                  routerConfig: _appRouter.router,
                 );
               },
             );

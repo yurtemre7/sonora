@@ -73,7 +73,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return ListenableBuilder(
       listenable: widget.playerProvider,
       builder: (context, _) {
-        var favSongs = widget.allSongs.where((s) => s.isFavorite).toList();
+        var favSongs = widget.playerProvider.allSongs
+            .where((s) => s.isFavorite)
+            .toList();
         var favAlbums = widget.allAlbums.where((a) {
           return widget.playerProvider.favoriteAlbums.contains(
             '${a.nameLower}|||${a.artistLower}',

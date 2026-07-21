@@ -67,6 +67,9 @@ List<AlbumGroup> buildAlbumGroups(List<Song> allSongs) {
       if (trackA != trackB) {
         return trackA.compareTo(trackB);
       }
+      if (trackA == 0 && trackB == 0) {
+        return a.filePath.compareTo(b.filePath);
+      }
       return a.titleLower.compareTo(b.titleLower);
     });
 
@@ -147,6 +150,9 @@ AlbumGroup buildAlbumGroup(
     int trackB = b.trackNumber ?? 0;
     if (trackA != trackB) {
       return trackA.compareTo(trackB);
+    }
+    if (trackA == 0 && trackB == 0) {
+      return a.filePath.compareTo(b.filePath);
     }
     return a.titleLower.compareTo(b.titleLower);
   });
