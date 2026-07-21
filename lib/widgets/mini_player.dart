@@ -114,7 +114,12 @@ class MiniPlayer extends StatelessWidget {
                                       gradient: LinearGradient(
                                         colors: [
                                           theme.colorScheme.primary,
-                                          theme.colorScheme.tertiary,
+                                          Color.lerp(
+                                                theme.colorScheme.primary,
+                                                theme.colorScheme.tertiary,
+                                                progress,
+                                              ) ??
+                                              theme.colorScheme.tertiary,
                                         ],
                                       ),
                                     ),
