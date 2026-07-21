@@ -71,7 +71,7 @@ class UpdateDialog extends StatelessWidget {
         FilledButton.icon(
           onPressed: () async {
             var url = Uri.parse(updateInfo.downloadUrl);
-            await launchUrl(url, mode: LaunchMode.externalApplication);
+            await launchUrl(url);
 
             if (context.mounted) {
               Navigator.of(context).pop();

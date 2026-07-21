@@ -225,10 +225,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                       if (_pendingUpdateUrl != null) {
                         var url = Uri.parse(_pendingUpdateUrl!);
                         if (await canLaunchUrl(url)) {
-                          await launchUrl(
-                            url,
-                            mode: LaunchMode.externalApplication,
-                          );
+                          await launchUrl(url);
                         }
                         return;
                       }
@@ -353,7 +350,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
               onTap: () async {
                 var url = Uri.parse('https://github.com/yurtemre7/sonora');
                 if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                  await launchUrl(url);
                 }
               },
             ),
@@ -365,7 +362,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
               onTap: () async {
                 var url = Uri.parse('https://github.com/yurtemre7');
                 if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                  await launchUrl(url);
                 }
               },
             ),
@@ -377,7 +374,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
               onTap: () async {
                 var url = Uri.parse('https://t.me/emredev');
                 if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                  await launchUrl(url);
                 }
               },
             ),
