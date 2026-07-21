@@ -566,22 +566,6 @@ class _HomeScreenState extends State<HomeScreen>
                   onPressed: onSort,
                   tooltip: 'Sort',
                 ),
-                const SizedBox(width: 8),
-                IconButton.filledTonal(
-                  icon: const Icon(Icons.favorite_rounded),
-                  onPressed: () {
-                    unfocus();
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (_) => FavoritesScreen(
-                        playerProvider: widget.playerProvider,
-                        allSongs: widget.playerProvider.allSongs,
-                        allAlbums: widget.playerProvider.cachedAlbums,
-                        allArtists: widget.playerProvider.cachedArtists,
-                      )
-                    ));
-                  },
-                  tooltip: 'Favorites',
-                ),
               ],
             ],
           ),
@@ -748,6 +732,24 @@ class _HomeScreenState extends State<HomeScreen>
                   elevation: 0,
                   scrolledUnderElevation: 0,
                   expandedHeight: 120,
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.favorite_rounded),
+                      onPressed: () {
+                        _searchFocusNode.unfocus();
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (_) => FavoritesScreen(
+                            playerProvider: widget.playerProvider,
+                            allSongs: widget.playerProvider.allSongs,
+                            allAlbums: widget.playerProvider.cachedAlbums,
+                            allArtists: widget.playerProvider.cachedArtists,
+                          )
+                        ));
+                      },
+                      tooltip: 'Favorites',
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   flexibleSpace: FlexibleSpaceBar(
                     titlePadding: const EdgeInsets.only(left: 20, bottom: 60),
                     title: ListenableBuilder(
