@@ -506,11 +506,40 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     required VoidCallback onPressed,
   }) {
     var theme = Theme.of(context);
+
+    if (active) {
+      return Material(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return TextButton.icon(
       style: TextButton.styleFrom(
-        foregroundColor: active
-            ? theme.colorScheme.primary
-            : theme.colorScheme.secondary,
+        foregroundColor: theme.colorScheme.secondary,
         visualDensity: VisualDensity.compact,
         padding: const EdgeInsets.symmetric(horizontal: 10),
       ),
@@ -525,33 +554,34 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     var timerActive = widget.playerProvider.sleepTimerDuration != null;
 
     if (timerActive) {
-      return Container(
-        height: 32,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: GestureDetector(
+      return Material(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
           onTap: () => _showSleepTimerSheet(context),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.timer_outlined,
-                size: 18,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Stop in ${_formatDuration(widget.playerProvider.sleepTimerDuration!)}',
-                style: theme.textTheme.labelMedium?.copyWith(
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.timer_outlined,
+                  size: 18,
                   color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
                 ),
-              ),
-            ],
+                const SizedBox(width: 6),
+                Text(
+                  'Stop in ${_formatDuration(widget.playerProvider.sleepTimerDuration!)}',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
