@@ -22,6 +22,7 @@ import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/seek_bar.dart';
 import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/song_tile.dart';
+import 'package:sonora/widgets/speed_slider.dart';
 import 'package:sonora/widgets/volume_slider.dart';
 
 class NowPlayingScreen extends StatefulWidget {
@@ -39,13 +40,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     with SingleTickerProviderStateMixin {
   var _showLyrics = false;
   var _showVolume = Platform.isWindows;
+  var _showSpeed = false;
   var _viewMode = _ViewMode.player;
 
   @override
   void initState() {
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -434,6 +435,21 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 _buildTimerChip(context),
                 Tooltip(
                   message:
+                      '${widget.playerProvider.speed}x — ${_showSpeed ? "Hide" : "Show"} speed',
+                  child: _buildActionChip(
+                    icon: _showSpeed
+                        ? Icons.speed_rounded
+                        : Icons.speed_outlined,
+                    label: '${widget.playerProvider.speed}x',
+                    active: _showSpeed,
+                    onPressed: () => setState(() {
+                      _showSpeed = !_showSpeed;
+                      if (_showSpeed) _showVolume = false;
+                    }),
+                  ),
+                ),
+                Tooltip(
+                  message:
                       '${(widget.playerProvider.volume * 100).round()}% — ${_showVolume ? "Hide" : "Show"} volume',
                   child: _buildActionChip(
                     icon: _showVolume
@@ -441,7 +457,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                         : Icons.volume_up_outlined,
                     label: '${(widget.playerProvider.volume * 100).round()}%',
                     active: _showVolume,
-                    onPressed: () => setState(() => _showVolume = !_showVolume),
+                    onPressed: () => setState(() {
+                      _showVolume = !_showVolume;
+                      if (_showVolume) _showSpeed = false;
+                    }),
                   ),
                 ),
               ],
@@ -458,12 +477,19 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             isPlaying: widget.playerProvider.isPlaying,
           ),
 
-          // Volume Slider
+          // Volume / Speed Sliders
           if (_showVolume) ...[
             const SizedBox(height: 8),
             VolumeSlider(
               volume: widget.playerProvider.volume,
               onChanged: widget.playerProvider.setVolume,
+            ),
+          ],
+          if (_showSpeed) ...[
+            const SizedBox(height: 8),
+            SpeedSlider(
+              speed: widget.playerProvider.speed,
+              onChanged: widget.playerProvider.setSpeed,
             ),
           ],
 
@@ -670,7 +696,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           ),
           ...sameAlbum.map(
             (s) => SongTile(
-  hideMenu: true,
+              hideMenu: true,
               song: s,
               onTap: () => _playRelatedSong(s, allSongs),
               showDivider: true,
@@ -692,7 +718,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           ),
           ...sameArtist.map(
             (s) => SongTile(
-  hideMenu: true,
+              hideMenu: true,
               song: s,
               onTap: () => _playRelatedSong(s, allSongs),
               showDivider: true,
@@ -869,7 +895,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: SongTile(
-  hideMenu: true,
+                                    hideMenu: true,
                                     song: song,
                                     isCurrent: isCurrent,
                                     showHighlightBackground: false,

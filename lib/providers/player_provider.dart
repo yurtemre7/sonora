@@ -45,6 +45,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool get isExtractingColors => _isExtractingColors;
 
   var _volume = 1.0;
+  var _speed = 1.0;
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
   Duration? sleepTimerOriginalDuration;
@@ -79,15 +80,24 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
-  // ── Volume ────────────────────────────────────────────────────────────────
+  // ── Volume & Speed ────────────────────────────────────────────────────────
 
   double get volume => _volume;
+  double get speed => _speed;
 
   Future<void> setVolume(double value) async {
     _volume = (value.clamp(0.0, 1.0) * 100).round() / 100;
     await audioHandler.player.setVolume(_volume);
     var prefs = SharedPreferencesAsync();
     await prefs.setDouble('volume', _volume);
+    notifyListeners();
+  }
+
+  Future<void> setSpeed(double value) async {
+    _speed = value.clamp(0.5, 2.0);
+    await audioHandler.setSpeed(_speed);
+    var prefs = SharedPreferencesAsync();
+    await prefs.setDouble('speed', _speed);
     notifyListeners();
   }
 
@@ -667,6 +677,18 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     var defaultColorVal = await prefs.getInt('default_theme_color');
     if (defaultColorVal != null) {
       defaultThemeColor = Color(defaultColorVal);
+    }
+
+    var savedVolume = await prefs.getDouble('volume');
+    if (savedVolume != null) {
+      _volume = savedVolume;
+      await audioHandler.player.setVolume(_volume);
+    }
+
+    var savedSpeed = await prefs.getDouble('speed');
+    if (savedSpeed != null) {
+      _speed = savedSpeed;
+      await audioHandler.setSpeed(_speed);
     }
 
     if (!settingsProvider.useDynamicTheme) {

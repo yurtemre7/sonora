@@ -485,6 +485,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   Future<void> pause() => player.pause();
 
   @override
+  Future<void> setSpeed(double speed) => player.setSpeed(speed);
+
+  @override
   Future<void> stop() async {
     await player.stop();
     _rawPlaylist = [];
