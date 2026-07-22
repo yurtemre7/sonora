@@ -13,6 +13,7 @@ All notable changes to the Sonora music player project are documented in this fi
 ### Fixed
 * Restore miniplayer padding in privacy and formatting settings screens
 * Resolve settings persistence and UI safe area issues
+* Implement custom draggable scrollbar to resolve transition assertion crashes
 ### Changed
 * Perf: Downscale playlist cover images to prevent memory bloat
 * Perf: Downscale album and artist images to prevent memory bloat and scrolling lag

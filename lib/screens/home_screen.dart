@@ -17,6 +17,7 @@ import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
+import 'package:sonora/widgets/custom_scrollbar.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
 import 'package:sonora/widgets/song_tile.dart';
 import 'package:sonora/widgets/update_dialog.dart';
@@ -954,7 +955,8 @@ class _HomeScreenState extends State<HomeScreen>
                   filteredPlaylists: filteredPlaylists,
                 ),
                 Expanded(
-                  child: PageTransitionSwitcher(
+                  child: CustomScrollbar(
+                    child: PageTransitionSwitcher(
                     reverse:
                         _tabController.index < _tabController.previousIndex,
                     transitionBuilder: (child, animation, secondaryAnimation) {
@@ -996,8 +998,7 @@ class _HomeScreenState extends State<HomeScreen>
                                           ),
                                     ),
                                   )
-                                : Scrollbar(
-                                    child: GridView.builder(
+                                : GridView.builder(
                                       key: const PageStorageKey<String>(
                                         'albums_grid',
                                       ),
@@ -1086,8 +1087,7 @@ class _HomeScreenState extends State<HomeScreen>
                                           ),
                                         );
                                       },
-                                    ),
-                                  );
+                                    );
 
                           case 2:
                             // Tab 3: Artists.
@@ -1115,8 +1115,7 @@ class _HomeScreenState extends State<HomeScreen>
                                           ),
                                     ),
                                   )
-                                : Scrollbar(
-                                    child: ListView.builder(
+                                : ListView.builder(
                                       key: const PageStorageKey<String>(
                                         'artists_list',
                                       ),
@@ -1178,8 +1177,7 @@ class _HomeScreenState extends State<HomeScreen>
                                           ],
                                         );
                                       },
-                                    ),
-                                  );
+                                    );
 
                           case 3:
                             // Tab 4: Playlists.
@@ -1251,8 +1249,7 @@ class _HomeScreenState extends State<HomeScreen>
                                           ),
                                     ),
                                   )
-                                : Scrollbar(
-                                    child: ListView.builder(
+                                : ListView.builder(
                                       key: const PageStorageKey<String>(
                                         'playlists_list',
                                       ),
@@ -1527,8 +1524,7 @@ class _HomeScreenState extends State<HomeScreen>
                                           ],
                                         );
                                       },
-                                    ),
-                                  );
+                                    );
 
                           default:
                             // Tab 1: Songs
@@ -1632,8 +1628,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                   var currentSong = widget
                                                       .playerProvider
                                                       .currentSong;
-                                                  return Scrollbar(
-                                                    child: ListView.builder(
+                                                  return ListView.builder(
                                                       key:
                                                           const PageStorageKey<
                                                             String
@@ -1677,8 +1672,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                           },
                                                         );
                                                       },
-                                                    ),
-                                                  );
+                                                    );
                                                 },
                                               ),
                                       ),
@@ -1688,6 +1682,7 @@ class _HomeScreenState extends State<HomeScreen>
                       },
                     ),
                   ),
+                ),
                 ),
               ],
             ),
