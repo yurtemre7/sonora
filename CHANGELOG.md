@@ -2,6 +2,14 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.9.2] - 2026-07-22
+### Fixed
+* Restore miniplayer padding in privacy and formatting settings screens
+* Resolve settings persistence and UI safe area issues
+### Changed
+* Perf: Downscale playlist cover images to prevent memory bloat
+* Perf: Downscale album and artist images to prevent memory bloat and scrolling lag
+
 ## [1.9.1] - 2026-07-21
 ### Fixed
 * Resolve navigation bar transparency, sorting, and playlist cover deletion
