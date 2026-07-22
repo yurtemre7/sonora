@@ -958,17 +958,12 @@ class _HomeScreenState extends State<HomeScreen>
                     reverse:
                         _tabController.index < _tabController.previousIndex,
                     transitionBuilder: (child, animation, secondaryAnimation) {
-                      var isIncoming =
-                          (child.key as ValueKey<int>?)?.value ==
-                          _tabController.index;
                       return SharedAxisTransition(
                         fillColor: Colors.transparent,
                         animation: animation,
                         secondaryAnimation: secondaryAnimation,
                         transitionType: SharedAxisTransitionType.horizontal,
-                        child: isIncoming
-                            ? child
-                            : PrimaryScrollController.none(child: child),
+                        child: child,
                       );
                     },
                     child: Builder(
