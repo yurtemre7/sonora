@@ -16,7 +16,12 @@ class PrivacySettingsScreen extends StatelessWidget {
         scrolledUnderElevation: 0,
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 8,
+          bottom: 8 + MediaQuery.paddingOf(context).bottom,
+        ),
         children: [
           _buildCard(
             theme,

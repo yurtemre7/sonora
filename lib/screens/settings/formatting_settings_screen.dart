@@ -32,7 +32,10 @@ class FormattingSettingsScreen extends StatelessWidget {
           var displayTitle = fakeSong.displayTitle;
 
           return ListView(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            padding: EdgeInsets.only(
+              top: 16.0,
+              bottom: 16.0 + MediaQuery.paddingOf(context).bottom,
+            ),
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),

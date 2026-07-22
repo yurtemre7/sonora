@@ -382,7 +382,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               context.push(AppRoutes.settingsInfo);
             },
           ),
-          const SizedBox(height: 32),
         ],
       ),
     );
