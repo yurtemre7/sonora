@@ -328,7 +328,7 @@ class SonoraAppRouter {
   }
 }
 
-class _ShellMiniPlayer extends StatelessWidget {
+class _ShellMiniPlayer extends StatefulWidget {
   const _ShellMiniPlayer({
     required this.playerProvider,
     required this.currentSong,
@@ -340,26 +340,41 @@ class _ShellMiniPlayer extends StatelessWidget {
   final VoidCallback onOpenNowPlaying;
 
   @override
+  State<_ShellMiniPlayer> createState() => _ShellMiniPlayerState();
+}
+
+class _ShellMiniPlayerState extends State<_ShellMiniPlayer> {
+  var _lastIndex = -1;
+  var _reverse = false;
+
+  @override
   Widget build(BuildContext context) {
+    var currentIndex = widget.playerProvider.currentIndex;
+    if (currentIndex != _lastIndex && _lastIndex != -1) {
+      _reverse = currentIndex < _lastIndex;
+    }
+    _lastIndex = currentIndex;
+
     return StreamBuilder<Duration>(
-      stream: playerProvider.audioHandler.player.positionStream,
+      stream: widget.playerProvider.audioHandler.player.positionStream,
       builder: (context, snapshot) {
         var position = snapshot.data ?? Duration.zero;
-        var totalMs = currentSong.duration.inMilliseconds;
+        var totalMs = widget.currentSong.duration.inMilliseconds;
         var progress = totalMs > 0 ? position.inMilliseconds / totalMs : 0.0;
 
         return MiniPlayer(
-          currentSong: currentSong,
-          isPlaying: playerProvider.audioHandler.player.playing,
-          isCompleted: playerProvider.isCompleted,
+          reverse: _reverse,
+          currentSong: widget.currentSong,
+          isPlaying: widget.playerProvider.audioHandler.player.playing,
+          isCompleted: widget.playerProvider.isCompleted,
           progress: progress,
-          onTap: onOpenNowPlaying,
-          onPlayPause: playerProvider.playPause,
-          onNext: playerProvider.next,
-          onSwipeUp: onOpenNowPlaying,
-          onSwipeDown: playerProvider.stop,
-          onSwipeLeft: playerProvider.previous,
-          onSwipeRight: playerProvider.next,
+          onTap: widget.onOpenNowPlaying,
+          onPlayPause: widget.playerProvider.playPause,
+          onNext: widget.playerProvider.next,
+          onSwipeUp: widget.onOpenNowPlaying,
+          onSwipeDown: widget.playerProvider.stop,
+          onSwipeLeft: widget.playerProvider.previous,
+          onSwipeRight: widget.playerProvider.next,
         );
       },
     );

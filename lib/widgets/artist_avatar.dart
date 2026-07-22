@@ -19,7 +19,9 @@ class ArtistAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     var hasLocalImage = artist.localImagePath != null;
-    var fallbackArtworkPath = artist.songs.isNotEmpty ? artist.songs.first.artworkPath : null;
+    var fallbackArtworkPath = artist.songs.isNotEmpty
+        ? artist.songs.first.artworkPath
+        : null;
     var hasFallback = fallbackArtworkPath != null;
 
     return Container(
@@ -43,22 +45,22 @@ class ArtistAvatar extends StatelessWidget {
               ),
             )
           : hasFallback
-              ? ClipOval(
-                  child: AlbumArt(
-                    artworkPath: fallbackArtworkPath,
-                    size: radius * 2,
-                    borderRadius: 0,
-                  ),
-                )
-              : CircleAvatar(
-                  radius: radius,
-                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                  child: Icon(
-                    Icons.person_rounded,
-                    size: iconSize ?? radius,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
+          ? ClipOval(
+              child: AlbumArt(
+                artworkPath: fallbackArtworkPath,
+                size: radius * 2,
+                borderRadius: 0,
+              ),
+            )
+          : CircleAvatar(
+              radius: radius,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              child: Icon(
+                Icons.person_rounded,
+                size: iconSize ?? radius,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
     );
   }
 }

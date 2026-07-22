@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/widgets/album_art.dart';
@@ -16,6 +17,7 @@ class MiniPlayer extends StatelessWidget {
     this.onSwipeDown,
     this.onSwipeLeft,
     this.onSwipeRight,
+    this.reverse = false,
   });
 
   final Song currentSong;
@@ -29,6 +31,7 @@ class MiniPlayer extends StatelessWidget {
   final VoidCallback? onSwipeDown;
   final VoidCallback? onSwipeLeft;
   final VoidCallback? onSwipeRight;
+  final bool reverse;
 
   @override
   Widget build(BuildContext context) {
@@ -140,38 +143,65 @@ class MiniPlayer extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          // Album art thumbnail
-                          AlbumArt(
-                            artworkPath: currentSong.artworkPath,
-                            size: 44,
-                            borderRadius: 8,
-                          ),
-                          const SizedBox(width: 14),
-
-                          // Title & Artist
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  currentSong.displayTitle,
-                                  style: theme.textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.w600,
+                            child: PageTransitionSwitcher(
+                              reverse: reverse,
+                              transitionBuilder:
+                                  (child, animation, secondaryAnimation) {
+                                    return SharedAxisTransition(
+                                      fillColor: Colors.transparent,
+                                      animation: animation,
+                                      secondaryAnimation: secondaryAnimation,
+                                      transitionType:
+                                          SharedAxisTransitionType.horizontal,
+                                      child: child,
+                                    );
+                                  },
+                              child: Row(
+                                key: ValueKey(currentSong.id),
+                                children: [
+                                  // Album art thumbnail
+                                  AlbumArt(
+                                    artworkPath: currentSong.artworkPath,
+                                    size: 44,
+                                    borderRadius: 8,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  currentSong.artist,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
+                                  const SizedBox(width: 14),
+
+                                  // Title & Artist
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          currentSong.displayTitle,
+                                          style: theme.textTheme.bodyLarge
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          currentSong.artist,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
 

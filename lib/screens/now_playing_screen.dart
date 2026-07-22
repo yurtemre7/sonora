@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sonora/models/grouping.dart';
@@ -41,6 +42,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   var _showLyrics = false;
   var _showVolume = Platform.isWindows;
   var _viewMode = _ViewMode.player;
+  var _lastIndex = -1;
+  var _reverse = false;
 
   @override
   void initState() {
@@ -55,6 +58,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       listenable: widget.playerProvider,
       builder: (context, _) {
         var song = widget.playerProvider.currentSong;
+        var currentIndex = widget.playerProvider.currentIndex;
+        if (currentIndex != _lastIndex && _lastIndex != -1) {
+          _reverse = currentIndex < _lastIndex;
+        }
+        _lastIndex = currentIndex;
 
         if (song == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -298,15 +306,30 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                     child: Stack(
                       children: [
                         Positioned.fill(
-                          child: AlbumArt(
-                            artworkPath: song.artworkPath,
-                            size: SettingsProvider.instance.immersiveMode
-                                ? constraints.maxWidth
-                                : min(
-                                    MediaQuery.sizeOf(context).width * 0.80,
-                                    300.0,
-                                  ),
-                            borderRadius: 28,
+                          child: PageTransitionSwitcher(
+                            reverse: _reverse,
+                            transitionBuilder:
+                                (child, animation, secondaryAnimation) {
+                                  return SharedAxisTransition(
+                                    fillColor: Colors.transparent,
+                                    animation: animation,
+                                    secondaryAnimation: secondaryAnimation,
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                    child: child,
+                                  );
+                                },
+                            child: AlbumArt(
+                              key: ValueKey(song.id),
+                              artworkPath: song.artworkPath,
+                              size: SettingsProvider.instance.immersiveMode
+                                  ? constraints.maxWidth
+                                  : min(
+                                      MediaQuery.sizeOf(context).width * 0.80,
+                                      300.0,
+                                    ),
+                              borderRadius: 28,
+                            ),
                           ),
                         ),
                         if (_showLyrics)
@@ -342,6 +365,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             children: [
               Expanded(
                 child: Column(
+                  key: ValueKey(song.id),
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     MarqueeText(
