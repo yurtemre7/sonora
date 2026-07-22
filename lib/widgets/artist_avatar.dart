@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:sonora/models/grouping.dart';
+import 'package:sonora/widgets/album_art.dart';
 
 class ArtistAvatar extends StatelessWidget {
   final ArtistGroup artist;
@@ -18,6 +19,8 @@ class ArtistAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     var hasLocalImage = artist.localImagePath != null;
+    var fallbackArtworkPath = artist.songs.isNotEmpty ? artist.songs.first.artworkPath : null;
+    var hasFallback = fallbackArtworkPath != null;
 
     return Container(
       decoration: BoxDecoration(
@@ -30,20 +33,32 @@ class ArtistAvatar extends StatelessWidget {
           ),
         ],
       ),
-      child: CircleAvatar(
-        radius: radius,
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-        backgroundImage: hasLocalImage
-            ? FileImage(File(artist.localImagePath!))
-            : null,
-        child: hasLocalImage
-            ? null
-            : Icon(
-                Icons.person_rounded,
-                size: iconSize ?? radius,
-                color: theme.colorScheme.onSurfaceVariant,
+      child: hasLocalImage
+          ? CircleAvatar(
+              radius: radius,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              backgroundImage: ResizeImage(
+                FileImage(File(artist.localImagePath!)),
+                width: (radius * 3).toInt(),
               ),
-      ),
+            )
+          : hasFallback
+              ? ClipOval(
+                  child: AlbumArt(
+                    artworkPath: fallbackArtworkPath,
+                    size: radius * 2,
+                    borderRadius: 0,
+                  ),
+                )
+              : CircleAvatar(
+                  radius: radius,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  child: Icon(
+                    Icons.person_rounded,
+                    size: iconSize ?? radius,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
     );
   }
 }
