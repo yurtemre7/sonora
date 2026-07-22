@@ -47,7 +47,8 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                 ),
                 const SizedBox(height: 16),
                 Expanded(
-                  child: ListView(
+                  child: Scrollbar(
+                    child: ListView(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 8,
@@ -146,6 +147,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                       const SizedBox(height: 16),
                     ],
                   ),
+                ),
                 ),
               ],
             ),

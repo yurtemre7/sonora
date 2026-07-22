@@ -62,8 +62,12 @@ class _PlaylistSelectorBottomSheetState
       builder: (context, _) {
         var playlists = widget.playerProvider.playlists;
 
-        return Container(
-          decoration: BoxDecoration(
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.6,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
@@ -131,9 +135,9 @@ class _PlaylistSelectorBottomSheetState
                     )
                   else
                     Flexible(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
+                      child: Scrollbar(
+                        child: ListView.builder(
+                          shrinkWrap: true,
                         itemCount: playlists.length,
                         itemBuilder: (_, index) {
                           var playlist = playlists[index];
@@ -274,13 +278,14 @@ class _PlaylistSelectorBottomSheetState
                             ],
                           );
                         },
+                        ),
                       ),
                     ),
                 ],
               ),
             ),
           ),
-        );
+        ));
       },
     );
   }
