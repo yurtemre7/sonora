@@ -262,8 +262,11 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(24),
                                         image: DecorationImage(
-                                          image: FileImage(
-                                            File(_playlist.coverImagePath!),
+                                          image: ResizeImage(
+                                            FileImage(
+                                              File(_playlist.coverImagePath!),
+                                            ),
+                                            width: 540,
                                           ),
                                           fit: BoxFit.cover,
                                         ),

@@ -166,10 +166,13 @@ class _PlaylistSelectorBottomSheetState
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               image: DecorationImage(
-                                                image: FileImage(
-                                                  File(
-                                                    playlist.coverImagePath!,
+                                                image: ResizeImage(
+                                                  FileImage(
+                                                    File(
+                                                      playlist.coverImagePath!,
+                                                    ),
                                                   ),
+                                                  width: 120,
                                                 ),
                                                 fit: BoxFit.cover,
                                               ),

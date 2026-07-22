@@ -1241,11 +1241,14 @@ class _HomeScreenState extends State<HomeScreen>
                                                             8,
                                                           ),
                                                       image: DecorationImage(
-                                                        image: FileImage(
-                                                          File(
-                                                            playlist
-                                                                .coverImagePath!,
+                                                        image: ResizeImage(
+                                                          FileImage(
+                                                            File(
+                                                              playlist
+                                                                  .coverImagePath!,
+                                                            ),
                                                           ),
+                                                          width: 144,
                                                         ),
                                                         fit: BoxFit.cover,
                                                       ),
