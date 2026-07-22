@@ -49,105 +49,109 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                 Expanded(
                   child: Scrollbar(
                     child: ListView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    children: [
-                      _buildInfoGroup(
-                        theme: theme,
-                        title: 'Metadata',
-                        children: [
-                          _buildInfoRow('Title', song.displayTitle, theme),
-                          _buildInfoRow('Artist', song.artist, theme),
-                          _buildInfoRow('Album', song.album, theme),
-                          if (song.trackNumber != null)
-                            _buildInfoRow(
-                              'Track',
-                              song.trackNumber.toString(),
-                              theme,
-                            ),
-                          if (song.genre != null)
-                            _buildInfoRow('Genre', song.genre!, theme),
-                          if (song.year != null)
-                            _buildInfoRow('Year', song.year.toString(), theme),
-                          _buildInfoRow(
-                            'Duration',
-                            song.durationFormatted,
-                            theme,
-                            isLast: true,
-                          ),
-                        ],
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
                       ),
-                      _buildInfoGroup(
-                        theme: theme,
-                        title: 'File Info',
-                        children: [
-                          _buildInfoRow(
-                            'File Path',
-                            song.filePath,
-                            theme,
-                            isPath: true,
-                          ),
-                          if (song.fileSize != null)
-                            _buildInfoRow(
-                              'File Size',
-                              _formatFileSize(song.fileSize!),
-                              theme,
-                            ),
-                          if (song.lastModifiedMs != null)
-                            _buildInfoRow(
-                              'Date Modified',
-                              _formatDate(
-                                DateTime.fromMillisecondsSinceEpoch(
-                                  song.lastModifiedMs!,
-                                ),
+                      children: [
+                        _buildInfoGroup(
+                          theme: theme,
+                          title: 'Metadata',
+                          children: [
+                            _buildInfoRow('Title', song.displayTitle, theme),
+                            _buildInfoRow('Artist', song.artist, theme),
+                            _buildInfoRow('Album', song.album, theme),
+                            if (song.trackNumber != null)
+                              _buildInfoRow(
+                                'Track',
+                                song.trackNumber.toString(),
+                                theme,
                               ),
-                              theme,
-                            ),
-                          if (stat != null && stat.changed != stat.modified)
+                            if (song.genre != null)
+                              _buildInfoRow('Genre', song.genre!, theme),
+                            if (song.year != null)
+                              _buildInfoRow(
+                                'Year',
+                                song.year.toString(),
+                                theme,
+                              ),
                             _buildInfoRow(
-                              'Date Created',
-                              _formatDate(stat.changed),
-                              theme,
-                              isLast: song.format == null,
-                            ),
-                          if (song.format == null)
-                            const SizedBox.shrink()
-                          else
-                            _buildInfoRow(
-                              'Format',
-                              song.format!.toUpperCase(),
+                              'Duration',
+                              song.durationFormatted,
                               theme,
                               isLast: true,
                             ),
-                        ],
-                      ),
-                      if (song.bitrate != null || song.samplerate != null)
+                          ],
+                        ),
                         _buildInfoGroup(
                           theme: theme,
-                          title: 'Audio Properties',
+                          title: 'File Info',
                           children: [
-                            if (song.bitrate != null)
+                            _buildInfoRow(
+                              'File Path',
+                              song.filePath,
+                              theme,
+                              isPath: true,
+                            ),
+                            if (song.fileSize != null)
                               _buildInfoRow(
-                                'Bitrate',
-                                '${song.bitrate} kbps',
+                                'File Size',
+                                _formatFileSize(song.fileSize!),
                                 theme,
-                                isLast: song.samplerate == null,
                               ),
-                            if (song.samplerate != null)
+                            if (song.lastModifiedMs != null)
                               _buildInfoRow(
-                                'Sample Rate',
-                                '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
+                                'Date Modified',
+                                _formatDate(
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                    song.lastModifiedMs!,
+                                  ),
+                                ),
+                                theme,
+                              ),
+                            if (stat != null && stat.changed != stat.modified)
+                              _buildInfoRow(
+                                'Date Created',
+                                _formatDate(stat.changed),
+                                theme,
+                                isLast: song.format == null,
+                              ),
+                            if (song.format == null)
+                              const SizedBox.shrink()
+                            else
+                              _buildInfoRow(
+                                'Format',
+                                song.format!.toUpperCase(),
                                 theme,
                                 isLast: true,
                               ),
                           ],
                         ),
-                      const SizedBox(height: 16),
-                    ],
+                        if (song.bitrate != null || song.samplerate != null)
+                          _buildInfoGroup(
+                            theme: theme,
+                            title: 'Audio Properties',
+                            children: [
+                              if (song.bitrate != null)
+                                _buildInfoRow(
+                                  'Bitrate',
+                                  '${song.bitrate} kbps',
+                                  theme,
+                                  isLast: song.samplerate == null,
+                                ),
+                              if (song.samplerate != null)
+                                _buildInfoRow(
+                                  'Sample Rate',
+                                  '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
+                                  theme,
+                                  isLast: true,
+                                ),
+                            ],
+                          ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
-                ),
                 ),
               ],
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/widgets/preset_card.dart';
 import 'package:sonora/widgets/speed_slider.dart';
 
 void showMfxBottomSheet(BuildContext context, PlayerProvider playerProvider) {
@@ -11,24 +12,88 @@ void showMfxBottomSheet(BuildContext context, PlayerProvider playerProvider) {
   );
 }
 
-class _MfxBottomSheet extends StatelessWidget {
+class _MfxBottomSheet extends StatefulWidget {
   const _MfxBottomSheet({required this.playerProvider});
 
   final PlayerProvider playerProvider;
+
+  @override
+  State<_MfxBottomSheet> createState() => _MfxBottomSheetState();
+}
+
+class _MfxBottomSheetState extends State<_MfxBottomSheet> {
+  late ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      int selectedIndex = _getSelectedIndex(widget.playerProvider);
+      _scrollToIndex(selectedIndex, animate: false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  int _getSelectedIndex(PlayerProvider player) {
+    if (player.isSuperSlowed) return 0;
+    if (player.isSlowed) return 1;
+    if (player.isSpedUp) return 3;
+    if (player.isNightcore) return 4;
+    if (player.isSuperSpedUp) return 5;
+    return 2; // Normal
+  }
+
+  void _scrollToIndex(int index, {bool animate = true}) {
+    if (!_scrollController.hasClients) return;
+
+    var screenWidth = MediaQuery.of(context).size.width;
+    var itemWidth = 140.0;
+    var itemMargin = 12.0;
+    var horizontalPadding = 16.0;
+
+    var itemCenterOffset =
+        horizontalPadding +
+        (index * (itemWidth + itemMargin)) +
+        (itemWidth / 2);
+    var targetOffset = itemCenterOffset - (screenWidth / 2);
+
+    var clampedOffset = targetOffset.clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
+
+    if (animate) {
+      _scrollController.animateTo(
+        clampedOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      _scrollController.jumpTo(clampedOffset);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
 
     return ListenableBuilder(
-      listenable: playerProvider,
+      listenable: widget.playerProvider,
       builder: (context, _) {
-        var player = playerProvider;
+        var player = widget.playerProvider;
         return LayoutBuilder(
           builder: (context, constraints) {
             return ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: constraints.maxHeight * 0.5,
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
               ),
               child: Container(
                 decoration: BoxDecoration(
@@ -37,7 +102,8 @@ class _MfxBottomSheet extends StatelessWidget {
                     top: Radius.circular(24),
                   ),
                 ),
-                child: SafeArea(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -95,30 +161,129 @@ class _MfxBottomSheet extends StatelessWidget {
                         child: ListView(
                           padding: const EdgeInsets.only(bottom: 24),
                           children: [
-                            SwitchListTile(
-                              title: const Text('Slowed'),
-                              subtitle: const Text('0.85x Speed and Pitch'),
-                              secondary: Icon(
-                                Icons.fast_rewind_rounded,
-                                color: player.isSlowed
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurfaceVariant,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
                               ),
-                              value: player.isSlowed,
-                              onChanged: player.setSlowed,
-                            ),
-                            SwitchListTile(
-                              title: const Text('Sped Up'),
-                              subtitle: const Text('1.25x Speed and Pitch'),
-                              secondary: Icon(
-                                Icons.fast_forward_rounded,
-                                color: player.isSpedUp
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurfaceVariant,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Preset Speed & Pitch',
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  if (player.isSuperSlowed ||
+                                      player.isSlowed ||
+                                      player.isSpedUp ||
+                                      player.isSuperSpedUp ||
+                                      player.isNightcore)
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      onPressed: () {
+                                        player.resetAllMfx();
+                                        _scrollToIndex(2);
+                                      },
+                                      child: const Text('Reset'),
+                                    )
+                                  else
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      onPressed: null,
+                                      child: const Text(''),
+                                    ),
+                                ],
                               ),
-                              value: player.isSpedUp,
-                              onChanged: player.setSpedUp,
                             ),
+                            const SizedBox(height: 8),
+                            SingleChildScrollView(
+                              controller: _scrollController,
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Row(
+                                children: [
+                                  PresetCard(
+                                    title: 'Super Slowed',
+                                    subtitle: '0.70x Speed',
+                                    icon: Icons.fast_rewind_rounded,
+                                    isSelected: player.isSuperSlowed,
+                                    onTap: () {
+                                      player.setSuperSlowed(true);
+                                      _scrollToIndex(0);
+                                    },
+                                  ),
+                                  PresetCard(
+                                    title: 'Slowed',
+                                    subtitle: '0.85x Speed',
+                                    icon: Icons.fast_rewind_rounded,
+                                    isSelected: player.isSlowed,
+                                    onTap: () {
+                                      player.setSlowed(true);
+                                      _scrollToIndex(1);
+                                    },
+                                  ),
+                                  PresetCard(
+                                    title: 'Normal',
+                                    subtitle: '1.0x Speed',
+                                    icon: Icons.play_arrow_rounded,
+                                    isSelected:
+                                        !player.isSuperSlowed &&
+                                        !player.isSlowed &&
+                                        !player.isSpedUp &&
+                                        !player.isSuperSpedUp &&
+                                        !player.isNightcore,
+                                    onTap: () {
+                                      player.setSuperSlowed(false);
+                                      player.setSlowed(false);
+                                      player.setSpedUp(false);
+                                      player.setSuperSpedUp(false);
+                                      player.setNightcore(false);
+                                      _scrollToIndex(2);
+                                    },
+                                  ),
+                                  PresetCard(
+                                    title: 'Sped Up',
+                                    subtitle: '1.25x Speed',
+                                    icon: Icons.fast_forward_rounded,
+                                    isSelected: player.isSpedUp,
+                                    onTap: () {
+                                      player.setSpedUp(true);
+                                      _scrollToIndex(3);
+                                    },
+                                  ),
+                                  PresetCard(
+                                    title: 'Nightcore',
+                                    subtitle: '1.30x Speed',
+                                    icon: Icons.bolt_rounded,
+                                    isSelected: player.isNightcore,
+                                    onTap: () {
+                                      player.setNightcore(true);
+                                      _scrollToIndex(4);
+                                    },
+                                  ),
+                                  PresetCard(
+                                    title: 'Super Sped Up',
+                                    subtitle: '1.50x Speed',
+                                    icon: Icons.fast_forward_rounded,
+                                    isSelected: player.isSuperSpedUp,
+                                    onTap: () {
+                                      player.setSuperSpedUp(true);
+                                      _scrollToIndex(5);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                             SwitchListTile(
                               title: const Text('Warmth (Reverb)'),
                               subtitle: const Text(
@@ -132,6 +297,34 @@ class _MfxBottomSheet extends StatelessWidget {
                               ),
                               value: player.isReverbEnabled,
                               onChanged: player.setReverbEnabled,
+                            ),
+                            SwitchListTile(
+                              title: const Text('Lo-Fi / Vintage Room'),
+                              subtitle: const Text(
+                                'Aggressive high-cut filter',
+                              ),
+                              secondary: Icon(
+                                Icons.radio_rounded,
+                                color: player.isLofiEnabled
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant,
+                              ),
+                              value: player.isLofiEnabled,
+                              onChanged: player.setLofiEnabled,
+                            ),
+                            SwitchListTile(
+                              title: const Text('Bass Boosted'),
+                              subtitle: const Text(
+                                'Strong low-frequency bump (+80%)',
+                              ),
+                              secondary: Icon(
+                                Icons.speaker_group_rounded,
+                                color: player.isBassBoostEnabled
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant,
+                              ),
+                              value: player.isBassBoostEnabled,
+                              onChanged: player.setBassBoostEnabled,
                             ),
                             const Divider(height: 32),
                             Padding(
@@ -147,14 +340,38 @@ class _MfxBottomSheet extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Opacity(
-                              opacity: (player.isSlowed || player.isSpedUp)
+                              opacity:
+                                  (player.isSlowed ||
+                                      player.isSpedUp ||
+                                      player.isSuperSlowed ||
+                                      player.isSuperSpedUp ||
+                                      player.isNightcore)
                                   ? 0.5
                                   : 1.0,
                               child: IgnorePointer(
-                                ignoring: player.isSlowed || player.isSpedUp,
+                                ignoring:
+                                    player.isSlowed ||
+                                    player.isSpedUp ||
+                                    player.isSuperSlowed ||
+                                    player.isSuperSpedUp ||
+                                    player.isNightcore,
                                 child: SpeedSlider(
                                   speed: player.speed,
                                   onChanged: player.setSpeed,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            Center(
+                              child: TextButton.icon(
+                                onPressed: () {
+                                  player.resetAllMfx();
+                                  _scrollToIndex(2);
+                                },
+                                icon: const Icon(Icons.refresh_rounded),
+                                label: const Text('Reset All Effects'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: theme.colorScheme.error,
                                 ),
                               ),
                             ),

@@ -2,6 +2,16 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [Unreleased]
+### Added
+* Add Nightcore and Bass Boosted MFX presets
+* Add Lo-Fi / Vintage Room EQ filter to MFX menu
+* Add MFX state persistence and center-scrolling preset carousel
+* Add global Reset All Effects button to MFX menu
+### Fixed
+* Fix Android EQ dropout by re-applying MFX states on track change
+* Fix Now Playing MFX chip highlight logic to cover all presets
+
 ## [1.9.2] - 2026-07-22
 ### Fixed
 * Restore miniplayer padding in privacy and formatting settings screens

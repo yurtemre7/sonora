@@ -493,21 +493,40 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   Future<void> setPitch(double pitch) => player.setPitch(pitch);
 
-  Future<void> setEqEnabled(bool enabled) async {
+  Future<void> setEqMode(String mode) async {
+    var enabled = mode != 'off';
     await equalizer.setEnabled(enabled);
     if (enabled) {
       try {
         var params = await equalizer.parameters;
-        // Simple bass boost and treble cut preset for "Slowed + Reverb" warmth
         for (var band in params.bands) {
-          // If low frequency (< 250Hz), boost it. If high (> 4000Hz), cut it.
           var freq = band.centerFrequency;
-          if (freq < 250) {
-            await band.setGain(params.maxDecibels * 0.5); // +50% of max boost
-          } else if (freq > 4000) {
-            await band.setGain(params.minDecibels * 0.5); // 50% of max cut
-          } else {
-            await band.setGain(0.0);
+
+          if (mode == 'lofi') {
+            // Aggressive high cut and slight bass cut for vintage radio feel
+            if (freq > 2000) {
+              await band.setGain(params.minDecibels); // Maximum cut
+            } else if (freq < 150) {
+              await band.setGain(params.minDecibels * 0.3);
+            } else {
+              await band.setGain(0.0);
+            }
+          } else if (mode == 'warmth') {
+            // Simple bass boost and treble cut preset for "Slowed + Reverb" warmth
+            if (freq < 250) {
+              await band.setGain(params.maxDecibels * 0.5); // +50% of max boost
+            } else if (freq > 4000) {
+              await band.setGain(params.minDecibels * 0.5); // 50% of max cut
+            } else {
+              await band.setGain(0.0);
+            }
+          } else if (mode == 'bass_boost') {
+            // Strong bass boost without high cut
+            if (freq < 250) {
+              await band.setGain(params.maxDecibels * 0.8); // +80% of max boost
+            } else {
+              await band.setGain(0.0);
+            }
           }
         }
       } catch (e) {

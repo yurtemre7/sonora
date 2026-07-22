@@ -68,224 +68,235 @@ class _PlaylistSelectorBottomSheetState
           ),
           child: Container(
             decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.only(
-                top: 8,
-                left: 24,
-                right: 24,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              color: theme.colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Drag handle
-                  Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.4,
-                      ),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Add to Playlist',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: 8,
+                  left: 24,
+                  right: 24,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Drag handle
+                    Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.4,
                         ),
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      IconButton.filledTonal(
-                        onPressed: _showCreatePlaylistDialog,
-                        icon: const Icon(Icons.add_rounded),
-                        tooltip: 'Create Playlist',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  if (playlists.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 32.0),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.playlist_add_rounded,
-                            size: 48,
-                            color: theme.colorScheme.onSurfaceVariant
-                                .withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Add to Playlist',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'No playlists created yet',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        IconButton.filledTonal(
+                          onPressed: _showCreatePlaylistDialog,
+                          icon: const Icon(Icons.add_rounded),
+                          tooltip: 'Create Playlist',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    if (playlists.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32.0),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.playlist_add_rounded,
+                              size: 48,
+                              color: theme.colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.5),
                             ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    Flexible(
-                      child: Scrollbar(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                        itemCount: playlists.length,
-                        itemBuilder: (_, index) {
-                          var playlist = playlists[index];
-                          var isAlreadyIn = playlist.songIds.contains(
-                            widget.song.id,
-                          );
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  clipBehavior: Clip.antiAlias,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: ListTile(
-                                    tileColor: isAlreadyIn
-                                        ? theme.colorScheme.primaryContainer
-                                              .withValues(alpha: 0.15)
-                                        : theme.colorScheme.surfaceContainerLow,
-                                    leading: playlist.coverImagePath != null
-                                        ? Container(
-                                            width: 40,
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              image: DecorationImage(
-                                                image: ResizeImage(
-                                                  FileImage(
-                                                    File(
-                                                      playlist.coverImagePath!,
-                                                    ),
-                                                  ),
-                                                  width: 120,
-                                                ),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          )
-                                        : Icon(
-                                            Icons.playlist_add_rounded,
-                                            color: isAlreadyIn
-                                                ? theme.colorScheme.primary
-                                                : null,
-                                          ),
-                                    title: Text(
-                                      playlist.name,
-                                      style: theme.textTheme.bodyLarge
-                                          ?.copyWith(
-                                            fontWeight: isAlreadyIn
-                                                ? FontWeight.w600
-                                                : null,
-                                          ),
-                                    ),
-                                    subtitle: Builder(
-                                      builder: (context) {
-                                        // Count only IDs that still exist in the
-                                        // loaded library, so orphaned/stale IDs
-                                        // do not inflate the displayed count.
-                                        var allIds = widget
-                                            .playerProvider
-                                            .allSongs
-                                            .map((s) => s.id)
-                                            .toSet();
-                                        var liveCount = playlist.songIds
-                                            .where((id) => allIds.contains(id))
-                                            .length;
-                                        return Text(
-                                          '$liveCount ${liveCount == 1 ? 'song' : 'songs'}',
-                                        );
-                                      },
-                                    ),
-                                    trailing: isAlreadyIn
-                                        ? Icon(
-                                            Icons.check_circle_rounded,
-                                            color: theme.colorScheme.primary,
-                                          )
-                                        : null,
-                                    onTap: () async {
-                                      var messenger = ScaffoldMessenger.of(
-                                        context,
-                                      );
-                                      if (isAlreadyIn) {
-                                        await widget.playerProvider
-                                            .removeSongFromPlaylist(
-                                              playlist.id,
-                                              widget.song.id,
-                                            );
-                                        messenger.showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Removed "${widget.song.displayTitle}" from ${playlist.name}.',
-                                            ),
-                                            behavior: SnackBarBehavior.floating,
-                                            duration: const Duration(
-                                              seconds: 2,
-                                            ),
-                                          ),
-                                        );
-                                      } else {
-                                        await widget.playerProvider
-                                            .addSongToPlaylist(
-                                              playlist.id,
-                                              widget.song.id,
-                                            );
-                                        messenger.showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Added "${widget.song.displayTitle}" to ${playlist.name}.',
-                                            ),
-                                            behavior: SnackBarBehavior.floating,
-                                            duration: const Duration(
-                                              seconds: 2,
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No playlists created yet',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
-                              if (index < playlists.length - 1)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 16),
-                                  child: Divider(
-                                    height: 1,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withValues(alpha: 0.06),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Flexible(
+                        child: Scrollbar(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: playlists.length,
+                            itemBuilder: (_, index) {
+                              var playlist = playlists[index];
+                              var isAlreadyIn = playlist.songIds.contains(
+                                widget.song.id,
+                              );
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0,
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      clipBehavior: Clip.antiAlias,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: ListTile(
+                                        tileColor: isAlreadyIn
+                                            ? theme.colorScheme.primaryContainer
+                                                  .withValues(alpha: 0.15)
+                                            : theme
+                                                  .colorScheme
+                                                  .surfaceContainerLow,
+                                        leading: playlist.coverImagePath != null
+                                            ? Container(
+                                                width: 40,
+                                                height: 40,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  image: DecorationImage(
+                                                    image: ResizeImage(
+                                                      FileImage(
+                                                        File(
+                                                          playlist
+                                                              .coverImagePath!,
+                                                        ),
+                                                      ),
+                                                      width: 120,
+                                                    ),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                              )
+                                            : Icon(
+                                                Icons.playlist_add_rounded,
+                                                color: isAlreadyIn
+                                                    ? theme.colorScheme.primary
+                                                    : null,
+                                              ),
+                                        title: Text(
+                                          playlist.name,
+                                          style: theme.textTheme.bodyLarge
+                                              ?.copyWith(
+                                                fontWeight: isAlreadyIn
+                                                    ? FontWeight.w600
+                                                    : null,
+                                              ),
+                                        ),
+                                        subtitle: Builder(
+                                          builder: (context) {
+                                            // Count only IDs that still exist in the
+                                            // loaded library, so orphaned/stale IDs
+                                            // do not inflate the displayed count.
+                                            var allIds = widget
+                                                .playerProvider
+                                                .allSongs
+                                                .map((s) => s.id)
+                                                .toSet();
+                                            var liveCount = playlist.songIds
+                                                .where(
+                                                  (id) => allIds.contains(id),
+                                                )
+                                                .length;
+                                            return Text(
+                                              '$liveCount ${liveCount == 1 ? 'song' : 'songs'}',
+                                            );
+                                          },
+                                        ),
+                                        trailing: isAlreadyIn
+                                            ? Icon(
+                                                Icons.check_circle_rounded,
+                                                color:
+                                                    theme.colorScheme.primary,
+                                              )
+                                            : null,
+                                        onTap: () async {
+                                          var messenger = ScaffoldMessenger.of(
+                                            context,
+                                          );
+                                          if (isAlreadyIn) {
+                                            await widget.playerProvider
+                                                .removeSongFromPlaylist(
+                                                  playlist.id,
+                                                  widget.song.id,
+                                                );
+                                            messenger.showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'Removed "${widget.song.displayTitle}" from ${playlist.name}.',
+                                                ),
+                                                behavior:
+                                                    SnackBarBehavior.floating,
+                                                duration: const Duration(
+                                                  seconds: 2,
+                                                ),
+                                              ),
+                                            );
+                                          } else {
+                                            await widget.playerProvider
+                                                .addSongToPlaylist(
+                                                  playlist.id,
+                                                  widget.song.id,
+                                                );
+                                            messenger.showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'Added "${widget.song.displayTitle}" to ${playlist.name}.',
+                                                ),
+                                                behavior:
+                                                    SnackBarBehavior.floating,
+                                                duration: const Duration(
+                                                  seconds: 2,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
                                   ),
-                                ),
-                            ],
-                          );
-                        },
+                                  if (index < playlists.length - 1)
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 16),
+                                      child: Divider(
+                                        height: 1,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(alpha: 0.06),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ));
+        );
       },
     );
   }

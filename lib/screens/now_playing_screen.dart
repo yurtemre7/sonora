@@ -459,11 +459,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 _buildActionChip(
                   icon: Icons.auto_awesome,
                   label: 'MFX',
-                  active:
-                      widget.playerProvider.isSlowed ||
-                      widget.playerProvider.isSpedUp ||
-                      widget.playerProvider.isReverbEnabled ||
-                      widget.playerProvider.speed != 1.0,
+                  active: widget.playerProvider.isMfxActive,
                   onPressed: () =>
                       showMfxBottomSheet(context, widget.playerProvider),
                 ),

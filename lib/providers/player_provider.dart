@@ -48,8 +48,13 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   // Experimental MFX
   var _isSlowed = false;
+  var _isSuperSlowed = false;
+  var _isNightcore = false;
   var _isSpedUp = false;
+  var _isSuperSpedUp = false;
   var _isReverbEnabled = false;
+  var _isLofiEnabled = false;
+  var _isBassBoostEnabled = false;
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
   Duration? sleepTimerOriginalDuration;
@@ -99,7 +104,11 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> setSpeed(double value) async {
     _speed = value.clamp(0.5, 2.0);
-    if (!_isSlowed && !_isSpedUp) {
+    if (!_isSlowed &&
+        !_isSpedUp &&
+        !_isSuperSlowed &&
+        !_isSuperSpedUp &&
+        !_isNightcore) {
       await audioHandler.setSpeed(_speed);
     }
     var prefs = SharedPreferencesAsync();
@@ -110,38 +119,172 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   // ── Experimental MFX ──────────────────────────────────────────────────────
 
   bool get isSlowed => _isSlowed;
+  bool get isSuperSlowed => _isSuperSlowed;
+  bool get isNightcore => _isNightcore;
   bool get isSpedUp => _isSpedUp;
+  bool get isSuperSpedUp => _isSuperSpedUp;
   bool get isReverbEnabled => _isReverbEnabled;
+  bool get isLofiEnabled => _isLofiEnabled;
+  bool get isBassBoostEnabled => _isBassBoostEnabled;
+
+  bool get isMfxActive =>
+      _isSlowed ||
+      _isSuperSlowed ||
+      _isSpedUp ||
+      _isSuperSpedUp ||
+      _isNightcore ||
+      _isReverbEnabled ||
+      _isLofiEnabled ||
+      _isBassBoostEnabled ||
+      _speed != 1.0;
+
+  Future<void> _saveMfxSettings() async {
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('mfx_isSlowed', _isSlowed);
+    await prefs.setBool('mfx_isSuperSlowed', _isSuperSlowed);
+    await prefs.setBool('mfx_isSpedUp', _isSpedUp);
+    await prefs.setBool('mfx_isSuperSpedUp', _isSuperSpedUp);
+    await prefs.setBool('mfx_isNightcore', _isNightcore);
+    await prefs.setBool('mfx_isReverbEnabled', _isReverbEnabled);
+    await prefs.setBool('mfx_isLofiEnabled', _isLofiEnabled);
+    await prefs.setBool('mfx_isBassBoostEnabled', _isBassBoostEnabled);
+  }
 
   Future<void> setSlowed(bool value) async {
     _isSlowed = value;
-    if (_isSlowed) _isSpedUp = false;
+    if (_isSlowed) {
+      _isSpedUp = false;
+      _isSuperSlowed = false;
+      _isSuperSpedUp = false;
+      _isNightcore = false;
+    }
+    await _saveMfxSettings();
+    await _applyMfx();
+  }
+
+  Future<void> setSuperSlowed(bool value) async {
+    _isSuperSlowed = value;
+    if (_isSuperSlowed) {
+      _isSlowed = false;
+      _isSpedUp = false;
+      _isSuperSpedUp = false;
+      _isNightcore = false;
+    }
+    await _saveMfxSettings();
     await _applyMfx();
   }
 
   Future<void> setSpedUp(bool value) async {
     _isSpedUp = value;
-    if (_isSpedUp) _isSlowed = false;
+    if (_isSpedUp) {
+      _isSlowed = false;
+      _isSuperSlowed = false;
+      _isSuperSpedUp = false;
+      _isNightcore = false;
+    }
+    await _saveMfxSettings();
+    await _applyMfx();
+  }
+
+  Future<void> setSuperSpedUp(bool value) async {
+    _isSuperSpedUp = value;
+    if (_isSuperSpedUp) {
+      _isSlowed = false;
+      _isSuperSlowed = false;
+      _isSpedUp = false;
+      _isNightcore = false;
+    }
+    await _saveMfxSettings();
+    await _applyMfx();
+  }
+
+  Future<void> setNightcore(bool value) async {
+    _isNightcore = value;
+    if (_isNightcore) {
+      _isSlowed = false;
+      _isSuperSlowed = false;
+      _isSpedUp = false;
+      _isSuperSpedUp = false;
+    }
+    await _saveMfxSettings();
     await _applyMfx();
   }
 
   Future<void> setReverbEnabled(bool value) async {
     _isReverbEnabled = value;
+    if (_isReverbEnabled) {
+      _isLofiEnabled = false;
+      _isBassBoostEnabled = false;
+    }
+    await _saveMfxSettings();
+    await _applyMfx();
+  }
+
+  Future<void> setLofiEnabled(bool value) async {
+    _isLofiEnabled = value;
+    if (_isLofiEnabled) {
+      _isReverbEnabled = false;
+      _isBassBoostEnabled = false;
+    }
+    await _saveMfxSettings();
+    await _applyMfx();
+  }
+
+  Future<void> setBassBoostEnabled(bool value) async {
+    _isBassBoostEnabled = value;
+    if (_isBassBoostEnabled) {
+      _isReverbEnabled = false;
+      _isLofiEnabled = false;
+    }
+    await _saveMfxSettings();
+    await _applyMfx();
+  }
+
+  Future<void> resetAllMfx() async {
+    _isSlowed = false;
+    _isSuperSlowed = false;
+    _isSpedUp = false;
+    _isSuperSpedUp = false;
+    _isNightcore = false;
+    _isReverbEnabled = false;
+    _isLofiEnabled = false;
+    _speed = 1.0;
+    var prefs = SharedPreferencesAsync();
+    await prefs.setDouble('speed', _speed);
+    await _saveMfxSettings();
     await _applyMfx();
   }
 
   Future<void> _applyMfx() async {
-    if (_isSlowed) {
+    if (_isSuperSlowed) {
+      await audioHandler.setSpeed(0.70);
+      await audioHandler.setPitch(0.70);
+    } else if (_isSlowed) {
       await audioHandler.setSpeed(0.85);
       await audioHandler.setPitch(0.85);
+    } else if (_isSuperSpedUp) {
+      await audioHandler.setSpeed(1.50);
+      await audioHandler.setPitch(1.50);
     } else if (_isSpedUp) {
       await audioHandler.setSpeed(1.25);
       await audioHandler.setPitch(1.25);
+    } else if (_isNightcore) {
+      await audioHandler.setSpeed(1.30);
+      await audioHandler.setPitch(1.30);
     } else {
       await audioHandler.setSpeed(_speed);
       await audioHandler.setPitch(1.0);
     }
-    await audioHandler.setEqEnabled(_isReverbEnabled);
+
+    var eqMode = 'off';
+    if (_isLofiEnabled) {
+      eqMode = 'lofi';
+    } else if (_isReverbEnabled) {
+      eqMode = 'warmth';
+    } else if (_isBassBoostEnabled) {
+      eqMode = 'bass_boost';
+    }
+    await audioHandler.setEqMode(eqMode);
     notifyListeners();
   }
 
@@ -575,6 +718,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       if (index >= 0) {
         if (_lastExtractedSongId != queue[index].id) {
           _extractThemeColorForSong(queue[index]);
+          // Re-apply MFX when a new track loads to ensure AndroidEqualizer and speed persist securely across tracks
+          _applyMfx();
         }
         if (index != currentIndex) {
           currentIndex = index;
@@ -745,8 +890,21 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     var savedSpeed = await prefs.getDouble('speed');
     if (savedSpeed != null) {
       _speed = savedSpeed;
-      await audioHandler.setSpeed(_speed);
+      // We will apply this via _applyMfx below if no presets override it.
     }
+
+    _isSlowed = await prefs.getBool('mfx_isSlowed') ?? false;
+    _isSuperSlowed = await prefs.getBool('mfx_isSuperSlowed') ?? false;
+    _isSpedUp = await prefs.getBool('mfx_isSpedUp') ?? false;
+    _isSuperSpedUp = await prefs.getBool('mfx_isSuperSpedUp') ?? false;
+    _isNightcore = await prefs.getBool('mfx_isNightcore') ?? false;
+    _isReverbEnabled = await prefs.getBool('mfx_isReverbEnabled') ?? false;
+    _isLofiEnabled = await prefs.getBool('mfx_isLofiEnabled') ?? false;
+    _isBassBoostEnabled =
+        await prefs.getBool('mfx_isBassBoostEnabled') ?? false;
+
+    // Apply initial audio settings
+    await _applyMfx();
 
     if (!settingsProvider.useDynamicTheme) {
       themeColorNotifier.value = defaultThemeColor;
