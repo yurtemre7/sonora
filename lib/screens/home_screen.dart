@@ -11,7 +11,6 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/screens/favorites_screen.dart';
-import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
@@ -253,14 +252,12 @@ class _HomeScreenState extends State<HomeScreen>
     String title;
     String subtitle;
     List<(String, String)> options;
-    String tabName;
 
     switch (tabIndex) {
       case 1:
         title = 'Sort Albums By';
         subtitle =
             'Your sorting preference will be saved per tab and automatically applied on next startup.';
-        tabName = 'albums';
         options = [
           ('Album Name', 'name'),
           ('Artist', 'artist'),
@@ -271,7 +268,6 @@ class _HomeScreenState extends State<HomeScreen>
         title = 'Sort Artists By';
         subtitle =
             'Your sorting preference will be saved per tab and automatically applied on next startup.';
-        tabName = 'artists';
         options = [
           ('Artist Name', 'name'),
           ('Album Count', 'albums'),
@@ -281,13 +277,11 @@ class _HomeScreenState extends State<HomeScreen>
         title = 'Sort Playlists By';
         subtitle =
             'Your sorting preference will be saved per tab and automatically applied on next startup.';
-        tabName = 'playlists';
         options = [('Playlist Name', 'name'), ('Song Count', 'songs')];
       default:
         title = 'Sort Songs By';
         subtitle =
             'Your sorting preference will be saved per tab and automatically applied on next startup.';
-        tabName = 'songs';
         options = [
           ('Title', 'title'),
           ('Artist', 'artist'),
@@ -330,11 +324,33 @@ class _HomeScreenState extends State<HomeScreen>
                         onChanged: (val) {
                           setState(() => _setSortByForTab(tabIndex, val!));
                           setSheetState(() {});
-                          MusicScanner().saveTabSortSettings(
-                            tabName,
-                            _sortByForTab(tabIndex),
-                            _sortAscendingForTab(tabIndex),
-                          );
+                          if (tabIndex == 0) {
+                            SettingsProvider.instance.saveSortSettings(
+                              songSortBy: _sortByForTab(tabIndex),
+                              songSortAscending: _sortAscendingForTab(tabIndex),
+                            );
+                          } else if (tabIndex == 1) {
+                            SettingsProvider.instance.saveSortSettings(
+                              albumSortBy: _sortByForTab(tabIndex),
+                              albumSortAscending: _sortAscendingForTab(
+                                tabIndex,
+                              ),
+                            );
+                          } else if (tabIndex == 2) {
+                            SettingsProvider.instance.saveSortSettings(
+                              artistSortBy: _sortByForTab(tabIndex),
+                              artistSortAscending: _sortAscendingForTab(
+                                tabIndex,
+                              ),
+                            );
+                          } else if (tabIndex == 3) {
+                            SettingsProvider.instance.saveSortSettings(
+                              playlistSortBy: _sortByForTab(tabIndex),
+                              playlistSortAscending: _sortAscendingForTab(
+                                tabIndex,
+                              ),
+                            );
+                          }
                           Navigator.pop(context);
                         },
                         child: Column(
@@ -356,11 +372,33 @@ class _HomeScreenState extends State<HomeScreen>
                             () => _setSortAscendingForTab(tabIndex, val),
                           );
                           setSheetState(() {});
-                          MusicScanner().saveTabSortSettings(
-                            tabName,
-                            _sortByForTab(tabIndex),
-                            _sortAscendingForTab(tabIndex),
-                          );
+                          if (tabIndex == 0) {
+                            SettingsProvider.instance.saveSortSettings(
+                              songSortBy: _sortByForTab(tabIndex),
+                              songSortAscending: _sortAscendingForTab(tabIndex),
+                            );
+                          } else if (tabIndex == 1) {
+                            SettingsProvider.instance.saveSortSettings(
+                              albumSortBy: _sortByForTab(tabIndex),
+                              albumSortAscending: _sortAscendingForTab(
+                                tabIndex,
+                              ),
+                            );
+                          } else if (tabIndex == 2) {
+                            SettingsProvider.instance.saveSortSettings(
+                              artistSortBy: _sortByForTab(tabIndex),
+                              artistSortAscending: _sortAscendingForTab(
+                                tabIndex,
+                              ),
+                            );
+                          } else if (tabIndex == 3) {
+                            SettingsProvider.instance.saveSortSettings(
+                              playlistSortBy: _sortByForTab(tabIndex),
+                              playlistSortAscending: _sortAscendingForTab(
+                                tabIndex,
+                              ),
+                            );
+                          }
                         },
                       ),
                     ],
@@ -939,98 +977,88 @@ class _HomeScreenState extends State<HomeScreen>
                                   ),
                                 )
                               : Scrollbar(
-                                  child: RefreshIndicator(
-                                    onRefresh: widget.onResyncNow,
-                                    child: GridView.builder(
-                                      key: const PageStorageKey<String>(
-                                        'albums_grid',
-                                      ),
-                                      primary: true,
-                                      physics:
-                                          const AlwaysScrollableScrollPhysics(),
-                                      padding: const EdgeInsets.only(
-                                        left: 16,
-                                        right: 16,
-                                        top: 12,
-                                        bottom: 120,
-                                      ),
-                                      gridDelegate:
-                                          const SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 2,
-                                            crossAxisSpacing: 16,
-                                            mainAxisSpacing: 16,
-                                            childAspectRatio: 0.78,
-                                          ),
-                                      itemCount: filteredAlbums.length,
-                                      itemBuilder: (context, index) {
-                                        var album = filteredAlbums[index];
-                                        var firstSong = album.songs.first;
+                                  child: GridView.builder(
+                                    key: const PageStorageKey<String>(
+                                      'albums_grid',
+                                    ),
+                                    primary: true,
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.only(
+                                      left: 16,
+                                      right: 16,
+                                      top: 12,
+                                      bottom: 120,
+                                    ),
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          crossAxisSpacing: 16,
+                                          mainAxisSpacing: 16,
+                                          childAspectRatio: 0.78,
+                                        ),
+                                    itemCount: filteredAlbums.length,
+                                    itemBuilder: (context, index) {
+                                      var album = filteredAlbums[index];
+                                      var firstSong = album.songs.first;
 
-                                        return InkWell(
-                                          onTap: () {
-                                            _searchFocusNode.unfocus();
-                                            openAlbum(context, album);
-                                          },
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                child: AspectRatio(
-                                                  aspectRatio: 1.0,
-                                                  child: AlbumArt(
-                                                    artworkPath:
-                                                        firstSong.artworkPath,
-                                                    size: 200,
-                                                    borderRadius: 20,
-                                                  ),
+                                      return InkWell(
+                                        onTap: () {
+                                          _searchFocusNode.unfocus();
+                                          openAlbum(context, album);
+                                        },
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: AspectRatio(
+                                                aspectRatio: 1.0,
+                                                child: AlbumArt(
+                                                  artworkPath:
+                                                      firstSong.artworkPath,
+                                                  size: 200,
+                                                  borderRadius: 20,
                                                 ),
                                               ),
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                album.name,
-                                                style: theme
-                                                    .textTheme
-                                                    .titleSmall
-                                                    ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontFamily: 'Outfit',
-                                                    ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              Text(
-                                                album.artist,
-                                                style: theme.textTheme.bodySmall
-                                                    ?.copyWith(
-                                                      color: theme
-                                                          .colorScheme
-                                                          .onSurfaceVariant,
-                                                    ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                '${album.songs.length} ${album.songs.length == 1 ? 'track' : 'tracks'}',
-                                                style: theme
-                                                    .textTheme
-                                                    .labelSmall
-                                                    ?.copyWith(
-                                                      color: theme
-                                                          .colorScheme
-                                                          .primary,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              album.name,
+                                              style: theme.textTheme.titleSmall
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily: 'Outfit',
+                                                  ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              album.artist,
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color: theme
+                                                        .colorScheme
+                                                        .onSurfaceVariant,
+                                                  ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              '${album.songs.length} ${album.songs.length == 1 ? 'track' : 'tracks'}',
+                                              style: theme.textTheme.labelSmall
+                                                  ?.copyWith(
+                                                    color: theme
+                                                        .colorScheme
+                                                        .primary,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
                                 );
 
@@ -1055,71 +1083,63 @@ class _HomeScreenState extends State<HomeScreen>
                                   ),
                                 )
                               : Scrollbar(
-                                  child: RefreshIndicator(
-                                    onRefresh: widget.onResyncNow,
-                                    child: ListView.builder(
-                                      key: const PageStorageKey<String>(
-                                        'artists_list',
-                                      ),
-                                      primary: true,
-                                      physics:
-                                          const AlwaysScrollableScrollPhysics(),
-                                      padding: const EdgeInsets.only(
-                                        bottom: 120,
-                                      ),
-                                      itemCount: filteredArtists.length,
-                                      itemBuilder: (context, index) {
-                                        var artist = filteredArtists[index];
-
-                                        return Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            ListTile(
-                                              leading: ArtistAvatar(
-                                                artist: artist,
-                                                radius: 24,
-                                                iconSize: 28,
-                                              ),
-                                              title: Text(
-                                                artist.name,
-                                                style: theme
-                                                    .textTheme
-                                                    .titleMedium
-                                                    ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontFamily: 'Outfit',
-                                                    ),
-                                              ),
-                                              subtitle: Text(
-                                                '${artist.albums.length} ${artist.albums.length == 1 ? 'album' : 'albums'} • ${artist.songs.length} ${artist.songs.length == 1 ? 'song' : 'songs'}',
-                                              ),
-                                              trailing: const Icon(
-                                                Icons.chevron_right_rounded,
-                                              ),
-                                              onTap: () {
-                                                _searchFocusNode.unfocus();
-                                                openArtist(context, artist);
-                                              },
-                                            ),
-                                            if (index <
-                                                filteredArtists.length - 1)
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  left: 72,
-                                                ),
-                                                child: Divider(
-                                                  height: 1,
-                                                  color: theme
-                                                      .colorScheme
-                                                      .onSurface
-                                                      .withValues(alpha: 0.06),
-                                                ),
-                                              ),
-                                          ],
-                                        );
-                                      },
+                                  child: ListView.builder(
+                                    key: const PageStorageKey<String>(
+                                      'artists_list',
                                     ),
+                                    primary: true,
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.only(bottom: 120),
+                                    itemCount: filteredArtists.length,
+                                    itemBuilder: (context, index) {
+                                      var artist = filteredArtists[index];
+
+                                      return Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ListTile(
+                                            leading: ArtistAvatar(
+                                              artist: artist,
+                                              radius: 24,
+                                              iconSize: 28,
+                                            ),
+                                            title: Text(
+                                              artist.name,
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily: 'Outfit',
+                                                  ),
+                                            ),
+                                            subtitle: Text(
+                                              '${artist.albums.length} ${artist.albums.length == 1 ? 'album' : 'albums'} • ${artist.songs.length} ${artist.songs.length == 1 ? 'song' : 'songs'}',
+                                            ),
+                                            trailing: const Icon(
+                                              Icons.chevron_right_rounded,
+                                            ),
+                                            onTap: () {
+                                              _searchFocusNode.unfocus();
+                                              openArtist(context, artist);
+                                            },
+                                          ),
+                                          if (index <
+                                              filteredArtists.length - 1)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 72,
+                                              ),
+                                              child: Divider(
+                                                height: 1,
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.06),
+                                              ),
+                                            ),
+                                        ],
+                                      );
+                                    },
                                   ),
                                 );
 
@@ -1188,281 +1208,263 @@ class _HomeScreenState extends State<HomeScreen>
                                   ),
                                 )
                               : Scrollbar(
-                                  child: RefreshIndicator(
-                                    onRefresh: widget.onResyncNow,
-                                    child: ListView.builder(
-                                      key: const PageStorageKey<String>(
-                                        'playlists_list',
-                                      ),
-                                      primary: true,
-                                      physics:
-                                          const AlwaysScrollableScrollPhysics(),
-                                      padding: const EdgeInsets.only(
-                                        bottom: 120,
-                                      ),
-                                      itemCount: filteredPlaylists.length,
-                                      itemBuilder: (context, index) {
-                                        var playlist = filteredPlaylists[index];
-                                        var songCount = widget.songs
-                                            .where(
-                                              (s) => playlist.songIds.contains(
-                                                s.id,
-                                              ),
-                                            )
-                                            .length;
+                                  child: ListView.builder(
+                                    key: const PageStorageKey<String>(
+                                      'playlists_list',
+                                    ),
+                                    primary: true,
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.only(bottom: 120),
+                                    itemCount: filteredPlaylists.length,
+                                    itemBuilder: (context, index) {
+                                      var playlist = filteredPlaylists[index];
+                                      var songCount = widget.songs
+                                          .where(
+                                            (s) =>
+                                                playlist.songIds.contains(s.id),
+                                          )
+                                          .length;
 
-                                        return Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            ListTile(
-                                              leading:
-                                                  playlist.coverImagePath !=
-                                                      null
-                                                  ? Container(
-                                                      width: 48,
-                                                      height: 48,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              8,
-                                                            ),
-                                                        image: DecorationImage(
-                                                          image: FileImage(
-                                                            File(
-                                                              playlist
-                                                                  .coverImagePath!,
-                                                            ),
+                                      return Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ListTile(
+                                            leading:
+                                                playlist.coverImagePath != null
+                                                ? Container(
+                                                    width: 48,
+                                                    height: 48,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            8,
                                                           ),
-                                                          fit: BoxFit.cover,
+                                                      image: DecorationImage(
+                                                        image: FileImage(
+                                                          File(
+                                                            playlist
+                                                                .coverImagePath!,
+                                                          ),
                                                         ),
-                                                      ),
-                                                    )
-                                                  : Container(
-                                                      width: 48,
-                                                      height: 48,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              8,
-                                                            ),
-                                                        gradient: LinearGradient(
-                                                          colors: [
-                                                            theme
-                                                                .colorScheme
-                                                                .primaryContainer,
-                                                            theme
-                                                                .colorScheme
-                                                                .secondaryContainer,
-                                                          ],
-                                                          begin:
-                                                              Alignment.topLeft,
-                                                          end: Alignment
-                                                              .bottomRight,
-                                                        ),
-                                                      ),
-                                                      child: Icon(
-                                                        Icons
-                                                            .music_note_rounded,
-                                                        color: theme
-                                                            .colorScheme
-                                                            .onPrimaryContainer,
+                                                        fit: BoxFit.cover,
                                                       ),
                                                     ),
-                                              title: Text(playlist.name),
-                                              subtitle: Text(
-                                                '$songCount ${songCount == 1 ? 'song' : 'songs'}',
+                                                  )
+                                                : Container(
+                                                    width: 48,
+                                                    height: 48,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            8,
+                                                          ),
+                                                      gradient: LinearGradient(
+                                                        colors: [
+                                                          theme
+                                                              .colorScheme
+                                                              .primaryContainer,
+                                                          theme
+                                                              .colorScheme
+                                                              .secondaryContainer,
+                                                        ],
+                                                        begin:
+                                                            Alignment.topLeft,
+                                                        end: Alignment
+                                                            .bottomRight,
+                                                      ),
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.music_note_rounded,
+                                                      color: theme
+                                                          .colorScheme
+                                                          .onPrimaryContainer,
+                                                    ),
+                                                  ),
+                                            title: Text(playlist.name),
+                                            subtitle: Text(
+                                              '$songCount ${songCount == 1 ? 'song' : 'songs'}',
+                                            ),
+                                            trailing: PopupMenuButton<int>(
+                                              icon: const Icon(
+                                                Icons.more_vert_rounded,
                                               ),
-                                              trailing: PopupMenuButton<int>(
-                                                icon: const Icon(
-                                                  Icons.more_vert_rounded,
+                                              itemBuilder: (context) => [
+                                                const PopupMenuItem(
+                                                  value: 3,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.image_rounded),
+                                                      SizedBox(width: 8),
+                                                      Text('Change Cover'),
+                                                    ],
+                                                  ),
                                                 ),
-                                                itemBuilder: (context) => [
-                                                  const PopupMenuItem(
-                                                    value: 3,
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(
-                                                          Icons.image_rounded,
-                                                        ),
-                                                        SizedBox(width: 8),
-                                                        Text('Change Cover'),
-                                                      ],
-                                                    ),
+                                                const PopupMenuItem(
+                                                  value: 2,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.edit_rounded),
+                                                      SizedBox(width: 8),
+                                                      Text('Rename'),
+                                                    ],
                                                   ),
-                                                  const PopupMenuItem(
-                                                    value: 2,
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(
-                                                          Icons.edit_rounded,
+                                                ),
+                                                const PopupMenuItem(
+                                                  value: 1,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons
+                                                            .delete_outline_rounded,
+                                                        color: Colors.red,
+                                                      ),
+                                                      SizedBox(width: 8),
+                                                      Text(
+                                                        'Delete',
+                                                        style: TextStyle(
+                                                          color: Colors.red,
                                                         ),
-                                                        SizedBox(width: 8),
-                                                        Text('Rename'),
-                                                      ],
-                                                    ),
+                                                      ),
+                                                    ],
                                                   ),
+                                                ),
+                                                if (playlist.coverImagePath !=
+                                                    null)
                                                   const PopupMenuItem(
-                                                    value: 1,
+                                                    value: 4,
                                                     child: Row(
                                                       children: [
                                                         Icon(
                                                           Icons
-                                                              .delete_outline_rounded,
-                                                          color: Colors.red,
+                                                              .hide_image_rounded,
                                                         ),
                                                         SizedBox(width: 8),
-                                                        Text(
-                                                          'Delete',
-                                                          style: TextStyle(
-                                                            color: Colors.red,
-                                                          ),
-                                                        ),
+                                                        Text('Remove Cover'),
                                                       ],
                                                     ),
                                                   ),
-                                                  if (playlist.coverImagePath !=
-                                                      null)
-                                                    const PopupMenuItem(
-                                                      value: 4,
-                                                      child: Row(
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .hide_image_rounded,
-                                                          ),
-                                                          SizedBox(width: 8),
-                                                          Text('Remove Cover'),
-                                                        ],
+                                              ],
+                                              onSelected: (val) async {
+                                                if (val == 3) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'For best results, choose a square image.',
+                                                      ),
+                                                      duration: Duration(
+                                                        seconds: 2,
                                                       ),
                                                     ),
-                                                ],
-                                                onSelected: (val) async {
-                                                  if (val == 3) {
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      const SnackBar(
-                                                        content: Text(
-                                                          'For best results, choose a square image.',
-                                                        ),
-                                                        duration: Duration(
-                                                          seconds: 2,
-                                                        ),
-                                                      ),
+                                                  );
+                                                  var result =
+                                                      await FilePicker.pickFiles(
+                                                        type: FileType.image,
+                                                      );
+                                                  if (result != null &&
+                                                      result
+                                                              .files
+                                                              .single
+                                                              .path !=
+                                                          null) {
+                                                    var sourceFile = File(
+                                                      result.files.single.path!,
                                                     );
-                                                    var result =
-                                                        await FilePicker.pickFiles(
-                                                          type: FileType.image,
-                                                        );
-                                                    if (result != null &&
-                                                        result
-                                                                .files
-                                                                .single
-                                                                .path !=
-                                                            null) {
-                                                      var sourceFile = File(
-                                                        result
-                                                            .files
-                                                            .single
-                                                            .path!,
+                                                    var appDir =
+                                                        await getApplicationDocumentsDirectory();
+                                                    var coversDir = Directory(
+                                                      '${appDir.path}/playlist_covers',
+                                                    );
+                                                    if (!coversDir
+                                                        .existsSync()) {
+                                                      coversDir.createSync(
+                                                        recursive: true,
                                                       );
-                                                      var appDir =
-                                                          await getApplicationDocumentsDirectory();
-                                                      var coversDir = Directory(
-                                                        '${appDir.path}/playlist_covers',
-                                                      );
-                                                      if (!coversDir
-                                                          .existsSync()) {
-                                                        coversDir.createSync(
-                                                          recursive: true,
-                                                        );
-                                                      }
-                                                      var extension = sourceFile
-                                                          .path
-                                                          .split('.')
-                                                          .last;
-                                                      var newPath =
-                                                          '${coversDir.path}/${playlist.id}.$extension';
-                                                      await sourceFile.copy(
-                                                        newPath,
-                                                      );
-                                                      await widget
-                                                          .playerProvider
-                                                          .updatePlaylistCover(
-                                                            playlist.id,
-                                                            newPath,
-                                                          );
                                                     }
-                                                  } else if (val == 4) {
+                                                    var extension = sourceFile
+                                                        .path
+                                                        .split('.')
+                                                        .last;
+                                                    var newPath =
+                                                        '${coversDir.path}/${playlist.id}.$extension';
+                                                    await sourceFile.copy(
+                                                      newPath,
+                                                    );
                                                     await widget.playerProvider
                                                         .updatePlaylistCover(
                                                           playlist.id,
-                                                          null,
+                                                          newPath,
                                                         );
-                                                  } else if (val == 2) {
-                                                    RenamePlaylistDialog.show(
-                                                      context,
-                                                      playlist: playlist,
-                                                      onRename: widget
-                                                          .onRenamePlaylist,
-                                                    );
-                                                  } else if (val == 1) {
-                                                    var confirmed =
-                                                        await ConfirmDeleteDialog.show(
-                                                          context,
-                                                          title:
-                                                              'Delete Playlist?',
-                                                          message:
-                                                              'Delete "${playlist.name}"? This cannot be undone.',
-                                                        );
-                                                    if (confirmed != true) {
-                                                      return;
-                                                    }
-                                                    await widget
-                                                        .onDeletePlaylist(
-                                                          playlist.id,
-                                                        );
-                                                    if (!context.mounted) {
-                                                      return;
-                                                    }
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          'Playlist "${playlist.name}" deleted.',
-                                                        ),
-                                                        behavior:
-                                                            SnackBarBehavior
-                                                                .floating,
-                                                      ),
-                                                    );
                                                   }
-                                                },
-                                              ),
-                                              onTap: () {
-                                                _searchFocusNode.unfocus();
-                                                openPlaylist(context, playlist);
+                                                } else if (val == 4) {
+                                                  await widget.playerProvider
+                                                      .updatePlaylistCover(
+                                                        playlist.id,
+                                                        null,
+                                                      );
+                                                } else if (val == 2) {
+                                                  RenamePlaylistDialog.show(
+                                                    context,
+                                                    playlist: playlist,
+                                                    onRename:
+                                                        widget.onRenamePlaylist,
+                                                  );
+                                                } else if (val == 1) {
+                                                  var confirmed =
+                                                      await ConfirmDeleteDialog.show(
+                                                        context,
+                                                        title:
+                                                            'Delete Playlist?',
+                                                        message:
+                                                            'Delete "${playlist.name}"? This cannot be undone.',
+                                                      );
+                                                  if (confirmed != true) {
+                                                    return;
+                                                  }
+                                                  await widget.onDeletePlaylist(
+                                                    playlist.id,
+                                                  );
+                                                  if (!context.mounted) {
+                                                    return;
+                                                  }
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        'Playlist "${playlist.name}" deleted.',
+                                                      ),
+                                                      behavior: SnackBarBehavior
+                                                          .floating,
+                                                    ),
+                                                  );
+                                                }
                                               },
                                             ),
-                                            if (index <
-                                                filteredPlaylists.length - 1)
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  left: 72,
-                                                ),
-                                                child: Divider(
-                                                  height: 1,
-                                                  color: theme
-                                                      .colorScheme
-                                                      .onSurface
-                                                      .withValues(alpha: 0.06),
-                                                ),
+                                            onTap: () {
+                                              _searchFocusNode.unfocus();
+                                              openPlaylist(context, playlist);
+                                            },
+                                          ),
+                                          if (index <
+                                              filteredPlaylists.length - 1)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 72,
                                               ),
-                                          ],
-                                        );
-                                      },
-                                    ),
+                                              child: Divider(
+                                                height: 1,
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.06),
+                                              ),
+                                            ),
+                                        ],
+                                      );
+                                    },
                                   ),
                                 );
 
@@ -1568,54 +1570,48 @@ class _HomeScreenState extends State<HomeScreen>
                                                     .playerProvider
                                                     .currentSong;
                                                 return Scrollbar(
-                                                  child: RefreshIndicator(
-                                                    onRefresh:
-                                                        widget.onResyncNow,
-                                                    child: ListView.builder(
-                                                      key:
-                                                          const PageStorageKey<
-                                                            String
-                                                          >('songs_list'),
-                                                      primary: true,
-                                                      physics:
-                                                          const AlwaysScrollableScrollPhysics(),
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                            bottom: 120,
-                                                          ),
-                                                      itemCount:
-                                                          filteredSongs.length,
-                                                      itemBuilder: (context, index) {
-                                                        var song =
-                                                            filteredSongs[index];
-                                                        var isCurrent =
-                                                            currentSong !=
-                                                                null &&
-                                                            currentSong.id ==
-                                                                song.id;
-                                                        return SongTile(
-                                                          song: song,
-                                                          playerProvider: widget
-                                                              .playerProvider,
-                                                          isCurrent: isCurrent,
-                                                          showDivider:
-                                                              index <
-                                                              filteredSongs
-                                                                      .length -
-                                                                  1,
-                                                          onTap: () {
-                                                            _searchFocusNode
-                                                                .unfocus();
-                                                            widget
-                                                                .playerProvider
-                                                                .playSong(
-                                                                  song,
-                                                                  filteredSongs,
-                                                                );
-                                                          },
-                                                        );
-                                                      },
-                                                    ),
+                                                  child: ListView.builder(
+                                                    key:
+                                                        const PageStorageKey<
+                                                          String
+                                                        >('songs_list'),
+                                                    primary: true,
+                                                    physics:
+                                                        const AlwaysScrollableScrollPhysics(),
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          bottom: 120,
+                                                        ),
+                                                    itemCount:
+                                                        filteredSongs.length,
+                                                    itemBuilder: (context, index) {
+                                                      var song =
+                                                          filteredSongs[index];
+                                                      var isCurrent =
+                                                          currentSong != null &&
+                                                          currentSong.id ==
+                                                              song.id;
+                                                      return SongTile(
+                                                        song: song,
+                                                        playerProvider: widget
+                                                            .playerProvider,
+                                                        isCurrent: isCurrent,
+                                                        showDivider:
+                                                            index <
+                                                            filteredSongs
+                                                                    .length -
+                                                                1,
+                                                        onTap: () {
+                                                          _searchFocusNode
+                                                              .unfocus();
+                                                          widget.playerProvider
+                                                              .playSong(
+                                                                song,
+                                                                filteredSongs,
+                                                              );
+                                                        },
+                                                      );
+                                                    },
                                                   ),
                                                 );
                                               },

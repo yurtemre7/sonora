@@ -44,6 +44,9 @@ This file outlines project-specific rules and instructions for coding assistants
 * **Hot Restart:** For structural state changes (like adding new widgets or modifying global state), use hot restart (typically via your IDE or `R` in the terminal).
 * **Rule:** If a Flutter application is currently running, you should use hot reload after making Dart code changes to keep the live app in sync. Use hot restart for structural changes.
 
+### Analysis Options
+* **Rule:** The project's linting configuration is defined in [analysis_options.yaml](file:///Users/yurtemre/Code/antigravity/kind-salk/analysis_options.yaml). It extends `flutter_lints/flutter.yaml` and enforces strict guidelines, including `always_use_package_imports`, `prefer_single_quotes`, and various other stylistic rules. Always ensure new code complies with these rules to keep `flutter analyze` clean.
+
 ## Music Player Development
 
 ### Audio Playback

@@ -63,7 +63,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
               },
             ),
             ListenableBuilder(
-              listenable: playerProvider,
+              listenable: settingsProvider,
               builder: (context, _) {
                 return Column(
                   children: [
