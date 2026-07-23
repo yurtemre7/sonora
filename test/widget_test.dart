@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/providers/settings_provider.dart';
 
 void main() {
   test('Song model duration formatted correctly', () {
@@ -28,6 +29,8 @@ void main() {
   test(
     'Song model displayTitle cleans up featuring artist details and redundant artist names',
     () {
+      SettingsProvider.instance.filterTitleFeatures = true;
+      SettingsProvider.instance.filterTitleArtist = true;
       // 1. Basic featuring removal in parentheses/brackets
       var songFt1 = Song(
         id: 1,
