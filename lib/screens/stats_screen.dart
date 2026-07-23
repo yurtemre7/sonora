@@ -5,6 +5,7 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/stats_service.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/song_tile.dart';
@@ -63,7 +64,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Listening Statistics'),
+        title: Text(context.l10n.listeningStatistics),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => closeRoute(context),
@@ -71,7 +72,7 @@ class _StatsScreenState extends State<StatsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline_rounded),
-            tooltip: 'Reset Statistics',
+            tooltip: context.l10n.resetStatistics,
             onPressed: () => _confirmResetStats(context),
           ),
         ],

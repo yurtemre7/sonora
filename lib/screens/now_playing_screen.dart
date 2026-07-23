@@ -1072,7 +1072,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                   widget.playerProvider.stopSleepTimer();
                                   Navigator.pop(context);
                                 },
-                                child: const Text('Cancel Timer'),
+                                child: Text(context.l10n.cancelTimer),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -1102,7 +1102,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                             child: Column(
                               children: [
                                 Text(
-                                  'Timer Duration',
+                                  context.l10n.timerDuration,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
                                   ),
@@ -1127,7 +1127,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                             Expanded(
                               child: OutlinedButton(
                                 onPressed: () => selectedDuration.value = null,
-                                child: const Text('Back'),
+                                child: Text(context.l10n.back),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -1137,7 +1137,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                   widget.playerProvider.startSleepTimer(sel);
                                   Navigator.pop(context);
                                 },
-                                child: const Text('Start Timer'),
+                                child: Text(context.l10n.startTimer),
                               ),
                             ),
                           ],
@@ -1176,7 +1176,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                             }
                           },
                           icon: const Icon(Icons.edit_calendar_rounded),
-                          label: const Text('Custom Duration...'),
+                          label: Text(context.l10n.customDuration),
                         ),
                       ],
                       const SizedBox(height: 16),
@@ -1266,21 +1266,21 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Custom Sleep Timer'),
+          title: Text(context.l10n.customSleepTimer),
           content: TextField(
             controller: controller,
             keyboardType: TextInputType.number,
             autofocus: true,
-            decoration: const InputDecoration(
-              suffixText: 'minutes',
-              hintText: 'Enter duration',
+            decoration: InputDecoration(
+              suffixText: context.l10n.minutes,
+              hintText: context.l10n.enterDurationHint,
             ),
           ),
           actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.cancel),
             ),
             FilledButton(
               onPressed: () {
@@ -1289,7 +1289,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   Navigator.pop(context, Duration(minutes: minutes));
                 }
               },
-              child: const Text('Next'),
+              child: Text(context.l10n.next),
             ),
           ],
         );

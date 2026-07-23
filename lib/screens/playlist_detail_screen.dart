@@ -381,7 +381,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   }
                                 },
                                 icon: const Icon(Icons.play_arrow_rounded),
-                                label: const Text('Play'),
+                                label: Text(context.l10n.play),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -396,7 +396,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   }
                                 },
                                 icon: const Icon(Icons.shuffle_rounded),
-                                label: const Text('Shuffle'),
+                                label: Text(context.l10n.shuffle),
                               ),
                             ),
                           ],

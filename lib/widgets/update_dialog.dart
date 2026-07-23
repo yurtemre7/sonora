@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sonora/services/update_service.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UpdateDialog extends StatelessWidget {
@@ -17,7 +18,7 @@ class UpdateDialog extends StatelessWidget {
         children: [
           Icon(Icons.system_update_rounded, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
-          const Text('Update Available'),
+          Text(context.l10n.updateAvailable),
         ],
       ),
       content: SizedBox(
@@ -27,14 +28,14 @@ class UpdateDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Version ${updateInfo.version} is now available!',
+              context.l10n.updateAvailableMessage(updateInfo.version),
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              'Changelog:',
+              context.l10n.changelogLabel,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.primary,
               ),
@@ -66,7 +67,7 @@ class UpdateDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Later'),
+          child: Text(context.l10n.later),
         ),
         FilledButton.icon(
           onPressed: () async {
@@ -78,7 +79,7 @@ class UpdateDialog extends StatelessWidget {
             }
           },
           icon: const Icon(Icons.download_rounded),
-          label: const Text('Download'),
+          label: Text(context.l10n.download),
         ),
       ],
     );

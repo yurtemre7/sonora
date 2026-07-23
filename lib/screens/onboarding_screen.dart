@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sonora/services/permission_service.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key, required this.onComplete});
@@ -222,7 +223,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                           : _nameController.text.trim(),
                                     ),
                               icon: const Icon(Icons.done_rounded),
-                              label: const Text('Get Started'),
+                              label: Text(context.l10n.getStarted),
                             )
                           : FloatingActionButton(
                               onPressed:
@@ -328,7 +329,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             const SizedBox(height: 48),
             Text(
-              'Welcome to Sonora',
+              context.l10n.welcomeToSonora,
               style: GoogleFonts.outfit(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -343,7 +344,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 controller: _nameController,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
-                  labelText: 'Your Name (Optional)',
+                  labelText: context.l10n.yourNameOptional,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -354,7 +355,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             const SizedBox(height: 16),
             Text(
-              'A premium offline music experience built with beautiful Material 3 Expressive elements.\n\nEnjoy fluid, stutter-free playback and fast background syncing.',
+              context.l10n.onboardingDescription,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 height: 1.5,
@@ -403,9 +404,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ? theme.colorScheme.primary
                             : theme.colorScheme.onSurfaceVariant,
                       ),
-                      title: const Text('Access Audio & Image Files'),
-                      subtitle: const Text(
-                        'Required to index audio tracks and scan local cover images (artist.jpg / cover.jpg) on your device.',
+                      title: Text(context.l10n.accessAudioAndImageFiles),
+                      subtitle: Text(
+                        context.l10n.accessAudioSubtitle,
                       ),
                     ),
                     const Divider(height: 24),
@@ -418,9 +419,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ? theme.colorScheme.primary
                             : theme.colorScheme.onSurfaceVariant,
                       ),
-                      title: const Text('Show Notifications'),
-                      subtitle: const Text(
-                        'Required to show lockscreen & notification shade media playback controls.',
+                      title: Text(context.l10n.showNotifications),
+                      subtitle: Text(
+                        context.l10n.showNotificationsSubtitle,
                       ),
                     ),
                   ],
@@ -429,7 +430,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             const SizedBox(height: 40),
             Text(
-              'Permissions Needed',
+              context.l10n.permissionsNeeded,
               style: GoogleFonts.outfit(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -439,7 +440,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'To play and control your music, Sonora needs runtime authorization permissions from your device.',
+              context.l10n.permissionsExplanation,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 height: 1.5,
@@ -454,8 +455,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
               label: Text(
                 allGranted
-                    ? 'All Permissions Granted'
-                    : 'Configure Permissions',
+                    ? context.l10n.allPermissionsGranted
+                    : context.l10n.configurePermissions,
               ),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
@@ -497,7 +498,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             const SizedBox(height: 40),
             Text(
-              'Setup Music Directory',
+              context.l10n.setupMusicDirectory,
               style: GoogleFonts.outfit(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -508,8 +509,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(height: 16),
             Text(
               _selectedFolder == null
-                  ? 'Choose the primary folder containing your audio tracks (MP3, FLAC, M4A, etc.) to build your initial library database.'
-                  : 'Selected Directory:',
+                  ? context.l10n.chooseMusicFolder
+                  : context.l10n.selectedDirectory,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 height: 1.5,
@@ -548,7 +549,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     : Icons.folder_shared_rounded,
               ),
               label: Text(
-                _selectedFolder == null ? 'Select Folder' : 'Change Folder',
+                _selectedFolder == null
+                    ? context.l10n.selectFolder
+                    : context.l10n.changeFolder,
               ),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(

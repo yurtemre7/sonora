@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:sonora/services/update_service.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class ChangelogScreen extends StatefulWidget {
   const ChangelogScreen({super.key});
@@ -48,7 +49,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Changelog'),
+        title: Text(context.l10n.changelogTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -90,13 +91,13 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Failed to load changelog.',
+                    context.l10n.failedToLoadChangelog,
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
                   FilledButton.tonal(
                     onPressed: _loadChangelog,
-                    child: const Text('Try Again'),
+                    child: Text(context.l10n.tryAgain),
                   ),
                 ],
               ),

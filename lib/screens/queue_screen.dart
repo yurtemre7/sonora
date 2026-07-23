@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
 /// Screen displaying the current play queue with reordering and removal controls.
@@ -39,7 +40,7 @@ class _QueueScreenState extends State<QueueScreen> {
 
         if (queue.isEmpty) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Queue')),
+            appBar: AppBar(title: Text(context.l10n.queue)),
             body: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -53,7 +54,7 @@ class _QueueScreenState extends State<QueueScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Queue is empty',
+                    context.l10n.queueEmpty,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

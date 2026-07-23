@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/preset_card.dart';
 import 'package:sonora/widgets/speed_slider.dart';
 
@@ -188,7 +189,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                         player.resetAllMfx();
                                         _scrollToIndex(2);
                                       },
-                                      child: const Text('Reset'),
+                                      child: Text(context.l10n.resetAll),
                                     )
                                   else
                                     TextButton(
@@ -285,7 +286,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                             ),
                             const SizedBox(height: 16),
                             SwitchListTile(
-                              title: const Text('Warmth (Reverb)'),
+                              title: Text(context.l10n.mfxWarmth),
                               subtitle: const Text(
                                 'Simulated via EQ (Bass boost, High cut)',
                               ),
@@ -299,7 +300,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                               onChanged: player.setReverbEnabled,
                             ),
                             SwitchListTile(
-                              title: const Text('Lo-Fi / Vintage Room'),
+                              title: Text(context.l10n.mfxLoFi),
                               subtitle: const Text(
                                 'Aggressive high-cut filter',
                               ),
@@ -313,7 +314,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                               onChanged: player.setLofiEnabled,
                             ),
                             SwitchListTile(
-                              title: const Text('Bass Boosted'),
+                              title: Text(context.l10n.mfxBassBoosted),
                               subtitle: const Text(
                                 'Strong low-frequency bump (+80%)',
                               ),
@@ -362,16 +363,18 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                               ),
                             ),
                             const SizedBox(height: 32),
-                            Center(
-                              child: TextButton.icon(
-                                onPressed: () {
-                                  player.resetAllMfx();
-                                  _scrollToIndex(2);
-                                },
-                                icon: const Icon(Icons.refresh_rounded),
-                                label: const Text('Reset All Effects'),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: theme.colorScheme.error,
+                            SafeArea(
+                              child: Center(
+                                child: TextButton.icon(
+                                  onPressed: () {
+                                    player.resetAllMfx();
+                                    _scrollToIndex(2);
+                                  },
+                                  icon: const Icon(Icons.refresh_rounded),
+                                  label: Text(context.l10n.mfxResetAll),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: theme.colorScheme.error,
+                                  ),
                                 ),
                               ),
                             ),

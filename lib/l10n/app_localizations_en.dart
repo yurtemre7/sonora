@@ -12,6 +12,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutSonora => 'About Sonora';
 
   @override
+  String get accessAudioAndImageFiles => 'Access Audio & Image Files';
+
+  @override
+  String get accessAudioSubtitle =>
+      'Required to index audio tracks and scan local cover images (artist.jpg / cover.jpg) on your device.';
+
+  @override
   String albumCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -24,6 +31,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get albums => 'Albums';
+
+  @override
+  String get allPermissionsGranted => 'All Permissions Granted';
 
   @override
   String get alreadyOnLatest => 'You are already on the latest version.';
@@ -72,7 +82,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Check GitHub for releases every time the app opens';
 
   @override
+  String get back => 'Back';
+
+  @override
   String get cancel => 'Cancel';
+
+  @override
+  String get cancelTimer => 'Cancel Timer';
 
   @override
   String get change => 'Change';
@@ -87,6 +103,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changelog => 'Changelog';
 
   @override
+  String get changelogLabel => 'Changelog:';
+
+  @override
   String get changelogSubtitle => 'View what\'s new';
 
   @override
@@ -99,6 +118,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkForUpdatesSubtitle => 'Check GitHub for a new release';
 
   @override
+  String get chooseMusicFolder =>
+      'Choose the primary folder containing your audio tracks (MP3, FLAC, M4A, etc.) to build your initial library database.';
+
+  @override
   String get chooseTheme => 'Choose Theme';
 
   @override
@@ -108,10 +131,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityAndSupport => 'Community & Support';
 
   @override
+  String get configurePermissions => 'Configure Permissions';
+
+  @override
   String get create => 'Create';
 
   @override
   String get createPlaylist => 'Create a playlist';
+
+  @override
+  String get customDuration => 'Custom Duration...';
+
+  @override
+  String get customSleepTimer => 'Custom Sleep Timer';
 
   @override
   String get dangerZone => 'Danger Zone';
@@ -171,6 +203,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get displayedAs => 'Displayed As:';
 
   @override
+  String get download => 'Download';
+
+  @override
   String get dynamicTheme => 'Dynamic Theme (Material You)';
 
   @override
@@ -178,7 +213,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Automatically theme the app using active album art';
 
   @override
+  String get enterDurationHint => 'Enter duration';
+
+  @override
   String get enterYourName => 'Enter Your Name';
+
+  @override
+  String get failedToLoadChangelog => 'Failed to load changelog.';
 
   @override
   String get favorites => 'Favorites';
@@ -205,6 +246,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get formattingSubtitle => 'Configure how song titles are displayed';
+
+  @override
+  String get getStarted => 'Get Started';
 
   @override
   String goodAfternoon(String name) {
@@ -253,6 +297,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lastSync => 'Last Sync';
 
   @override
+  String get later => 'Later';
+
+  @override
   String get libraryFormatting => 'Library Formatting';
 
   @override
@@ -280,12 +327,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mfx => 'MFX';
 
   @override
+  String get mfxBassBoosted => 'Bass Boosted';
+
+  @override
+  String get mfxLoFi => 'Lo-Fi / Vintage Room';
+
+  @override
+  String get mfxResetAll => 'Reset All Effects';
+
+  @override
+  String get mfxWarmth => 'Warmth (Reverb)';
+
+  @override
   String minuteAbbr(int min) {
     return '$min min';
   }
 
   @override
+  String get minutes => 'minutes';
+
+  @override
   String get neverSynced => 'Never synced';
+
+  @override
+  String get next => 'Next';
 
   @override
   String get noAlbumsFound => 'No albums found';
@@ -321,6 +386,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ok => 'OK';
 
   @override
+  String get onboardingDescription =>
+      'A premium offline music experience built with beautiful Material 3 Expressive elements.\n\nEnjoy fluid, stutter-free playback and fast background syncing.';
+
+  @override
   String get openGithubReleases => 'Open GitHub Releases';
 
   @override
@@ -335,6 +404,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get permissionsExplained => 'Permissions Explained';
+
+  @override
+  String get permissionsExplanation =>
+      'To play and control your music, Sonora needs runtime authorization permissions from your device.';
+
+  @override
+  String get permissionsNeeded => 'Permissions Needed';
 
   @override
   String get personalization => 'Personalization';
@@ -364,6 +440,9 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get playlistName => 'Playlist name';
 
   @override
   String get playlists => 'Playlists';
@@ -431,6 +510,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacySubtitle => 'Data management and required permissions';
 
   @override
+  String get queue => 'Queue';
+
+  @override
+  String get queueEmpty => 'Queue is empty';
+
+  @override
   String get rateLimitMessage =>
       'GitHub API rate limit (60 requests/hour for anonymous requests) has been reached.\n\nPlease open the GitHub repository directly to check for new releases.';
 
@@ -448,6 +533,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reset => 'Reset';
+
+  @override
+  String get resetAll => 'Reset';
 
   @override
   String get resetApplication => 'Reset Application';
@@ -488,7 +576,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchSongsHint => 'Search songs, artists...';
 
   @override
+  String get selectFolder => 'Select Folder';
+
+  @override
   String get selectLanguage => 'Select Language';
+
+  @override
+  String get selectedDirectory => 'Selected Directory:';
 
   @override
   String get setMusicDirectory => 'Set Music Directory';
@@ -500,11 +594,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
+  String get setupMusicDirectory => 'Setup Music Directory';
+
+  @override
   String get showAudioVisualizer => 'Show Audio Visualizer';
 
   @override
   String get showAudioVisualizerSubtitle =>
       'Animate audio wave visualizer inside player screen';
+
+  @override
+  String get showNotifications => 'Show Notifications';
+
+  @override
+  String get showNotificationsSubtitle =>
+      'Required to show lockscreen & notification shade media playback controls.';
 
   @override
   String get shuffle => 'Shuffle';
@@ -591,6 +695,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sourceCodeSubtitle => 'View the GitHub repository';
 
   @override
+  String get startTimer => 'Start Timer';
+
+  @override
   String get stats => 'Stats';
 
   @override
@@ -622,6 +729,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timer => 'Timer';
 
   @override
+  String get timerDuration => 'Timer Duration';
+
+  @override
   String get titleFilters => 'Title Filters';
 
   @override
@@ -633,6 +743,17 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 track',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get updateAvailable => 'Update Available';
+
+  @override
+  String updateAvailableMessage(String version) {
+    return 'Version $version is now available!';
   }
 
   @override
@@ -656,5 +777,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get volume => 'Volume';
 
   @override
+  String get welcomeToSonora => 'Welcome to Sonora';
+
+  @override
   String get yourName => 'Your Name';
+
+  @override
+  String get yourNameOptional => 'Your Name (Optional)';
 }

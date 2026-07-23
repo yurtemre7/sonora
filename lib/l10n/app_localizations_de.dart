@@ -12,6 +12,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aboutSonora => 'Über Sonora';
 
   @override
+  String get accessAudioAndImageFiles => 'Zugriff auf Audio- und Bilddateien';
+
+  @override
+  String get accessAudioSubtitle =>
+      'Erforderlich, um Audiodateien zu indexieren und lokale Cover-Bilder (artist.jpg / cover.jpg) zu scannen.';
+
+  @override
   String albumCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -26,14 +33,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get albums => 'Alben';
 
   @override
-  String get alreadyOnLatest => 'Sie verwenden bereits die neueste Version.';
+  String get allPermissionsGranted => 'Alle Berechtigungen erteilt';
+
+  @override
+  String get alreadyOnLatest => 'Du verwendest bereits die neueste Version.';
 
   @override
   String get amoledDark => 'AMOLED Rein-Schwarz';
 
   @override
   String get amoledDarkSubtitle =>
-      'Verwende tiefschwarze Hintergründe im Dunkelmodus statt Dunkelgrau';
+      'Tiefschwarze Hintergründe im Dunkelmodus statt Dunkelgrau verwenden';
 
   @override
   String get appLanguage => 'App-Sprache';
@@ -73,7 +83,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Bei jedem App-Start GitHub auf neue Versionen prüfen';
 
   @override
+  String get back => 'Zurück';
+
+  @override
   String get cancel => 'Abbrechen';
+
+  @override
+  String get cancelTimer => 'Timer abbrechen';
 
   @override
   String get change => 'Ändern';
@@ -86,6 +102,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get changelog => 'Änderungsprotokoll';
+
+  @override
+  String get changelogLabel => 'Änderungsprotokoll:';
 
   @override
   String get changelogSubtitle => 'Neuigkeiten ansehen';
@@ -101,6 +120,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'GitHub nach einer neuen Version durchsuchen';
 
   @override
+  String get chooseMusicFolder =>
+      'Wähle den Hauptordner mit deinen Audiodateien (MP3, FLAC, M4A, etc.), um deine erste Bibliothek aufzubauen.';
+
+  @override
   String get chooseTheme => 'Theme wählen';
 
   @override
@@ -110,10 +133,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get communityAndSupport => 'Community & Support';
 
   @override
+  String get configurePermissions => 'Berechtigungen einrichten';
+
+  @override
   String get create => 'Erstellen';
 
   @override
   String get createPlaylist => 'Playlist erstellen';
+
+  @override
+  String get customDuration => 'Eigene Dauer...';
+
+  @override
+  String get customSleepTimer => 'Eigener Schlaf-Timer';
 
   @override
   String get dangerZone => 'Gefahrenzone';
@@ -137,11 +169,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get defaultAppColor => 'Standard-App-Farbe';
 
   @override
-  String get defaultSleepTimer => 'Standard-Einschlaftimer';
+  String get defaultSleepTimer => 'Standard-Schlaf-Timer';
 
   @override
   String get defaultSleepTimerSubtitle =>
-      'Vorausgewählte Dauer beim Öffnen des Einschlaftimers';
+      'Vorausgewählte Dauer beim Öffnen des Schlaf-Timers';
 
   @override
   String get defaultStartPage => 'Standard-Startseite';
@@ -174,6 +206,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get displayedAs => 'Dargestellt als:';
 
   @override
+  String get download => 'Herunterladen';
+
+  @override
   String get dynamicTheme => 'Dynamisches Theme (Material You)';
 
   @override
@@ -181,7 +216,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Farben der App automatisch an das aktive Album-Cover anpassen';
 
   @override
-  String get enterYourName => 'Name eingeben';
+  String get enterDurationHint => 'Dauer eingeben';
+
+  @override
+  String get enterYourName => 'Deinen Namen eingeben';
+
+  @override
+  String get failedToLoadChangelog =>
+      'Änderungsprotokoll konnte nicht geladen werden.';
 
   @override
   String get favorites => 'Favoriten';
@@ -209,6 +251,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get formattingSubtitle =>
       'Konfigurieren, wie Songtitel angezeigt werden';
+
+  @override
+  String get getStarted => 'Loslegen';
 
   @override
   String goodAfternoon(String name) {
@@ -257,6 +302,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get lastSync => 'Letzte Synchronisation';
 
   @override
+  String get later => 'Später';
+
+  @override
   String get libraryFormatting => 'Bibliotheksformatierung';
 
   @override
@@ -284,12 +332,30 @@ class AppLocalizationsDe extends AppLocalizations {
   String get mfx => 'MFX';
 
   @override
+  String get mfxBassBoosted => 'Bass verstärkt';
+
+  @override
+  String get mfxLoFi => 'Lo-Fi / Vintage Room';
+
+  @override
+  String get mfxResetAll => 'Alle Effekte zurücksetzen';
+
+  @override
+  String get mfxWarmth => 'Wärme (Reverb)';
+
+  @override
   String minuteAbbr(int min) {
     return '$min Min.';
   }
 
   @override
+  String get minutes => 'Minuten';
+
+  @override
   String get neverSynced => 'Noch nie synchronisiert';
+
+  @override
+  String get next => 'Weiter';
 
   @override
   String get noAlbumsFound => 'Keine Alben gefunden';
@@ -325,6 +391,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get ok => 'OK';
 
   @override
+  String get onboardingDescription =>
+      'Ein erstklassiges Offline-Musikerlebnis mit wunderschönem Material 3 Expressive Design.\n\nGenieße flüssige Wiedergabe ohne Ruckler und schnelle Hintergrundsuche.';
+
+  @override
   String get openGithubReleases => 'GitHub-Releases öffnen';
 
   @override
@@ -339,6 +409,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get permissionsExplained => 'Berechtigungen erklärt';
+
+  @override
+  String get permissionsExplanation =>
+      'Damit du deine Musik abspielen und steuern kannst, benötigt Sonora Laufzeitberechtigungen von deinem Gerät.';
+
+  @override
+  String get permissionsNeeded => 'Berechtigungen erforderlich';
 
   @override
   String get personalization => 'Personalisierung';
@@ -357,7 +434,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get playbackSubtitle =>
-      'Sleep-Timer, Startseite, Hintergrundwiedergabe';
+      'Schlaf-Timer, Startseite, Hintergrundwiedergabe';
 
   @override
   String playlistCount(int count) {
@@ -371,6 +448,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get playlistName => 'Playlist-Name';
+
+  @override
   String get playlists => 'Playlists';
 
   @override
@@ -378,28 +458,28 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get preferLocalArtistImagesSubtitle =>
-      'Lokale artist.jpg-Dateien aus Ihren Musikordnern verwenden, wenn verfügbar';
+      'Lokale artist.jpg-Dateien aus deinen Musikordnern verwenden, wenn verfügbar';
 
   @override
   String get preview => 'Vorschau';
 
   @override
   String get privacyCardDataContent =>
-      'Diese App funktioniert vollständig offline und kommuniziert mit keinen Servern, außer zur Prüfung auf App-Updates via GitHub. Alle Bibliotheksstatistiken, Einstellungen und Wiedergabedaten verbleiben ausschließlich auf Ihrem Gerät und werden niemals übertragen.\n\nSie können darauf vertrauen, dass Ihre Hörgewohnheiten privat bleiben.';
+      'Diese App funktioniert vollständig offline und kommuniziert mit keinen Servern, außer zur Prüfung auf App-Updates via GitHub. Alle Bibliotheksstatistiken, Einstellungen und Wiedergabedaten verbleiben ausschließlich auf deinem Gerät und werden niemals übertragen.\n\nDu kannst darauf vertrauen, dass deine Hörgewohnheiten privat bleiben.';
 
   @override
-  String get privacyCardDataTitle => 'Ihre Daten gehören Ihnen';
+  String get privacyCardDataTitle => 'Deine Daten gehören dir';
 
   @override
   String get privacyCardDeleteDataContent =>
-      'Sie haben die volle Kontrolle. Alle App-Einstellungen, Statistiken und Caches können jederzeit sofort in der Gefahrenzone am Ende des Tabs \"Info & Support\" gelöscht werden.';
+      'Du hast die volle Kontrolle. Alle App-Einstellungen, Statistiken und Caches kannst du jederzeit sofort in der Gefahrenzone am Ende des Tabs \"Info & Hilfe\" löschen.';
 
   @override
   String get privacyCardDeleteDataTitle => 'Alle Daten löschen';
 
   @override
   String get privacyCardInternetContent =>
-      'Wird ausschließlich dazu verwendet, die aktuelle Version und das Änderungsprotokoll von GitHub abzurufen, um Sie über verfügbare Updates zu informieren.';
+      'Wird ausschließlich dazu verwendet, die aktuelle Version und das Änderungsprotokoll von GitHub abzurufen, um dich über verfügbare Updates zu informieren.';
 
   @override
   String get privacyCardInternetTitle => 'Internet';
@@ -414,7 +494,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get privacyCardStorageContent =>
-      'Wird verwendet, um den ausgewählten Musikordner nach Audiodateien und lokalen Künstler-/Albumbildern (z. B. artist.jpg oder cover.png) zu durchsuchen.\n\nTransparenz-Garantie: Obwohl Android um Zugriff auf \"Fotos & Medien\" bittet, durchsucht Sonora ausschließlich Dateien im angegebenen Musikverzeichnis. Wir greifen NIEMALS auf Ihre persönliche Fotogalerie oder private Bilder zu.';
+      'Wird verwendet, um den ausgewählten Musikordner nach Audiodateien und lokalen Künstler-/Albumbildern (z. B. artist.jpg oder cover.png) zu durchsuchen.\n\nTransparenz-Garantie: Obwohl Android um Zugriff auf \"Fotos & Medien\" bittet, durchsucht Sonora ausschließlich Dateien im angegebenen Musikverzeichnis. Wir greifen NIEMALS auf deine persönliche Fotogalerie oder private Bilder zu.';
 
   @override
   String get privacyCardStorageTitle => 'Speicher, Audio & Coverbilder';
@@ -437,8 +517,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Datenverwaltung und erforderliche Berechtigungen';
 
   @override
+  String get queue => 'Warteschlange';
+
+  @override
+  String get queueEmpty => 'Warteschlange ist leer';
+
+  @override
   String get rateLimitMessage =>
-      'Das GitHub-API-Rate-Limit (60 Anfragen/Stunde für anonyme Anfragen) wurde erreicht.\n\nBitte öffnen Sie das GitHub-Repository direkt, um nach neuen Versionen zu suchen.';
+      'Das GitHub-API-Rate-Limit (60 Anfragen/Stunde für anonyme Anfragen) wurde erreicht.\n\nBitte öffne das GitHub-Repository direkt, um nach neuen Versionen zu suchen.';
 
   @override
   String get rateLimitTitle => 'Rate-Limit überschritten';
@@ -454,6 +540,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get reset => 'Zurücksetzen';
+
+  @override
+  String get resetAll => 'Zurücksetzen';
 
   @override
   String get resetApplication => 'App zurücksetzen';
@@ -474,7 +563,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get resetStatisticsConfirmMessage =>
-      'Dies löscht Ihre gesamten Hörstatistiken dauerhaft, einschließlich Gesamtdauer, Wiedergabezahlen und Top-Charts. Dies kann nicht rückgängig gemacht werden.';
+      'Dies löscht deine gesamten Hörstatistiken dauerhaft, einschließlich Gesamtdauer, Wiedergabezahlen und Top-Charts. Dies kann nicht rückgängig gemacht werden.';
 
   @override
   String get resetStatisticsConfirmTitle => 'Statistiken zurücksetzen?';
@@ -495,7 +584,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get searchSongsHint => 'Songs, Künstler suchen...';
 
   @override
+  String get selectFolder => 'Ordner auswählen';
+
+  @override
   String get selectLanguage => 'Sprache wählen';
+
+  @override
+  String get selectedDirectory => 'Ausgewähltes Verzeichnis:';
 
   @override
   String get setMusicDirectory => 'Musikverzeichnis festlegen';
@@ -507,11 +602,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings => 'Einstellungen';
 
   @override
+  String get setupMusicDirectory => 'Musikverzeichnis einrichten';
+
+  @override
   String get showAudioVisualizer => 'Audio-Visualisierer anzeigen';
 
   @override
   String get showAudioVisualizerSubtitle =>
       'Audio-Wellen-Visualisierer im Player-Bildschirm animieren';
+
+  @override
+  String get showNotifications => 'Benachrichtigungen anzeigen';
+
+  @override
+  String get showNotificationsSubtitle =>
+      'Erforderlich, um Mediensteuerung auf dem Sperrbildschirm und in der Benachrichtigungsleiste anzuzeigen.';
 
   @override
   String get shuffle => 'Zufall';
@@ -589,7 +694,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get sortSubtitle =>
-      'Ihre Sortiereinstellung wird pro Tab gespeichert und beim nächsten Start automatisch angewendet.';
+      'Deine Sortiereinstellung wird pro Tab gespeichert und beim nächsten Start automatisch angewendet.';
 
   @override
   String get sourceCode => 'Quellcode';
@@ -598,11 +703,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sourceCodeSubtitle => 'Das GitHub-Repository ansehen';
 
   @override
+  String get startTimer => 'Timer starten';
+
+  @override
   String get stats => 'Statistiken';
 
   @override
   String get syncExplanation =>
-      'Sonora spielt Ihre Dateien lokal und offline ab. Wenn Sie neue Titel in diesen Ordner kopieren, führen Sie unten eine Synchronisation aus.';
+      'Sonora spielt deine Dateien lokal und offline ab. Wenn du neue Titel in diesen Ordner kopierst, führe unten eine Synchronisation durch.';
 
   @override
   String get syncNow => 'Jetzt synchronisieren';
@@ -614,7 +722,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get systemDefault => 'Systemstandard';
 
   @override
-  String get systemSubtitle => 'Folgt dem Theme Ihres Geräts';
+  String get systemSubtitle => 'Folgt dem Theme deines Geräts';
 
   @override
   String get telegramContact => 'Telegram-Kontakt';
@@ -629,6 +737,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get timer => 'Timer';
 
   @override
+  String get timerDuration => 'Timer-Dauer';
+
+  @override
   String get titleFilters => 'Titel-Filter';
 
   @override
@@ -640,6 +751,17 @@ class AppLocalizationsDe extends AppLocalizations {
       one: '1 Titel',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get tryAgain => 'Erneut versuchen';
+
+  @override
+  String get updateAvailable => 'Update verfügbar';
+
+  @override
+  String updateAvailableMessage(String version) {
+    return 'Version $version ist jetzt verfügbar!';
   }
 
   @override
@@ -664,5 +786,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get volume => 'Lautstärke';
 
   @override
-  String get yourName => 'Ihr Name';
+  String get welcomeToSonora => 'Willkommen bei Sonora';
+
+  @override
+  String get yourName => 'Dein Name';
+
+  @override
+  String get yourNameOptional => 'Dein Name (Optional)';
 }

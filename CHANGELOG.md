@@ -2,6 +2,11 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [Unreleased]
+### Added
+* Full app localization (English, German, Japanese) via Flutter `intl` — all settings screens, favorites, sort sheet, count labels, and dialogs now use `context.l10n`
+* Language picker in Library Formatting settings (system default / English / German / Japanese)
+
 ## [1.11.2] - 2026-07-23
 ### Fixed
 * Downscale background blur images to 120px in detail screens to eliminate GPU/RAM lag when opening playlists, artists, or albums with high-resolution covers

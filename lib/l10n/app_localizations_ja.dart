@@ -12,12 +12,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aboutSonora => 'Sonoraについて';
 
   @override
+  String get accessAudioAndImageFiles => 'オーディオと画像ファイルへのアクセス';
+
+  @override
+  String get accessAudioSubtitle =>
+      '音楽ファイルのインデックス作成とローカルカバー画像（artist.jpg / cover.jpg）のスキャンに必要です。';
+
+  @override
   String albumCount(int count) {
     return '$count アルバム';
   }
 
   @override
   String get albums => 'アルバム';
+
+  @override
+  String get allPermissionsGranted => 'すべての権限が許可されました';
 
   @override
   String get alreadyOnLatest => 'すでに最新バージョンをお使いです。';
@@ -58,7 +68,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get autoCheckUpdatesSubtitle => 'アプリ起動時にGitHubで新バージョンを確認します';
 
   @override
+  String get back => '戻る';
+
+  @override
   String get cancel => 'キャンセル';
+
+  @override
+  String get cancelTimer => 'タイマーをキャンセル';
 
   @override
   String get change => '変更';
@@ -73,6 +89,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get changelog => '更新履歴';
 
   @override
+  String get changelogLabel => '更新履歴：';
+
+  @override
   String get changelogSubtitle => '新機能を確認';
 
   @override
@@ -85,6 +104,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get checkForUpdatesSubtitle => 'GitHubで新しいリリースを確認します';
 
   @override
+  String get chooseMusicFolder =>
+      '初期ライブラリを構築するために、音楽ファイル（MP3、FLAC、M4Aなど）が入ったメインフォルダを選択してください。';
+
+  @override
   String get chooseTheme => 'テーマを選択';
 
   @override
@@ -94,10 +117,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get communityAndSupport => 'コミュニティ＆サポート';
 
   @override
+  String get configurePermissions => '権限を設定';
+
+  @override
   String get create => '作成';
 
   @override
   String get createPlaylist => 'プレイリストを作成';
+
+  @override
+  String get customDuration => 'カスタム時間...';
+
+  @override
+  String get customSleepTimer => 'カスタムスリープタイマー';
 
   @override
   String get dangerZone => '危険ゾーン';
@@ -156,13 +188,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get displayedAs => '表示名:';
 
   @override
+  String get download => 'ダウンロード';
+
+  @override
   String get dynamicTheme => 'ダイナミックテーマ (Material You)';
 
   @override
   String get dynamicThemeSubtitle => '再生中のアルバムアートの色に合わせてアプリを自動着色します';
 
   @override
+  String get enterDurationHint => '時間を入力';
+
+  @override
   String get enterYourName => '名前を入力';
+
+  @override
+  String get failedToLoadChangelog => '更新履歴を読み込めませんでした。';
 
   @override
   String get favorites => 'お気に入り';
@@ -187,6 +228,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get formattingSubtitle => '曲タイトルの表示方法を設定します';
+
+  @override
+  String get getStarted => '始める';
 
   @override
   String goodAfternoon(String name) {
@@ -234,6 +278,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get lastSync => '最終同期';
 
   @override
+  String get later => 'あとで';
+
+  @override
   String get libraryFormatting => 'ライブラリの形式設定';
 
   @override
@@ -261,12 +308,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mfx => 'MFX';
 
   @override
+  String get mfxBassBoosted => 'ベースブースト';
+
+  @override
+  String get mfxLoFi => 'Lo-Fi / ヴィンテージルーム';
+
+  @override
+  String get mfxResetAll => 'すべてのエフェクトをリセット';
+
+  @override
+  String get mfxWarmth => '暖かみ（リバーブ）';
+
+  @override
   String minuteAbbr(int min) {
     return '$min分';
   }
 
   @override
+  String get minutes => '分';
+
+  @override
   String get neverSynced => '未同期';
+
+  @override
+  String get next => '次へ';
 
   @override
   String get noAlbumsFound => 'アルバムが見つかりません';
@@ -302,6 +367,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ok => 'OK';
 
   @override
+  String get onboardingDescription =>
+      '美しいMaterial 3 Expressiveデザインで作られたプレミアムなオフライン音楽体験。\n\nなめらかな再生とスピーディなバックグラウンドスキャンをお楽しみください。';
+
+  @override
   String get openGithubReleases => 'GitHub Releasesを開く';
 
   @override
@@ -315,6 +384,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get permissionsExplained => '権限の説明';
+
+  @override
+  String get permissionsExplanation =>
+      '音楽を再生・操作するために、Sonoraはデバイスのランタイム権限が必要です。';
+
+  @override
+  String get permissionsNeeded => '権限が必要です';
 
   @override
   String get personalization => 'パーソナライズ';
@@ -338,6 +414,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String playlistCount(int count) {
     return '$count プレイリスト';
   }
+
+  @override
+  String get playlistName => 'プレイリスト名';
 
   @override
   String get playlists => 'プレイリスト';
@@ -403,6 +482,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get privacySubtitle => 'データ管理と必要な権限';
 
   @override
+  String get queue => '再生キュー';
+
+  @override
+  String get queueEmpty => 'キューは空です';
+
+  @override
   String get rateLimitMessage =>
       'GitHubのAPIレート制限（匿名リクエスト60回/時間）に達しました。\n\nGitHubリポジトリを直接開いて新しいリリースを確認してください。';
 
@@ -420,6 +505,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reset => 'リセット';
+
+  @override
+  String get resetAll => 'リセット';
 
   @override
   String get resetApplication => 'アプリをリセット';
@@ -460,7 +548,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get searchSongsHint => '曲、アーティストを検索...';
 
   @override
+  String get selectFolder => 'フォルダを選択';
+
+  @override
   String get selectLanguage => '言語を選択';
+
+  @override
+  String get selectedDirectory => '選択したディレクトリ：';
 
   @override
   String get setMusicDirectory => '音楽ディレクトリを設定';
@@ -472,10 +566,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings => '設定';
 
   @override
+  String get setupMusicDirectory => '音楽ディレクトリの設定';
+
+  @override
   String get showAudioVisualizer => 'オーディオビジュアライザーを表示';
 
   @override
   String get showAudioVisualizerSubtitle => 'プレイヤー画面内にオーディオ波形アニメーションを表示します';
+
+  @override
+  String get showNotifications => '通知を表示';
+
+  @override
+  String get showNotificationsSubtitle =>
+      'ロック画面と通知シェードにメディア再生コントロールを表示するために必要です。';
 
   @override
   String get shuffle => 'シャッフル';
@@ -555,6 +659,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sourceCodeSubtitle => 'GitHubリポジトリを表示';
 
   @override
+  String get startTimer => 'タイマーを開始';
+
+  @override
   String get stats => '統計';
 
   @override
@@ -586,11 +693,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get timer => 'タイマー';
 
   @override
+  String get timerDuration => 'タイマー時間';
+
+  @override
   String get titleFilters => 'タイトルフィルター';
 
   @override
   String trackCount(int count) {
     return '$count トラック';
+  }
+
+  @override
+  String get tryAgain => 'もう一度試す';
+
+  @override
+  String get updateAvailable => 'アップデートあり';
+
+  @override
+  String updateAvailableMessage(String version) {
+    return 'バージョン $version が利用可能です！';
   }
 
   @override
@@ -612,5 +733,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get volume => '音量';
 
   @override
+  String get welcomeToSonora => 'Sonoraへようこそ';
+
+  @override
   String get yourName => 'あなたの名前';
+
+  @override
+  String get yourNameOptional => 'あなたの名前（任意）';
 }

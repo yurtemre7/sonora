@@ -1,6 +1,8 @@
 {
   "@@locale": "en",
   "aboutSonora": "About Sonora",
+  "accessAudioAndImageFiles": "Access Audio & Image Files",
+  "accessAudioSubtitle": "Required to index audio tracks and scan local cover images (artist.jpg / cover.jpg) on your device.",
   "albumCount": "{count, plural, =1{1 album} other{{count} albums}}",
   "@albumCount": {
     "placeholders": {
@@ -10,6 +12,7 @@
     }
   },
   "albums": "Albums",
+  "allPermissionsGranted": "All Permissions Granted",
   "alreadyOnLatest": "You are already on the latest version.",
   "amoledDark": "AMOLED Pure Black",
   "amoledDarkSubtitle": "Use pitch black backgrounds in dark mode instead of dark gray",
@@ -32,20 +35,27 @@
   "artists": "Artists",
   "autoCheckUpdates": "Automatically Check for Updates",
   "autoCheckUpdatesSubtitle": "Check GitHub for releases every time the app opens",
+  "back": "Back",
   "cancel": "Cancel",
+  "cancelTimer": "Cancel Timer",
   "change": "Change",
   "changeCover": "Change Cover",
   "changeFolder": "Change Folder",
   "changelog": "Changelog",
+  "changelogLabel": "Changelog:",
   "changelogSubtitle": "View what's new",
   "changelogTitle": "Changelog",
   "checkForUpdates": "Check for Updates",
   "checkForUpdatesSubtitle": "Check GitHub for a new release",
+  "chooseMusicFolder": "Choose the primary folder containing your audio tracks (MP3, FLAC, M4A, etc.) to build your initial library database.",
   "chooseTheme": "Choose Theme",
   "close": "Close",
   "communityAndSupport": "Community & Support",
+  "configurePermissions": "Configure Permissions",
   "create": "Create",
   "createPlaylist": "Create a playlist",
+  "customDuration": "Custom Duration...",
+  "customSleepTimer": "Custom Sleep Timer",
   "dangerZone": "Danger Zone",
   "dark": "Dark",
   "darkSubtitle": "Always use dark theme",
@@ -71,9 +81,12 @@
   "developerProfile": "Developer Profile",
   "developerProfileSubtitle": "Check out yurtemre7 on GitHub",
   "displayedAs": "Displayed As:",
+  "download": "Download",
   "dynamicTheme": "Dynamic Theme (Material You)",
   "dynamicThemeSubtitle": "Automatically theme the app using active album art",
+  "enterDurationHint": "Enter duration",
   "enterYourName": "Enter Your Name",
+  "failedToLoadChangelog": "Failed to load changelog.",
   "favorites": "Favorites",
   "fileSize": "File Size",
   "filterTitleArtist": "Remove artist from titles",
@@ -82,6 +95,7 @@
   "filterTitleFeaturesSubtitle": "Hides featured artists from the song title if present.",
   "formattingSettings": "Title & Metadata Formatting",
   "formattingSubtitle": "Configure how song titles are displayed",
+  "getStarted": "Get Started",
   "goodAfternoon": "Good afternoon, {name}",
   "@goodAfternoon": {
     "placeholders": {
@@ -116,6 +130,7 @@
   "languageJapanese": "Japanese",
   "languageSystem": "System Default",
   "lastSync": "Last Sync",
+  "later": "Later",
   "libraryFormatting": "Library Formatting",
   "librarySync": "Library Sync",
   "licenses": "Licenses",
@@ -125,6 +140,10 @@
   "listeningStatistics": "Listening Statistics",
   "lyrics": "Lyrics",
   "mfx": "MFX",
+  "mfxBassBoosted": "Bass Boosted",
+  "mfxLoFi": "Lo-Fi / Vintage Room",
+  "mfxResetAll": "Reset All Effects",
+  "mfxWarmth": "Warmth (Reverb)",
   "minuteAbbr": "{min} min",
   "@minuteAbbr": {
     "placeholders": {
@@ -133,7 +152,9 @@
       }
     }
   },
+  "minutes": "minutes",
   "neverSynced": "Never synced",
+  "next": "Next",
   "noAlbumsFound": "No albums found",
   "noArtistsFound": "No artists found",
   "noFavoritesYet": "No favorites yet",
@@ -145,11 +166,14 @@
   "noPlaylistsFound": "No playlists found",
   "noSongsFound": "No songs found",
   "ok": "OK",
+  "onboardingDescription": "A premium offline music experience built with beautiful Material 3 Expressive elements.\n\nEnjoy fluid, stutter-free playback and fast background syncing.",
   "openGithubReleases": "Open GitHub Releases",
   "originalMetadata": "Original Metadata:",
   "pauseOnDuck": "Pause on notifications",
   "pauseOnDuckSubtitle": "Pause music instead of lowering volume when a notification arrives",
   "permissionsExplained": "Permissions Explained",
+  "permissionsExplanation": "To play and control your music, Sonora needs runtime authorization permissions from your device.",
+  "permissionsNeeded": "Permissions Needed",
   "personalization": "Personalization",
   "play": "Play",
   "playAll": "Play All",
@@ -164,6 +188,7 @@
       }
     }
   },
+  "playlistName": "Playlist name",
   "playlists": "Playlists",
   "preferLocalArtistImages": "Prefer Local Artist Images",
   "preferLocalArtistImagesSubtitle": "Use local artist.jpg files from your music folders when available",
@@ -183,12 +208,15 @@
   "privacyPermissions": "Privacy & Permissions",
   "privacySettings": "Privacy & Permissions",
   "privacySubtitle": "Data management and required permissions",
+  "queue": "Queue",
+  "queueEmpty": "Queue is empty",
   "rateLimitMessage": "GitHub API rate limit (60 requests/hour for anonymous requests) has been reached.\n\nPlease open the GitHub repository directly to check for new releases.",
   "rateLimitTitle": "Rate Limit Exceeded",
   "removeCover": "Remove Cover",
   "rename": "Rename",
   "renamePlaylist": "Rename Playlist",
   "reset": "Reset",
+  "resetAll": "Reset",
   "resetApplication": "Reset Application",
   "resetApplicationConfirmMessage": "This will permanently delete all imported audio files and clear your library. This cannot be undone.",
   "resetApplicationConfirmTitle": "Reset Application?",
@@ -201,12 +229,17 @@
   "searchArtistsHint": "Search artists...",
   "searchPlaylistsHint": "Search playlists...",
   "searchSongsHint": "Search songs, artists...",
+  "selectFolder": "Select Folder",
   "selectLanguage": "Select Language",
+  "selectedDirectory": "Selected Directory:",
   "setMusicDirectory": "Set Music Directory",
   "setSyncFolder": "Set Sync Folder",
   "settings": "Settings",
+  "setupMusicDirectory": "Setup Music Directory",
   "showAudioVisualizer": "Show Audio Visualizer",
   "showAudioVisualizerSubtitle": "Animate audio wave visualizer inside player screen",
+  "showNotifications": "Show Notifications",
+  "showNotificationsSubtitle": "Required to show lockscreen & notification shade media playback controls.",
   "shuffle": "Shuffle",
   "shuffleAll": "Shuffle All",
   "shufflePlay": "Shuffle Play",
@@ -239,6 +272,7 @@
   "sortSubtitle": "Your sorting preference will be saved per tab and automatically applied on next startup.",
   "sourceCode": "Source Code",
   "sourceCodeSubtitle": "View the GitHub repository",
+  "startTimer": "Start Timer",
   "stats": "Stats",
   "syncExplanation": "Sonora plays your files locally and offline. When you copy new tracks into this folder, run a sync below to add them to your library.",
   "syncNow": "Sync Now",
@@ -249,6 +283,7 @@
   "telegramContactSubtitle": "Reach out via @emredev",
   "themeMode": "Theme Mode",
   "timer": "Timer",
+  "timerDuration": "Timer Duration",
   "titleFilters": "Title Filters",
   "trackCount": "{count, plural, =1{1 track} other{{count} tracks}}",
   "@trackCount": {
@@ -258,11 +293,23 @@
       }
     }
   },
+  "tryAgain": "Try Again",
+  "updateAvailable": "Update Available",
+  "updateAvailableMessage": "Version {version} is now available!",
+  "@updateAvailableMessage": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "updateCheckFailed": "Failed to check for updates. Check your internet connection.",
   "useGreetingTitle": "Use Greeting Title",
   "useGreetingTitleSubtitle": "Show a time-based greeting on the home screen instead of the app name",
   "viewStatistics": "View Statistics",
   "viewStatisticsSubtitle": "See your playback history and stats",
   "volume": "Volume",
-  "yourName": "Your Name"
+  "welcomeToSonora": "Welcome to Sonora",
+  "yourName": "Your Name",
+  "yourNameOptional": "Your Name (Optional)"
 }

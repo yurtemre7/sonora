@@ -643,18 +643,18 @@ class _HomeScreenState extends State<HomeScreen>
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('New Playlist'),
+        title: Text(context.l10n.createPlaylist),
         content: TextField(
           controller: textController,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Playlist name'),
+          decoration: InputDecoration(hintText: context.l10n.playlistName),
           textCapitalization: TextCapitalization.sentences,
         ),
         actionsAlignment: MainAxisAlignment.spaceBetween,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -664,7 +664,7 @@ class _HomeScreenState extends State<HomeScreen>
                 await widget.onCreatePlaylist(name);
               }
             },
-            child: const Text('Create'),
+            child: Text(context.l10n.create),
           ),
         ],
       ),
@@ -743,7 +743,7 @@ class _HomeScreenState extends State<HomeScreen>
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Sync Now'),
+                  child: Text(context.l10n.syncNow),
                 ),
               ],
             ),

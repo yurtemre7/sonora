@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class PlaylistSelectorBottomSheet extends StatefulWidget {
   const PlaylistSelectorBottomSheet({
@@ -306,10 +307,10 @@ class _PlaylistSelectorBottomSheetState
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Create Playlist'),
+        title: Text(context.l10n.createPlaylist),
         content: TextField(
           controller: _playlistNameController,
-          decoration: const InputDecoration(hintText: 'Playlist name'),
+          decoration: InputDecoration(hintText: context.l10n.playlistName),
           autofocus: true,
           textCapitalization: TextCapitalization.sentences,
         ),
@@ -317,7 +318,7 @@ class _PlaylistSelectorBottomSheetState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -329,7 +330,7 @@ class _PlaylistSelectorBottomSheetState
                 }
               }
             },
-            child: const Text('Create'),
+            child: Text(context.l10n.create),
           ),
         ],
       ),

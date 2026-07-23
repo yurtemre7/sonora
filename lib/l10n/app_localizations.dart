@@ -106,6 +106,18 @@ abstract class AppLocalizations {
   /// **'About Sonora'**
   String get aboutSonora;
 
+  /// No description provided for @accessAudioAndImageFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Access Audio & Image Files'**
+  String get accessAudioAndImageFiles;
+
+  /// No description provided for @accessAudioSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Required to index audio tracks and scan local cover images (artist.jpg / cover.jpg) on your device.'**
+  String get accessAudioSubtitle;
+
   /// No description provided for @albumCount.
   ///
   /// In en, this message translates to:
@@ -117,6 +129,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Albums'**
   String get albums;
+
+  /// No description provided for @allPermissionsGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'All Permissions Granted'**
+  String get allPermissionsGranted;
 
   /// No description provided for @alreadyOnLatest.
   ///
@@ -190,11 +208,23 @@ abstract class AppLocalizations {
   /// **'Check GitHub for releases every time the app opens'**
   String get autoCheckUpdatesSubtitle;
 
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
   /// No description provided for @cancel.
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
+
+  /// No description provided for @cancelTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Timer'**
+  String get cancelTimer;
 
   /// No description provided for @change.
   ///
@@ -220,6 +250,12 @@ abstract class AppLocalizations {
   /// **'Changelog'**
   String get changelog;
 
+  /// No description provided for @changelogLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Changelog:'**
+  String get changelogLabel;
+
   /// No description provided for @changelogSubtitle.
   ///
   /// In en, this message translates to:
@@ -244,6 +280,12 @@ abstract class AppLocalizations {
   /// **'Check GitHub for a new release'**
   String get checkForUpdatesSubtitle;
 
+  /// No description provided for @chooseMusicFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the primary folder containing your audio tracks (MP3, FLAC, M4A, etc.) to build your initial library database.'**
+  String get chooseMusicFolder;
+
   /// No description provided for @chooseTheme.
   ///
   /// In en, this message translates to:
@@ -262,6 +304,12 @@ abstract class AppLocalizations {
   /// **'Community & Support'**
   String get communityAndSupport;
 
+  /// No description provided for @configurePermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure Permissions'**
+  String get configurePermissions;
+
   /// No description provided for @create.
   ///
   /// In en, this message translates to:
@@ -273,6 +321,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create a playlist'**
   String get createPlaylist;
+
+  /// No description provided for @customDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Duration...'**
+  String get customDuration;
+
+  /// No description provided for @customSleepTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Sleep Timer'**
+  String get customSleepTimer;
 
   /// No description provided for @dangerZone.
   ///
@@ -382,6 +442,12 @@ abstract class AppLocalizations {
   /// **'Displayed As:'**
   String get displayedAs;
 
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
   /// No description provided for @dynamicTheme.
   ///
   /// In en, this message translates to:
@@ -394,11 +460,23 @@ abstract class AppLocalizations {
   /// **'Automatically theme the app using active album art'**
   String get dynamicThemeSubtitle;
 
+  /// No description provided for @enterDurationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter duration'**
+  String get enterDurationHint;
+
   /// No description provided for @enterYourName.
   ///
   /// In en, this message translates to:
   /// **'Enter Your Name'**
   String get enterYourName;
+
+  /// No description provided for @failedToLoadChangelog.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load changelog.'**
+  String get failedToLoadChangelog;
 
   /// No description provided for @favorites.
   ///
@@ -447,6 +525,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Configure how song titles are displayed'**
   String get formattingSubtitle;
+
+  /// No description provided for @getStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get getStarted;
 
   /// No description provided for @goodAfternoon.
   ///
@@ -526,6 +610,12 @@ abstract class AppLocalizations {
   /// **'Last Sync'**
   String get lastSync;
 
+  /// No description provided for @later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
+
   /// No description provided for @libraryFormatting.
   ///
   /// In en, this message translates to:
@@ -580,17 +670,53 @@ abstract class AppLocalizations {
   /// **'MFX'**
   String get mfx;
 
+  /// No description provided for @mfxBassBoosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Bass Boosted'**
+  String get mfxBassBoosted;
+
+  /// No description provided for @mfxLoFi.
+  ///
+  /// In en, this message translates to:
+  /// **'Lo-Fi / Vintage Room'**
+  String get mfxLoFi;
+
+  /// No description provided for @mfxResetAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All Effects'**
+  String get mfxResetAll;
+
+  /// No description provided for @mfxWarmth.
+  ///
+  /// In en, this message translates to:
+  /// **'Warmth (Reverb)'**
+  String get mfxWarmth;
+
   /// No description provided for @minuteAbbr.
   ///
   /// In en, this message translates to:
   /// **'{min} min'**
   String minuteAbbr(int min);
 
+  /// No description provided for @minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes'**
+  String get minutes;
+
   /// No description provided for @neverSynced.
   ///
   /// In en, this message translates to:
   /// **'Never synced'**
   String get neverSynced;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
 
   /// No description provided for @noAlbumsFound.
   ///
@@ -658,6 +784,12 @@ abstract class AppLocalizations {
   /// **'OK'**
   String get ok;
 
+  /// No description provided for @onboardingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A premium offline music experience built with beautiful Material 3 Expressive elements.\n\nEnjoy fluid, stutter-free playback and fast background syncing.'**
+  String get onboardingDescription;
+
   /// No description provided for @openGithubReleases.
   ///
   /// In en, this message translates to:
@@ -687,6 +819,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Permissions Explained'**
   String get permissionsExplained;
+
+  /// No description provided for @permissionsExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'To play and control your music, Sonora needs runtime authorization permissions from your device.'**
+  String get permissionsExplanation;
+
+  /// No description provided for @permissionsNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions Needed'**
+  String get permissionsNeeded;
 
   /// No description provided for @personalization.
   ///
@@ -729,6 +873,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 playlist} other{{count} playlists}}'**
   String playlistCount(int count);
+
+  /// No description provided for @playlistName.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist name'**
+  String get playlistName;
 
   /// No description provided for @playlists.
   ///
@@ -844,6 +994,18 @@ abstract class AppLocalizations {
   /// **'Data management and required permissions'**
   String get privacySubtitle;
 
+  /// No description provided for @queue.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue'**
+  String get queue;
+
+  /// No description provided for @queueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue is empty'**
+  String get queueEmpty;
+
   /// No description provided for @rateLimitMessage.
   ///
   /// In en, this message translates to:
@@ -879,6 +1041,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset'**
   String get reset;
+
+  /// No description provided for @resetAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetAll;
 
   /// No description provided for @resetApplication.
   ///
@@ -952,11 +1120,23 @@ abstract class AppLocalizations {
   /// **'Search songs, artists...'**
   String get searchSongsHint;
 
+  /// No description provided for @selectFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Folder'**
+  String get selectFolder;
+
   /// No description provided for @selectLanguage.
   ///
   /// In en, this message translates to:
   /// **'Select Language'**
   String get selectLanguage;
+
+  /// No description provided for @selectedDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected Directory:'**
+  String get selectedDirectory;
 
   /// No description provided for @setMusicDirectory.
   ///
@@ -976,6 +1156,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// No description provided for @setupMusicDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup Music Directory'**
+  String get setupMusicDirectory;
+
   /// No description provided for @showAudioVisualizer.
   ///
   /// In en, this message translates to:
@@ -987,6 +1173,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Animate audio wave visualizer inside player screen'**
   String get showAudioVisualizerSubtitle;
+
+  /// No description provided for @showNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Notifications'**
+  String get showNotifications;
+
+  /// No description provided for @showNotificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Required to show lockscreen & notification shade media playback controls.'**
+  String get showNotificationsSubtitle;
 
   /// No description provided for @shuffle.
   ///
@@ -1138,6 +1336,12 @@ abstract class AppLocalizations {
   /// **'View the GitHub repository'**
   String get sourceCodeSubtitle;
 
+  /// No description provided for @startTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Timer'**
+  String get startTimer;
+
   /// No description provided for @stats.
   ///
   /// In en, this message translates to:
@@ -1198,6 +1402,12 @@ abstract class AppLocalizations {
   /// **'Timer'**
   String get timer;
 
+  /// No description provided for @timerDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer Duration'**
+  String get timerDuration;
+
   /// No description provided for @titleFilters.
   ///
   /// In en, this message translates to:
@@ -1209,6 +1419,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 track} other{{count} tracks}}'**
   String trackCount(int count);
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Available'**
+  String get updateAvailable;
+
+  /// No description provided for @updateAvailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is now available!'**
+  String updateAvailableMessage(String version);
 
   /// No description provided for @updateCheckFailed.
   ///
@@ -1246,11 +1474,23 @@ abstract class AppLocalizations {
   /// **'Volume'**
   String get volume;
 
+  /// No description provided for @welcomeToSonora.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Sonora'**
+  String get welcomeToSonora;
+
   /// No description provided for @yourName.
   ///
   /// In en, this message translates to:
   /// **'Your Name'**
   String get yourName;
+
+  /// No description provided for @yourNameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Name (Optional)'**
+  String get yourNameOptional;
 }
 
 class _AppLocalizationsDelegate
