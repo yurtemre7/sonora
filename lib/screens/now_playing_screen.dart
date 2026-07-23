@@ -441,31 +441,42 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
               padding: const EdgeInsets.symmetric(horizontal: 4),
               children: [
                 if (song.hasLyrics)
-                  _buildActionChip(
-                    icon: _showLyrics
-                        ? Icons.lyrics_rounded
-                        : Icons.lyrics_outlined,
-                    label: 'Lyrics',
-                    active: _showLyrics,
-                    onPressed: () => setState(() => _showLyrics = !_showLyrics),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: _buildActionChip(
+                      icon: _showLyrics
+                          ? Icons.lyrics_rounded
+                          : Icons.lyrics_outlined,
+                      label: 'Lyrics',
+                      active: _showLyrics,
+                      onPressed: () => setState(() => _showLyrics = !_showLyrics),
+                    ),
                   ),
-                _buildActionChip(
-                  icon: Icons.playlist_add_rounded,
-                  label: 'Playlist',
-                  active: false,
-                  onPressed: () => _showAddToPlaylistDialog(context, song),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: _buildActionChip(
+                    icon: Icons.playlist_add_rounded,
+                    label: 'Playlist',
+                    active: false,
+                    onPressed: () => _showAddToPlaylistDialog(context, song),
+                  ),
                 ),
-                _buildTimerChip(context),
-                _buildActionChip(
-                  icon: Icons.auto_awesome,
-                  label: 'MFX',
-                  active: widget.playerProvider.isMfxActive,
-                  onPressed: () =>
-                      showMfxBottomSheet(context, widget.playerProvider),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: _buildTimerChip(context),
                 ),
-                Tooltip(
-                  message:
-                      '${(widget.playerProvider.volume * 100).round()}% — ${_showVolume ? "Hide" : "Show"} volume',
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: _buildActionChip(
+                    icon: Icons.auto_awesome,
+                    label: 'MFX',
+                    active: widget.playerProvider.isMfxActive,
+                    onPressed: () =>
+                        showMfxBottomSheet(context, widget.playerProvider),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: _buildActionChip(
                     icon: _showVolume
                         ? Icons.volume_up_rounded
