@@ -20,14 +20,9 @@ class MusicScanner {
   /// Cached local artist images path mapping
   Map<String, String> localArtistImages = {};
 
-  /// Queries the cached list of songs from storage instantly.
-  Future<List<Song>> scanAllSongs() async {
-    var songs = <Song>[];
-
+  /// Loads cached local artist images mapping from disk.
+  Future<Map<String, String>> loadLocalArtistImages() async {
     try {
-      // Read existing metadata cache directly for instant UI loading
-      songs = await _readImportedSongsMetadata();
-
       var appDir = await getApplicationDocumentsDirectory();
       var imagesFile = File('${appDir.path}/artist_images.json');
       if (imagesFile.existsSync()) {
@@ -35,6 +30,18 @@ class MusicScanner {
             jsonDecode(await imagesFile.readAsString()) as Map<String, dynamic>;
         localArtistImages = map.map((k, v) => MapEntry(k, v.toString()));
       }
+    } catch (_) {}
+    return localArtistImages;
+  }
+
+  /// Queries the cached list of songs from storage instantly.
+  Future<List<Song>> scanAllSongs() async {
+    var songs = <Song>[];
+
+    try {
+      // Read existing metadata cache directly for instant UI loading
+      songs = await _readImportedSongsMetadata();
+      await loadLocalArtistImages();
     } catch (_) {
       // Return whatever is left on error
     }
@@ -125,9 +132,16 @@ class MusicScanner {
                   name.endsWith('.png') ||
                   name.endsWith('.webp') ||
                   name.endsWith('.jpeg')) {
+                var parentPath = entity.parent.path;
+                var normParentPath = parentPath.replaceAll('\\', '/');
                 localImageFiles
-                    .putIfAbsent(entity.parent.path, () => [])
+                    .putIfAbsent(parentPath, () => [])
                     .add(entity.path);
+                if (normParentPath != parentPath) {
+                  localImageFiles
+                      .putIfAbsent(normParentPath, () => [])
+                      .add(entity.path);
+                }
               } else {
                 var ext = name.split('.').last;
                 if (audioExtensions.contains(ext)) {
@@ -276,6 +290,21 @@ class MusicScanner {
                   ? fileName.substring(0, extIndex)
                   : fileName;
 
+              // Fallback to directory structure for artist/album if metadata is missing
+              if (artist == null || artist.isEmpty || artist == 'Unknown Artist') {
+                var parentDirName = file.parent.parent.path.split(RegExp(r'[/\\]')).last;
+                if (parentDirName.isNotEmpty && parentDirName != 'music' && parentDirName != 'Download') {
+                  artist = parentDirName;
+                }
+              }
+
+              if (album == null || album.isEmpty || album == 'Unknown Album') {
+                var dirName = file.parent.path.split(RegExp(r'[/\\]')).last;
+                if (dirName.isNotEmpty) {
+                  album = dirName;
+                }
+              }
+
               // Fallback to filename parsing
               if (trackNumber == null) {
                 var match = RegExp(
@@ -328,43 +357,57 @@ class MusicScanner {
         }
         var finalArtistImages = <String, String>{};
         for (var song in songsToKeep) {
-          var dir = File(song.filePath).parent.path;
-          var parentDir = File(song.filePath).parent.parent.path;
-
-          var lowerArtist = song.artist.toLowerCase();
+          var lowerArtist = song.artist.trim().toLowerCase();
           var cleanArtist = lowerArtist
               .split(RegExp(r'[,;/]|\sfeat\.|\sft\.', caseSensitive: false))
               .first
               .trim();
 
-          String? findArtistImage(String path) {
-            var images = localImageFiles[path];
-            if (images == null || images.isEmpty) return null;
-            for (var img in images) {
-              var name = img.split(Platform.pathSeparator).last.toLowerCase();
-              if (name == 'artist.jpg' ||
-                  name == 'artist.png' ||
-                  name == 'artist.webp' ||
-                  name == 'artist.jpeg') {
-                return img;
+          String? findArtistImage(Directory startDir) {
+            Directory? current = startDir;
+            var normFolderPath = folderPath.replaceAll('\\', '/');
+            while (current != null) {
+              var normCurrentPath = current.path.replaceAll('\\', '/');
+              var images = localImageFiles[current.path] ?? localImageFiles[normCurrentPath];
+              if (images != null && images.isNotEmpty) {
+                for (var img in images) {
+                  var name = img.split(RegExp(r'[/\\]')).last.toLowerCase();
+                  if (name == 'artist.jpg' ||
+                      name == 'artist.png' ||
+                      name == 'artist.webp' ||
+                      name == 'artist.jpeg') {
+                    return img;
+                  }
+                  if (name == '$cleanArtist.jpg' ||
+                      name == '$cleanArtist.png' ||
+                      name == '$cleanArtist.webp' ||
+                      name == '$cleanArtist.jpeg') {
+                    return img;
+                  }
+                }
+                var dirName = normCurrentPath.split('/').last.toLowerCase().trim();
+                if (dirName == cleanArtist || dirName == lowerArtist) {
+                  return images.first;
+                }
+                // If we are at the artist folder level and any image exists, return it
+                if (images.isNotEmpty) {
+                  return images.first;
+                }
               }
-              if (name == '$cleanArtist.jpg' ||
-                  name == '$cleanArtist.png' ||
-                  name == '$cleanArtist.webp' ||
-                  name == '$cleanArtist.jpeg') {
-                return img;
-              }
-            }
-            var dirName = path.split(Platform.pathSeparator).last.toLowerCase();
-            if (dirName == cleanArtist) {
-              return images.first;
+              if (normCurrentPath == normFolderPath) break;
+              var parent = current.parent;
+              if (parent.path == current.path) break;
+              current = parent;
             }
             return null;
           }
 
-          var match = findArtistImage(dir) ?? findArtistImage(parentDir);
+          var match = findArtistImage(File(song.filePath).parent);
           if (match != null) {
             finalArtistImages[lowerArtist] = match;
+            if (cleanArtist.isNotEmpty) {
+              finalArtistImages[cleanArtist] = match;
+            }
           }
         }
 

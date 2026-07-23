@@ -48,10 +48,13 @@ class PrivacySettingsScreen extends StatelessWidget {
           _buildCard(
             theme,
             icon: Icons.folder_open_rounded,
-            title: 'Storage & Audio',
+            title: 'Storage, Audio & Cover Images',
             content:
-                'Used to scan your local storage for audio files and extract album '
-                'artwork to build your music library. We only read audio-related files.',
+                'Used to scan your selected music folder for audio tracks and local artist/album artwork '
+                '(e.g., artist.jpg or cover.png).\n\n'
+                'Transparent Privacy Guarantee: Although Android prompts for "Photos & Media" access, '
+                'Sonora strictly scans files inside your designated music directory. '
+                'We NEVER read, inspect, or access your personal photo gallery, camera roll, or private images.',
           ),
           const SizedBox(height: 12),
           _buildCard(

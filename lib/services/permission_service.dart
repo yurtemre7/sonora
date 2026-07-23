@@ -18,9 +18,12 @@ class PermissionService {
     try {
       var sdkInt = await getAndroidSdk();
       if (sdkInt >= 33) {
-        // Android 13+ uses granular media permission
-        var status = await Permission.audio.request();
-        audioGranted = status.isGranted;
+        // Android 13+ uses granular media permissions for audio and images
+        var audioStatus = await Permission.audio.request();
+        try {
+          await Permission.photos.request();
+        } catch (_) {}
+        audioGranted = audioStatus.isGranted;
       } else {
         // Legacy storage permission for Android 12 and below
         var status = await Permission.storage.request();

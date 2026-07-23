@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonora/providers/player_provider.dart';
@@ -5,6 +6,7 @@ import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/routing/app_routes.dart';
+import 'package:sonora/screens/settings/debug_caches_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -382,6 +384,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
               context.push(AppRoutes.settingsInfo);
             },
           ),
+          if (kDebugMode) ...[
+            const Divider(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 8.0,
+              ),
+              child: Text(
+                'Developer Tools',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.tertiary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.bug_report_outlined,
+                color: theme.colorScheme.tertiary,
+              ),
+              title: Text(
+                'Debug Cache Info',
+                style: TextStyle(
+                  color: theme.colorScheme.tertiary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: const Text(
+                'View raw formatted cache data, local artist images, and sync state',
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DebugCachesScreen(
+                      playerProvider: widget.playerProvider,
+                      settingsProvider: widget.settingsProvider,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ],
       ),
     );

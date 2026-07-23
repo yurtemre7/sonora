@@ -35,11 +35,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _checkInitialPermissions() async {
     if (!Platform.isAndroid) return;
 
-    // Check storage permission based on SDK version
     var sdkInt = await PermissionService().getAndroidSdk();
     bool storageOk;
     if (sdkInt >= 33) {
-      storageOk = await Permission.audio.isGranted;
+      storageOk = (await Permission.audio.isGranted) && (await Permission.photos.isGranted);
     } else {
       storageOk = await Permission.storage.isGranted;
     }
@@ -402,9 +401,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ? theme.colorScheme.primary
                             : theme.colorScheme.onSurfaceVariant,
                       ),
-                      title: const Text('Access Audio Files'),
+                      title: const Text('Access Audio & Image Files'),
                       subtitle: const Text(
-                        'Required to index and play local music on your device.',
+                        'Required to index audio tracks and scan local cover images (artist.jpg / cover.jpg) on your device.',
                       ),
                     ),
                     const Divider(height: 24),
