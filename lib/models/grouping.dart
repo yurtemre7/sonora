@@ -164,7 +164,11 @@ AlbumGroup buildAlbumGroup(
   );
 }
 
-ArtistGroup buildArtistGroup(String artistName, List<Song> allSongs) {
+ArtistGroup buildArtistGroup(
+  String artistName,
+  List<Song> allSongs, [
+  Map<String, String>? localArtistImages,
+]) {
   var normalizedArtist = artistName.trim().isEmpty
       ? 'Unknown Artist'
       : artistName.trim();
@@ -191,5 +195,12 @@ ArtistGroup buildArtistGroup(String artistName, List<Song> allSongs) {
     return AlbumGroup(name: e.key, artist: normalizedArtist, songs: e.value);
   }).toList();
 
-  return ArtistGroup(name: normalizedArtist, songs: songs, albums: albums);
+  var localImage = localArtistImages?[normalizedArtist.toLowerCase()];
+
+  return ArtistGroup(
+    name: normalizedArtist,
+    songs: songs,
+    albums: albums,
+    localImagePath: localImage,
+  );
 }

@@ -2,15 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.11.0] - 2026-07-23
-### Added
-* Implement low-res playlist cover cropping, 1:1 scrollbar drag, shuffle seek fix, and update settings
+## [1.11.1] - 2026-07-23
 ### Fixed
+* Render scanned local artist cover artwork (`artist.png`/`artist.jpg`) inside the artist detail screen header and background blur
 * Unify home screen tab bar text font size across all tabs
-* Add READ_MEDIA_IMAGES permission and fix artist image discovery
-### Changed
-* Chore: Add new tests
-* Chore: Format files
 
 ## [1.10.1] - 2026-07-22
 ### Fixed

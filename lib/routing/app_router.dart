@@ -19,6 +19,7 @@ import 'package:sonora/screens/settings/playback_settings_screen.dart';
 import 'package:sonora/screens/settings/privacy_settings_screen.dart';
 import 'package:sonora/screens/settings_screen.dart';
 import 'package:sonora/screens/stats_screen.dart';
+import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/utils/logger.dart';
 import 'package:sonora/widgets/mini_player.dart';
 
@@ -223,6 +224,9 @@ class SonoraAppRouter {
               var latestArtist = buildArtistGroup(
                 artistName,
                 playerProvider.allSongs,
+                settingsProvider.preferLocalArtistImages
+                    ? MusicScanner().localArtistImages
+                    : {},
               );
               if (latestArtist.songs.isEmpty) {
                 return const Scaffold(
