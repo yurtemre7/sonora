@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonora/l10n/app_localizations.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
@@ -518,6 +519,9 @@ class _SonoraAppState extends State<SonoraApp> {
                   child: MaterialApp.router(
                     scaffoldMessengerKey: _scaffoldMessengerKey,
                     title: 'Sonora',
+                    locale: _settingsProvider.currentLocale,
+                    localizationsDelegates: AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
                     theme: AppTheme.getTheme(
                       Brightness.light,
                       seedColor: activeSeedColor,

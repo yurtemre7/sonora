@@ -1,0 +1,268 @@
+{
+  "@@locale": "en",
+  "aboutSonora": "About Sonora",
+  "albumCount": "{count, plural, =1{1 album} other{{count} albums}}",
+  "@albumCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "albums": "Albums",
+  "alreadyOnLatest": "You are already on the latest version.",
+  "amoledDark": "AMOLED Pure Black",
+  "amoledDarkSubtitle": "Use pitch black backgrounds in dark mode instead of dark gray",
+  "appLanguage": "App Language",
+  "appTitle": "Sonora",
+  "@appTitle": {
+    "description": "App title"
+  },
+  "appearance": "Appearance",
+  "appearanceSettings": "Appearance & Theme",
+  "appearanceSubtitle": "Theme, colors, visualizer, local images",
+  "artistCount": "{count, plural, =1{1 artist} other{{count} artists}}",
+  "@artistCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "artists": "Artists",
+  "autoCheckUpdates": "Automatically Check for Updates",
+  "autoCheckUpdatesSubtitle": "Check GitHub for releases every time the app opens",
+  "cancel": "Cancel",
+  "change": "Change",
+  "changeCover": "Change Cover",
+  "changeFolder": "Change Folder",
+  "changelog": "Changelog",
+  "changelogSubtitle": "View what's new",
+  "changelogTitle": "Changelog",
+  "checkForUpdates": "Check for Updates",
+  "checkForUpdatesSubtitle": "Check GitHub for a new release",
+  "chooseTheme": "Choose Theme",
+  "close": "Close",
+  "communityAndSupport": "Community & Support",
+  "create": "Create",
+  "createPlaylist": "Create a playlist",
+  "dangerZone": "Danger Zone",
+  "dark": "Dark",
+  "darkSubtitle": "Always use dark theme",
+  "dataManagement": "Data Management",
+  "dateCreated": "Date Created",
+  "dateModified": "Date Modified",
+  "defaultAppColor": "Default App Color",
+  "defaultSleepTimer": "Default Sleep Timer",
+  "defaultSleepTimerSubtitle": "Default duration selected when opening the sleep timer",
+  "defaultStartPage": "Default Start Page",
+  "defaultStartPageSubtitle": "Page to show when the app starts",
+  "delete": "Delete",
+  "deletePlaylist": "Delete Playlist",
+  "deletePlaylistConfirmMessage": "Delete \"{name}\"? This cannot be undone.",
+  "@deletePlaylistConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deletePlaylistConfirmTitle": "Delete Playlist?",
+  "developerProfile": "Developer Profile",
+  "developerProfileSubtitle": "Check out yurtemre7 on GitHub",
+  "displayedAs": "Displayed As:",
+  "dynamicTheme": "Dynamic Theme (Material You)",
+  "dynamicThemeSubtitle": "Automatically theme the app using active album art",
+  "enterYourName": "Enter Your Name",
+  "favorites": "Favorites",
+  "fileSize": "File Size",
+  "filterTitleArtist": "Remove artist from titles",
+  "filterTitleArtistSubtitle": "Hides \"Artist - \" from the beginning of song titles.",
+  "filterTitleFeatures": "Remove (feat.) from titles",
+  "filterTitleFeaturesSubtitle": "Hides featured artists from the song title if present.",
+  "formattingSettings": "Title & Metadata Formatting",
+  "formattingSubtitle": "Configure how song titles are displayed",
+  "goodAfternoon": "Good afternoon, {name}",
+  "@goodAfternoon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goodEvening": "Good evening, {name}",
+  "@goodEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goodMorning": "Good morning, {name}",
+  "@goodMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "infoSettings": "Info & Support",
+  "infoSubtitle": "About, updates, changelog, danger zone",
+  "keepPlayingOnClose": "Keep playing on app close",
+  "keepPlayingOnCloseSubtitle": "Keep playing music in the background when swiped away",
+  "language": "Language",
+  "languageEnglish": "English",
+  "languageGerman": "German",
+  "languageJapanese": "Japanese",
+  "languageSystem": "System Default",
+  "lastSync": "Last Sync",
+  "libraryFormatting": "Library Formatting",
+  "librarySync": "Library Sync",
+  "licenses": "Licenses",
+  "licensesSubtitle": "Open source licenses",
+  "light": "Light",
+  "lightSubtitle": "Always use light theme",
+  "listeningStatistics": "Listening Statistics",
+  "lyrics": "Lyrics",
+  "mfx": "MFX",
+  "minuteAbbr": "{min} min",
+  "@minuteAbbr": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "neverSynced": "Never synced",
+  "noAlbumsFound": "No albums found",
+  "noArtistsFound": "No artists found",
+  "noFavoritesYet": "No favorites yet",
+  "noMatchingAlbumsFound": "No matching albums found",
+  "noMatchingArtistsFound": "No matching artists found",
+  "noMatchingPlaylistsFound": "No matching playlists found",
+  "noMatchingSongsFound": "No matching songs found",
+  "noMusicFilesFound": "No music files found",
+  "noPlaylistsFound": "No playlists found",
+  "noSongsFound": "No songs found",
+  "ok": "OK",
+  "openGithubReleases": "Open GitHub Releases",
+  "originalMetadata": "Original Metadata:",
+  "pauseOnDuck": "Pause on notifications",
+  "pauseOnDuckSubtitle": "Pause music instead of lowering volume when a notification arrives",
+  "permissionsExplained": "Permissions Explained",
+  "personalization": "Personalization",
+  "play": "Play",
+  "playAll": "Play All",
+  "playback": "Playback",
+  "playbackSettings": "Playback & Audio",
+  "playbackSubtitle": "Sleep timer, start page, background play",
+  "playlistCount": "{count, plural, =1{1 playlist} other{{count} playlists}}",
+  "@playlistCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "playlists": "Playlists",
+  "preferLocalArtistImages": "Prefer Local Artist Images",
+  "preferLocalArtistImagesSubtitle": "Use local artist.jpg files from your music folders when available",
+  "preview": "Preview",
+  "privacyCardDataContent": "This app operates entirely offline and communicates with no servers, with the exception of checking GitHub for app updates. All of your library statistics, preferences, and playtime data stay strictly on your device and are never sent anywhere. \n\nYou can trust that your listening habits remain private.",
+  "privacyCardDataTitle": "Your Data is Yours",
+  "privacyCardDeleteDataContent": "You have full control. You can wipe all app settings, statistics, and caches instantly at any time from the Danger Zone located at the bottom of the Info & Support tab.",
+  "privacyCardDeleteDataTitle": "Delete All Data",
+  "privacyCardInternetContent": "Only used to fetch the latest release version and changelog from GitHub to notify you of available updates.",
+  "privacyCardInternetTitle": "Internet",
+  "privacyCardNotificationsContent": "Used to display the media player controls in your notification shade and lock screen. A foreground service is required to keep the music playing continuously in the background when the app is closed.",
+  "privacyCardNotificationsTitle": "Notifications & Foreground Service",
+  "privacyCardStorageContent": "Used to scan your selected music folder for audio tracks and local artist/album artwork (e.g., artist.jpg or cover.png).\n\nTransparent Privacy Guarantee: Although Android prompts for \"Photos & Media\" access, Sonora strictly scans files inside your designated music directory. We NEVER read, inspect, or access your personal photo gallery, camera roll, or private images.",
+  "privacyCardStorageTitle": "Storage, Audio & Cover Images",
+  "privacyCardWakeLockContent": "Prevents your device from sleeping and abruptly stopping the music playback while you are listening.",
+  "privacyCardWakeLockTitle": "Wake Lock",
+  "privacyPermissions": "Privacy & Permissions",
+  "privacySettings": "Privacy & Permissions",
+  "privacySubtitle": "Data management and required permissions",
+  "rateLimitMessage": "GitHub API rate limit (60 requests/hour for anonymous requests) has been reached.\n\nPlease open the GitHub repository directly to check for new releases.",
+  "rateLimitTitle": "Rate Limit Exceeded",
+  "removeCover": "Remove Cover",
+  "rename": "Rename",
+  "renamePlaylist": "Rename Playlist",
+  "reset": "Reset",
+  "resetApplication": "Reset Application",
+  "resetApplicationConfirmMessage": "This will permanently delete all imported audio files and clear your library. This cannot be undone.",
+  "resetApplicationConfirmTitle": "Reset Application?",
+  "resetApplicationSubtitle": "Hold for 3 seconds to wipe all data.",
+  "resetStatistics": "Reset Statistics",
+  "resetStatisticsConfirmMessage": "This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.",
+  "resetStatisticsConfirmTitle": "Reset Statistics?",
+  "save": "Save",
+  "searchAlbumsHint": "Search albums...",
+  "searchArtistsHint": "Search artists...",
+  "searchPlaylistsHint": "Search playlists...",
+  "searchSongsHint": "Search songs, artists...",
+  "selectLanguage": "Select Language",
+  "setMusicDirectory": "Set Music Directory",
+  "setSyncFolder": "Set Sync Folder",
+  "settings": "Settings",
+  "showAudioVisualizer": "Show Audio Visualizer",
+  "showAudioVisualizerSubtitle": "Animate audio wave visualizer inside player screen",
+  "shuffle": "Shuffle",
+  "shuffleAll": "Shuffle All",
+  "shufflePlay": "Shuffle Play",
+  "songCount": "{count, plural, =1{1 song} other{{count} songs}}",
+  "@songCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "songs": "Songs",
+  "sort": "Sort",
+  "sortAlbumsBy": "Sort Albums By",
+  "sortArtistsBy": "Sort Artists By",
+  "sortAscending": "Sort Ascending",
+  "sortByAlbumCount": "Album Count",
+  "sortByAlbumName": "Album Name",
+  "sortByArtist": "Artist",
+  "sortByArtistName": "Artist Name",
+  "sortByDuration": "Duration",
+  "sortByName": "Name",
+  "sortByPlaylistName": "Playlist Name",
+  "sortByRecentlyAdded": "Recently Added",
+  "sortBySongCount": "Song Count",
+  "sortByTitle": "Title",
+  "sortByTrackCount": "Track Count",
+  "sortPlaylistsBy": "Sort Playlists By",
+  "sortSongsBy": "Sort Songs By",
+  "sortSubtitle": "Your sorting preference will be saved per tab and automatically applied on next startup.",
+  "sourceCode": "Source Code",
+  "sourceCodeSubtitle": "View the GitHub repository",
+  "stats": "Stats",
+  "syncExplanation": "Sonora plays your files locally and offline. When you copy new tracks into this folder, run a sync below to add them to your library.",
+  "syncNow": "Sync Now",
+  "syncing": "Syncing...",
+  "systemDefault": "System Default",
+  "systemSubtitle": "Follows your device theme",
+  "telegramContact": "Telegram Contact",
+  "telegramContactSubtitle": "Reach out via @emredev",
+  "themeMode": "Theme Mode",
+  "timer": "Timer",
+  "titleFilters": "Title Filters",
+  "trackCount": "{count, plural, =1{1 track} other{{count} tracks}}",
+  "@trackCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "updateCheckFailed": "Failed to check for updates. Check your internet connection.",
+  "useGreetingTitle": "Use Greeting Title",
+  "useGreetingTitleSubtitle": "Show a time-based greeting on the home screen instead of the app name",
+  "viewStatistics": "View Statistics",
+  "viewStatisticsSubtitle": "See your playback history and stats",
+  "volume": "Volume",
+  "yourName": "Your Name"
+}

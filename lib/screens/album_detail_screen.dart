@@ -6,6 +6,7 @@ import 'package:sonora/models/grouping.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/utils/format_utils.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
 import 'package:sonora/widgets/song_tile.dart';
@@ -131,7 +132,7 @@ class AlbumDetailScreen extends StatelessWidget {
                             }
                           },
                           icon: const Icon(Icons.play_arrow_rounded),
-                          label: const Text('Play'),
+                          label: Text(context.l10n.play),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -143,7 +144,7 @@ class AlbumDetailScreen extends StatelessWidget {
                             }
                           },
                           icon: const Icon(Icons.shuffle_rounded),
-                          label: const Text('Shuffle'),
+                          label: Text(context.l10n.shuffle),
                         ),
                       ),
                       const SizedBox(width: 8),

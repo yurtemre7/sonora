@@ -13,6 +13,7 @@ import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/services/lyrics_service.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/ambient_glow.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
@@ -447,7 +448,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                       icon: _showLyrics
                           ? Icons.lyrics_rounded
                           : Icons.lyrics_outlined,
-                      label: 'Lyrics',
+                      label: context.l10n.lyrics,
                       active: _showLyrics,
                       onPressed: () => setState(() => _showLyrics = !_showLyrics),
                     ),
@@ -456,7 +457,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: _buildActionChip(
                     icon: Icons.playlist_add_rounded,
-                    label: 'Playlist',
+                    label: context.l10n.playlists,
                     active: false,
                     onPressed: () => _showAddToPlaylistDialog(context, song),
                   ),
@@ -469,7 +470,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: _buildActionChip(
                     icon: Icons.auto_awesome,
-                    label: 'MFX',
+                    label: context.l10n.mfx,
                     active: widget.playerProvider.isMfxActive,
                     onPressed: () =>
                         showMfxBottomSheet(context, widget.playerProvider),

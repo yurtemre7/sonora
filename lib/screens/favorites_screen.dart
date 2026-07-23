@@ -7,6 +7,7 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/utils/format_utils.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/song_tile.dart';
@@ -86,7 +87,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         }).toList();
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Favorites'), centerTitle: true),
+          appBar: AppBar(title: Text(context.l10n.favorites), centerTitle: true),
           body: CustomScrollView(
             slivers: [
               if (favArtists.isNotEmpty) ...[
@@ -103,7 +104,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(
-                          'Artists',
+                          context.l10n.artists,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -181,7 +182,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(
-                          'Albums',
+                          context.l10n.albums,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -207,8 +208,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         controller: _albumScrollController,
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        // Add lots of items if we want continuous looping, or just cycle naturally
-                        // for a true carousel we could use a large number, but simple repetition is okay
                         itemCount: favAlbums.length,
                         itemBuilder: (context, index) {
                           var album = favAlbums[index];
@@ -272,14 +271,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(
-                          'Songs',
+                          context.l10n.songs,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${favSongs.length} • ${formatTotalDuration(favSongs)}',
+                          '${context.l10n.songCount(favSongs.length)} • ${formatTotalDuration(favSongs)}',
                           style: theme.textTheme.titleSmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -323,7 +322,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No favorites yet',
+                          context.l10n.noFavoritesYet,
                           style: theme.textTheme.titleLarge?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),

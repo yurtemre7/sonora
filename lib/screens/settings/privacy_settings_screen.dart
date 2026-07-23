@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class PrivacySettingsScreen extends StatelessWidget {
   const PrivacySettingsScreen({super.key});
@@ -10,7 +11,7 @@ class PrivacySettingsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Privacy & Permissions'),
+        title: Text(context.l10n.privacyPermissions),
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -26,19 +27,14 @@ class PrivacySettingsScreen extends StatelessWidget {
           _buildCard(
             theme,
             icon: Icons.security_rounded,
-            title: 'Your Data is Yours',
-            content:
-                'This app operates entirely offline and communicates with no servers, '
-                'with the exception of checking GitHub for app updates. '
-                'All of your library statistics, preferences, and playtime data stay '
-                'strictly on your device and are never sent anywhere. '
-                '\n\nYou can trust that your listening habits remain private.',
+            title: context.l10n.privacyCardDataTitle,
+            content: context.l10n.privacyCardDataContent,
           ),
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 8),
             child: Text(
-              'Permissions Explained',
+              context.l10n.permissionsExplained,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -48,47 +44,35 @@ class PrivacySettingsScreen extends StatelessWidget {
           _buildCard(
             theme,
             icon: Icons.folder_open_rounded,
-            title: 'Storage, Audio & Cover Images',
-            content:
-                'Used to scan your selected music folder for audio tracks and local artist/album artwork '
-                '(e.g., artist.jpg or cover.png).\n\n'
-                'Transparent Privacy Guarantee: Although Android prompts for "Photos & Media" access, '
-                'Sonora strictly scans files inside your designated music directory. '
-                'We NEVER read, inspect, or access your personal photo gallery, camera roll, or private images.',
+            title: context.l10n.privacyCardStorageTitle,
+            content: context.l10n.privacyCardStorageContent,
           ),
           const SizedBox(height: 12),
           _buildCard(
             theme,
             icon: Icons.notifications_active_rounded,
-            title: 'Notifications & Foreground Service',
-            content:
-                'Used to display the media player controls in your notification shade '
-                'and lock screen. A foreground service is required to keep the music '
-                'playing continuously in the background when the app is closed.',
+            title: context.l10n.privacyCardNotificationsTitle,
+            content: context.l10n.privacyCardNotificationsContent,
           ),
           const SizedBox(height: 12),
           _buildCard(
             theme,
             icon: Icons.battery_charging_full_rounded,
-            title: 'Wake Lock',
-            content:
-                'Prevents your device from sleeping and abruptly stopping the '
-                'music playback while you are listening.',
+            title: context.l10n.privacyCardWakeLockTitle,
+            content: context.l10n.privacyCardWakeLockContent,
           ),
           const SizedBox(height: 12),
           _buildCard(
             theme,
             icon: Icons.public_rounded,
-            title: 'Internet',
-            content:
-                'Only used to fetch the latest release version and changelog from '
-                'GitHub to notify you of available updates.',
+            title: context.l10n.privacyCardInternetTitle,
+            content: context.l10n.privacyCardInternetContent,
           ),
           const SizedBox(height: 32),
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 8),
             child: Text(
-              'Data Management',
+              context.l10n.dataManagement,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -98,11 +82,8 @@ class PrivacySettingsScreen extends StatelessWidget {
           _buildCard(
             theme,
             icon: Icons.delete_sweep_rounded,
-            title: 'Delete All Data',
-            content:
-                'You have full control. You can wipe all app settings, statistics, '
-                'and caches instantly at any time from the Danger Zone located at '
-                'the bottom of the Info & Support tab.',
+            title: context.l10n.privacyCardDeleteDataTitle,
+            content: context.l10n.privacyCardDeleteDataContent,
           ),
           const SizedBox(height: 32),
         ],

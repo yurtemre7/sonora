@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class PlaybackSettingsScreen extends StatelessWidget {
   const PlaybackSettingsScreen({
@@ -17,7 +18,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Playback'),
+        title: Text(context.l10n.playback),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -35,21 +36,19 @@ class PlaybackSettingsScreen extends StatelessWidget {
                   children: [
                     SwitchListTile(
                       secondary: const Icon(Icons.play_circle_outline_rounded),
-                      title: const Text('Keep playing on app close'),
-                      subtitle: const Text(
-                        'Keep playing music in the background when swiped away',
-                      ),
+                      title: Text(context.l10n.keepPlayingOnClose),
+                      subtitle: Text(context.l10n.keepPlayingOnCloseSubtitle),
                       value: settingsProvider.keepPlayingOnClose,
                       onChanged: (val) {
                         settingsProvider.setKeepPlayingOnClose(val);
                       },
                     ),
                     SwitchListTile(
-                      secondary: const Icon(Icons.notifications_paused_rounded),
-                      title: const Text('Pause on notifications'),
-                      subtitle: const Text(
-                        'Pause music instead of lowering volume when a notification arrives',
+                      secondary: const Icon(
+                        Icons.notifications_paused_rounded,
                       ),
+                      title: Text(context.l10n.pauseOnDuck),
+                      subtitle: Text(context.l10n.pauseOnDuckSubtitle),
                       value: settingsProvider.pauseOnDuck,
                       onChanged: (val) {
                         settingsProvider.setPauseOnDuck(
@@ -69,10 +68,8 @@ class PlaybackSettingsScreen extends StatelessWidget {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.timer_outlined),
-                      title: const Text('Default Sleep Timer'),
-                      subtitle: const Text(
-                        'Default duration selected when opening the sleep timer',
-                      ),
+                      title: Text(context.l10n.defaultSleepTimer),
+                      subtitle: Text(context.l10n.defaultSleepTimerSubtitle),
                       trailing: DropdownButton<int>(
                         value: settingsProvider.sleepTimerDefaultMinutes,
                         underline: const SizedBox(),
@@ -80,7 +77,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
                             .map(
                               (min) => DropdownMenuItem<int>(
                                 value: min,
-                                child: Text('$min min'),
+                                child: Text(context.l10n.minuteAbbr(min)),
                               ),
                             )
                             .toList(),
@@ -93,24 +90,27 @@ class PlaybackSettingsScreen extends StatelessWidget {
                     ),
                     ListTile(
                       leading: const Icon(Icons.home_outlined),
-                      title: const Text('Default Start Page'),
-                      subtitle: const Text('Page to show when the app starts'),
+                      title: Text(context.l10n.defaultStartPage),
+                      subtitle: Text(context.l10n.defaultStartPageSubtitle),
                       trailing: DropdownButton<int>(
                         value: settingsProvider.defaultStartPage,
                         underline: const SizedBox(),
-                        items: const [
-                          DropdownMenuItem<int>(value: 0, child: Text('Songs')),
+                        items: [
+                          DropdownMenuItem<int>(
+                            value: 0,
+                            child: Text(context.l10n.songs),
+                          ),
                           DropdownMenuItem<int>(
                             value: 1,
-                            child: Text('Albums'),
+                            child: Text(context.l10n.albums),
                           ),
                           DropdownMenuItem<int>(
                             value: 2,
-                            child: Text('Artists'),
+                            child: Text(context.l10n.artists),
                           ),
                           DropdownMenuItem<int>(
                             value: 3,
-                            child: Text('Playlists'),
+                            child: Text(context.l10n.playlists),
                           ),
                         ],
                         onChanged: (val) {

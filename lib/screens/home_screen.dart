@@ -15,6 +15,7 @@ import 'package:sonora/screens/favorites_screen.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/utils/image_utils.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
@@ -259,38 +260,37 @@ class _HomeScreenState extends State<HomeScreen>
 
     switch (tabIndex) {
       case 1:
-        title = 'Sort Albums By';
-        subtitle =
-            'Your sorting preference will be saved per tab and automatically applied on next startup.';
+        title = context.l10n.sortAlbumsBy;
+        subtitle = context.l10n.sortSubtitle;
         options = [
-          ('Album Name', 'name'),
-          ('Artist', 'artist'),
-          ('Track Count', 'tracks'),
-          ('Recently Added', 'recent'),
+          (context.l10n.sortByAlbumName, 'name'),
+          (context.l10n.sortByArtist, 'artist'),
+          (context.l10n.sortByTrackCount, 'tracks'),
+          (context.l10n.sortByRecentlyAdded, 'recent'),
         ];
       case 2:
-        title = 'Sort Artists By';
-        subtitle =
-            'Your sorting preference will be saved per tab and automatically applied on next startup.';
+        title = context.l10n.sortArtistsBy;
+        subtitle = context.l10n.sortSubtitle;
         options = [
-          ('Artist Name', 'name'),
-          ('Album Count', 'albums'),
-          ('Song Count', 'songs'),
+          (context.l10n.sortByArtistName, 'name'),
+          (context.l10n.sortByAlbumCount, 'albums'),
+          (context.l10n.sortBySongCount, 'songs'),
         ];
       case 3:
-        title = 'Sort Playlists By';
-        subtitle =
-            'Your sorting preference will be saved per tab and automatically applied on next startup.';
-        options = [('Playlist Name', 'name'), ('Song Count', 'songs')];
-      default:
-        title = 'Sort Songs By';
-        subtitle =
-            'Your sorting preference will be saved per tab and automatically applied on next startup.';
+        title = context.l10n.sortPlaylistsBy;
+        subtitle = context.l10n.sortSubtitle;
         options = [
-          ('Title', 'title'),
-          ('Artist', 'artist'),
-          ('Duration', 'duration'),
-          ('Recently Added', 'recent'),
+          (context.l10n.sortByPlaylistName, 'name'),
+          (context.l10n.sortBySongCount, 'songs'),
+        ];
+      default:
+        title = context.l10n.sortSongsBy;
+        subtitle = context.l10n.sortSubtitle;
+        options = [
+          (context.l10n.sortByTitle, 'title'),
+          (context.l10n.sortByArtist, 'artist'),
+          (context.l10n.sortByDuration, 'duration'),
+          (context.l10n.sortByRecentlyAdded, 'recent'),
         ];
     }
 
@@ -369,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       const Divider(),
                       SwitchListTile(
-                        title: const Text('Sort Ascending'),
+                        title: Text(context.l10n.sortAscending),
                         value: _sortAscendingForTab(tabIndex),
                         onChanged: (val) {
                           setState(
@@ -492,7 +492,7 @@ class _HomeScreenState extends State<HomeScreen>
     switch (tabIndex) {
       case 1:
         count = filteredAlbums.length;
-        label = '$count ${count == 1 ? 'album' : 'albums'}';
+        label = context.l10n.albumCount(count);
         onShuffle = () {
           unfocus();
           widget.playerProvider.quickShuffle(
@@ -505,7 +505,7 @@ class _HomeScreenState extends State<HomeScreen>
         };
       case 2:
         count = filteredArtists.length;
-        label = '$count ${count == 1 ? 'artist' : 'artists'}';
+        label = context.l10n.artistCount(count);
         onShuffle = () {
           unfocus();
           widget.playerProvider.quickShuffle(
@@ -518,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen>
         };
       case 3:
         count = filteredPlaylists.length;
-        label = '$count ${count == 1 ? 'playlist' : 'playlists'}';
+        label = context.l10n.playlistCount(count);
         onShuffle = () {
           unfocus();
           _showCreatePlaylistDialog();
@@ -530,7 +530,7 @@ class _HomeScreenState extends State<HomeScreen>
       default:
         count = filteredSongs.length;
         var timeStr = formatTotalDuration(filteredSongs);
-        label = '$count ${count == 1 ? 'song' : 'songs'} • $timeStr';
+        label = '${context.l10n.songCount(count)} • $timeStr';
         onShuffle = () {
           unfocus();
           widget.playerProvider.quickShuffle(filteredSongs);
@@ -560,10 +560,10 @@ class _HomeScreenState extends State<HomeScreen>
                   },
                   decoration: InputDecoration(
                     hintText: switch (tabIndex) {
-                      1 => 'Search albums...',
-                      2 => 'Search artists...',
-                      3 => 'Search playlists...',
-                      _ => 'Search songs, artists...',
+                      1 => context.l10n.searchAlbumsHint,
+                      2 => context.l10n.searchArtistsHint,
+                      3 => context.l10n.searchPlaylistsHint,
+                      _ => context.l10n.searchSongsHint,
                     },
                     prefixIcon: const Icon(Icons.search_rounded),
                     suffixIcon: _searchQuery.isNotEmpty
@@ -598,20 +598,20 @@ class _HomeScreenState extends State<HomeScreen>
                     IconButton.filledTonal(
                       icon: const Icon(Icons.shuffle_rounded),
                       onPressed: onShuffle,
-                      tooltip: 'Shuffle Play',
+                      tooltip: context.l10n.shufflePlay,
                     )
                   else
                     IconButton.filledTonal(
                       icon: const Icon(Icons.playlist_add),
                       onPressed: onShuffle,
-                      tooltip: 'Create a playlist',
+                      tooltip: context.l10n.createPlaylist,
                     ),
                 ],
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
                   icon: const Icon(Icons.sort_rounded),
                   onPressed: onSort,
-                  tooltip: 'Sort',
+                  tooltip: context.l10n.sort,
                 ),
               ],
             ],
@@ -809,15 +809,16 @@ class _HomeScreenState extends State<HomeScreen>
                         if (SettingsProvider.instance.useGreetingTitle) {
                           var hour = DateTime.now().hour;
                           String greeting;
+                          var userName = SettingsProvider.instance.userName;
                           if (hour < 12) {
-                            greeting = 'Good morning';
+                            greeting = context.l10n.goodMorning(userName);
                           } else if (hour < 17) {
-                            greeting = 'Good afternoon';
+                            greeting = context.l10n.goodAfternoon(userName);
                           } else {
-                            greeting = 'Good evening';
+                            greeting = context.l10n.goodEvening(userName);
                           }
                           return Text(
-                            '$greeting, ${SettingsProvider.instance.userName}',
+                            greeting,
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               letterSpacing: -0.5,
@@ -908,31 +909,31 @@ class _HomeScreenState extends State<HomeScreen>
                                       .textTheme
                                       .labelMedium
                                       ?.copyWith(fontSize: 13),
-                                  tabs: const [
+                                  tabs: [
                                     Tab(
                                       child: Text(
-                                        'Songs',
+                                        context.l10n.songs,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     Tab(
                                       child: Text(
-                                        'Albums',
+                                        context.l10n.albums,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     Tab(
                                       child: Text(
-                                        'Artists',
+                                        context.l10n.artists,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     Tab(
                                       child: Text(
-                                        'Playlists',
+                                        context.l10n.playlists,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),

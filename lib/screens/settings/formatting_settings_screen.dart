@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/settings_provider.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class FormattingSettingsScreen extends StatelessWidget {
   final SettingsProvider settingsProvider;
@@ -13,7 +14,7 @@ class FormattingSettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Library Formatting'),
+        title: Text(context.l10n.libraryFormatting),
         centerTitle: true,
       ),
       body: ListenableBuilder(
@@ -40,7 +41,7 @@ class FormattingSettingsScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
-                  'Preview',
+                  context.l10n.preview,
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -68,7 +69,7 @@ class FormattingSettingsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Original Metadata:',
+                        context.l10n.originalMetadata,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -85,7 +86,7 @@ class FormattingSettingsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Displayed As:',
+                        context.l10n.displayedAs,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -106,7 +107,7 @@ class FormattingSettingsScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
-                  'Title Filters',
+                  context.l10n.titleFilters,
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -115,21 +116,72 @@ class FormattingSettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               SwitchListTile(
-                title: const Text('Remove (feat.) from titles'),
-                subtitle: const Text(
-                  'Hides featured artists from the song title if present.',
-                ),
+                title: Text(context.l10n.filterTitleFeatures),
+                subtitle: Text(context.l10n.filterTitleFeaturesSubtitle),
                 value: settingsProvider.filterTitleFeatures,
                 onChanged: (val) =>
                     settingsProvider.setFilterTitleFeatures(val),
               ),
               SwitchListTile(
-                title: const Text('Remove artist from titles'),
-                subtitle: const Text(
-                  'Hides "Artist - " from the beginning of song titles.',
-                ),
+                title: Text(context.l10n.filterTitleArtist),
+                subtitle: Text(context.l10n.filterTitleArtistSubtitle),
                 value: settingsProvider.filterTitleArtist,
                 onChanged: (val) => settingsProvider.setFilterTitleArtist(val),
+              ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  context.l10n.language,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                title: Text(context.l10n.appLanguage),
+                subtitle: Text(
+                  switch (settingsProvider.appLocale) {
+                    'en' => context.l10n.languageEnglish,
+                    'de' => context.l10n.languageGerman,
+                    'ja' => context.l10n.languageJapanese,
+                    _ => context.l10n.languageSystem,
+                  },
+                ),
+                leading: const Icon(Icons.language_rounded),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (dialogContext) => SimpleDialog(
+                      title: Text(context.l10n.selectLanguage),
+                      children: [
+                        for (var option in [
+                          ('system', context.l10n.languageSystem),
+                          ('en', context.l10n.languageEnglish),
+                          ('de', context.l10n.languageGerman),
+                          ('ja', context.l10n.languageJapanese),
+                        ])
+                          ListTile(
+                            leading: Icon(
+                              settingsProvider.appLocale == option.$1
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_unchecked,
+                              color: settingsProvider.appLocale == option.$1
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurfaceVariant,
+                            ),
+                            title: Text(option.$2),
+                            onTap: () {
+                              settingsProvider.setAppLocale(option.$1);
+                              Navigator.pop(dialogContext);
+                            },
+                          ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           );

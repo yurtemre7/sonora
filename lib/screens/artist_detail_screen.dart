@@ -6,6 +6,7 @@ import 'package:sonora/models/grouping.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/utils/format_utils.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
@@ -114,7 +115,7 @@ class ArtistDetailScreen extends StatelessWidget {
                             }
                           },
                           icon: const Icon(Icons.play_arrow_rounded),
-                          label: const Text('Play All'),
+                          label: Text(context.l10n.playAll),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -126,7 +127,7 @@ class ArtistDetailScreen extends StatelessWidget {
                             }
                           },
                           icon: const Icon(Icons.shuffle_rounded),
-                          label: const Text('Shuffle All'),
+                          label: Text(context.l10n.shuffleAll),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -160,7 +161,7 @@ class ArtistDetailScreen extends StatelessWidget {
                       bottom: 8.0,
                     ),
                     child: Text(
-                      'Albums',
+                      context.l10n.albums,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Outfit',
@@ -207,7 +208,7 @@ class ArtistDetailScreen extends StatelessWidget {
                                 SizedBox(
                                   width: 110,
                                   child: Text(
-                                    '${album.songs.length} tracks',
+                                    context.l10n.trackCount(album.songs.length),
                                     style: theme.textTheme.labelSmall?.copyWith(
                                       color: theme.colorScheme.onSurfaceVariant,
                                     ),
@@ -235,7 +236,7 @@ class ArtistDetailScreen extends StatelessWidget {
                     bottom: 8.0,
                   ),
                   child: Text(
-                    'Tracks',
+                    context.l10n.songs,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Outfit',

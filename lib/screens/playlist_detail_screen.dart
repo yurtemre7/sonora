@@ -10,6 +10,7 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/utils/image_utils.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
@@ -84,10 +85,11 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
   /// Confirms and performs playlist deletion, then closes this screen.
   Future<void> _deletePlaylist() async {
     if (widget.onDeletePlaylist == null) return;
+    var l10n = context.l10n;
     var confirmed = await ConfirmDeleteDialog.show(
       context,
-      title: 'Delete Playlist?',
-      message: 'Delete "${_playlist.name}"? This cannot be undone.',
+      title: l10n.deletePlaylistConfirmTitle,
+      message: l10n.deletePlaylistConfirmMessage(_playlist.name),
     );
     if (confirmed != true || !mounted) return;
     // Close the detail screen first so go_router never tries to
@@ -200,55 +202,58 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                               _deletePlaylist();
                             }
                           },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 3,
-                              child: Row(
-                                children: [
-                                  Icon(Icons.image_rounded),
-                                  SizedBox(width: 8),
-                                  Text('Change Cover'),
-                                ],
-                              ),
-                            ),
-                            if (_playlist.coverImagePath != null)
-                              const PopupMenuItem(
-                                value: 4,
+                          itemBuilder: (context) {
+                            var l10n = context.l10n;
+                            return [
+                              PopupMenuItem(
+                                value: 3,
                                 child: Row(
                                   children: [
-                                    Icon(Icons.hide_image_rounded),
-                                    SizedBox(width: 8),
-                                    Text('Remove Cover'),
+                                    const Icon(Icons.image_rounded),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.changeCover),
                                   ],
                                 ),
                               ),
-                            const PopupMenuItem(
-                              value: 2,
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit_rounded),
-                                  SizedBox(width: 8),
-                                  Text('Rename Playlist'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 1,
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.delete_outline_rounded,
-                                    color: Colors.red,
+                              if (_playlist.coverImagePath != null)
+                                PopupMenuItem(
+                                  value: 4,
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.hide_image_rounded),
+                                      const SizedBox(width: 8),
+                                      Text(l10n.removeCover),
+                                    ],
                                   ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Delete Playlist',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ],
+                                ),
+                              PopupMenuItem(
+                                value: 2,
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.edit_rounded),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.renamePlaylist),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                              PopupMenuItem(
+                                value: 1,
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.delete_outline_rounded,
+                                      color: Colors.red,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      l10n.deletePlaylist,
+                                      style: const TextStyle(color: Colors.red),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ];
+                          },
                         ),
                     ],
                     backgroundColor: Colors.transparent,

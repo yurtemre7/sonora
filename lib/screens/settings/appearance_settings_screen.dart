@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/theme_color_selector.dart';
 
 class AppearanceSettingsScreen extends StatelessWidget {
@@ -17,11 +18,11 @@ class AppearanceSettingsScreen extends StatelessWidget {
   final PlayerProvider playerProvider;
   final SettingsProvider settingsProvider;
 
-  String _themeModeName(ThemeMode mode) {
+  String _themeModeName(BuildContext context, ThemeMode mode) {
     return switch (mode) {
-      ThemeMode.system => 'System Default',
-      ThemeMode.light => 'Light',
-      ThemeMode.dark => 'Dark',
+      ThemeMode.system => context.l10n.systemDefault,
+      ThemeMode.light => context.l10n.light,
+      ThemeMode.dark => context.l10n.dark,
     };
   }
 
@@ -47,7 +48,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
         return SafeArea(
           child: ListenableBuilder(
             listenable: themeProvider,
-            builder: (context, _) {
+            builder: (ctx, _) {
               var currentMode = themeProvider.themeMode;
               return Column(
                 mainAxisSize: MainAxisSize.min,
@@ -55,7 +56,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
                     child: Text(
-                      'Choose Theme',
+                      ctx.l10n.chooseTheme,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -73,20 +74,20 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       children: [
                         RadioListTile<ThemeMode>(
                           value: ThemeMode.system,
-                          title: const Text('System Default'),
-                          subtitle: const Text('Follows your device theme'),
+                          title: Text(ctx.l10n.systemDefault),
+                          subtitle: Text(ctx.l10n.systemSubtitle),
                           secondary: const Icon(Icons.brightness_auto_rounded),
                         ),
                         RadioListTile<ThemeMode>(
                           value: ThemeMode.light,
-                          title: const Text('Light'),
-                          subtitle: const Text('Always use light theme'),
+                          title: Text(ctx.l10n.light),
+                          subtitle: Text(ctx.l10n.lightSubtitle),
                           secondary: const Icon(Icons.light_mode_rounded),
                         ),
                         RadioListTile<ThemeMode>(
                           value: ThemeMode.dark,
-                          title: const Text('Dark'),
-                          subtitle: const Text('Always use dark theme'),
+                          title: Text(ctx.l10n.dark),
+                          subtitle: Text(ctx.l10n.darkSubtitle),
                           secondary: const Icon(Icons.dark_mode_rounded),
                         ),
                       ],
@@ -107,7 +108,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
     var theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Appearance'),
+        title: Text(context.l10n.appearance),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -124,8 +125,8 @@ class AppearanceSettingsScreen extends StatelessWidget {
                 var mode = themeProvider.themeMode;
                 return ListTile(
                   leading: Icon(_themeModeIcon(mode)),
-                  title: const Text('Theme Mode'),
-                  subtitle: Text(_themeModeName(mode)),
+                  title: Text(context.l10n.themeMode),
+                  subtitle: Text(_themeModeName(context, mode)),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _showThemeModeSheet(context),
                 );
@@ -144,7 +145,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                         vertical: 8.0,
                       ),
                       child: Text(
-                        'Default App Color',
+                        context.l10n.defaultAppColor,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -161,28 +162,24 @@ class AppearanceSettingsScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     SwitchListTile(
                       secondary: const Icon(Icons.dark_mode_outlined),
-                      title: const Text('AMOLED Pure Black'),
-                      subtitle: const Text(
-                        'Use pitch black backgrounds in dark mode instead of dark gray',
-                      ),
+                      title: Text(context.l10n.amoledDark),
+                      subtitle: Text(context.l10n.amoledDarkSubtitle),
                       value: settingsProvider.amoledDark,
                       onChanged: (val) => settingsProvider.setAmoledDark(val),
                     ),
-
                     SwitchListTile(
                       secondary: const Icon(Icons.color_lens_outlined),
-                      title: const Text('Dynamic Theme (Material You)'),
-                      subtitle: const Text(
-                        'Automatically theme the app using active album art',
-                      ),
+                      title: Text(context.l10n.dynamicTheme),
+                      subtitle: Text(context.l10n.dynamicThemeSubtitle),
                       value: settingsProvider.useDynamicTheme,
-                      onChanged: (val) => settingsProvider.setDynamicTheme(val),
+                      onChanged: (val) =>
+                          settingsProvider.setDynamicTheme(val),
                     ),
                     SwitchListTile(
                       secondary: const Icon(Icons.account_box_outlined),
-                      title: const Text('Prefer Local Artist Images'),
-                      subtitle: const Text(
-                        'Use local artist.jpg files from your music folders when available',
+                      title: Text(context.l10n.preferLocalArtistImages),
+                      subtitle: Text(
+                        context.l10n.preferLocalArtistImagesSubtitle,
                       ),
                       value: settingsProvider.preferLocalArtistImages,
                       onChanged: (val) =>
@@ -190,9 +187,9 @@ class AppearanceSettingsScreen extends StatelessWidget {
                     ),
                     SwitchListTile(
                       secondary: const Icon(Icons.bar_chart_rounded),
-                      title: const Text('Show Audio Visualizer'),
-                      subtitle: const Text(
-                        'Animate audio wave visualizer inside player screen',
+                      title: Text(context.l10n.showAudioVisualizer),
+                      subtitle: Text(
+                        context.l10n.showAudioVisualizerSubtitle,
                       ),
                       value: settingsProvider.showVisualizer,
                       onChanged: (val) =>
@@ -205,7 +202,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                         vertical: 8.0,
                       ),
                       child: Text(
-                        'Personalization',
+                        context.l10n.personalization,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -213,10 +210,8 @@ class AppearanceSettingsScreen extends StatelessWidget {
                     ),
                     SwitchListTile(
                       secondary: const Icon(Icons.wb_sunny_rounded),
-                      title: const Text('Use Greeting Title'),
-                      subtitle: const Text(
-                        'Show a time-based greeting on the home screen instead of the app name',
-                      ),
+                      title: Text(context.l10n.useGreetingTitle),
+                      subtitle: Text(context.l10n.useGreetingTitleSubtitle),
                       value: settingsProvider.useGreetingTitle,
                       onChanged: (val) {
                         settingsProvider.setUseGreetingTitle(val);
@@ -225,7 +220,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                     if (settingsProvider.useGreetingTitle)
                       ListTile(
                         leading: const Icon(Icons.badge_rounded),
-                        title: const Text('Your Name'),
+                        title: Text(context.l10n.yourName),
                         subtitle: Text(settingsProvider.userName),
                         onTap: () async {
                           var controller = TextEditingController(
@@ -234,19 +229,19 @@ class AppearanceSettingsScreen extends StatelessWidget {
                           var newName = await showDialog<String>(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Enter Your Name'),
+                              title: Text(context.l10n.enterYourName),
                               content: TextField(
                                 controller: controller,
                                 autofocus: true,
                                 textCapitalization: TextCapitalization.words,
-                                decoration: const InputDecoration(
-                                  hintText: 'Name',
+                                decoration: InputDecoration(
+                                  hintText: context.l10n.yourName,
                                 ),
                               ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cancel'),
+                                  child: Text(context.l10n.cancel),
                                 ),
                                 FilledButton(
                                   onPressed: () {
@@ -256,7 +251,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                                       text.isEmpty ? 'User' : text,
                                     );
                                   },
-                                  child: const Text('Save'),
+                                  child: Text(context.l10n.save),
                                 ),
                               ],
                             ),

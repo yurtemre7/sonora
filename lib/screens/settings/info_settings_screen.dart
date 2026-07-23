@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/routing/app_routes.dart';
 import 'package:sonora/services/update_service.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/update_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -66,10 +67,9 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
   Future<void> _confirmResetDialog() async {
     var confirmed = await ConfirmDeleteDialog.show(
       context,
-      title: 'Reset Application?',
-      message:
-          'This will permanently delete all imported audio files and clear your library. This cannot be undone.',
-      confirmLabel: 'Reset',
+      title: context.l10n.resetApplicationConfirmTitle,
+      message: context.l10n.resetApplicationConfirmMessage,
+      confirmLabel: context.l10n.reset,
     );
     if (confirmed != true || !mounted) return;
     widget.onResetApp();
@@ -149,7 +149,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
           actions: [
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Close'),
+              child: Text(context.l10n.close),
             ),
           ],
         );
@@ -162,7 +162,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
     var theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Info & Support'),
+        title: Text(context.l10n.infoSettings),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -176,7 +176,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
             // ── App Info ──────────────────────────────────────────────────
             ListTile(
               leading: const Icon(Icons.info_outline_rounded),
-              title: const Text('About Sonora'),
+              title: Text(context.l10n.aboutSonora),
               subtitle: Text('Version $_appVersion'),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => _showAboutAppDialog(context),
@@ -189,8 +189,8 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.system_update_rounded),
-              title: const Text('Check for Updates'),
-              subtitle: const Text('Check GitHub for a new release'),
+              title: Text(context.l10n.checkForUpdates),
+              subtitle: Text(context.l10n.checkForUpdatesSubtitle),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: _isCheckingUpdate
                   ? null
@@ -213,24 +213,22 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24),
                             ),
-                            title: const Row(
+                            title: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.warning_amber_rounded,
                                   color: Colors.orange,
                                 ),
-                                SizedBox(width: 12),
-                                Text('Rate Limit Exceeded'),
+                                const SizedBox(width: 12),
+                                Text(context.l10n.rateLimitTitle),
                               ],
                             ),
-                            content: const Text(
-                              'GitHub API rate limit (60 requests/hour for anonymous requests) has been reached.\n\n'
-                              'Please open the GitHub repository directly to check for new releases.',
-                            ),
+                            content: Text(context.l10n.rateLimitMessage),
                             actions: [
                               TextButton(
-                                onPressed: () => Navigator.pop(dialogContext),
-                                child: const Text('Cancel'),
+                                onPressed: () =>
+                                    Navigator.pop(dialogContext),
+                                child: Text(context.l10n.cancel),
                               ),
                               FilledButton.icon(
                                 onPressed: () async {
@@ -244,17 +242,15 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                                   );
                                 },
                                 icon: const Icon(Icons.open_in_new_rounded),
-                                label: const Text('Open GitHub Releases'),
+                                label: Text(context.l10n.openGithubReleases),
                               ),
                             ],
                           ),
                         );
                       } else if (result.hasError) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Failed to check for updates. Check your internet connection.',
-                            ),
+                          SnackBar(
+                            content: Text(context.l10n.updateCheckFailed),
                             behavior: SnackBarBehavior.floating,
                           ),
                         );
@@ -266,10 +262,8 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'You are already on the latest version.',
-                            ),
+                          SnackBar(
+                            content: Text(context.l10n.alreadyOnLatest),
                             behavior: SnackBarBehavior.floating,
                           ),
                         );
@@ -278,10 +272,8 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
             ),
             SwitchListTile(
               secondary: const Icon(Icons.sync_rounded),
-              title: const Text('Automatically Check for Updates'),
-              subtitle: const Text(
-                'Check GitHub for releases every time the app opens',
-              ),
+              title: Text(context.l10n.autoCheckUpdates),
+              subtitle: Text(context.l10n.autoCheckUpdatesSubtitle),
               value: SettingsProvider.instance.autoCheckUpdates,
               onChanged: (val) {
                 setState(() {
@@ -291,8 +283,8 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
             ),
             ListTile(
               leading: const Icon(Icons.history_rounded),
-              title: const Text('Changelog'),
-              subtitle: const Text('View what\'s new'),
+              title: Text(context.l10n.changelogTitle),
+              subtitle: Text(context.l10n.changelogSubtitle),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
                 context.push(AppRoutes.changelog);
@@ -300,8 +292,8 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
             ),
             ListTile(
               leading: const Icon(Icons.description_outlined),
-              title: const Text('Licenses'),
-              subtitle: const Text('Open source licenses'),
+              title: Text(context.l10n.licenses),
+              subtitle: Text(context.l10n.licensesSubtitle),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
                 showLicensePage(
@@ -344,7 +336,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                 vertical: 8.0,
               ),
               child: Text(
-                'Community & Support',
+                context.l10n.communityAndSupport,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -353,8 +345,8 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
             ),
             ListTile(
               leading: const Icon(Icons.code_rounded),
-              title: const Text('Source Code'),
-              subtitle: const Text('View the GitHub repository'),
+              title: Text(context.l10n.sourceCode),
+              subtitle: Text(context.l10n.sourceCodeSubtitle),
               trailing: const Icon(Icons.open_in_new_rounded),
               onTap: () async {
                 var url = Uri.parse('https://github.com/yurtemre7/sonora');
@@ -363,8 +355,8 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
             ),
             ListTile(
               leading: const Icon(Icons.person_rounded),
-              title: const Text('Developer Profile'),
-              subtitle: const Text('Check out yurtemre7 on GitHub'),
+              title: Text(context.l10n.developerProfile),
+              subtitle: Text(context.l10n.developerProfileSubtitle),
               trailing: const Icon(Icons.open_in_new_rounded),
               onTap: () async {
                 var url = Uri.parse('https://github.com/yurtemre7');
@@ -373,8 +365,8 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
             ),
             ListTile(
               leading: const Icon(Icons.send_rounded),
-              title: const Text('Telegram Contact'),
-              subtitle: const Text('Reach out via @emredev'),
+              title: Text(context.l10n.telegramContact),
+              subtitle: Text(context.l10n.telegramContactSubtitle),
               trailing: const Icon(Icons.open_in_new_rounded),
               onTap: () async {
                 var url = Uri.parse('https://t.me/emredev');
@@ -391,7 +383,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                 vertical: 8.0,
               ),
               child: Text(
-                'Danger Zone',
+                context.l10n.dangerZone,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.error,
                   fontWeight: FontWeight.bold,
@@ -464,7 +456,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Reset Application',
+                                        context.l10n.resetApplication,
                                         style: theme.textTheme.titleMedium
                                             ?.copyWith(
                                               color: theme.colorScheme.error,
@@ -473,7 +465,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        'Hold for 3 seconds to wipe all data.',
+                                        context.l10n.resetApplicationSubtitle,
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               color: theme

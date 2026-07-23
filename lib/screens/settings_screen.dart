@@ -7,6 +7,7 @@ import 'package:sonora/providers/theme_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/routing/app_routes.dart';
 import 'package:sonora/screens/settings/debug_caches_screen.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -56,7 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     var theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(context.l10n.settings),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -76,7 +77,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               vertical: 8.0,
             ),
             child: Text(
-              'Library Sync',
+              context.l10n.librarySync,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -103,47 +104,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(
-                              Icons.folder_shared_rounded,
-                              color: theme.colorScheme.primary,
-                              size: 26,
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primaryContainer,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.folder_rounded,
+                                color: theme.colorScheme.onPrimaryContainer,
+                                size: 22,
+                              ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 14),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Sync Folder Path',
+                                    widget.settingsProvider.scanFolder ??
+                                        context.l10n.setMusicDirectory,
                                     style: theme.textTheme.titleMedium
                                         ?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    widget.settingsProvider.scanFolder ??
-                                        'Not configured',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                      fontFamily: 'monospace',
-                                      fontSize: 12,
-                                    ),
-                                    maxLines: 2,
+                                    maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
+                                  if (widget.settingsProvider.scanFolder !=
+                                      null)
+                                    Text(
+                                      'Active sync location',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                    ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 24),
+                            const SizedBox(width: 8),
                             OutlinedButton(
-                              onPressed: () async {
-                                await widget.onConfigureFolder();
-                              },
+                              onPressed: widget.onConfigureFolder,
                               style: OutlinedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -153,13 +161,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   vertical: 8,
                                 ),
                               ),
-                              child: const Text('Change'),
+                              child: Text(
+                                widget.settingsProvider.scanFolder == null
+                                    ? context.l10n.setSyncFolder
+                                    : context.l10n.change,
+                              ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Sonora plays your files locally and offline. When you copy new tracks into this folder, run a sync below to add them to your library.',
+                          context.l10n.syncExplanation,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant
                                 .withValues(alpha: 0.8),
@@ -202,7 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Last Sync',
+                                    context.l10n.lastSync,
                                     style: theme.textTheme.labelMedium
                                         ?.copyWith(
                                           color: theme
@@ -214,7 +226,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   const SizedBox(height: 2),
                                   Text(
                                     widget.settingsProvider.lastSyncTime ??
-                                        'Never synced',
+                                        context.l10n.neverSynced,
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -299,7 +311,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       )
                                     : const Icon(Icons.sync_rounded, size: 16),
                                 label: Text(
-                                  _isSyncing ? 'Syncing...' : 'Sync Now',
+                                  _isSyncing
+                                      ? context.l10n.syncing
+                                      : context.l10n.syncNow,
                                 ),
                               ),
                           ],
@@ -320,7 +334,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               vertical: 8.0,
             ),
             child: Text(
-              'Statistics',
+              context.l10n.stats,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -329,8 +343,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.analytics_outlined),
-            title: const Text('View Statistics'),
-            subtitle: const Text('See your playback history and stats'),
+            title: Text(context.l10n.viewStatistics),
+            subtitle: Text(context.l10n.viewStatisticsSubtitle),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               context.push(AppRoutes.stats);
@@ -341,8 +355,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // ── Sub Settings ──────────────────────────────────────────────
           ListTile(
             leading: const Icon(Icons.palette_outlined),
-            title: const Text('Appearance'),
-            subtitle: const Text('Theme, colors, visualizer, local images'),
+            title: Text(context.l10n.appearance),
+            subtitle: Text(context.l10n.appearanceSubtitle),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               context.push(AppRoutes.settingsAppearance);
@@ -350,8 +364,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.title_rounded),
-            title: const Text('Library Formatting'),
-            subtitle: const Text('Configure how song titles are displayed'),
+            title: Text(context.l10n.libraryFormatting),
+            subtitle: Text(context.l10n.formattingSubtitle),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               context.push(AppRoutes.settingsFormatting);
@@ -359,8 +373,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.play_circle_outline_rounded),
-            title: const Text('Playback'),
-            subtitle: const Text('Sleep timer, start page, background play'),
+            title: Text(context.l10n.playback),
+            subtitle: Text(context.l10n.playbackSubtitle),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               context.push(AppRoutes.settingsPlayback);
@@ -368,8 +382,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: const Text('Privacy & Permissions'),
-            subtitle: const Text('Data management and required permissions'),
+            title: Text(context.l10n.privacySettings),
+            subtitle: Text(context.l10n.privacySubtitle),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               context.push(AppRoutes.settingsPrivacy);
@@ -377,8 +391,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.info_outline_rounded),
-            title: const Text('Info & Support'),
-            subtitle: const Text('About, updates, changelog, danger zone'),
+            title: Text(context.l10n.infoSettings),
+            subtitle: Text(context.l10n.infoSubtitle),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               context.push(AppRoutes.settingsInfo);

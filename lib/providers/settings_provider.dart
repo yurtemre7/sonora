@@ -33,6 +33,7 @@ class SettingsProvider extends ChangeNotifier {
   var userName = 'User';
   var useGreetingTitle = false;
   var autoCheckUpdates = true;
+  var appLocale = 'system';
   String? scanFolder;
   String? lastSyncTime;
   int? lastSyncDuration;
@@ -40,9 +41,18 @@ class SettingsProvider extends ChangeNotifier {
   var _isLoaded = false;
   bool get isLoaded => _isLoaded;
 
+  Locale? get currentLocale {
+    if (appLocale == 'en') return const Locale('en');
+    if (appLocale == 'de') return const Locale('de');
+    if (appLocale == 'ja') return const Locale('ja');
+    return null; // System default
+  }
+
   Future<void> loadSettings() async {
     var prefs = SharedPreferencesAsync();
     var scanner = MusicScanner();
+
+    appLocale = await prefs.getString('app_locale') ?? 'system';
 
     useDynamicTheme = await prefs.getBool('use_dynamic_theme') ?? true;
     amoledDark = await prefs.getBool('amoled_dark') ?? false;
@@ -236,6 +246,13 @@ class SettingsProvider extends ChangeNotifier {
       this.playlistSortAscending = playlistSortAscending;
       await prefs.setBool('playlist_sort_ascending', playlistSortAscending);
     }
+    notifyListeners();
+  }
+
+  Future<void> setAppLocale(String localeCode) async {
+    appLocale = localeCode;
+    var prefs = SharedPreferencesAsync();
+    await prefs.setString('app_locale', localeCode);
     notifyListeners();
   }
 

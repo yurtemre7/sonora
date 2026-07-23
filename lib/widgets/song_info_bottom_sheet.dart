@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:sonora/models/song.dart';
 
 void showSongInfoBottomSheet(BuildContext context, Song song) {
@@ -103,6 +104,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                               _buildInfoRow(
                                 'Date Modified',
                                 _formatDate(
+                                  context,
                                   DateTime.fromMillisecondsSinceEpoch(
                                     song.lastModifiedMs!,
                                   ),
@@ -112,7 +114,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                             if (stat != null && stat.changed != stat.modified)
                               _buildInfoRow(
                                 'Date Created',
-                                _formatDate(stat.changed),
+                                _formatDate(context, stat.changed),
                                 theme,
                                 isLast: song.format == null,
                               ),
@@ -255,28 +257,9 @@ String _formatFileSize(int bytes) {
   return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
 }
 
-String _formatDate(DateTime dt) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  var m = months[dt.month - 1];
-  var d = dt.day;
-  var y = dt.year;
-  var hr = dt.hour == 0 ? 12 : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
-  var min = dt.minute.toString().padLeft(2, '0');
-  var ampm = dt.hour >= 12 ? 'PM' : 'AM';
-  return '$m $d, $y, $hr:$min $ampm';
+String _formatDate(BuildContext context, DateTime dt) {
+  var locale = Localizations.localeOf(context).toString();
+  return DateFormat.yMMMd(locale).add_jm().format(dt);
 }
 
 FileStat? _getFileStat(String path) {
