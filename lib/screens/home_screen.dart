@@ -892,37 +892,47 @@ class _HomeScreenState extends State<HomeScreen>
                                     color: theme.colorScheme.primaryContainer,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
+                                  labelPadding: const EdgeInsets.symmetric(horizontal: 4),
                                   labelColor:
                                       theme.colorScheme.onPrimaryContainer,
-                                  labelStyle: theme.textTheme.labelLarge
-                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                  labelStyle: theme.textTheme.labelMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
                                   unselectedLabelColor:
                                       theme.colorScheme.onSurfaceVariant,
                                   unselectedLabelStyle:
-                                      theme.textTheme.labelLarge,
-                                  tabs: [
-                                    const Tab(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text('Songs'),
+                                      theme.textTheme.labelMedium?.copyWith(
+                                        fontSize: 13,
+                                      ),
+                                  tabs: const [
+                                    Tab(
+                                      child: Text(
+                                        'Songs',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    const Tab(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text('Albums'),
+                                    Tab(
+                                      child: Text(
+                                        'Albums',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    const Tab(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text('Artists'),
+                                    Tab(
+                                      child: Text(
+                                        'Artists',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    const Tab(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text('Playlists'),
+                                    Tab(
+                                      child: Text(
+                                        'Playlists',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ],
