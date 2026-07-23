@@ -16,6 +16,7 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
   var _viewportDimension = 1.0;
   var _isScrolling = false;
   var _isDragging = false;
+  double? _dragThumbOffset;
   Timer? _fadeTimer;
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -55,7 +56,7 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
     double thumbHeight = (_viewportDimension / contentHeight * _viewportDimension) * 0.75;
     if (thumbHeight.isNaN || thumbHeight.isInfinite) thumbHeight = 0;
     
-    // Ensure clamp limits are valid (viewport must be at least 40 to clamp to 40)
+    // Ensure clamp limits are valid
     double minThumbHeight = _viewportDimension < 40.0 ? _viewportDimension : 40.0;
     thumbHeight = thumbHeight.clamp(minThumbHeight, _viewportDimension);
     
@@ -63,7 +64,9 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
     if (maxThumbOffset < 0) maxThumbOffset = 0;
     
     double scrollPercentage = _maxScrollExtent > 0 ? _scrollOffset / _maxScrollExtent : 0;
-    double thumbOffset = scrollPercentage * maxThumbOffset;
+    double thumbOffset = _isDragging && _dragThumbOffset != null
+        ? _dragThumbOffset!
+        : (scrollPercentage * maxThumbOffset);
     if (thumbOffset.isNaN || thumbOffset.isInfinite) thumbOffset = 0;
 
     return NotificationListener<ScrollNotification>(
@@ -78,19 +81,30 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onVerticalDragDown: (details) {
-                  setState(() => _isDragging = true);
+                  setState(() {
+                    _isDragging = true;
+                    _dragThumbOffset = thumbOffset;
+                  });
                 },
                 onVerticalDragCancel: () {
-                  setState(() => _isDragging = false);
+                  setState(() {
+                    _isDragging = false;
+                    _dragThumbOffset = null;
+                  });
                 },
                 onVerticalDragUpdate: (details) {
                   _fadeTimer?.cancel();
-                  setState(() => _isScrolling = true);
                   
-                  double newThumbOffset = (thumbOffset + details.delta.dy).clamp(0.0, maxThumbOffset);
+                  double currentOffset = _dragThumbOffset ?? thumbOffset;
+                  double newThumbOffset = (currentOffset + details.delta.dy).clamp(0.0, maxThumbOffset);
                   double newPercentage = maxThumbOffset > 0 ? newThumbOffset / maxThumbOffset : 0;
                   double newScrollOffset = newPercentage * _maxScrollExtent;
                   
+                  setState(() {
+                    _isScrolling = true;
+                    _dragThumbOffset = newThumbOffset;
+                  });
+
                   var primaryController = PrimaryScrollController.maybeOf(context);
                   if (primaryController != null && primaryController.hasClients) {
                     for (var position in primaryController.positions) {
@@ -99,7 +113,10 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
                   }
                 },
                 onVerticalDragEnd: (details) {
-                  setState(() => _isDragging = false);
+                  setState(() {
+                    _isDragging = false;
+                    _dragThumbOffset = null;
+                  });
                   _fadeTimer = Timer(const Duration(milliseconds: 1500), () {
                     if (mounted) setState(() => _isScrolling = false);
                   });

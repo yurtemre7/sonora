@@ -32,6 +32,7 @@ class SettingsProvider extends ChangeNotifier {
   var filterTitleArtist = false;
   var userName = 'User';
   var useGreetingTitle = false;
+  var autoCheckUpdates = true;
   String? scanFolder;
   String? lastSyncTime;
   int? lastSyncDuration;
@@ -73,6 +74,7 @@ class SettingsProvider extends ChangeNotifier {
     filterTitleArtist = await prefs.getBool('filter_title_artist') ?? false;
     userName = await prefs.getString('user_name') ?? 'User';
     useGreetingTitle = await prefs.getBool('use_greeting_title') ?? false;
+    autoCheckUpdates = await prefs.getBool('auto_check_updates') ?? true;
 
     scanFolder = await scanner.getScanFolder();
     lastSyncTime = await scanner.getLastSyncTime();
@@ -80,6 +82,13 @@ class SettingsProvider extends ChangeNotifier {
 
     _isLoaded = true;
     notifyListeners();
+  }
+
+  Future<void> setAutoCheckUpdates(bool value) async {
+    autoCheckUpdates = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('auto_check_updates', value);
   }
 
   Future<void> setUserName(String name) async {

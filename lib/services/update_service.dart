@@ -30,37 +30,14 @@ class UpdateResult {
 class UpdateService {
   static const _githubApiUrl =
       'https://api.github.com/repos/yurtemre7/sonora/releases/latest';
-  static const _lastCheckKey = 'last_update_check_time';
 
-  /// Session-only pending update URL
-  static String? pendingUpdateUrl;
-
-  /// Checks for an update. If [manual] is true, ignores the 12-hour throttle.
-  static Future<UpdateResult> checkForUpdate({bool manual = false}) async {
+  /// Checks for an update via GitHub API releases.
+  static Future<UpdateResult> checkForUpdate() async {
     try {
-      var prefs = SharedPreferencesAsync();
-
-      if (!manual) {
-        var lastCheckStr = await prefs.getString(_lastCheckKey);
-        if (lastCheckStr != null) {
-          var lastCheck = DateTime.tryParse(lastCheckStr);
-          if (lastCheck != null &&
-              DateTime.now().difference(lastCheck).inHours < 12) {
-            // Checked recently, silently return no update
-            return UpdateResult();
-          }
-        }
-      }
-
       var response = await http.get(
         Uri.parse(_githubApiUrl),
         headers: {'Accept': 'application/vnd.github.v3+json'},
       );
-
-      if (!manual) {
-        // Record the check time if it's an automatic check
-        await prefs.setString(_lastCheckKey, DateTime.now().toIso8601String());
-      }
 
       if (response.statusCode == 403 || response.statusCode == 429) {
         return UpdateResult(isRateLimited: true);
@@ -75,9 +52,8 @@ class UpdateService {
         if (tagName != null && htmlUrl != null) {
           var isNewer = await _isVersionNewer(tagName);
           if (isNewer) {
-            // Cache the latest changelog from main as well
+            // Fetch latest changelog from main repository as well
             await fetchChangelog(forceRefresh: true);
-            pendingUpdateUrl = htmlUrl;
 
             return UpdateResult(
               update: UpdateInfo(
@@ -87,7 +63,6 @@ class UpdateService {
               ),
             );
           } else {
-            pendingUpdateUrl = null;
             return UpdateResult(); // up to date
           }
         }

@@ -414,11 +414,13 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       isShuffled = false;
 
       // When unshuffling, the currentIndex changes, so we must reload the whole playlist
-      // to sync the AudioHandler's internal queue.
+      // to sync the AudioHandler's internal queue while preserving current playback position.
       try {
+        var currentPosition = audioHandler.playbackState.value.updatePosition;
         await audioHandler.loadPlaylist(
           queue.map(_songToMediaItem).toList(),
           initialIndex: currentIndex,
+          initialPosition: currentPosition,
         );
         if (isPlaying) {
           await audioHandler.play();

@@ -2,8 +2,15 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.10.1] - 2026-07-22
+## [1.10.1] - 2026-07-23
+### Added
+* Add persistent setting to toggle automatic update checks on app open (default: ON)
+* Asynchronously square-crop and downscale picked playlist cover images to 512x512 JPEG to prevent memory bloat and UI lag
 ### Fixed
+* Ensure update checker fails silently and safely when device is offline without disrupting app startup
+* Preserve current playback position when toggling shuffle mode on/off
+* Request `READ_MEDIA_IMAGES` / `photos` permission on Android 13+ for existing and new users to enable local cover image scanning
+* Fix recursive directory parent traversal for artist cover image (`artist.png`/`artist.jpg`) discovery
 * Implement custom draggable scrollbar to resolve transition crashes
 * Page animation glitching
 

@@ -245,6 +245,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   Future<void> loadPlaylist(
     List<MediaItem> items, {
     int initialIndex = 0,
+    Duration? initialPosition,
   }) async {
     _rawPlaylist = List<MediaItem>.from(items);
 
@@ -286,7 +287,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       await player.setAudioSources(
         initialBatch,
         initialIndex: initialNativeIndex,
-        initialPosition: Duration.zero,
+        initialPosition: initialPosition ?? Duration.zero,
       );
 
       queue.add(windowItems);

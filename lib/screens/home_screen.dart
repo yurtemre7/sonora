@@ -14,6 +14,7 @@ import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/screens/favorites_screen.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/format_utils.dart';
+import 'package:sonora/utils/image_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
@@ -113,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> _checkUpdateAutomatically() async {
     if (kDebugMode) return;
+    if (!SettingsProvider.instance.autoCheckUpdates) return;
 
     var result = await UpdateService.checkForUpdate();
     if (result.update != null && mounted) {
@@ -1351,6 +1353,21 @@ class _HomeScreenState extends State<HomeScreen>
                                                       ],
                                                     ),
                                                   ),
+                                                  if (playlist.coverImagePath !=
+                                                      null)
+                                                    const PopupMenuItem(
+                                                      value: 4,
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons
+                                                                .hide_image_rounded,
+                                                          ),
+                                                          SizedBox(width: 8),
+                                                          Text('Remove Cover'),
+                                                        ],
+                                                      ),
+                                                    ),
                                                   const PopupMenuItem(
                                                     value: 2,
                                                     child: Row(
@@ -1382,21 +1399,6 @@ class _HomeScreenState extends State<HomeScreen>
                                                       ],
                                                     ),
                                                   ),
-                                                  if (playlist.coverImagePath !=
-                                                      null)
-                                                    const PopupMenuItem(
-                                                      value: 4,
-                                                      child: Row(
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .hide_image_rounded,
-                                                          ),
-                                                          SizedBox(width: 8),
-                                                          Text('Remove Cover'),
-                                                        ],
-                                                      ),
-                                                    ),
                                                 ],
                                                 onSelected: (val) async {
                                                   if (val == 3) {
@@ -1439,15 +1441,14 @@ class _HomeScreenState extends State<HomeScreen>
                                                           recursive: true,
                                                         );
                                                       }
-                                                      var extension = sourceFile
-                                                          .path
-                                                          .split('.')
-                                                          .last;
                                                       var newPath =
-                                                          '${coversDir.path}/${playlist.id}.$extension';
-                                                      await sourceFile.copy(
-                                                        newPath,
-                                                      );
+                                                          '${coversDir.path}/${playlist.id}.jpg';
+                                                      await PlaylistImageUtils
+                                                          .processAndSavePlaylistCover(
+                                                            sourceFile,
+                                                            newPath,
+                                                          );
+
                                                       await widget
                                                           .playerProvider
                                                           .updatePlaylistCover(

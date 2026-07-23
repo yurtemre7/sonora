@@ -9,6 +9,7 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/utils/format_utils.dart';
+import 'package:sonora/utils/image_utils.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
@@ -111,9 +112,11 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
       if (!coversDir.existsSync()) {
         coversDir.createSync(recursive: true);
       }
-      var extension = sourceFile.path.split('.').last;
-      var newPath = '${coversDir.path}/${_playlist.id}.$extension';
-      await sourceFile.copy(newPath);
+      var newPath = '${coversDir.path}/${_playlist.id}.jpg';
+      await PlaylistImageUtils.processAndSavePlaylistCover(
+        sourceFile,
+        newPath,
+      );
 
       await widget.playerProvider.updatePlaylistCover(_playlist.id, newPath);
     }
@@ -200,17 +203,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                 children: [
                                   Icon(Icons.image_rounded),
                                   SizedBox(width: 8),
-                                  Text('Change Cover Image'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 2,
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit_rounded),
-                                  SizedBox(width: 8),
-                                  Text('Rename Playlist'),
+                                  Text('Change Cover'),
                                 ],
                               ),
                             ),
@@ -221,10 +214,20 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   children: [
                                     Icon(Icons.hide_image_rounded),
                                     SizedBox(width: 8),
-                                    Text('Remove Cover Image'),
+                                    Text('Remove Cover'),
                                   ],
                                 ),
                               ),
+                            const PopupMenuItem(
+                              value: 2,
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit_rounded),
+                                  SizedBox(width: 8),
+                                  Text('Rename Playlist'),
+                                ],
+                              ),
+                            ),
                             const PopupMenuItem(
                               value: 1,
                               child: Row(
@@ -252,7 +255,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 24),
                             Hero(
                               tag: 'playlist_art_${_playlist.id}',
                               child: _playlist.coverImagePath != null

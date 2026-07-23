@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/routing/app_routes.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
@@ -20,7 +21,6 @@ class InfoSettingsScreen extends StatefulWidget {
 class _InfoSettingsScreenState extends State<InfoSettingsScreen>
     with SingleTickerProviderStateMixin {
   var _isCheckingUpdate = false;
-  String? _pendingUpdateUrl;
   var _appVersion = '1.0.0';
 
   // For the 3-second hold gesture
@@ -61,12 +61,6 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
     setState(() {
       _appVersion = version;
     });
-
-    if (UpdateService.pendingUpdateUrl != null) {
-      setState(() {
-        _pendingUpdateUrl = UpdateService.pendingUpdateUrl;
-      });
-    }
   }
 
   Future<void> _confirmResetDialog() async {
@@ -194,61 +188,62 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                       height: 24,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Icon(
-                      _pendingUpdateUrl != null
-                          ? Icons.download_rounded
-                          : Icons.system_update_rounded,
-                      color: _pendingUpdateUrl != null
-                          ? theme.colorScheme.primary
-                          : null,
-                    ),
-              title: Text(
-                _pendingUpdateUrl != null ? 'Update now' : 'Check for Updates',
-                style: TextStyle(
-                  color: _pendingUpdateUrl != null
-                      ? theme.colorScheme.primary
-                      : null,
-                  fontWeight: _pendingUpdateUrl != null
-                      ? FontWeight.bold
-                      : null,
-                ),
-              ),
-              subtitle: Text(
-                _pendingUpdateUrl != null
-                    ? 'A new version is ready to download'
-                    : 'Check GitHub for a new release',
-              ),
+                  : const Icon(Icons.system_update_rounded),
+              title: const Text('Check for Updates'),
+              subtitle: const Text('Check GitHub for a new release'),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: _isCheckingUpdate
                   ? null
                   : () async {
-                      if (_pendingUpdateUrl != null) {
-                        var url = Uri.parse(_pendingUpdateUrl!);
-                        await launchUrl(url);
-                        return;
-                      }
-
                       setState(() {
                         _isCheckingUpdate = true;
                       });
 
-                      var result = await UpdateService.checkForUpdate(
-                        manual: true,
-                      );
+                      var result = await UpdateService.checkForUpdate();
 
                       if (!context.mounted) return;
                       setState(() {
                         _isCheckingUpdate = false;
-                        _pendingUpdateUrl = UpdateService.pendingUpdateUrl;
                       });
 
                       if (result.isRateLimited) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'GitHub API rate limit exceeded. Please try again later.',
+                        showDialog(
+                          context: context,
+                          builder: (dialogContext) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
                             ),
-                            behavior: SnackBarBehavior.floating,
+                            title: const Row(
+                              children: [
+                                Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                                SizedBox(width: 12),
+                                Text('Rate Limit Exceeded'),
+                              ],
+                            ),
+                            content: const Text(
+                              'GitHub API rate limit (60 requests/hour for anonymous requests) has been reached.\n\n'
+                              'Please open the GitHub repository directly to check for new releases.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(dialogContext),
+                                child: const Text('Cancel'),
+                              ),
+                              FilledButton.icon(
+                                onPressed: () async {
+                                  Navigator.pop(dialogContext);
+                                  var githubUrl = Uri.parse(
+                                    'https://github.com/yurtemre7/sonora/releases',
+                                  );
+                                  await launchUrl(
+                                    githubUrl,
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                },
+                                icon: const Icon(Icons.open_in_new_rounded),
+                                label: const Text('Open GitHub Releases'),
+                              ),
+                            ],
                           ),
                         );
                       } else if (result.hasError) {
@@ -277,6 +272,19 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                         );
                       }
                     },
+            ),
+            SwitchListTile(
+              secondary: const Icon(Icons.sync_rounded),
+              title: const Text('Automatically Check for Updates'),
+              subtitle: const Text(
+                'Check GitHub for releases every time the app opens',
+              ),
+              value: SettingsProvider.instance.autoCheckUpdates,
+              onChanged: (val) {
+                setState(() {
+                  SettingsProvider.instance.setAutoCheckUpdates(val);
+                });
+              },
             ),
             ListTile(
               leading: const Icon(Icons.history_rounded),

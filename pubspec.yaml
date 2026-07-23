@@ -20,6 +20,7 @@ dependencies:
   go_router: ^17.3.0
   google_fonts: ^8.2.0
   http: ^1.6.0
+  image: ^4.9.1
   just_audio: ^0.10.6
   just_audio_windows: ^0.2.3
   package_info_plus: ^10.2.1
