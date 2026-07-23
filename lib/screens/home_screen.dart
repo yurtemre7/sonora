@@ -1462,6 +1462,9 @@ class _HomeScreenState extends State<HomeScreen>
                                                         newPath,
                                                       );
 
+                                                      FileImage(File(newPath)).evict();
+                                                      imageCache.clearLiveImages();
+
                                                       await widget
                                                           .playerProvider
                                                           .updatePlaylistCover(

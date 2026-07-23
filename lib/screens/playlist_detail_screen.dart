@@ -115,6 +115,10 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
       var newPath = '${coversDir.path}/${_playlist.id}.jpg';
       await PlaylistImageUtils.processAndSavePlaylistCover(sourceFile, newPath);
 
+      // Evict stale cached image for this path so Flutter reloads the new cropped file
+      FileImage(File(newPath)).evict();
+      imageCache.clearLiveImages();
+
       await widget.playerProvider.updatePlaylistCover(_playlist.id, newPath);
     }
   }
@@ -149,11 +153,14 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: FileImage(
-                            File(
-                              _playlist.coverImagePath ??
-                                  firstSong!.artworkPath!,
+                          image: ResizeImage(
+                            FileImage(
+                              File(
+                                _playlist.coverImagePath ??
+                                    firstSong!.artworkPath!,
+                              ),
                             ),
+                            width: 120,
                           ),
                           fit: BoxFit.cover,
                           opacity: 0.15,

@@ -38,7 +38,10 @@ class ArtistDetailScreen extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: FileImage(File(imagePath)),
+                      image: ResizeImage(
+                        FileImage(File(imagePath)),
+                        width: 120,
+                      ),
                       fit: BoxFit.cover,
                       opacity: 0.1,
                     ),

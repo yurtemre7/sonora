@@ -2,6 +2,11 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.11.2] - 2026-07-23
+### Fixed
+* Downscale background blur images to 120px in detail screens to eliminate GPU/RAM lag when opening playlists, artists, or albums with high-resolution covers
+* Evict stale ImageCache entries when updating playlist cover images so new cropped artwork renders immediately
+
 ## [1.11.1] - 2026-07-23
 ### Fixed
 * Render scanned local artist cover artwork (`artist.png`/`artist.jpg`) inside the artist detail screen header and background blur

@@ -36,7 +36,10 @@ class AlbumDetailScreen extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: FileImage(File(firstSong.artworkPath!)),
+                      image: ResizeImage(
+                        FileImage(File(firstSong.artworkPath!)),
+                        width: 120,
+                      ),
                       fit: BoxFit.cover,
                       opacity: 0.15,
                     ),
