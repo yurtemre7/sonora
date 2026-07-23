@@ -20,8 +20,9 @@ class PlaylistImageUtils {
       if (decoded == null) return inputBytes;
 
       // Calculate center crop square bounds
-      var cropSize =
-          decoded.width < decoded.height ? decoded.width : decoded.height;
+      var cropSize = decoded.width < decoded.height
+          ? decoded.width
+          : decoded.height;
       var offsetX = (decoded.width - cropSize) ~/ 2;
       var offsetY = (decoded.height - cropSize) ~/ 2;
 

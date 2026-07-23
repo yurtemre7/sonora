@@ -291,9 +291,15 @@ class MusicScanner {
                   : fileName;
 
               // Fallback to directory structure for artist/album if metadata is missing
-              if (artist == null || artist.isEmpty || artist == 'Unknown Artist') {
-                var parentDirName = file.parent.parent.path.split(RegExp(r'[/\\]')).last;
-                if (parentDirName.isNotEmpty && parentDirName != 'music' && parentDirName != 'Download') {
+              if (artist == null ||
+                  artist.isEmpty ||
+                  artist == 'Unknown Artist') {
+                var parentDirName = file.parent.parent.path
+                    .split(RegExp(r'[/\\]'))
+                    .last;
+                if (parentDirName.isNotEmpty &&
+                    parentDirName != 'music' &&
+                    parentDirName != 'Download') {
                   artist = parentDirName;
                 }
               }
@@ -368,7 +374,9 @@ class MusicScanner {
             var normFolderPath = folderPath.replaceAll('\\', '/');
             while (current != null) {
               var normCurrentPath = current.path.replaceAll('\\', '/');
-              var images = localImageFiles[current.path] ?? localImageFiles[normCurrentPath];
+              var images =
+                  localImageFiles[current.path] ??
+                  localImageFiles[normCurrentPath];
               if (images != null && images.isNotEmpty) {
                 for (var img in images) {
                   var name = img.split(RegExp(r'[/\\]')).last.toLowerCase();
@@ -385,7 +393,11 @@ class MusicScanner {
                     return img;
                   }
                 }
-                var dirName = normCurrentPath.split('/').last.toLowerCase().trim();
+                var dirName = normCurrentPath
+                    .split('/')
+                    .last
+                    .toLowerCase()
+                    .trim();
                 if (dirName == cleanArtist || dirName == lowerArtist) {
                   return images.first;
                 }

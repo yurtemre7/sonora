@@ -113,10 +113,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
         coversDir.createSync(recursive: true);
       }
       var newPath = '${coversDir.path}/${_playlist.id}.jpg';
-      await PlaylistImageUtils.processAndSavePlaylistCover(
-        sourceFile,
-        newPath,
-      );
+      await PlaylistImageUtils.processAndSavePlaylistCover(sourceFile, newPath);
 
       await widget.playerProvider.updatePlaylistCover(_playlist.id, newPath);
     }

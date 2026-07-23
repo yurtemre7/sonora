@@ -892,7 +892,9 @@ class _HomeScreenState extends State<HomeScreen>
                                     color: theme.colorScheme.primaryContainer,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
-                                  labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                                  labelPadding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
                                   labelColor:
                                       theme.colorScheme.onPrimaryContainer,
                                   labelStyle: theme.textTheme.labelMedium
@@ -902,10 +904,10 @@ class _HomeScreenState extends State<HomeScreen>
                                       ),
                                   unselectedLabelColor:
                                       theme.colorScheme.onSurfaceVariant,
-                                  unselectedLabelStyle:
-                                      theme.textTheme.labelMedium?.copyWith(
-                                        fontSize: 13,
-                                      ),
+                                  unselectedLabelStyle: theme
+                                      .textTheme
+                                      .labelMedium
+                                      ?.copyWith(fontSize: 13),
                                   tabs: const [
                                     Tab(
                                       child: Text(
@@ -969,48 +971,50 @@ class _HomeScreenState extends State<HomeScreen>
                 Expanded(
                   child: CustomScrollbar(
                     child: PageTransitionSwitcher(
-                    reverse:
-                        _tabController.index < _tabController.previousIndex,
-                    transitionBuilder: (child, animation, secondaryAnimation) {
-                      return SharedAxisTransition(
-                        fillColor: Colors.transparent,
-                        animation: animation,
-                        secondaryAnimation: secondaryAnimation,
-                        transitionType: SharedAxisTransitionType.horizontal,
-                        child: child,
-                      );
-                    },
-                    child: Builder(
-                      key: ValueKey(_tabController.index),
-                      builder: (context) {
-                        switch (_tabController.index) {
-                          case 1:
-                            // Tab 2: Albums.
-                            return widget.songs.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'No albums found',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
-                                  )
-                                : filteredAlbums.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'No matching albums found',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
-                                  )
-                                : GridView.builder(
+                      reverse:
+                          _tabController.index < _tabController.previousIndex,
+                      transitionBuilder:
+                          (child, animation, secondaryAnimation) {
+                            return SharedAxisTransition(
+                              fillColor: Colors.transparent,
+                              animation: animation,
+                              secondaryAnimation: secondaryAnimation,
+                              transitionType:
+                                  SharedAxisTransitionType.horizontal,
+                              child: child,
+                            );
+                          },
+                      child: Builder(
+                        key: ValueKey(_tabController.index),
+                        builder: (context) {
+                          switch (_tabController.index) {
+                            case 1:
+                              // Tab 2: Albums.
+                              return widget.songs.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No albums found',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    )
+                                  : filteredAlbums.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No matching albums found',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    )
+                                  : GridView.builder(
                                       key: const PageStorageKey<String>(
                                         'albums_grid',
                                       ),
@@ -1101,33 +1105,33 @@ class _HomeScreenState extends State<HomeScreen>
                                       },
                                     );
 
-                          case 2:
-                            // Tab 3: Artists.
-                            return widget.songs.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'No artists found',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
-                                  )
-                                : filteredArtists.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'No matching artists found',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
-                                  )
-                                : ListView.builder(
+                            case 2:
+                              // Tab 3: Artists.
+                              return widget.songs.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No artists found',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    )
+                                  : filteredArtists.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No matching artists found',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    )
+                                  : ListView.builder(
                                       key: const PageStorageKey<String>(
                                         'artists_list',
                                       ),
@@ -1191,77 +1195,77 @@ class _HomeScreenState extends State<HomeScreen>
                                       },
                                     );
 
-                          case 3:
-                            // Tab 4: Playlists.
-                            return widget.playerProvider.playlists.isEmpty
-                                ? Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 32.0,
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.queue_music_rounded,
-                                            size: 64,
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant
-                                                .withValues(alpha: 0.4),
-                                          ),
-                                          const SizedBox(height: 16),
-                                          Text(
-                                            'No playlists yet',
-                                            style: theme.textTheme.titleMedium
-                                                ?.copyWith(
-                                                  color: theme
-                                                      .colorScheme
-                                                      .onSurfaceVariant,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            'Create custom playlists to group and organize your synced music files.',
-                                            style: theme.textTheme.bodySmall
-                                                ?.copyWith(
-                                                  color: theme
-                                                      .colorScheme
-                                                      .onSurfaceVariant
-                                                      .withValues(alpha: 0.7),
-                                                ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 24),
-                                          FilledButton.icon(
-                                            onPressed:
-                                                _showCreatePlaylistDialog,
-                                            icon: const Icon(
-                                              Icons.playlist_add_rounded,
+                            case 3:
+                              // Tab 4: Playlists.
+                              return widget.playerProvider.playlists.isEmpty
+                                  ? Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 32.0,
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.queue_music_rounded,
+                                              size: 64,
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant
+                                                  .withValues(alpha: 0.4),
                                             ),
-                                            label: const Text(
-                                              'Create Playlist',
+                                            const SizedBox(height: 16),
+                                            Text(
+                                              'No playlists yet',
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    color: theme
+                                                        .colorScheme
+                                                        .onSurfaceVariant,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                              textAlign: TextAlign.center,
                                             ),
-                                          ),
-                                        ],
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Create custom playlists to group and organize your synced music files.',
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color: theme
+                                                        .colorScheme
+                                                        .onSurfaceVariant
+                                                        .withValues(alpha: 0.7),
+                                                  ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            const SizedBox(height: 24),
+                                            FilledButton.icon(
+                                              onPressed:
+                                                  _showCreatePlaylistDialog,
+                                              icon: const Icon(
+                                                Icons.playlist_add_rounded,
+                                              ),
+                                              label: const Text(
+                                                'Create Playlist',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                : filteredPlaylists.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      'No matching playlists found',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
-                                  )
-                                : ListView.builder(
+                                    )
+                                  : filteredPlaylists.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No matching playlists found',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    )
+                                  : ListView.builder(
                                       key: const PageStorageKey<String>(
                                         'playlists_list',
                                       ),
@@ -1453,11 +1457,10 @@ class _HomeScreenState extends State<HomeScreen>
                                                       }
                                                       var newPath =
                                                           '${coversDir.path}/${playlist.id}.jpg';
-                                                      await PlaylistImageUtils
-                                                          .processAndSavePlaylistCover(
-                                                            sourceFile,
-                                                            newPath,
-                                                          );
+                                                      await PlaylistImageUtils.processAndSavePlaylistCover(
+                                                        sourceFile,
+                                                        newPath,
+                                                      );
 
                                                       await widget
                                                           .playerProvider
@@ -1537,109 +1540,110 @@ class _HomeScreenState extends State<HomeScreen>
                                       },
                                     );
 
-                          default:
-                            // Tab 1: Songs
-                            return widget.songs.isEmpty
-                                ? Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 32.0,
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            widget.scanFolder == null
-                                                ? Icons.folder_open_rounded
-                                                : Icons.music_off_rounded,
-                                            size: 64,
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant
-                                                .withValues(alpha: 0.4),
-                                          ),
-                                          const SizedBox(height: 16),
-                                          Text(
-                                            widget.scanFolder == null
-                                                ? 'Set Music Directory'
-                                                : 'No music files found',
-                                            style: theme.textTheme.titleMedium
-                                                ?.copyWith(
-                                                  color: theme
-                                                      .colorScheme
-                                                      .onSurfaceVariant,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            widget.scanFolder == null
-                                                ? 'Choose a folder directory on your device to scan and play music from.'
-                                                : 'Please put some audio files (e.g. .mp3, .m4a) in the folder:\n\n${widget.scanFolder}',
-                                            style: theme.textTheme.bodySmall
-                                                ?.copyWith(
-                                                  color: theme
-                                                      .colorScheme
-                                                      .onSurfaceVariant
-                                                      .withValues(alpha: 0.7),
-                                                ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 24),
-                                          FilledButton.icon(
-                                            onPressed: widget.onConfigureFolder,
-                                            icon: Icon(
+                            default:
+                              // Tab 1: Songs
+                              return widget.songs.isEmpty
+                                  ? Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 32.0,
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
                                               widget.scanFolder == null
-                                                  ? Icons.folder_copy_rounded
-                                                  : Icons
-                                                        .create_new_folder_rounded,
+                                                  ? Icons.folder_open_rounded
+                                                  : Icons.music_off_rounded,
+                                              size: 64,
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant
+                                                  .withValues(alpha: 0.4),
                                             ),
-                                            label: Text(
+                                            const SizedBox(height: 16),
+                                            Text(
                                               widget.scanFolder == null
-                                                  ? 'Set Sync Folder'
-                                                  : 'Change Folder',
+                                                  ? 'Set Music Directory'
+                                                  : 'No music files found',
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    color: theme
+                                                        .colorScheme
+                                                        .onSurfaceVariant,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                              textAlign: TextAlign.center,
                                             ),
-                                            style: FilledButton.styleFrom(
-                                              backgroundColor: theme
-                                                  .colorScheme
-                                                  .primaryContainer,
-                                              foregroundColor: theme
-                                                  .colorScheme
-                                                  .onPrimaryContainer,
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              widget.scanFolder == null
+                                                  ? 'Choose a folder directory on your device to scan and play music from.'
+                                                  : 'Please put some audio files (e.g. .mp3, .m4a) in the folder:\n\n${widget.scanFolder}',
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color: theme
+                                                        .colorScheme
+                                                        .onSurfaceVariant
+                                                        .withValues(alpha: 0.7),
+                                                  ),
+                                              textAlign: TextAlign.center,
                                             ),
-                                          ),
-                                        ],
+                                            const SizedBox(height: 24),
+                                            FilledButton.icon(
+                                              onPressed:
+                                                  widget.onConfigureFolder,
+                                              icon: Icon(
+                                                widget.scanFolder == null
+                                                    ? Icons.folder_copy_rounded
+                                                    : Icons
+                                                          .create_new_folder_rounded,
+                                              ),
+                                              label: Text(
+                                                widget.scanFolder == null
+                                                    ? 'Set Sync Folder'
+                                                    : 'Change Folder',
+                                              ),
+                                              style: FilledButton.styleFrom(
+                                                backgroundColor: theme
+                                                    .colorScheme
+                                                    .primaryContainer,
+                                                foregroundColor: theme
+                                                    .colorScheme
+                                                    .onPrimaryContainer,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                : Column(
-                                    children: [
-                                      if (widget.showSyncPrompt)
-                                        _buildSyncPromptBanner(theme),
-                                      Expanded(
-                                        child: filteredSongs.isEmpty
-                                            ? Center(
-                                                child: Text(
-                                                  'No matching songs found',
-                                                  style: theme
-                                                      .textTheme
-                                                      .bodyMedium
-                                                      ?.copyWith(
-                                                        color: theme
-                                                            .colorScheme
-                                                            .onSurfaceVariant,
-                                                      ),
-                                                ),
-                                              )
-                                            : ListenableBuilder(
-                                                listenable:
-                                                    widget.playerProvider,
-                                                builder: (context, _) {
-                                                  var currentSong = widget
-                                                      .playerProvider
-                                                      .currentSong;
-                                                  return ListView.builder(
+                                    )
+                                  : Column(
+                                      children: [
+                                        if (widget.showSyncPrompt)
+                                          _buildSyncPromptBanner(theme),
+                                        Expanded(
+                                          child: filteredSongs.isEmpty
+                                              ? Center(
+                                                  child: Text(
+                                                    'No matching songs found',
+                                                    style: theme
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.copyWith(
+                                                          color: theme
+                                                              .colorScheme
+                                                              .onSurfaceVariant,
+                                                        ),
+                                                  ),
+                                                )
+                                              : ListenableBuilder(
+                                                  listenable:
+                                                      widget.playerProvider,
+                                                  builder: (context, _) {
+                                                    var currentSong = widget
+                                                        .playerProvider
+                                                        .currentSong;
+                                                    return ListView.builder(
                                                       key:
                                                           const PageStorageKey<
                                                             String
@@ -1684,16 +1688,16 @@ class _HomeScreenState extends State<HomeScreen>
                                                         );
                                                       },
                                                     );
-                                                },
-                                              ),
-                                      ),
-                                    ],
-                                  );
-                        }
-                      },
+                                                  },
+                                                ),
+                                        ),
+                                      ],
+                                    );
+                          }
+                        },
+                      ),
                     ),
                   ),
-                ),
                 ),
               ],
             ),

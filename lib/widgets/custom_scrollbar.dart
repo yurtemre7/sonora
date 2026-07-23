@@ -21,14 +21,15 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification.metrics.axis != Axis.vertical) return false;
-    
-    if (notification is ScrollUpdateNotification || notification is ScrollEndNotification) {
+
+    if (notification is ScrollUpdateNotification ||
+        notification is ScrollEndNotification) {
       if (mounted) {
         setState(() {
           _scrollOffset = notification.metrics.pixels;
           _maxScrollExtent = notification.metrics.maxScrollExtent;
           _viewportDimension = notification.metrics.viewportDimension;
-          
+
           _isScrolling = true;
           _fadeTimer?.cancel();
           _fadeTimer = Timer(const Duration(milliseconds: 1500), () {
@@ -53,17 +54,22 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
   @override
   Widget build(BuildContext context) {
     double contentHeight = _maxScrollExtent + _viewportDimension;
-    double thumbHeight = (_viewportDimension / contentHeight * _viewportDimension) * 0.75;
+    double thumbHeight =
+        (_viewportDimension / contentHeight * _viewportDimension) * 0.75;
     if (thumbHeight.isNaN || thumbHeight.isInfinite) thumbHeight = 0;
-    
+
     // Ensure clamp limits are valid
-    double minThumbHeight = _viewportDimension < 40.0 ? _viewportDimension : 40.0;
+    double minThumbHeight = _viewportDimension < 40.0
+        ? _viewportDimension
+        : 40.0;
     thumbHeight = thumbHeight.clamp(minThumbHeight, _viewportDimension);
-    
+
     double maxThumbOffset = _viewportDimension - thumbHeight;
     if (maxThumbOffset < 0) maxThumbOffset = 0;
-    
-    double scrollPercentage = _maxScrollExtent > 0 ? _scrollOffset / _maxScrollExtent : 0;
+
+    double scrollPercentage = _maxScrollExtent > 0
+        ? _scrollOffset / _maxScrollExtent
+        : 0;
     double thumbOffset = _isDragging && _dragThumbOffset != null
         ? _dragThumbOffset!
         : (scrollPercentage * maxThumbOffset);
@@ -94,21 +100,27 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
                 },
                 onVerticalDragUpdate: (details) {
                   _fadeTimer?.cancel();
-                  
+
                   double currentOffset = _dragThumbOffset ?? thumbOffset;
-                  double newThumbOffset = (currentOffset + details.delta.dy).clamp(0.0, maxThumbOffset);
-                  double newPercentage = maxThumbOffset > 0 ? newThumbOffset / maxThumbOffset : 0;
+                  double newThumbOffset = (currentOffset + details.delta.dy)
+                      .clamp(0.0, maxThumbOffset);
+                  double newPercentage = maxThumbOffset > 0
+                      ? newThumbOffset / maxThumbOffset
+                      : 0;
                   double newScrollOffset = newPercentage * _maxScrollExtent;
-                  
+
                   setState(() {
                     _isScrolling = true;
                     _dragThumbOffset = newThumbOffset;
                   });
 
-                  var primaryController = PrimaryScrollController.maybeOf(context);
-                  if (primaryController != null && primaryController.hasClients) {
+                  var primaryController = PrimaryScrollController.maybeOf(
+                    context,
+                  );
+                  if (primaryController != null &&
+                      primaryController.hasClients) {
                     for (var position in primaryController.positions) {
-                       position.jumpTo(newScrollOffset);
+                      position.jumpTo(newScrollOffset);
                     }
                   }
                 },
@@ -140,7 +152,9 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
                       width: _isDragging ? 12 : 8,
                       height: thumbHeight,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),

@@ -215,7 +215,10 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                             ),
                             title: const Row(
                               children: [
-                                Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  color: Colors.orange,
+                                ),
                                 SizedBox(width: 12),
                                 Text('Rate Limit Exceeded'),
                               ],

@@ -38,7 +38,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     var sdkInt = await PermissionService().getAndroidSdk();
     bool storageOk;
     if (sdkInt >= 33) {
-      storageOk = (await Permission.audio.isGranted) && (await Permission.photos.isGranted);
+      storageOk =
+          (await Permission.audio.isGranted) &&
+          (await Permission.photos.isGranted);
     } else {
       storageOk = await Permission.storage.isGranted;
     }

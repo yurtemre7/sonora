@@ -48,7 +48,10 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
       try {
         var dir = Directory(folderPath);
         if (dir.existsSync()) {
-          for (var entity in dir.listSync(recursive: true, followLinks: false)) {
+          for (var entity in dir.listSync(
+            recursive: true,
+            followLinks: false,
+          )) {
             if (entity is File) {
               filesList.add(entity.path);
             }
