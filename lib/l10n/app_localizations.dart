@@ -1612,6 +1612,12 @@ abstract class AppLocalizations {
   /// **'Stats'**
   String get stats;
 
+  /// No description provided for @stopInX.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop in {duration}'**
+  String stopInX(String duration);
+
   /// No description provided for @syncDuration.
   ///
   /// In en, this message translates to:

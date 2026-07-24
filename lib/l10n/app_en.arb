@@ -328,6 +328,14 @@
   "sourceCodeSubtitle": "View the GitHub repository",
   "startTimer": "Start Timer",
   "stats": "Stats",
+  "stopInX": "Stop in {duration}",
+  "@stopInX": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "syncDuration": " in {duration}ms",
   "@syncDuration": {
     "placeholders": {

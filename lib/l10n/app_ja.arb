@@ -252,6 +252,7 @@
   "sourceCodeSubtitle": "GitHubリポジトリを表示",
   "startTimer": "タイマーを開始",
   "stats": "統計",
+  "stopInX": "{duration}後に停止",
   "syncDuration": "（{duration}ms）",
   "syncExplanation": "Sonoraはファイルをローカル・オフラインで再生します。このフォルダに新しいトラックをコピーした場合は、以下から同期を実行してください。",
   "syncLibraryDatabase": "ライブラリデータベースを同期しますか？",

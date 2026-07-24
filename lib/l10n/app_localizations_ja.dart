@@ -802,6 +802,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get stats => '統計';
 
   @override
+  String stopInX(String duration) {
+    return '$duration後に停止';
+  }
+
+  @override
   String syncDuration(String duration) {
     return '（${duration}ms）';
   }

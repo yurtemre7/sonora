@@ -605,7 +605,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Stop in ${_formatDuration(widget.playerProvider.sleepTimerDuration!)}',
+                  context.l10n.stopInX(_formatDuration(widget.playerProvider.sleepTimerDuration!)),
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -621,7 +621,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
 
     return _buildActionChip(
       icon: Icons.timer_outlined,
-      label: 'Timer',
+      label: context.l10n.sleepTimer,
       active: false,
       onPressed: () => _showSleepTimerSheet(context),
     );

@@ -252,6 +252,7 @@
   "sourceCodeSubtitle": "Das GitHub-Repository ansehen",
   "startTimer": "Timer starten",
   "stats": "Statistiken",
+  "stopInX": "Stoppt in {duration}",
   "syncDuration": " in {duration}ms",
   "syncExplanation": "Sonora spielt deine Dateien lokal und offline ab. Wenn du neue Titel in diesen Ordner kopierst, führe unten eine Synchronisation durch.",
   "syncLibraryDatabase": "Bibliotheksdatenbank synchronisieren?",

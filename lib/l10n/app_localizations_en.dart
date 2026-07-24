@@ -840,6 +840,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stats => 'Stats';
 
   @override
+  String stopInX(String duration) {
+    return 'Stop in $duration';
+  }
+
+  @override
   String syncDuration(String duration) {
     return ' in ${duration}ms';
   }
