@@ -98,6 +98,16 @@
   "enterDurationHint": "Enter duration",
   "enterYourName": "Enter Your Name",
   "experimental": "Experimental",
+  "exportToM3u": "Export to M3U",
+  "exportedPlaylist": "Exported playlist: {name}",
+  "@exportedPlaylist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToExport": "Failed to export",
   "failedToLoadChangelog": "Failed to load changelog.",
   "failedToSelectDirectory": "Failed to select directory. Please try again.",
   "favoriteRemove": "Remove Favorite",
@@ -141,35 +151,9 @@
   "keepPlayingOnCloseSubtitle": "Keep playing music in the background when swiped away",
   "language": "Language",
   "languageEnglish": "English",
-  "languageGerman": "German",
   "languageJapanese": "Japanese",
   "languageSystem": "System Default",
   "lastSync": "Last Sync",
-  "yesterday": "Yesterday",
-  "exportToM3u": "Export to M3U",
-  "saveAsPlaylist": "Save as Playlist",
-  "saveQueueAsPlaylist": "Save Queue as Playlist",
-  "playlistName": "Playlist Name",
-  "failedToExport": "Failed to export",
-  "exportedPlaylist": "Exported playlist: {name}",
-  "@exportedPlaylist": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "queueNOfM": "Queue ({current} of {total})",
-  "@queueNOfM": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "later": "Later",
   "libraryFormatting": "Library Formatting",
   "librarySync": "Library Sync",
@@ -269,6 +253,17 @@
   "queue": "Queue",
   "queueEmpty": "Queue is empty",
   "queueIsEmpty": "Queue is empty",
+  "queueNOfM": "Queue ({current} of {total})",
+  "@queueNOfM": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "queueXOfY": "Queue ({current} of {total})",
   "@queueXOfY": {
     "placeholders": {
@@ -305,6 +300,8 @@
   "resetStatisticsTitle": "Reset Statistics?",
   "resetStatisticsWarning": "This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.",
   "save": "Save",
+  "saveAsPlaylist": "Save as Playlist",
+  "saveQueueAsPlaylist": "Save Queue as Playlist",
   "searchAlbumsHint": "Search albums...",
   "searchArtistsHint": "Search artists...",
   "searchPlaylistsHint": "Search playlists...",
@@ -434,6 +431,7 @@
   "viewStatisticsSubtitle": "See your playback history and stats",
   "volume": "Volume",
   "welcomeToSonora": "Welcome to Sonora",
+  "yesterday": "Yesterday",
   "yourName": "Your Name",
   "yourNameOptional": "Your Name (Optional)",
   "yourOwnPlaylist": "Your own playlist"

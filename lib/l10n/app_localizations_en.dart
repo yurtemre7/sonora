@@ -256,6 +256,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get experimental => 'Experimental';
 
   @override
+  String get exportToM3u => 'Export to M3U';
+
+  @override
+  String exportedPlaylist(String name) {
+    return 'Exported playlist: $name';
+  }
+
+  @override
+  String get failedToExport => 'Failed to export';
+
+  @override
   String get failedToLoadChangelog => 'Failed to load changelog.';
 
   @override
@@ -332,9 +343,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageEnglish => 'English';
 
   @override
-  String get languageGerman => 'German';
-
-  @override
   String get languageJapanese => 'Japanese';
 
   @override
@@ -342,34 +350,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lastSync => 'Last Sync';
-
-  @override
-  String get yesterday => 'Yesterday';
-
-  @override
-  String get exportToM3u => 'Export to M3U';
-
-  @override
-  String get saveAsPlaylist => 'Save as Playlist';
-
-  @override
-  String get saveQueueAsPlaylist => 'Save Queue as Playlist';
-
-  @override
-  String get playlistName => 'Playlist name';
-
-  @override
-  String get failedToExport => 'Failed to export';
-
-  @override
-  String exportedPlaylist(String name) {
-    return 'Exported playlist: $name';
-  }
-
-  @override
-  String queueNOfM(int current, int total) {
-    return 'Queue ($current of $total)';
-  }
 
   @override
   String get later => 'Later';
@@ -564,6 +544,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get playlistName => 'Playlist name';
+
+  @override
   String get playlists => 'Playlists';
 
   @override
@@ -645,6 +628,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get queueIsEmpty => 'Queue is empty';
+
+  @override
+  String queueNOfM(int current, int total) {
+    return 'Queue ($current of $total)';
+  }
 
   @override
   String queueXOfY(int current, int total) {
@@ -729,6 +717,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get save => 'Save';
+
+  @override
+  String get saveAsPlaylist => 'Save as Playlist';
+
+  @override
+  String get saveQueueAsPlaylist => 'Save Queue as Playlist';
 
   @override
   String get searchAlbumsHint => 'Search albums...';
@@ -993,6 +987,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeToSonora => 'Welcome to Sonora';
+
+  @override
+  String get yesterday => 'Yesterday';
 
   @override
   String get yourName => 'Your Name';

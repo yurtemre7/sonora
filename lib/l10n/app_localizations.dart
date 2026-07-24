@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
-import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_ja.dart';
 
@@ -95,7 +94,6 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('de'),
     Locale('en'),
     Locale('ja'),
   ];
@@ -544,6 +542,24 @@ abstract class AppLocalizations {
   /// **'Experimental'**
   String get experimental;
 
+  /// No description provided for @exportToM3u.
+  ///
+  /// In en, this message translates to:
+  /// **'Export to M3U'**
+  String get exportToM3u;
+
+  /// No description provided for @exportedPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported playlist: {name}'**
+  String exportedPlaylist(String name);
+
+  /// No description provided for @failedToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export'**
+  String get failedToExport;
+
   /// No description provided for @failedToLoadChangelog.
   ///
   /// In en, this message translates to:
@@ -676,12 +692,6 @@ abstract class AppLocalizations {
   /// **'English'**
   String get languageEnglish;
 
-  /// No description provided for @languageGerman.
-  ///
-  /// In en, this message translates to:
-  /// **'German'**
-  String get languageGerman;
-
   /// No description provided for @languageJapanese.
   ///
   /// In en, this message translates to:
@@ -699,54 +709,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last Sync'**
   String get lastSync;
-
-  /// No description provided for @yesterday.
-  ///
-  /// In en, this message translates to:
-  /// **'Yesterday'**
-  String get yesterday;
-
-  /// No description provided for @exportToM3u.
-  ///
-  /// In en, this message translates to:
-  /// **'Export to M3U'**
-  String get exportToM3u;
-
-  /// No description provided for @saveAsPlaylist.
-  ///
-  /// In en, this message translates to:
-  /// **'Save as Playlist'**
-  String get saveAsPlaylist;
-
-  /// No description provided for @saveQueueAsPlaylist.
-  ///
-  /// In en, this message translates to:
-  /// **'Save Queue as Playlist'**
-  String get saveQueueAsPlaylist;
-
-  /// No description provided for @playlistName.
-  ///
-  /// In en, this message translates to:
-  /// **'Playlist name'**
-  String get playlistName;
-
-  /// No description provided for @failedToExport.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to export'**
-  String get failedToExport;
-
-  /// No description provided for @exportedPlaylist.
-  ///
-  /// In en, this message translates to:
-  /// **'Exported playlist: {name}'**
-  String exportedPlaylist(String name);
-
-  /// No description provided for @queueNOfM.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue ({current} of {total})'**
-  String queueNOfM(int current, int total);
 
   /// No description provided for @later.
   ///
@@ -1102,6 +1064,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 playlist} other{{count} playlists}}'**
   String playlistCount(int count);
 
+  /// No description provided for @playlistName.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist name'**
+  String get playlistName;
+
   /// No description provided for @playlists.
   ///
   /// In en, this message translates to:
@@ -1251,6 +1219,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Queue is empty'**
   String get queueIsEmpty;
+
+  /// No description provided for @queueNOfM.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue ({current} of {total})'**
+  String queueNOfM(int current, int total);
 
   /// No description provided for @queueXOfY.
   ///
@@ -1407,6 +1381,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save'**
   String get save;
+
+  /// No description provided for @saveAsPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as Playlist'**
+  String get saveAsPlaylist;
+
+  /// No description provided for @saveQueueAsPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Queue as Playlist'**
+  String get saveQueueAsPlaylist;
 
   /// No description provided for @searchAlbumsHint.
   ///
@@ -1870,6 +1856,12 @@ abstract class AppLocalizations {
   /// **'Welcome to Sonora'**
   String get welcomeToSonora;
 
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
   /// No description provided for @yourName.
   ///
   /// In en, this message translates to:
@@ -1900,7 +1892,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['de', 'en', 'ja'].contains(locale.languageCode);
+      <String>['en', 'ja'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1909,8 +1901,6 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'de':
-      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
     case 'ja':

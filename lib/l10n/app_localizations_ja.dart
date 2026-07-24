@@ -240,6 +240,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get experimental => '実験的';
 
   @override
+  String get exportToM3u => 'Export to M3U';
+
+  @override
+  String exportedPlaylist(String name) {
+    return 'Exported playlist: $name';
+  }
+
+  @override
+  String get failedToExport => 'Failed to export';
+
+  @override
   String get failedToLoadChangelog => '更新履歴を読み込めませんでした。';
 
   @override
@@ -312,9 +323,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageEnglish => '英語';
 
   @override
-  String get languageGerman => 'ドイツ語';
-
-  @override
   String get languageJapanese => '日本語';
 
   @override
@@ -322,34 +330,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get lastSync => '最終同期';
-
-  @override
-  String get yesterday => 'Yesterday';
-
-  @override
-  String get exportToM3u => 'Export to M3U';
-
-  @override
-  String get saveAsPlaylist => 'Save as Playlist';
-
-  @override
-  String get saveQueueAsPlaylist => 'Save Queue as Playlist';
-
-  @override
-  String get playlistName => 'プレイリスト名';
-
-  @override
-  String get failedToExport => 'Failed to export';
-
-  @override
-  String exportedPlaylist(String name) {
-    return 'Exported playlist: $name';
-  }
-
-  @override
-  String queueNOfM(int current, int total) {
-    return 'Queue ($current of $total)';
-  }
 
   @override
   String get later => 'あとで';
@@ -536,6 +516,9 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get playlistName => 'プレイリスト名';
+
+  @override
   String get playlists => 'プレイリスト';
 
   @override
@@ -615,6 +598,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get queueIsEmpty => 'キューは空です';
+
+  @override
+  String queueNOfM(int current, int total) {
+    return 'Queue ($current of $total)';
+  }
 
   @override
   String queueXOfY(int current, int total) {
@@ -699,6 +687,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get save => '保存';
+
+  @override
+  String get saveAsPlaylist => 'Save as Playlist';
+
+  @override
+  String get saveQueueAsPlaylist => 'Save Queue as Playlist';
 
   @override
   String get searchAlbumsHint => 'アルバムを検索...';
@@ -947,6 +941,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get welcomeToSonora => 'Sonoraへようこそ';
+
+  @override
+  String get yesterday => 'Yesterday';
 
   @override
   String get yourName => 'あなたの名前';
