@@ -27,8 +27,8 @@
     "description": "App title"
   },
   "appearance": "Appearance",
-  "appearanceSettings": "Appearance & Theme",
   "appearanceSubtitle": "Theme, colors, visualizer, local images",
+  "arbLanguage": "English",
   "artistCount": "{count, plural, =1{1 artist} other{{count} artists}}",
   "@artistCount": {
     "placeholders": {
@@ -46,7 +46,6 @@
   "change": "Change",
   "changeCover": "Change Cover",
   "changeFolder": "Change Folder",
-  "changelog": "Changelog",
   "changelogLabel": "Changelog:",
   "changelogSubtitle": "View what's new",
   "changelogTitle": "Changelog",
@@ -118,7 +117,6 @@
   "filterTitleArtistSubtitle": "Hides \"Artist - \" from the beginning of song titles.",
   "filterTitleFeatures": "Remove (feat.) from titles",
   "filterTitleFeaturesSubtitle": "Hides featured artists from the song title if present.",
-  "formattingSettings": "Title & Metadata Formatting",
   "formattingSubtitle": "Configure how song titles are displayed",
   "getStarted": "Get Started",
   "goodAfternoon": "Good afternoon, {name}",
@@ -152,7 +150,6 @@
   "language": "Language",
   "languageEnglish": "English",
   "languageJapanese": "Japanese",
-  "languageSystem": "System Default",
   "lastSync": "Last Sync",
   "later": "Later",
   "libraryFormatting": "Library Formatting",
@@ -217,7 +214,6 @@
   "playNext": "Play Next",
   "playTooltip": "Play",
   "playback": "Playback",
-  "playbackSettings": "Playback & Audio",
   "playbackSubtitle": "Sleep timer, start page, background play",
   "playlistCount": "{count, plural, =1{1 playlist} other{{count} playlists}}",
   "@playlistCount": {
@@ -247,25 +243,12 @@
   "privacyCardStorageTitle": "Storage, Audio & Cover Images",
   "privacyCardWakeLockContent": "Prevents your device from sleeping and abruptly stopping the music playback while you are listening.",
   "privacyCardWakeLockTitle": "Wake Lock",
-  "privacyPermissions": "Privacy & Permissions",
   "privacySettings": "Privacy & Permissions",
   "privacySubtitle": "Data management and required permissions",
   "queue": "Queue",
   "queueEmpty": "Queue is empty",
-  "queueIsEmpty": "Queue is empty",
   "queueNOfM": "Queue ({current} of {total})",
   "@queueNOfM": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "queueXOfY": "Queue ({current} of {total})",
-  "@queueXOfY": {
     "placeholders": {
       "current": {
         "type": "int"
@@ -295,8 +278,6 @@
   "resetApplicationSubtitle": "Hold for 3 seconds to wipe all data.",
   "resetSpeed": "Reset to 1.0x",
   "resetStatistics": "Reset Statistics",
-  "resetStatisticsConfirmMessage": "This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.",
-  "resetStatisticsConfirmTitle": "Reset Statistics?",
   "resetStatisticsTitle": "Reset Statistics?",
   "resetStatisticsWarning": "This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.",
   "save": "Save",

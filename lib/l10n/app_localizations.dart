@@ -200,17 +200,17 @@ abstract class AppLocalizations {
   /// **'Appearance'**
   String get appearance;
 
-  /// No description provided for @appearanceSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Appearance & Theme'**
-  String get appearanceSettings;
-
   /// No description provided for @appearanceSubtitle.
   ///
   /// In en, this message translates to:
   /// **'Theme, colors, visualizer, local images'**
   String get appearanceSubtitle;
+
+  /// No description provided for @arbLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get arbLanguage;
 
   /// No description provided for @artistCount.
   ///
@@ -271,12 +271,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change Folder'**
   String get changeFolder;
-
-  /// No description provided for @changelog.
-  ///
-  /// In en, this message translates to:
-  /// **'Changelog'**
-  String get changelog;
 
   /// No description provided for @changelogLabel.
   ///
@@ -620,12 +614,6 @@ abstract class AppLocalizations {
   /// **'Hides featured artists from the song title if present.'**
   String get filterTitleFeaturesSubtitle;
 
-  /// No description provided for @formattingSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Title & Metadata Formatting'**
-  String get formattingSettings;
-
   /// No description provided for @formattingSubtitle.
   ///
   /// In en, this message translates to:
@@ -697,12 +685,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Japanese'**
   String get languageJapanese;
-
-  /// No description provided for @languageSystem.
-  ///
-  /// In en, this message translates to:
-  /// **'System Default'**
-  String get languageSystem;
 
   /// No description provided for @lastSync.
   ///
@@ -1046,12 +1028,6 @@ abstract class AppLocalizations {
   /// **'Playback'**
   String get playback;
 
-  /// No description provided for @playbackSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Playback & Audio'**
-  String get playbackSettings;
-
   /// No description provided for @playbackSubtitle.
   ///
   /// In en, this message translates to:
@@ -1184,12 +1160,6 @@ abstract class AppLocalizations {
   /// **'Wake Lock'**
   String get privacyCardWakeLockTitle;
 
-  /// No description provided for @privacyPermissions.
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy & Permissions'**
-  String get privacyPermissions;
-
   /// No description provided for @privacySettings.
   ///
   /// In en, this message translates to:
@@ -1214,23 +1184,11 @@ abstract class AppLocalizations {
   /// **'Queue is empty'**
   String get queueEmpty;
 
-  /// No description provided for @queueIsEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue is empty'**
-  String get queueIsEmpty;
-
   /// No description provided for @queueNOfM.
   ///
   /// In en, this message translates to:
   /// **'Queue ({current} of {total})'**
   String queueNOfM(int current, int total);
-
-  /// No description provided for @queueXOfY.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue ({current} of {total})'**
-  String queueXOfY(int current, int total);
 
   /// No description provided for @rateLimitMessage.
   ///
@@ -1351,18 +1309,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset Statistics'**
   String get resetStatistics;
-
-  /// No description provided for @resetStatisticsConfirmMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.'**
-  String get resetStatisticsConfirmMessage;
-
-  /// No description provided for @resetStatisticsConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset Statistics?'**
-  String get resetStatisticsConfirmTitle;
 
   /// No description provided for @resetStatisticsTitle.
   ///

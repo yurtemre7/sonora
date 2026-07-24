@@ -71,10 +71,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearance => 'Appearance';
 
   @override
-  String get appearanceSettings => 'Appearance & Theme';
+  String get appearanceSubtitle => 'Theme, colors, visualizer, local images';
 
   @override
-  String get appearanceSubtitle => 'Theme, colors, visualizer, local images';
+  String get arbLanguage => 'English';
 
   @override
   String artistCount(int count) {
@@ -114,9 +114,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get changeFolder => 'Change Folder';
-
-  @override
-  String get changelog => 'Changelog';
 
   @override
   String get changelogLabel => 'Changelog:';
@@ -300,9 +297,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Hides featured artists from the song title if present.';
 
   @override
-  String get formattingSettings => 'Title & Metadata Formatting';
-
-  @override
   String get formattingSubtitle => 'Configure how song titles are displayed';
 
   @override
@@ -344,9 +338,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageJapanese => 'Japanese';
-
-  @override
-  String get languageSystem => 'System Default';
 
   @override
   String get lastSync => 'Last Sync';
@@ -527,9 +518,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playback => 'Playback';
 
   @override
-  String get playbackSettings => 'Playback & Audio';
-
-  @override
   String get playbackSubtitle => 'Sleep timer, start page, background play';
 
   @override
@@ -612,9 +600,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyCardWakeLockTitle => 'Wake Lock';
 
   @override
-  String get privacyPermissions => 'Privacy & Permissions';
-
-  @override
   String get privacySettings => 'Privacy & Permissions';
 
   @override
@@ -627,15 +612,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queueEmpty => 'Queue is empty';
 
   @override
-  String get queueIsEmpty => 'Queue is empty';
-
-  @override
   String queueNOfM(int current, int total) {
-    return 'Queue ($current of $total)';
-  }
-
-  @override
-  String queueXOfY(int current, int total) {
     return 'Queue ($current of $total)';
   }
 
@@ -700,13 +677,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetStatistics => 'Reset Statistics';
-
-  @override
-  String get resetStatisticsConfirmMessage =>
-      'This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.';
-
-  @override
-  String get resetStatisticsConfirmTitle => 'Reset Statistics?';
 
   @override
   String get resetStatisticsTitle => 'Reset Statistics?';

@@ -97,13 +97,13 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                             ),
                             if (song.fileSize != null)
                               _buildInfoRow(
-                                'File Size',
+                                context.l10n.fileSize,
                                 _formatFileSize(song.fileSize!),
                                 theme,
                               ),
                             if (song.lastModifiedMs != null)
                               _buildInfoRow(
-                                'Date Modified',
+                                context.l10n.dateModified,
                                 _formatDate(
                                   context,
                                   DateTime.fromMillisecondsSinceEpoch(
@@ -114,7 +114,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                               ),
                             if (stat != null && stat.changed != stat.modified)
                               _buildInfoRow(
-                                'Date Created',
+                                context.l10n.dateCreated,
                                 _formatDate(context, stat.changed),
                                 theme,
                                 isLast: song.format == null,

@@ -64,10 +64,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get appearance => '外観';
 
   @override
-  String get appearanceSettings => '外観とテーマ';
+  String get appearanceSubtitle => 'テーマ、カラー、ビジュアライザー、ローカル画像';
 
   @override
-  String get appearanceSubtitle => 'テーマ、カラー、ビジュアライザー、ローカル画像';
+  String get arbLanguage => '日本語';
 
   @override
   String artistCount(int count) {
@@ -100,9 +100,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get changeFolder => 'フォルダを変更';
-
-  @override
-  String get changelog => '更新履歴';
 
   @override
   String get changelogLabel => '更新履歴:';
@@ -281,9 +278,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get filterTitleFeaturesSubtitle => '曲名に含まれるフィーチャリング情報を非表示にします。';
 
   @override
-  String get formattingSettings => 'タイトルとメタデータの表示形式';
-
-  @override
   String get formattingSubtitle => '曲名の表示方法を設定します';
 
   @override
@@ -324,9 +318,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get languageJapanese => '日本語';
-
-  @override
-  String get languageSystem => 'システムのデフォルト';
 
   @override
   String get lastSync => '最終同期';
@@ -504,9 +495,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get playback => '再生';
 
   @override
-  String get playbackSettings => '再生と音声';
-
-  @override
   String get playbackSubtitle => 'スリープタイマー、開始ページ、バックグラウンド再生';
 
   @override
@@ -581,9 +569,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get privacyCardWakeLockTitle => 'Wake Lock';
 
   @override
-  String get privacyPermissions => 'プライバシーと権限';
-
-  @override
   String get privacySettings => 'プライバシーと権限';
 
   @override
@@ -596,15 +581,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get queueEmpty => 'キューは空です';
 
   @override
-  String get queueIsEmpty => 'キューは空です';
-
-  @override
   String queueNOfM(int current, int total) {
-    return 'キュー（$current / $total）';
-  }
-
-  @override
-  String queueXOfY(int current, int total) {
     return 'キュー（$current / $total）';
   }
 
@@ -669,13 +646,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get resetStatistics => '統計をリセット';
-
-  @override
-  String get resetStatisticsConfirmMessage =>
-      '総再生時間、再生回数、トップチャートを含むすべての再生統計が完全に削除されます。この操作は元に戻せません。';
-
-  @override
-  String get resetStatisticsConfirmTitle => '統計をリセットしますか？';
 
   @override
   String get resetStatisticsTitle => '統計をリセットしますか？';

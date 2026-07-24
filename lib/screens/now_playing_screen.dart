@@ -662,7 +662,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
 
     return _buildActionChip(
       icon: Icons.timer_outlined,
-      label: context.l10n.sleepTimer,
+      label: context.l10n.timer,
       active: false,
       onPressed: () => _showSleepTimerSheet(context),
     );
@@ -849,7 +849,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              context.l10n.queueIsEmpty,
+              context.l10n.queueEmpty,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -875,7 +875,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
                 currentIndex >= 0
-                    ? context.l10n.queueXOfY(currentIndex + 1, queue.length)
+                    ? context.l10n.queueNOfM(currentIndex + 1, queue.length)
                     : context.l10n.queue,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,

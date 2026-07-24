@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonora/l10n/app_localizations_en.dart';
+import 'package:sonora/l10n/app_localizations_ja.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
@@ -356,9 +358,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(context.l10n.appLanguage),
             subtitle: Text(
               switch (widget.settingsProvider.appLocale) {
-                'en' => 'English',
-                'ja' => '日本語',
-                _ => context.l10n.languageSystem,
+                'en' => AppLocalizationsEn().arbLanguage,
+                'ja' => AppLocalizationsJa().arbLanguage,
+                _ => context.l10n.systemDefault,
               },
             ),
             trailing: const Icon(Icons.chevron_right_rounded),
@@ -369,9 +371,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: Text(context.l10n.selectLanguage),
                   children: [
                     for (var option in [
-                      ('system', context.l10n.languageSystem),
-                      ('en', 'English'),
-                      ('ja', '日本語'),
+                      ('system', context.l10n.systemDefault),
+                      ('en', AppLocalizationsEn().arbLanguage),
+                      ('ja', AppLocalizationsJa().arbLanguage),
                     ])
                       ListTile(
                         leading: Icon(

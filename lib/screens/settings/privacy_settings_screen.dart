@@ -11,7 +11,7 @@ class PrivacySettingsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: Text(context.l10n.privacyPermissions),
+        title: Text(context.l10n.privacySettings),
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,

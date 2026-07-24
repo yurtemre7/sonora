@@ -850,7 +850,7 @@ class _HomeScreenState extends State<HomeScreen>
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Text(
-                              'Sonora',
+                              context.l10n.appTitle,
                               style: theme.textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: -0.5,
@@ -1013,7 +1013,7 @@ class _HomeScreenState extends State<HomeScreen>
                               return widget.songs.isEmpty
                                   ? Center(
                                       child: Text(
-                                        'No albums found',
+                                        context.l10n.noAlbumsFound,
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               color: theme
@@ -1025,7 +1025,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   : filteredAlbums.isEmpty
                                   ? Center(
                                       child: Text(
-                                        'No matching albums found',
+                                        context.l10n.noMatchingAlbumsFound,
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               color: theme
@@ -1130,7 +1130,7 @@ class _HomeScreenState extends State<HomeScreen>
                               return widget.songs.isEmpty
                                   ? Center(
                                       child: Text(
-                                        'No artists found',
+                                        context.l10n.noArtistsFound,
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               color: theme
@@ -1142,7 +1142,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   : filteredArtists.isEmpty
                                   ? Center(
                                       child: Text(
-                                        'No matching artists found',
+                                        context.l10n.noMatchingArtistsFound,
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               color: theme
@@ -1276,7 +1276,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   : filteredPlaylists.isEmpty
                                   ? Center(
                                       child: Text(
-                                        'No matching playlists found',
+                                        context.l10n.noMatchingPlaylistsFound,
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               color: theme
@@ -1629,7 +1629,7 @@ class _HomeScreenState extends State<HomeScreen>
                                             Text(
                                               widget.scanFolder == null
                                                   ? 'Set Music Directory'
-                                                  : 'No music files found',
+                                                  : context.l10n.noMusicFilesFound,
                                               style: theme.textTheme.titleMedium
                                                   ?.copyWith(
                                                     color: theme
@@ -1689,7 +1689,7 @@ class _HomeScreenState extends State<HomeScreen>
                                           child: filteredSongs.isEmpty
                                               ? Center(
                                                   child: Text(
-                                                    'No matching songs found',
+                                                    context.l10n.noMatchingSongsFound,
                                                     style: theme
                                                         .textTheme
                                                         .bodyMedium

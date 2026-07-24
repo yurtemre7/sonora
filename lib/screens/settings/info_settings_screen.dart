@@ -100,7 +100,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Sonora',
+                  context.l10n.appTitle,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -298,7 +298,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
               onTap: () {
                 showLicensePage(
                   context: context,
-                  applicationName: 'Sonora',
+                  applicationName: context.l10n.appTitle,
                   applicationVersion: _appVersion,
                   applicationIcon: Padding(
                     padding: const EdgeInsets.all(8.0),
