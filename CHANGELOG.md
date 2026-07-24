@@ -2,6 +2,15 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.12.2] - 2026-07-24
+### Added
+* Improve japanese translations
+### Fixed
+* Language not updating
+### Changed
+* Chore: Localize more
+* Chore: Remove german language
+
 ## [1.12.1] - 2026-07-24
 ### Added
 * Add custom EQ, queue saving, and unify playlist actions
