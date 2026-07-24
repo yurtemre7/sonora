@@ -82,67 +82,148 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             .where((s) => s.isFavorite)
             .toList();
         var favAlbums = widget.allAlbums.where((a) {
-          return widget.playerProvider.favoriteAlbums.contains(
+          return widget.playerProvider.favoriteAlbums.containsKey(
             '${a.nameLower}|||${a.artistLower}',
           );
         }).toList();
         var favArtists = widget.allArtists.where((a) {
-          return widget.playerProvider.favoriteArtists.contains(a.nameLower);
+          return widget.playerProvider.favoriteArtists.containsKey(a.nameLower);
         }).toList();
 
         var sortAsc = SettingsProvider.instance.favoritesSortAscending;
-        favSongs.sort((a, b) => sortAsc ? a.title.compareTo(b.title) : b.title.compareTo(a.title));
-        favAlbums.sort((a, b) => sortAsc ? a.name.compareTo(b.name) : b.name.compareTo(a.name));
-        favArtists.sort((a, b) => sortAsc ? a.name.compareTo(b.name) : b.name.compareTo(a.name));
+        var sortBy = SettingsProvider.instance.favoritesSortBy;
+
+        favSongs.sort((a, b) {
+          var cmp = 0;
+          if (sortBy == 'duration') {
+            cmp = a.duration.compareTo(b.duration);
+          } else if (sortBy == 'date') {
+            var dateA = a.favoriteDateMs ?? 0;
+            var dateB = b.favoriteDateMs ?? 0;
+            cmp = dateA.compareTo(dateB);
+          } else {
+            cmp = a.titleLower.compareTo(b.titleLower);
+          }
+          return sortAsc ? cmp : -cmp;
+        });
+
+        favAlbums.sort((a, b) {
+          var cmp = 0;
+          if (sortBy == 'duration') {
+            var durA = a.songs.fold<int>(0, (s, x) => s + x.duration.inMilliseconds);
+            var durB = b.songs.fold<int>(0, (s, x) => s + x.duration.inMilliseconds);
+            cmp = durA.compareTo(durB);
+          } else if (sortBy == 'date') {
+            var dateA = widget.playerProvider.favoriteAlbums['${a.nameLower}|||${a.artistLower}'] ?? 0;
+            var dateB = widget.playerProvider.favoriteAlbums['${b.nameLower}|||${b.artistLower}'] ?? 0;
+            cmp = dateA.compareTo(dateB);
+          } else {
+            cmp = a.nameLower.compareTo(b.nameLower);
+          }
+          return sortAsc ? cmp : -cmp;
+        });
+
+        favArtists.sort((a, b) {
+          var cmp = 0;
+          if (sortBy == 'duration') {
+            var durA = a.songs.fold<int>(0, (s, x) => s + x.duration.inMilliseconds);
+            var durB = b.songs.fold<int>(0, (s, x) => s + x.duration.inMilliseconds);
+            cmp = durA.compareTo(durB);
+          } else if (sortBy == 'date') {
+            var dateA = widget.playerProvider.favoriteArtists[a.nameLower] ?? 0;
+            var dateB = widget.playerProvider.favoriteArtists[b.nameLower] ?? 0;
+            cmp = dateA.compareTo(dateB);
+          } else {
+            cmp = a.nameLower.compareTo(b.nameLower);
+          }
+          return sortAsc ? cmp : -cmp;
+        });
 
         return Scaffold(
           appBar: AppBar(
             title: Text(context.l10n.favorites),
             centerTitle: true,
             actions: [
-              PopupMenuButton<bool>(
+              PopupMenuButton<String>(
                 icon: const Icon(Icons.sort_rounded),
-                onSelected: (asc) {
-                  SettingsProvider.instance.saveSortSettings(favoritesSortAscending: asc);
+                onSelected: (val) {
+                  if (val.startsWith('sort_')) {
+                    SettingsProvider.instance.saveSortSettings(
+                      favoritesSortBy: val.replaceFirst('sort_', ''),
+                    );
+                  } else if (val.startsWith('asc_')) {
+                    SettingsProvider.instance.saveSortSettings(
+                      favoritesSortAscending: val == 'asc_true',
+                    );
+                  }
                 },
                 itemBuilder: (context) {
+                  var sortBy = SettingsProvider.instance.favoritesSortBy;
                   var isAsc = SettingsProvider.instance.favoritesSortAscending;
                   return [
                     PopupMenuItem(
-                      value: true,
+                      value: 'sort_name',
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.arrow_downward_rounded,
-                            color: isAsc ? theme.colorScheme.primary : null,
-                          ),
+                          if (sortBy == 'name')
+                            Icon(Icons.check, color: theme.colorScheme.primary)
+                          else
+                            const SizedBox(width: 24),
                           const SizedBox(width: 8),
-                          Text(
-                            context.l10n.sortAscending,
-                            style: TextStyle(
-                              color: isAsc ? theme.colorScheme.primary : null,
-                              fontWeight: isAsc ? FontWeight.bold : null,
-                            ),
-                          ),
+                          Text(context.l10n.sortByName),
                         ],
                       ),
                     ),
                     PopupMenuItem(
-                      value: false,
+                      value: 'sort_duration',
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.arrow_upward_rounded,
-                            color: !isAsc ? theme.colorScheme.primary : null,
-                          ),
+                          if (sortBy == 'duration')
+                            Icon(Icons.check, color: theme.colorScheme.primary)
+                          else
+                            const SizedBox(width: 24),
                           const SizedBox(width: 8),
-                          Text(
-                            context.l10n.sortDescending,
-                            style: TextStyle(
-                              color: !isAsc ? theme.colorScheme.primary : null,
-                              fontWeight: !isAsc ? FontWeight.bold : null,
-                            ),
-                          ),
+                          Text(context.l10n.sortByDuration),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'sort_date',
+                      child: Row(
+                        children: [
+                          if (sortBy == 'date')
+                            Icon(Icons.check, color: theme.colorScheme.primary)
+                          else
+                            const SizedBox(width: 24),
+                          const SizedBox(width: 8),
+                          Text(context.l10n.sortByDateFavorited),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: 'asc_true',
+                      child: Row(
+                        children: [
+                          if (isAsc)
+                            Icon(Icons.check, color: theme.colorScheme.primary)
+                          else
+                            const SizedBox(width: 24),
+                          const SizedBox(width: 8),
+                          Text(context.l10n.sortAscending),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'asc_false',
+                      child: Row(
+                        children: [
+                          if (!isAsc)
+                            Icon(Icons.check, color: theme.colorScheme.primary)
+                          else
+                            const SizedBox(width: 24),
+                          const SizedBox(width: 8),
+                          Text(context.l10n.sortDescending),
                         ],
                       ),
                     ),

@@ -803,6 +803,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortByArtistName => 'Artist Name';
 
   @override
+  String get sortByDateFavorited => 'Date Favorited';
+
+  @override
   String get sortByDuration => 'Duration';
 
   @override

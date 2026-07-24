@@ -12,6 +12,7 @@ class Song {
   final int? bitrate;
   final int? samplerate;
   final bool isFavorite;
+  final int? favoriteDateMs;
   final int? lastModifiedMs;
   final int? fileSize;
   final bool hasLyrics;
@@ -33,6 +34,7 @@ class Song {
     this.bitrate,
     this.samplerate,
     this.isFavorite = false,
+    this.favoriteDateMs,
     this.lastModifiedMs,
     this.fileSize,
     this.hasLyrics = false,
@@ -66,6 +68,7 @@ class Song {
     int? bitrate,
     int? samplerate,
     bool? isFavorite,
+    int? favoriteDateMs,
     int? lastModifiedMs,
     int? fileSize,
     bool? hasLyrics,
@@ -87,6 +90,7 @@ class Song {
       bitrate: bitrate ?? this.bitrate,
       samplerate: samplerate ?? this.samplerate,
       isFavorite: isFavorite ?? this.isFavorite,
+      favoriteDateMs: favoriteDateMs ?? this.favoriteDateMs,
       lastModifiedMs: lastModifiedMs ?? this.lastModifiedMs,
       fileSize: fileSize ?? this.fileSize,
       hasLyrics: hasLyrics ?? this.hasLyrics,

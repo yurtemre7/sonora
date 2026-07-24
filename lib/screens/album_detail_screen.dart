@@ -152,9 +152,7 @@ class AlbumDetailScreen extends StatelessWidget {
                         listenable: playerProvider,
                         builder: (context, _) {
                           var key = '${album.nameLower}|||${album.artistLower}';
-                          var isFav = playerProvider.favoriteAlbums.contains(
-                            key,
-                          );
+                          var isFav = playerProvider.favoriteAlbums.containsKey(key);
                           return AnimatedFavoriteButton(
                             isFavorite: isFav,
                             onToggle: () =>

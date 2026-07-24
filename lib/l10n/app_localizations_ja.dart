@@ -766,6 +766,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sortByArtistName => 'アーティスト名';
 
   @override
+  String get sortByDateFavorited => 'お気に入り追加日';
+
+  @override
   String get sortByDuration => '再生時間';
 
   @override

@@ -25,7 +25,8 @@ class SettingsProvider extends ChangeNotifier {
   var artistSortAscending = true;
   var playlistSortBy = 'name';
   var playlistSortAscending = true;
-  var favoritesSortAscending = true;
+  var favoritesSortBy = 'date';
+  var favoritesSortAscending = false;
 
   var keepPlayingOnClose = false;
   var pauseOnDuck = false;
@@ -78,8 +79,9 @@ class SettingsProvider extends ChangeNotifier {
     playlistSortBy = await prefs.getString('playlist_sort_by') ?? 'name';
     playlistSortAscending =
         await prefs.getBool('playlist_sort_ascending') ?? true;
+    favoritesSortBy = await prefs.getString('favorites_sort_by') ?? 'date';
     favoritesSortAscending =
-        await prefs.getBool('favorites_sort_ascending') ?? true;
+        await prefs.getBool('favorites_sort_ascending') ?? false;
 
     keepPlayingOnClose = await prefs.getBool('keep_playing_on_close') ?? false;
     pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
@@ -215,6 +217,7 @@ class SettingsProvider extends ChangeNotifier {
     bool? artistSortAscending,
     String? playlistSortBy,
     bool? playlistSortAscending,
+    String? favoritesSortBy,
     bool? favoritesSortAscending,
   }) async {
     var prefs = SharedPreferencesAsync();
@@ -249,6 +252,11 @@ class SettingsProvider extends ChangeNotifier {
     if (playlistSortAscending != null) {
       this.playlistSortAscending = playlistSortAscending;
       await prefs.setBool('playlist_sort_ascending', playlistSortAscending);
+    }
+
+    if (favoritesSortBy != null) {
+      this.favoritesSortBy = favoritesSortBy;
+      await prefs.setString('favorites_sort_by', favoritesSortBy);
     }
 
     if (favoritesSortAscending != null) {

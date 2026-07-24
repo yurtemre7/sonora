@@ -240,6 +240,7 @@
   "sortByAlbumName": "Albumname",
   "sortByArtist": "Künstler",
   "sortByArtistName": "Künstlername",
+  "sortByDateFavorited": "Datum markiert",
   "sortByDuration": "Dauer",
   "sortByName": "Name",
   "sortByPlaylistName": "Playlist-Name",

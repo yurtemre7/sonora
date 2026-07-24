@@ -134,7 +134,7 @@ class ArtistDetailScreen extends StatelessWidget {
                       ListenableBuilder(
                         listenable: playerProvider,
                         builder: (context, _) {
-                          var isFav = playerProvider.favoriteArtists.contains(
+                          var isFav = playerProvider.favoriteArtists.containsKey(
                             artist.nameLower,
                           );
                           return AnimatedFavoriteButton(

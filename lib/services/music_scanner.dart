@@ -916,8 +916,12 @@ class MusicScanner {
       if (songIndex >= 0) {
         var song = songs[songIndex];
         var newFavoriteStatus = !song.isFavorite;
+        var newFavoriteDateMs = newFavoriteStatus ? DateTime.now().millisecondsSinceEpoch : null;
 
-        songs[songIndex] = song.copyWith(isFavorite: newFavoriteStatus);
+        songs[songIndex] = song.copyWith(
+          isFavorite: newFavoriteStatus,
+          favoriteDateMs: newFavoriteDateMs,
+        );
 
         await _writeImportedSongsMetadata(songs);
       }
@@ -1061,6 +1065,7 @@ class MusicScanner {
           bitrate: item['bitrate'] as int?,
           samplerate: item['samplerate'] as int?,
           isFavorite: item['is_favorite'] as bool? ?? false,
+          favoriteDateMs: item['favorite_date_ms'] as int? ?? (item['is_favorite'] == true ? DateTime.now().millisecondsSinceEpoch : null),
           lastModifiedMs: item['last_modified_ms'] as int?,
           fileSize: item['file_size'] as int?,
           hasLyrics: item['has_lyrics'] == true,
@@ -1095,6 +1100,7 @@ class MusicScanner {
               'bitrate': s.bitrate,
               'samplerate': s.samplerate,
               'is_favorite': s.isFavorite,
+              'favorite_date_ms': s.favoriteDateMs,
               'last_modified_ms': s.lastModifiedMs,
               'file_size': s.fileSize,
               'has_lyrics': s.hasLyrics,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' show Platform;
 
 import 'package:audio_service/audio_service.dart';
@@ -27,8 +28,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   final SettingsProvider settingsProvider;
 
   // ── State fields ──────────────────────────────────────────────────────────
-  List<String> favoriteAlbums = [];
-  List<String> favoriteArtists = [];
+  Map<String, int> favoriteAlbums = {};
+  Map<String, int> favoriteArtists = {};
 
   var uniqueThemeCount = 0;
   List<Song> allSongs = [];
@@ -640,26 +641,26 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Toggles a song's favorite status in the cache index and favorite playlist.
   Future<void> toggleFavoriteAlbum(String key) async {
-    favoriteAlbums = List<String>.from(favoriteAlbums);
-    if (favoriteAlbums.contains(key)) {
+    favoriteAlbums = Map<String, int>.from(favoriteAlbums);
+    if (favoriteAlbums.containsKey(key)) {
       favoriteAlbums.remove(key);
     } else {
-      favoriteAlbums.add(key);
+      favoriteAlbums[key] = DateTime.now().millisecondsSinceEpoch;
     }
     var prefs = SharedPreferencesAsync();
-    await prefs.setStringList('favorite_albums', favoriteAlbums);
+    await prefs.setString('favorite_albums_map', jsonEncode(favoriteAlbums));
     notifyListeners();
   }
 
   Future<void> toggleFavoriteArtist(String nameLower) async {
-    favoriteArtists = List<String>.from(favoriteArtists);
-    if (favoriteArtists.contains(nameLower)) {
+    favoriteArtists = Map<String, int>.from(favoriteArtists);
+    if (favoriteArtists.containsKey(nameLower)) {
       favoriteArtists.remove(nameLower);
     } else {
-      favoriteArtists.add(nameLower);
+      favoriteArtists[nameLower] = DateTime.now().millisecondsSinceEpoch;
     }
     var prefs = SharedPreferencesAsync();
-    await prefs.setStringList('favorite_artists', favoriteArtists);
+    await prefs.setString('favorite_artists_map', jsonEncode(favoriteArtists));
     notifyListeners();
   }
 
@@ -871,12 +872,23 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> loadSettings() async {
     var prefs = SharedPreferencesAsync();
-    favoriteAlbums = List<String>.from(
-      await prefs.getStringList('favorite_albums') ?? [],
-    );
-    favoriteArtists = List<String>.from(
-      await prefs.getStringList('favorite_artists') ?? [],
-    );
+    var albumsMapStr = await prefs.getString('favorite_albums_map');
+    if (albumsMapStr != null) {
+      favoriteAlbums = Map<String, int>.from(jsonDecode(albumsMapStr));
+    } else {
+      var oldAlbums = await prefs.getStringList('favorite_albums') ?? [];
+      var now = DateTime.now().millisecondsSinceEpoch;
+      favoriteAlbums = {for (var k in oldAlbums) k: now};
+    }
+
+    var artistsMapStr = await prefs.getString('favorite_artists_map');
+    if (artistsMapStr != null) {
+      favoriteArtists = Map<String, int>.from(jsonDecode(artistsMapStr));
+    } else {
+      var oldArtists = await prefs.getStringList('favorite_artists') ?? [];
+      var now = DateTime.now().millisecondsSinceEpoch;
+      favoriteArtists = {for (var k in oldArtists) k: now};
+    }
 
     var defaultColorVal = await prefs.getInt('default_theme_color');
     if (defaultColorVal != null) {

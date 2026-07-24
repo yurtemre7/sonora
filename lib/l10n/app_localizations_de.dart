@@ -813,6 +813,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sortByArtistName => 'Künstlername';
 
   @override
+  String get sortByDateFavorited => 'Datum markiert';
+
+  @override
   String get sortByDuration => 'Dauer';
 
   @override

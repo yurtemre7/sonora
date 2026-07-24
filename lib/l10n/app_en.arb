@@ -316,6 +316,7 @@
   "sortByAlbumName": "Album Name",
   "sortByArtist": "Artist",
   "sortByArtistName": "Artist Name",
+  "sortByDateFavorited": "Date Favorited",
   "sortByDuration": "Duration",
   "sortByName": "Name",
   "sortByPlaylistName": "Playlist Name",

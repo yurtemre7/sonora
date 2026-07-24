@@ -240,6 +240,7 @@
   "sortByAlbumName": "アルバム名",
   "sortByArtist": "アーティスト",
   "sortByArtistName": "アーティスト名",
+  "sortByDateFavorited": "お気に入り追加日",
   "sortByDuration": "再生時間",
   "sortByName": "名前",
   "sortByPlaylistName": "プレイリスト名",

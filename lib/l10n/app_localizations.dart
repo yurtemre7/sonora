@@ -1540,6 +1540,12 @@ abstract class AppLocalizations {
   /// **'Artist Name'**
   String get sortByArtistName;
 
+  /// No description provided for @sortByDateFavorited.
+  ///
+  /// In en, this message translates to:
+  /// **'Date Favorited'**
+  String get sortByDateFavorited;
+
   /// No description provided for @sortByDuration.
   ///
   /// In en, this message translates to:
