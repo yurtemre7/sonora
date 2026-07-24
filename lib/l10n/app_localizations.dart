@@ -526,6 +526,12 @@ abstract class AppLocalizations {
   /// **'Enter Your Name'**
   String get enterYourName;
 
+  /// No description provided for @experimental.
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental'**
+  String get experimental;
+
   /// No description provided for @failedToLoadChangelog.
   ///
   /// In en, this message translates to:
@@ -807,6 +813,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'minutes'**
   String get minutes;
+
+  /// No description provided for @musicEffects.
+  ///
+  /// In en, this message translates to:
+  /// **'Music Effects'**
+  String get musicEffects;
 
   /// No description provided for @neverSynced.
   ///

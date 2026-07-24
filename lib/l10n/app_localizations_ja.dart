@@ -231,6 +231,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get enterYourName => '名前を入力';
 
   @override
+  String get experimental => '実験的';
+
+  @override
   String get failedToLoadChangelog => '更新履歴を読み込めませんでした。';
 
   @override
@@ -378,6 +381,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get minutes => '分';
+
+  @override
+  String get musicEffects => '音楽エフェクト';
 
   @override
   String get neverSynced => '未同期';

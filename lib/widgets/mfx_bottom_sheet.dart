@@ -131,7 +131,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'Music Effects',
+                              context.l10n.musicEffects,
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -147,7 +147,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                'Experimental',
+                                context.l10n.experimental,
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: theme.colorScheme.onTertiaryContainer,
                                   fontWeight: FontWeight.bold,

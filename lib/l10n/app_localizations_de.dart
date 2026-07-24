@@ -251,6 +251,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get enterYourName => 'Deinen Namen eingeben';
 
   @override
+  String get experimental => 'Experimentell';
+
+  @override
   String get failedToLoadChangelog =>
       'Änderungsprotokoll konnte nicht geladen werden.';
 
@@ -405,6 +408,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get minutes => 'Minuten';
+
+  @override
+  String get musicEffects => 'Musikeffekte';
 
   @override
   String get neverSynced => 'Noch nie synchronisiert';

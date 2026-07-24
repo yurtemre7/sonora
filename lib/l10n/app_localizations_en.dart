@@ -247,6 +247,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterYourName => 'Enter Your Name';
 
   @override
+  String get experimental => 'Experimental';
+
+  @override
   String get failedToLoadChangelog => 'Failed to load changelog.';
 
   @override
@@ -398,6 +401,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get minutes => 'minutes';
+
+  @override
+  String get musicEffects => 'Music Effects';
 
   @override
   String get neverSynced => 'Never synced';

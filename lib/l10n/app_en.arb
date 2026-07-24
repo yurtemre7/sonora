@@ -95,6 +95,7 @@
   "enableShuffle": "Enable shuffle",
   "enterDurationHint": "Enter duration",
   "enterYourName": "Enter Your Name",
+  "experimental": "Experimental",
   "failedToLoadChangelog": "Failed to load changelog.",
   "failedToSelectDirectory": "Failed to select directory. Please try again.",
   "favoriteRemove": "Remove Favorite",
@@ -170,6 +171,7 @@
     }
   },
   "minutes": "minutes",
+  "musicEffects": "Music Effects",
   "neverSynced": "Never synced",
   "next": "Next",
   "nextTooltip": "Next",
