@@ -356,9 +356,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(context.l10n.appLanguage),
             subtitle: Text(
               switch (widget.settingsProvider.appLocale) {
-                'en' => context.l10n.languageEnglish,
-                'de' => context.l10n.languageGerman,
-                'ja' => context.l10n.languageJapanese,
+                'en' => 'English',
+                'de' => 'Deutsch',
+                'ja' => '日本語',
                 _ => context.l10n.languageSystem,
               },
             ),
@@ -371,9 +371,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     for (var option in [
                       ('system', context.l10n.languageSystem),
-                      ('en', context.l10n.languageEnglish),
-                      ('de', context.l10n.languageGerman),
-                      ('ja', context.l10n.languageJapanese),
+                      ('en', 'English'),
+                      ('de', 'Deutsch'),
+                      ('ja', '日本語'),
                     ])
                       ListTile(
                         leading: Icon(
