@@ -45,9 +45,8 @@ class _StatsScreenState extends State<StatsScreen> {
   Future<void> _confirmResetStats(BuildContext context) async {
     var confirmed = await ConfirmDeleteDialog.show(
       context,
-      title: 'Reset Statistics?',
-      message:
-          'This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.',
+      title: context.l10n.resetStatisticsTitle,
+      message: context.l10n.resetStatisticsWarning,
       confirmLabel: 'Reset',
     );
     if (confirmed == true && mounted) {

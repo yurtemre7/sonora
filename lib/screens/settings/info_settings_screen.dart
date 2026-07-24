@@ -107,14 +107,14 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Version $_appVersion',
+                  context.l10n.version(_appVersion),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'A beautiful local music player for Android, built with Flutter and Material 3 Expressive design.',
+                  context.l10n.appDescription,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -128,7 +128,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Made with ❤️ by yurtemre',
+                  context.l10n.madeWithLove,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -177,7 +177,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
             ListTile(
               leading: const Icon(Icons.info_outline_rounded),
               title: Text(context.l10n.aboutSonora),
-              subtitle: Text('Version $_appVersion'),
+              subtitle: Text(context.l10n.version(_appVersion)),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => _showAboutAppDialog(context),
             ),

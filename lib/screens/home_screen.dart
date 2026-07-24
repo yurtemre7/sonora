@@ -704,7 +704,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Sync Library Database?',
+                  context.l10n.syncLibraryDatabase,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onPrimaryContainer,
@@ -714,7 +714,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              "It's been at least a month since your last library synchronization. Sonora runs offline—if you have loaded new music files into your device folder, run a sync now to discover and listen to them.",
+              context.l10n.syncLibraryDatabaseSubtitle,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant.withValues(
                   alpha: 0.9,
@@ -1605,8 +1605,8 @@ class _HomeScreenState extends State<HomeScreen>
                                               ),
                                               label: Text(
                                                 widget.scanFolder == null
-                                                    ? 'Set Sync Folder'
-                                                    : 'Change Folder',
+                                                    ? context.l10n.setMusicDirectory
+                                                    : context.l10n.change,
                                               ),
                                               style: FilledButton.styleFrom(
                                                 backgroundColor: theme

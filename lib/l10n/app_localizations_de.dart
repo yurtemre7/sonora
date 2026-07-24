@@ -19,6 +19,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Erforderlich, um Audiodateien zu indexieren und lokale Cover-Bilder (artist.jpg / cover.jpg) zu scannen.';
 
   @override
+  String get activeSyncLocation => 'Aktiver Sync-Speicherort';
+
+  @override
   String get addToPlaylist => 'Zur Playlist hinzufügen';
 
   @override
@@ -50,6 +53,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get amoledDarkSubtitle =>
       'Tiefschwarze Hintergründe im Dunkelmodus statt Dunkelgrau verwenden';
+
+  @override
+  String get appDescription =>
+      'Ein wunderschöner lokaler Musikplayer für Android, entwickelt mit Flutter und Material 3 Expressive Design.';
+
+  @override
+  String get appInfo => 'App-Info';
 
   @override
   String get appLanguage => 'App-Sprache';
@@ -156,6 +166,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get customSleepTimer => 'Eigener Schlaf-Timer';
+
+  @override
+  String get customSpeed => 'Benutzerdefinierte Geschwindigkeit';
 
   @override
   String get dangerZone => 'Gefahrenzone';
@@ -355,6 +368,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get lyrics => 'Songtext';
 
   @override
+  String get lyricsCaps => 'SONGTEXT';
+
+  @override
+  String get madeWithLove => 'Gemacht mit ❤️ von yurtemre';
+
+  @override
   String get mfx => 'MFX';
 
   @override
@@ -406,6 +425,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noFavoritesYet => 'Noch keine Favoriten';
 
   @override
+  String get noLyricsAvailable => 'Kein Songtext verfügbar';
+
+  @override
+  String get noLyricsFound => 'Kein Songtext gefunden';
+
+  @override
   String get noMatchingAlbumsFound => 'Keine passenden Alben gefunden';
 
   @override
@@ -422,6 +447,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get noPlaylistsFound => 'Keine Playlists gefunden';
+
+  @override
+  String get noRelatedSongs => 'Keine ähnlichen Songs';
 
   @override
   String get noSongsFound => 'Keine Songs gefunden';
@@ -467,6 +495,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get personalization => 'Personalisierung';
 
   @override
+  String get placeLrcFile =>
+      'Platziere eine .lrc- oder .txt-Datei mit demselben Namen neben der Audiodatei, um den Songtext zu laden.';
+
+  @override
   String get play => 'Wiedergabe';
 
   @override
@@ -506,11 +538,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get playlists => 'Playlists';
 
   @override
+  String get plusOneMin => '+1 Min';
+
+  @override
   String get preferLocalArtistImages => 'Lokale Künstlerbilder bevorzugen';
 
   @override
   String get preferLocalArtistImagesSubtitle =>
       'Lokale artist.jpg-Dateien aus deinen Musikordnern verwenden, wenn verfügbar';
+
+  @override
+  String get presetSpeedAndPitch => 'Voreingestellte Geschwindigkeit & Tonhöhe';
 
   @override
   String get preview => 'Vorschau';
@@ -578,6 +616,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get queueEmpty => 'Warteschlange ist leer';
 
   @override
+  String get queueIsEmpty => 'Warteschlange ist leer';
+
+  @override
+  String queueXOfY(int current, int total) {
+    return 'Warteschlange ($current von $total)';
+  }
+
+  @override
   String get rateLimitMessage =>
       'Das GitHub-API-Rate-Limit (60 Anfragen/Stunde für anonyme Anfragen) wurde erreicht.\n\nBitte öffne das GitHub-Repository direkt, um nach neuen Versionen zu suchen.';
 
@@ -586,6 +632,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get refresh => 'Aktualisieren';
+
+  @override
+  String get related => 'Ähnlich';
+
+  @override
+  String get relatedCaps => 'ÄHNLICH';
 
   @override
   String get removeCover => 'Cover entfernen';
@@ -640,6 +692,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get resetStatisticsConfirmTitle => 'Statistiken zurücksetzen?';
+
+  @override
+  String get resetStatisticsTitle => 'Statistiken zurücksetzen?';
+
+  @override
+  String get resetStatisticsWarning =>
+      'Dadurch werden all deine Hörstatistiken, einschließlich der Gesamtzeit, Wiedergabezahlen und Top-Charts, dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.';
 
   @override
   String get save => 'Speichern';
@@ -701,6 +760,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get shufflePlay => 'Zufallswiedergabe';
 
   @override
+  String get sleepTimer => 'Sleep-Timer';
+
+  @override
   String songCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -713,6 +775,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get songInfo => 'Song-Info';
+
+  @override
+  String get songInformation => 'Song-Informationen';
 
   @override
   String get songs => 'Songs';
@@ -785,11 +850,28 @@ class AppLocalizationsDe extends AppLocalizations {
   String get stats => 'Statistiken';
 
   @override
+  String syncDuration(String duration) {
+    return ' in ${duration}ms';
+  }
+
+  @override
   String get syncExplanation =>
       'Sonora spielt deine Dateien lokal und offline ab. Wenn du neue Titel in diesen Ordner kopierst, führe unten eine Synchronisation durch.';
 
   @override
+  String get syncLibraryDatabase => 'Bibliotheksdatenbank synchronisieren?';
+
+  @override
+  String get syncLibraryDatabaseSubtitle =>
+      'Es ist mindestens ein Monat seit deiner letzten Synchronisierung vergangen. Sonora läuft offline — wenn du neue Musikdateien in deinen Geräteordner geladen hast, führe jetzt eine Synchronisierung durch, um sie zu entdecken.';
+
+  @override
   String get syncNow => 'Jetzt synchronisieren';
+
+  @override
+  String syncedXSongs(int count, String duration) {
+    return '$count Songs synchronisiert$duration.';
+  }
 
   @override
   String get syncing => 'Synchronisieren...';
@@ -833,6 +915,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tryAgain => 'Erneut versuchen';
 
   @override
+  String get upNext => 'Als nächstes';
+
+  @override
+  String get upNextCaps => 'ALS NÄCHSTES';
+
+  @override
   String get updateAvailable => 'Update verfügbar';
 
   @override
@@ -850,6 +938,11 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get useGreetingTitleSubtitle =>
       'Zeitbasierte Begrüßung auf dem Startbildschirm statt App-Namen anzeigen';
+
+  @override
+  String version(String version) {
+    return 'Version $version';
+  }
 
   @override
   String get viewStatistics => 'Statistiken anzeigen';

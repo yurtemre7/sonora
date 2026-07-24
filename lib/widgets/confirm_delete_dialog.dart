@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 /// A reusable confirm-before-delete (destructive action) dialog.
 ///
@@ -24,8 +25,8 @@ class ConfirmDeleteDialog {
     BuildContext context, {
     required String title,
     required String message,
-    String confirmLabel = 'Delete',
-    String cancelLabel = 'Cancel',
+    String? confirmLabel,
+    String? cancelLabel,
   }) {
     return showDialog<bool>(
       context: context,
@@ -58,7 +59,7 @@ class ConfirmDeleteDialog {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(cancelLabel),
+              child: Text(cancelLabel ?? context.l10n.cancel),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
@@ -66,7 +67,7 @@ class ConfirmDeleteDialog {
                 foregroundColor: theme.colorScheme.onError,
               ),
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(confirmLabel),
+              child: Text(confirmLabel ?? context.l10n.delete),
             ),
           ],
         );

@@ -118,6 +118,12 @@ abstract class AppLocalizations {
   /// **'Required to index audio tracks and scan local cover images (artist.jpg / cover.jpg) on your device.'**
   String get accessAudioSubtitle;
 
+  /// No description provided for @activeSyncLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Active sync location'**
+  String get activeSyncLocation;
+
   /// No description provided for @addToPlaylist.
   ///
   /// In en, this message translates to:
@@ -165,6 +171,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use pitch black backgrounds in dark mode instead of dark gray'**
   String get amoledDarkSubtitle;
+
+  /// No description provided for @appDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A beautiful local music player for Android, built with Flutter and Material 3 Expressive design.'**
+  String get appDescription;
+
+  /// No description provided for @appInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'App Info'**
+  String get appInfo;
 
   /// No description provided for @appLanguage.
   ///
@@ -351,6 +369,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Custom Sleep Timer'**
   String get customSleepTimer;
+
+  /// No description provided for @customSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Speed'**
+  String get customSpeed;
 
   /// No description provided for @dangerZone.
   ///
@@ -712,6 +736,18 @@ abstract class AppLocalizations {
   /// **'Lyrics'**
   String get lyrics;
 
+  /// No description provided for @lyricsCaps.
+  ///
+  /// In en, this message translates to:
+  /// **'LYRICS'**
+  String get lyricsCaps;
+
+  /// No description provided for @madeWithLove.
+  ///
+  /// In en, this message translates to:
+  /// **'Made with ❤️ by yurtemre'**
+  String get madeWithLove;
+
   /// No description provided for @mfx.
   ///
   /// In en, this message translates to:
@@ -808,6 +844,18 @@ abstract class AppLocalizations {
   /// **'No favorites yet'**
   String get noFavoritesYet;
 
+  /// No description provided for @noLyricsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No lyrics available'**
+  String get noLyricsAvailable;
+
+  /// No description provided for @noLyricsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No lyrics found'**
+  String get noLyricsFound;
+
   /// No description provided for @noMatchingAlbumsFound.
   ///
   /// In en, this message translates to:
@@ -843,6 +891,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No playlists found'**
   String get noPlaylistsFound;
+
+  /// No description provided for @noRelatedSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'No related songs'**
+  String get noRelatedSongs;
 
   /// No description provided for @noSongsFound.
   ///
@@ -922,6 +976,12 @@ abstract class AppLocalizations {
   /// **'Personalization'**
   String get personalization;
 
+  /// No description provided for @placeLrcFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Place a .lrc or .txt file with the same name next to the audio file to load lyrics.'**
+  String get placeLrcFile;
+
   /// No description provided for @play.
   ///
   /// In en, this message translates to:
@@ -982,6 +1042,12 @@ abstract class AppLocalizations {
   /// **'Playlists'**
   String get playlists;
 
+  /// No description provided for @plusOneMin.
+  ///
+  /// In en, this message translates to:
+  /// **'+1 min'**
+  String get plusOneMin;
+
   /// No description provided for @preferLocalArtistImages.
   ///
   /// In en, this message translates to:
@@ -993,6 +1059,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use local artist.jpg files from your music folders when available'**
   String get preferLocalArtistImagesSubtitle;
+
+  /// No description provided for @presetSpeedAndPitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset Speed & Pitch'**
+  String get presetSpeedAndPitch;
 
   /// No description provided for @preview.
   ///
@@ -1108,6 +1180,18 @@ abstract class AppLocalizations {
   /// **'Queue is empty'**
   String get queueEmpty;
 
+  /// No description provided for @queueIsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue is empty'**
+  String get queueIsEmpty;
+
+  /// No description provided for @queueXOfY.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue ({current} of {total})'**
+  String queueXOfY(int current, int total);
+
   /// No description provided for @rateLimitMessage.
   ///
   /// In en, this message translates to:
@@ -1125,6 +1209,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refresh'**
   String get refresh;
+
+  /// No description provided for @related.
+  ///
+  /// In en, this message translates to:
+  /// **'Related'**
+  String get related;
+
+  /// No description provided for @relatedCaps.
+  ///
+  /// In en, this message translates to:
+  /// **'RELATED'**
+  String get relatedCaps;
 
   /// No description provided for @removeCover.
   ///
@@ -1227,6 +1323,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset Statistics?'**
   String get resetStatisticsConfirmTitle;
+
+  /// No description provided for @resetStatisticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Statistics?'**
+  String get resetStatisticsTitle;
+
+  /// No description provided for @resetStatisticsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.'**
+  String get resetStatisticsWarning;
 
   /// No description provided for @save.
   ///
@@ -1342,6 +1450,12 @@ abstract class AppLocalizations {
   /// **'Shuffle Play'**
   String get shufflePlay;
 
+  /// No description provided for @sleepTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep Timer'**
+  String get sleepTimer;
+
   /// No description provided for @songCount.
   ///
   /// In en, this message translates to:
@@ -1353,6 +1467,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Song Info'**
   String get songInfo;
+
+  /// No description provided for @songInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Song Information'**
+  String get songInformation;
 
   /// No description provided for @songs.
   ///
@@ -1492,17 +1612,41 @@ abstract class AppLocalizations {
   /// **'Stats'**
   String get stats;
 
+  /// No description provided for @syncDuration.
+  ///
+  /// In en, this message translates to:
+  /// **' in {duration}ms'**
+  String syncDuration(String duration);
+
   /// No description provided for @syncExplanation.
   ///
   /// In en, this message translates to:
   /// **'Sonora plays your files locally and offline. When you copy new tracks into this folder, run a sync below to add them to your library.'**
   String get syncExplanation;
 
+  /// No description provided for @syncLibraryDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Library Database?'**
+  String get syncLibraryDatabase;
+
+  /// No description provided for @syncLibraryDatabaseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s been at least a month since your last library synchronization. Sonora runs offline—if you have loaded new music files into your device folder, run a sync now to discover and listen to them.'**
+  String get syncLibraryDatabaseSubtitle;
+
   /// No description provided for @syncNow.
   ///
   /// In en, this message translates to:
   /// **'Sync Now'**
   String get syncNow;
+
+  /// No description provided for @syncedXSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced {count} songs{duration}.'**
+  String syncedXSongs(int count, String duration);
 
   /// No description provided for @syncing.
   ///
@@ -1570,6 +1714,18 @@ abstract class AppLocalizations {
   /// **'Try Again'**
   String get tryAgain;
 
+  /// No description provided for @upNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Up next'**
+  String get upNext;
+
+  /// No description provided for @upNextCaps.
+  ///
+  /// In en, this message translates to:
+  /// **'UP NEXT'**
+  String get upNextCaps;
+
   /// No description provided for @updateAvailable.
   ///
   /// In en, this message translates to:
@@ -1599,6 +1755,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show a time-based greeting on the home screen instead of the app name'**
   String get useGreetingTitleSubtitle;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String version(String version);
 
   /// No description provided for @viewStatistics.
   ///

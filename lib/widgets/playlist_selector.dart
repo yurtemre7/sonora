@@ -102,7 +102,7 @@ class _PlaylistSelectorBottomSheetState
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Add to Playlist',
+                          context.l10n.addToPlaylist,
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

@@ -171,7 +171,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Preset Speed & Pitch',
+                                    context.l10n.presetSpeedAndPitch,
                                     style: theme.textTheme.titleMedium
                                         ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
@@ -327,7 +327,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                 horizontal: 16,
                               ),
                               child: Text(
-                                'Custom Speed',
+                                context.l10n.customSpeed,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),

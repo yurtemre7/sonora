@@ -138,7 +138,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   if (widget.settingsProvider.scanFolder !=
                                       null)
                                     Text(
-                                      'Active sync location',
+                                      context.l10n.activeSyncLocation,
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
                                             color: theme
@@ -237,7 +237,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       null) ...[
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Duration: ${widget.settingsProvider.lastSyncDuration}ms',
+                                      context.l10n.syncDuration(widget.settingsProvider.lastSyncDuration.toString()),
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
                                             color: theme
@@ -274,9 +274,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                             context,
                                           ).showSnackBar(
                                             SnackBar(
-                                              content: Text(
-                                                'Synced ${widget.playerProvider.allSongs.length} songs$durationText.',
-                                              ),
+                                              content: Text(context.l10n.syncedXSongs(widget.playerProvider.allSongs.length, durationText)),
                                               behavior:
                                                   SnackBarBehavior.floating,
                                             ),

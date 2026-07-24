@@ -3,6 +3,7 @@
   "aboutSonora": "About Sonora",
   "accessAudioAndImageFiles": "Access Audio & Image Files",
   "accessAudioSubtitle": "Required to index audio tracks and scan local cover images (artist.jpg / cover.jpg) on your device.",
+  "activeSyncLocation": "Active sync location",
   "addToPlaylist": "Add to playlist",
   "addToQueue": "Add to Queue",
   "albumCount": "{count, plural, =1{1 album} other{{count} albums}}",
@@ -18,6 +19,8 @@
   "alreadyOnLatest": "You are already on the latest version.",
   "amoledDark": "AMOLED Pure Black",
   "amoledDarkSubtitle": "Use pitch black backgrounds in dark mode instead of dark gray",
+  "appDescription": "A beautiful local music player for Android, built with Flutter and Material 3 Expressive design.",
+  "appInfo": "App Info",
   "appLanguage": "App Language",
   "appTitle": "Sonora",
   "@appTitle": {
@@ -59,6 +62,7 @@
   "createPlaylist": "Create a playlist",
   "customDuration": "Custom Duration...",
   "customSleepTimer": "Custom Sleep Timer",
+  "customSpeed": "Custom Speed",
   "dangerZone": "Danger Zone",
   "dark": "Dark",
   "darkSubtitle": "Always use dark theme",
@@ -147,6 +151,8 @@
   "lightSubtitle": "Always use light theme",
   "listeningStatistics": "Listening Statistics",
   "lyrics": "Lyrics",
+  "lyricsCaps": "LYRICS",
+  "madeWithLove": "Made with ❤️ by yurtemre",
   "mfx": "MFX",
   "mfxBassBoosted": "Bass Boosted",
   "mfxBassBoostedSubtitle": "Strong low-frequency bump (+80%)",
@@ -170,12 +176,15 @@
   "noAlbumsFound": "No albums found",
   "noArtistsFound": "No artists found",
   "noFavoritesYet": "No favorites yet",
+  "noLyricsAvailable": "No lyrics available",
+  "noLyricsFound": "No lyrics found",
   "noMatchingAlbumsFound": "No matching albums found",
   "noMatchingArtistsFound": "No matching artists found",
   "noMatchingPlaylistsFound": "No matching playlists found",
   "noMatchingSongsFound": "No matching songs found",
   "noMusicFilesFound": "No music files found",
   "noPlaylistsFound": "No playlists found",
+  "noRelatedSongs": "No related songs",
   "noSongsFound": "No songs found",
   "ok": "OK",
   "onboardingDescription": "A premium offline music experience built with beautiful Material 3 Expressive elements.\n\nEnjoy fluid, stutter-free playback and fast background syncing.",
@@ -189,6 +198,7 @@
   "permissionsGrantedSuccess": "Permissions configured successfully!",
   "permissionsNeeded": "Permissions Needed",
   "personalization": "Personalization",
+  "placeLrcFile": "Place a .lrc or .txt file with the same name next to the audio file to load lyrics.",
   "play": "Play",
   "playAll": "Play All",
   "playNext": "Play Next",
@@ -206,8 +216,10 @@
   },
   "playlistName": "Playlist name",
   "playlists": "Playlists",
+  "plusOneMin": "+1 min",
   "preferLocalArtistImages": "Prefer Local Artist Images",
   "preferLocalArtistImagesSubtitle": "Use local artist.jpg files from your music folders when available",
+  "presetSpeedAndPitch": "Preset Speed & Pitch",
   "preview": "Preview",
   "previousTooltip": "Previous",
   "privacyCardDataContent": "This app operates entirely offline and communicates with no servers, with the exception of checking GitHub for app updates. All of your library statistics, preferences, and playtime data stay strictly on your device and are never sent anywhere. \n\nYou can trust that your listening habits remain private.",
@@ -227,9 +239,23 @@
   "privacySubtitle": "Data management and required permissions",
   "queue": "Queue",
   "queueEmpty": "Queue is empty",
+  "queueIsEmpty": "Queue is empty",
+  "queueXOfY": "Queue ({current} of {total})",
+  "@queueXOfY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "rateLimitMessage": "GitHub API rate limit (60 requests/hour for anonymous requests) has been reached.\n\nPlease open the GitHub repository directly to check for new releases.",
   "rateLimitTitle": "Rate Limit Exceeded",
   "refresh": "Refresh",
+  "related": "Related",
+  "relatedCaps": "RELATED",
   "removeCover": "Remove Cover",
   "removeFromPlaylist": "Remove from playlist",
   "rename": "Rename",
@@ -247,6 +273,8 @@
   "resetStatistics": "Reset Statistics",
   "resetStatisticsConfirmMessage": "This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.",
   "resetStatisticsConfirmTitle": "Reset Statistics?",
+  "resetStatisticsTitle": "Reset Statistics?",
+  "resetStatisticsWarning": "This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.",
   "save": "Save",
   "searchAlbumsHint": "Search albums...",
   "searchArtistsHint": "Search artists...",
@@ -266,6 +294,7 @@
   "shuffle": "Shuffle",
   "shuffleAll": "Shuffle All",
   "shufflePlay": "Shuffle Play",
+  "sleepTimer": "Sleep Timer",
   "songCount": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songCount": {
     "placeholders": {
@@ -275,6 +304,7 @@
     }
   },
   "songInfo": "Song Info",
+  "songInformation": "Song Information",
   "songs": "Songs",
   "sort": "Sort",
   "sortAlbumsBy": "Sort Albums By",
@@ -298,8 +328,29 @@
   "sourceCodeSubtitle": "View the GitHub repository",
   "startTimer": "Start Timer",
   "stats": "Stats",
+  "syncDuration": " in {duration}ms",
+  "@syncDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "syncExplanation": "Sonora plays your files locally and offline. When you copy new tracks into this folder, run a sync below to add them to your library.",
+  "syncLibraryDatabase": "Sync Library Database?",
+  "syncLibraryDatabaseSubtitle": "It's been at least a month since your last library synchronization. Sonora runs offline—if you have loaded new music files into your device folder, run a sync now to discover and listen to them.",
   "syncNow": "Sync Now",
+  "syncedXSongs": "Synced {count} songs{duration}.",
+  "@syncedXSongs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "syncing": "Syncing...",
   "systemDefault": "System Default",
   "systemSubtitle": "Follows your device theme",
@@ -318,6 +369,8 @@
     }
   },
   "tryAgain": "Try Again",
+  "upNext": "Up next",
+  "upNextCaps": "UP NEXT",
   "updateAvailable": "Update Available",
   "updateAvailableMessage": "Version {version} is now available!",
   "@updateAvailableMessage": {
@@ -330,6 +383,14 @@
   "updateCheckFailed": "Failed to check for updates. Check your internet connection.",
   "useGreetingTitle": "Use Greeting Title",
   "useGreetingTitleSubtitle": "Show a time-based greeting on the home screen instead of the app name",
+  "version": "Version {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "viewStatistics": "View Statistics",
   "viewStatisticsSubtitle": "See your playback history and stats",
   "volume": "Volume",

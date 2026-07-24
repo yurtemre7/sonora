@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 void showSongInfoBottomSheet(BuildContext context, Song song) {
   var theme = Theme.of(context);
@@ -41,7 +42,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Song Information',
+                  context.l10n.songInformation,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

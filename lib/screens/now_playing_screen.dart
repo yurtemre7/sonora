@@ -99,10 +99,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
               _viewMode == _ViewMode.player
                   ? 'Now Playing'
                   : _viewMode == _ViewMode.upNext
-                  ? 'Up Next'
-                  : _viewMode == _ViewMode.lyrics
-                  ? 'Lyrics'
-                  : 'Related',
+                      ? context.l10n.upNext
+                      : _viewMode == _ViewMode.lyrics
+                          ? context.l10n.lyrics
+                          : context.l10n.related,
             ),
             systemOverlayStyle: SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
@@ -636,22 +636,22 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       padding: const EdgeInsets.only(top: 8, bottom: 16),
       child: Row(
         children: [
-          _bottomTab(theme, _ViewMode.upNext, 'UP NEXT', true, 'Up next'),
+          _bottomTab(theme, _ViewMode.upNext, context.l10n.upNextCaps, true, context.l10n.upNext),
           const SizedBox(width: 8),
           _bottomTab(
             theme,
             _ViewMode.lyrics,
-            'LYRICS',
+            context.l10n.lyricsCaps,
             hasLyrics,
-            hasLyrics ? 'Lyrics' : 'No lyrics available',
+            hasLyrics ? context.l10n.lyrics : context.l10n.noLyricsAvailable,
           ),
           const SizedBox(width: 8),
           _bottomTab(
             theme,
             _ViewMode.related,
-            'RELATED',
+            context.l10n.relatedCaps,
             hasRelated,
-            hasRelated ? 'Related' : 'No related songs',
+            hasRelated ? context.l10n.related : context.l10n.noRelatedSongs,
           ),
         ],
       ),
@@ -808,7 +808,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              'Queue is empty',
+              context.l10n.queueIsEmpty,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -834,8 +834,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
                 currentIndex >= 0
-                    ? 'Queue (${currentIndex + 1} of ${queue.length})'
-                    : 'Queue',
+                    ? context.l10n.queueXOfY(currentIndex + 1, queue.length)
+                    : context.l10n.queue,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
@@ -1021,7 +1021,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Sleep Timer',
+                        context.l10n.sleepTimer,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Outfit',
@@ -1084,7 +1084,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                   );
                                   Navigator.pop(context);
                                 },
-                                child: const Text('+1 min'),
+                                child: Text(context.l10n.plusOneMin),
                               ),
                             ),
                           ],
@@ -1415,14 +1415,14 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
               ),
               const SizedBox(height: 12),
               Text(
-                'No lyrics found',
+                context.l10n.noLyricsFound,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                'Place a .lrc or .txt file with the same name next to the audio file to load lyrics.',
+                context.l10n.placeLrcFile,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withValues(
                     alpha: 0.7,

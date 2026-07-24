@@ -19,6 +19,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Required to index audio tracks and scan local cover images (artist.jpg / cover.jpg) on your device.';
 
   @override
+  String get activeSyncLocation => 'Active sync location';
+
+  @override
   String get addToPlaylist => 'Add to playlist';
 
   @override
@@ -50,6 +53,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get amoledDarkSubtitle =>
       'Use pitch black backgrounds in dark mode instead of dark gray';
+
+  @override
+  String get appDescription =>
+      'A beautiful local music player for Android, built with Flutter and Material 3 Expressive design.';
+
+  @override
+  String get appInfo => 'App Info';
 
   @override
   String get appLanguage => 'App Language';
@@ -153,6 +163,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customSleepTimer => 'Custom Sleep Timer';
+
+  @override
+  String get customSpeed => 'Custom Speed';
 
   @override
   String get dangerZone => 'Danger Zone';
@@ -349,6 +362,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lyrics => 'Lyrics';
 
   @override
+  String get lyricsCaps => 'LYRICS';
+
+  @override
+  String get madeWithLove => 'Made with ❤️ by yurtemre';
+
+  @override
   String get mfx => 'MFX';
 
   @override
@@ -399,6 +418,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noFavoritesYet => 'No favorites yet';
 
   @override
+  String get noLyricsAvailable => 'No lyrics available';
+
+  @override
+  String get noLyricsFound => 'No lyrics found';
+
+  @override
   String get noMatchingAlbumsFound => 'No matching albums found';
 
   @override
@@ -415,6 +440,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noPlaylistsFound => 'No playlists found';
+
+  @override
+  String get noRelatedSongs => 'No related songs';
 
   @override
   String get noSongsFound => 'No songs found';
@@ -460,6 +488,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personalization => 'Personalization';
 
   @override
+  String get placeLrcFile =>
+      'Place a .lrc or .txt file with the same name next to the audio file to load lyrics.';
+
+  @override
   String get play => 'Play';
 
   @override
@@ -498,11 +530,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playlists => 'Playlists';
 
   @override
+  String get plusOneMin => '+1 min';
+
+  @override
   String get preferLocalArtistImages => 'Prefer Local Artist Images';
 
   @override
   String get preferLocalArtistImagesSubtitle =>
       'Use local artist.jpg files from your music folders when available';
+
+  @override
+  String get presetSpeedAndPitch => 'Preset Speed & Pitch';
 
   @override
   String get preview => 'Preview';
@@ -569,6 +607,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queueEmpty => 'Queue is empty';
 
   @override
+  String get queueIsEmpty => 'Queue is empty';
+
+  @override
+  String queueXOfY(int current, int total) {
+    return 'Queue ($current of $total)';
+  }
+
+  @override
   String get rateLimitMessage =>
       'GitHub API rate limit (60 requests/hour for anonymous requests) has been reached.\n\nPlease open the GitHub repository directly to check for new releases.';
 
@@ -577,6 +623,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refresh => 'Refresh';
+
+  @override
+  String get related => 'Related';
+
+  @override
+  String get relatedCaps => 'RELATED';
 
   @override
   String get removeCover => 'Remove Cover';
@@ -630,6 +682,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetStatisticsConfirmTitle => 'Reset Statistics?';
+
+  @override
+  String get resetStatisticsTitle => 'Reset Statistics?';
+
+  @override
+  String get resetStatisticsWarning =>
+      'This will permanently delete all your listening statistics, including total time, play counts, and top charts. This cannot be undone.';
 
   @override
   String get save => 'Save';
@@ -691,6 +750,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shufflePlay => 'Shuffle Play';
 
   @override
+  String get sleepTimer => 'Sleep Timer';
+
+  @override
   String songCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -703,6 +765,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get songInfo => 'Song Info';
+
+  @override
+  String get songInformation => 'Song Information';
 
   @override
   String get songs => 'Songs';
@@ -775,11 +840,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stats => 'Stats';
 
   @override
+  String syncDuration(String duration) {
+    return ' in ${duration}ms';
+  }
+
+  @override
   String get syncExplanation =>
       'Sonora plays your files locally and offline. When you copy new tracks into this folder, run a sync below to add them to your library.';
 
   @override
+  String get syncLibraryDatabase => 'Sync Library Database?';
+
+  @override
+  String get syncLibraryDatabaseSubtitle =>
+      'It\'s been at least a month since your last library synchronization. Sonora runs offline—if you have loaded new music files into your device folder, run a sync now to discover and listen to them.';
+
+  @override
   String get syncNow => 'Sync Now';
+
+  @override
+  String syncedXSongs(int count, String duration) {
+    return 'Synced $count songs$duration.';
+  }
 
   @override
   String get syncing => 'Syncing...';
@@ -823,6 +905,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tryAgain => 'Try Again';
 
   @override
+  String get upNext => 'Up next';
+
+  @override
+  String get upNextCaps => 'UP NEXT';
+
+  @override
   String get updateAvailable => 'Update Available';
 
   @override
@@ -840,6 +928,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get useGreetingTitleSubtitle =>
       'Show a time-based greeting on the home screen instead of the app name';
+
+  @override
+  String version(String version) {
+    return 'Version $version';
+  }
 
   @override
   String get viewStatistics => 'View Statistics';
