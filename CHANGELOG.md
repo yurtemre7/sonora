@@ -5,6 +5,8 @@ All notable changes to the Sonora music player project are documented in this fi
 ## [1.12.1] - 2026-07-24
 ### Added
 * Add custom EQ, queue saving, and unify playlist actions
+### Changed
+* Chore: Autogenerate changelog
 
 ## [1.12.0] - 2026-07-24
 ### Added
