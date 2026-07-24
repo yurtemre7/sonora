@@ -219,7 +219,7 @@ class _PlaylistSelectorBottomSheetState
                                                 )
                                                 .length;
                                             return Text(
-                                              '$liveCount ${liveCount == 1 ? 'song' : 'songs'}',
+                                              context.l10n.songCount(liveCount),
                                             );
                                           },
                                         ),

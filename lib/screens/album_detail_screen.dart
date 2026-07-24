@@ -101,7 +101,7 @@ class AlbumDetailScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '${album.songs.length} ${album.songs.length == 1 ? 'track' : 'tracks'} • ${formatTotalDuration(album.songs)}',
+                        '${context.l10n.trackCount(album.songs.length)} • ${formatTotalDuration(album.songs)}',
                         style: theme.textTheme.labelMedium?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,

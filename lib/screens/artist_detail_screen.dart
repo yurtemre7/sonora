@@ -84,7 +84,7 @@ class ArtistDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${artist.albums.length} ${artist.albums.length == 1 ? 'album' : 'albums'} • ${artist.songs.length} ${artist.songs.length == 1 ? 'song' : 'songs'} • ${formatTotalDuration(artist.songs)}',
+                          '${context.l10n.albumCount(artist.albums.length)} • ${context.l10n.songCount(artist.songs.length)} • ${formatTotalDuration(artist.songs)}',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),

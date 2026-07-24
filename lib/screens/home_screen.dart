@@ -1090,7 +1090,7 @@ class _HomeScreenState extends State<HomeScreen>
                                               ),
                                               const SizedBox(height: 2),
                                               Text(
-                                                '${album.songs.length} ${album.songs.length == 1 ? 'track' : 'tracks'}',
+                                                context.l10n.trackCount(album.songs.length),
                                                 style: theme
                                                     .textTheme
                                                     .labelSmall
@@ -1167,7 +1167,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                     ),
                                               ),
                                               subtitle: Text(
-                                                '${artist.albums.length} ${artist.albums.length == 1 ? 'album' : 'albums'} • ${artist.songs.length} ${artist.songs.length == 1 ? 'song' : 'songs'}',
+                                                '${context.l10n.albumCount(artist.albums.length)} • ${context.l10n.songCount(artist.songs.length)}',
                                               ),
                                               trailing: const Icon(
                                                 Icons.chevron_right_rounded,
@@ -1349,7 +1349,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                     ),
                                               title: Text(playlist.name),
                                               subtitle: Text(
-                                                '$songCount ${songCount == 1 ? 'song' : 'songs'}',
+                                                context.l10n.songCount(songCount),
                                               ),
                                               trailing: PopupMenuButton<int>(
                                                 icon: const Icon(
