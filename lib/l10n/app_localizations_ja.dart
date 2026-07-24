@@ -12,14 +12,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aboutSonora => 'Sonoraについて';
 
   @override
-  String get accessAudioAndImageFiles => 'オーディオと画像ファイルへのアクセス';
+  String get accessAudioAndImageFiles => '音声ファイルと画像ファイルへのアクセス';
 
   @override
   String get accessAudioSubtitle =>
-      '音楽ファイルのインデックス作成とローカルカバー画像（artist.jpg / cover.jpg）のスキャンに必要です。';
+      '音声トラックのインデックス作成と、ローカルのカバー画像（artist.jpg / cover.jpg）のスキャンに必要です。';
 
   @override
-  String get activeSyncLocation => '現在のアクティブな同期先';
+  String get activeSyncLocation => '現在の同期先';
 
   @override
   String get addToPlaylist => 'プレイリストに追加';
@@ -29,7 +29,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String albumCount(int count) {
-    return '$count アルバム';
+    return '$count件のアルバム';
   }
 
   @override
@@ -39,13 +39,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get allPermissionsGranted => 'すべての権限が許可されました';
 
   @override
-  String get alreadyOnLatest => 'すでに最新バージョンをお使いです。';
+  String get alreadyOnLatest => 'すでに最新バージョンです。';
 
   @override
-  String get amoledDark => '有機ELピュアブラック';
+  String get amoledDark => 'AMOLEDピュアブラック';
 
   @override
-  String get amoledDarkSubtitle => 'ダークモード時にダークグレーの代わりに漆黒の背景を使用します';
+  String get amoledDarkSubtitle => 'ダークモード時に、ダークグレーではなく完全な黒背景を使用します';
 
   @override
   String get appDescription =>
@@ -71,17 +71,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String artistCount(int count) {
-    return '$count アーティスト';
+    return '$count人のアーティスト';
   }
 
   @override
   String get artists => 'アーティスト';
 
   @override
-  String get autoCheckUpdates => '自動的にアップデートを確認';
+  String get autoCheckUpdates => '更新を自動確認';
 
   @override
-  String get autoCheckUpdatesSubtitle => 'アプリ起動時にGitHubで新バージョンを確認します';
+  String get autoCheckUpdatesSubtitle => 'アプリ起動時にGitHubで新しいリリースを確認します';
 
   @override
   String get back => '戻る';
@@ -105,7 +105,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get changelog => '更新履歴';
 
   @override
-  String get changelogLabel => '更新履歴：';
+  String get changelogLabel => '更新履歴:';
 
   @override
   String get changelogSubtitle => '新機能を確認';
@@ -114,17 +114,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get changelogTitle => '更新履歴';
 
   @override
-  String get checkForUpdates => 'アップデートを確認';
+  String get checkForUpdates => '更新を確認';
 
   @override
   String get checkForUpdatesSubtitle => 'GitHubで新しいリリースを確認します';
 
   @override
   String get chooseMusicFolder =>
-      '初期ライブラリを構築するために、音楽ファイル（MP3、FLAC、M4Aなど）が入ったメインフォルダを選択してください。';
+      '初回ライブラリを作成するため、音声ファイル（MP3、FLAC、M4Aなど）が含まれているメインフォルダを選択してください。';
 
   @override
-  String get chooseSquareImage => '正方形の画像を選ぶと最適な結果が得られます。';
+  String get chooseSquareImage => '最適な表示のため、正方形の画像を選択してください。';
 
   @override
   String get chooseTheme => 'テーマを選択';
@@ -133,7 +133,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get close => '閉じる';
 
   @override
-  String get communityAndSupport => 'コミュニティ＆サポート';
+  String get communityAndSupport => 'コミュニティとサポート';
 
   @override
   String get configurePermissions => '権限を設定';
@@ -154,37 +154,37 @@ class AppLocalizationsJa extends AppLocalizations {
   String get customSpeed => 'カスタム速度';
 
   @override
-  String get dangerZone => '危険ゾーン';
+  String get dangerZone => '危険な操作';
 
   @override
   String get dark => 'ダーク';
 
   @override
-  String get darkSubtitle => '常にダークテーマを使用';
+  String get darkSubtitle => '常にダークテーマを使用します';
 
   @override
   String get dataManagement => 'データ管理';
 
   @override
-  String get dateCreated => '作成日時';
+  String get dateCreated => '作成日';
 
   @override
-  String get dateModified => '更新日時';
+  String get dateModified => '更新日';
 
   @override
-  String get defaultAppColor => '標準のアプリカラー';
+  String get defaultAppColor => 'デフォルトのアプリカラー';
 
   @override
-  String get defaultSleepTimer => 'デフォルトスリープタイマー';
+  String get defaultSleepTimer => 'デフォルトのスリープタイマー';
 
   @override
-  String get defaultSleepTimerSubtitle => 'スリープタイマーを開いたときにデフォルトで選択される時間';
+  String get defaultSleepTimerSubtitle => 'スリープタイマーを開いたときに最初に選択される時間です';
 
   @override
-  String get defaultStartPage => 'デフォルト開始ページ';
+  String get defaultStartPage => 'デフォルトの開始ページ';
 
   @override
-  String get defaultStartPageSubtitle => 'アプリ起動時に表示されるページ';
+  String get defaultStartPageSubtitle => 'アプリ起動時に表示するページです';
 
   @override
   String get delete => '削除';
@@ -194,7 +194,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String deletePlaylistConfirmMessage(String name) {
-    return '「$name」を削除しますか？この操作は取り消せません。';
+    return '「$name」を削除しますか？ この操作は元に戻せません。';
   }
 
   @override
@@ -207,22 +207,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get developerProfile => '開発者プロフィール';
 
   @override
-  String get developerProfileSubtitle => 'GitHubのyurtemre7を見る';
+  String get developerProfileSubtitle => 'GitHubでyurtemre7を見る';
 
   @override
   String get disableShuffle => 'シャッフルをオフ';
 
   @override
-  String get displayedAs => '表示名:';
+  String get displayedAs => '表示形式:';
 
   @override
   String get download => 'ダウンロード';
 
   @override
-  String get dynamicTheme => 'ダイナミックテーマ (Material You)';
+  String get dynamicTheme => 'ダイナミックテーマ（Material You）';
 
   @override
-  String get dynamicThemeSubtitle => '再生中のアルバムアートの色に合わせてアプリを自動着色します';
+  String get dynamicThemeSubtitle => '現在のアルバムアートに合わせてアプリのテーマを自動調整します';
 
   @override
   String get editDescription => '説明を編集';
@@ -240,27 +240,27 @@ class AppLocalizationsJa extends AppLocalizations {
   String get experimental => '実験的';
 
   @override
-  String get exportToM3u => 'Export to M3U';
+  String get exportToM3u => 'M3Uにエクスポート';
 
   @override
   String exportedPlaylist(String name) {
-    return 'Exported playlist: $name';
+    return 'プレイリストをエクスポートしました: $name';
   }
 
   @override
-  String get failedToExport => 'Failed to export';
+  String get failedToExport => 'エクスポートに失敗しました';
 
   @override
   String get failedToLoadChangelog => '更新履歴を読み込めませんでした。';
 
   @override
-  String get failedToSelectDirectory => 'フォルダを選択できませんでした。もう一度試してください。';
+  String get failedToSelectDirectory => 'フォルダを選択できませんでした。もう一度お試しください。';
 
   @override
   String get favoriteRemove => 'お気に入りから削除';
 
   @override
-  String get favoriteSong => 'お気に入りに追加';
+  String get favoriteSong => 'お気に入りの曲';
 
   @override
   String get favorites => 'お気に入り';
@@ -269,52 +269,52 @@ class AppLocalizationsJa extends AppLocalizations {
   String get fileSize => 'ファイルサイズ';
 
   @override
-  String get filterTitleArtist => 'タイトルからアーティスト名を削除';
+  String get filterTitleArtist => 'タイトル先頭のアーティスト名を削除';
 
   @override
-  String get filterTitleArtistSubtitle => '曲タイトルの先頭にある「アーティスト名 - 」を非表示にします。';
+  String get filterTitleArtistSubtitle => '曲名の先頭にある「Artist - 」を非表示にします。';
 
   @override
-  String get filterTitleFeatures => 'タイトルから (feat.) を削除';
+  String get filterTitleFeatures => 'タイトル内の（feat.）を削除';
 
   @override
-  String get filterTitleFeaturesSubtitle => '曲タイトルに含まれる客演情報を非表示にします。';
+  String get filterTitleFeaturesSubtitle => '曲名に含まれるフィーチャリング情報を非表示にします。';
 
   @override
-  String get formattingSettings => 'タイトルとメタデータの形式';
+  String get formattingSettings => 'タイトルとメタデータの表示形式';
 
   @override
-  String get formattingSubtitle => '曲タイトルの表示方法を設定します';
+  String get formattingSubtitle => '曲名の表示方法を設定します';
 
   @override
-  String get getStarted => '始める';
+  String get getStarted => 'はじめる';
 
   @override
   String goodAfternoon(String name) {
-    return 'こんにちは、$nameさん';
+    return '$nameさん、こんにちは';
   }
 
   @override
   String goodEvening(String name) {
-    return 'こんばんは、$nameさん';
+    return '$nameさん、こんばんは';
   }
 
   @override
   String goodMorning(String name) {
-    return 'おはよう、$nameさん';
+    return '$nameさん、おはようございます';
   }
 
   @override
   String get infoSettings => '情報とサポート';
 
   @override
-  String get infoSubtitle => 'アプリ情報、更新、変更履歴';
+  String get infoSubtitle => 'アプリ情報、更新、更新履歴、危険な操作';
 
   @override
-  String get keepPlayingOnClose => 'アプリ終了時も再生を継続';
+  String get keepPlayingOnClose => 'アプリ終了後も再生を継続';
 
   @override
-  String get keepPlayingOnCloseSubtitle => 'アプリをスワイプして閉じてもバックグラウンドで再生を続けます';
+  String get keepPlayingOnCloseSubtitle => 'アプリをスワイプして閉じても、バックグラウンドで再生を続けます';
 
   @override
   String get language => '言語';
@@ -326,7 +326,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageJapanese => '日本語';
 
   @override
-  String get languageSystem => 'システム標準';
+  String get languageSystem => 'システムのデフォルト';
 
   @override
   String get lastSync => '最終同期';
@@ -335,7 +335,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get later => 'あとで';
 
   @override
-  String get libraryFormatting => 'ライブラリの形式設定';
+  String get libraryFormatting => 'ライブラリの表示形式';
 
   @override
   String get librarySync => 'ライブラリ同期';
@@ -350,7 +350,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get light => 'ライト';
 
   @override
-  String get lightSubtitle => '常にライトテーマを使用';
+  String get lightSubtitle => '常にライトテーマを使用します';
 
   @override
   String get listeningStatistics => '再生統計';
@@ -362,22 +362,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get lyricsCaps => '歌詞';
 
   @override
-  String get madeWithLove => 'yurtemreによって❤️を込めて作られました';
+  String get madeWithLove => 'yurtemreが❤️を込めて制作';
 
   @override
   String get mfx => 'MFX';
 
   @override
-  String get mfxBassBoosted => 'ベースブースト';
+  String get mfxBassBoosted => '低音強調';
 
   @override
-  String get mfxBassBoostedSubtitle => '低音域を強調（+80%）';
+  String get mfxBassBoostedSubtitle => '低音域を強くブーストします（+80%）';
 
   @override
-  String get mfxLoFi => 'Lo-Fi / ヴィンテージルーム';
+  String get mfxLoFi => 'Lo‑Fi / ヴィンテージルーム';
 
   @override
-  String get mfxLoFiSubtitle => '積極的な高域カットフィルター';
+  String get mfxLoFiSubtitle => '高域を大きくカットするフィルターです';
 
   @override
   String get mfxResetAll => 'すべてのエフェクトをリセット';
@@ -386,7 +386,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mfxWarmth => '暖かみ（リバーブ）';
 
   @override
-  String get mfxWarmthSubtitle => 'EQでシミュレート（低音強調・高音カット）';
+  String get mfxWarmthSubtitle => 'EQで再現します（低音ブースト、高域カット）';
 
   @override
   String minuteAbbr(int min) {
@@ -397,10 +397,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get minutes => '分';
 
   @override
-  String get musicEffects => '音楽エフェクト';
+  String get musicEffects => '音響エフェクト';
 
   @override
-  String get neverSynced => '未同期';
+  String get neverSynced => '一度も同期していません';
 
   @override
   String get next => '次へ';
@@ -415,10 +415,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noArtistsFound => 'アーティストが見つかりません';
 
   @override
-  String get noFavoritesYet => 'お気に入りがまだありません';
+  String get noFavoritesYet => 'お気に入りはまだありません';
 
   @override
-  String get noLyricsAvailable => '歌詞はありません';
+  String get noLyricsAvailable => '利用可能な歌詞はありません';
 
   @override
   String get noLyricsFound => '歌詞が見つかりません';
@@ -442,7 +442,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noPlaylistsFound => 'プレイリストが見つかりません';
 
   @override
-  String get noRelatedSongs => '関連曲はありません';
+  String get noRelatedSongs => '関連する曲はありません';
 
   @override
   String get noSongsFound => '曲が見つかりません';
@@ -452,7 +452,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get onboardingDescription =>
-      '美しいMaterial 3 Expressiveデザインで作られたプレミアムなオフライン音楽体験。\n\nなめらかな再生とスピーディなバックグラウンドスキャンをお楽しみください。';
+      '美しいMaterial 3 Expressive要素で構築された、プレミアムなオフライン音楽体験です。\n\n滑らかで途切れのない再生と、高速なバックグラウンド同期をお楽しみください。';
 
   @override
   String get openGithubReleases => 'GitHub Releasesを開く';
@@ -461,10 +461,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get originalMetadata => '元のメタデータ:';
 
   @override
-  String get pauseOnDuck => '通知受信時に一時停止';
+  String get pauseOnDuck => '通知時に一時停止';
 
   @override
-  String get pauseOnDuckSubtitle => '通知が届いた際に音量を下げるのではなく再生を一時停止します';
+  String get pauseOnDuckSubtitle => '通知が届いたとき、音量を下げる代わりに再生を一時停止します';
 
   @override
   String get pauseTooltip => '一時停止';
@@ -473,21 +473,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get permissionsExplained => '権限の説明';
 
   @override
-  String get permissionsExplanation =>
-      '音楽を再生・操作するために、Sonoraはデバイスのランタイム権限が必要です。';
+  String get permissionsExplanation => '音楽を再生・操作するために、Sonoraは端末の実行時権限を必要とします。';
 
   @override
   String get permissionsGrantedSuccess => '権限の設定が完了しました！';
 
   @override
-  String get permissionsNeeded => '権限が必要です';
+  String get permissionsNeeded => '必要な権限';
 
   @override
   String get personalization => 'パーソナライズ';
 
   @override
   String get placeLrcFile =>
-      '歌詞を読み込むには、同じ名前の.lrcまたは.txtファイルをオーディオファイルの横に配置します。';
+      '歌詞を読み込むには、音声ファイルと同じ名前の .lrc または .txt ファイルを隣に配置してください。';
 
   @override
   String get play => '再生';
@@ -505,14 +504,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get playback => '再生';
 
   @override
-  String get playbackSettings => '再生とオーディオ';
+  String get playbackSettings => '再生と音声';
 
   @override
-  String get playbackSubtitle => 'スリープタイマー、起動ページ、バックグラウンド再生';
+  String get playbackSubtitle => 'スリープタイマー、開始ページ、バックグラウンド再生';
 
   @override
   String playlistCount(int count) {
-    return '$count プレイリスト';
+    return '$count件のプレイリスト';
   }
 
   @override
@@ -529,10 +528,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get preferLocalArtistImagesSubtitle =>
-      '音楽フォルダ内の local artist.jpg ファイルを優先的に使用します';
+      '利用可能な場合、音楽フォルダ内の artist.jpg を優先して使用します';
 
   @override
-  String get presetSpeedAndPitch => 'プリセット速度とピッチ';
+  String get presetSpeedAndPitch => '速度とピッチのプリセット';
 
   @override
   String get preview => 'プレビュー';
@@ -542,44 +541,44 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get privacyCardDataContent =>
-      'このアプリは完全にオフラインで動作し、GitHubのアップデート確認を除いてサーバーと通信しません。ライブラリ統計、設定、再生データはすべてデバイス上にのみ保存され、外部に送信されることはありません。\n\nあなたのリスニング習慣が確実にプライベートに保たれます。';
+      'このアプリは完全にオフラインで動作し、アプリ更新の確認のためにGitHubへアクセスする場合を除き、いかなるサーバーとも通信しません。ライブラリ統計、設定、再生時間データはすべて端末内にのみ保存され、外部へ送信されることはありません。\n\nあなたの再生履歴やリスニング習慣はプライベートに保たれます。';
 
   @override
-  String get privacyCardDataTitle => 'あなたのデータはあなたのもの';
+  String get privacyCardDataTitle => 'データはあなたのものです';
 
   @override
   String get privacyCardDeleteDataContent =>
-      'あなたは完全な制御権を持っています。「情報＆サポート」タブ下部の危険ゾーンから、すべてのアプリ設定・統計・キャッシュをいつでも即座に削除できます。';
+      'すべてのデータは自分で管理できます。情報とサポートタブの最下部にある危険な操作から、アプリ設定、統計、キャッシュをいつでもすぐに削除できます。';
 
   @override
-  String get privacyCardDeleteDataTitle => '全データ削除';
+  String get privacyCardDeleteDataTitle => 'すべてのデータを削除';
 
   @override
   String get privacyCardInternetContent =>
-      'GitHubから最新バージョンと更新履歴を取得し、利用可能なアップデートを通知するためだけに使用されます。';
+      '利用可能な更新を通知するため、GitHubから最新リリースのバージョンと更新履歴を取得する目的でのみ使用されます。';
 
   @override
   String get privacyCardInternetTitle => 'インターネット';
 
   @override
   String get privacyCardNotificationsContent =>
-      '通知シェードとロック画面にメディアプレイヤーコントロールを表示するために使用されます。アプリを閉じた後もバックグラウンドで音楽を継続再生するためにフォアグラウンドサービスが必要です。';
+      '通知シェードとロック画面にメディアプレーヤーの操作を表示するために使用されます。アプリを閉じてもバックグラウンドで音楽を継続再生するには、フォアグラウンドサービスが必要です。';
 
   @override
-  String get privacyCardNotificationsTitle => '通知・フォアグラウンドサービス';
+  String get privacyCardNotificationsTitle => '通知とフォアグラウンドサービス';
 
   @override
   String get privacyCardStorageContent =>
-      '選択した音楽フォルダ内の音楽ファイルおよびローカルアーティスト/アルバムアートワーク（例：artist.jpgやcover.png）のスキャンに使用されます。\n\nプライバシー保証：Androidが「写真とメディア」アクセスを求めますが、Sonoraは指定された音楽ディレクトリ内のファイルのみをスキャンします。個人の写真ギャラリーやプライベート画像には一切アクセスしません。';
+      '選択した音楽フォルダ内の音声トラックと、ローカルのアーティスト／アルバムアートワーク（例: artist.jpg や cover.png）をスキャンするために使用されます。\n\n明確なプライバシー保証: Androidでは「写真とメディア」へのアクセス許可が表示されますが、Sonoraがスキャンするのは指定された音楽ディレクトリ内のファイルに限られます。個人の写真ギャラリー、カメラロール、プライベート画像を読み取ったり、調べたり、アクセスしたりすることは決してありません。';
 
   @override
-  String get privacyCardStorageTitle => 'ストレージ・オーディオ・カバー画像';
+  String get privacyCardStorageTitle => 'ストレージ、音声、カバー画像';
 
   @override
-  String get privacyCardWakeLockContent => 'デバイスがスリープ状態になって再生が突然停止しないようにします。';
+  String get privacyCardWakeLockContent => '再生中に端末がスリープして、音楽再生が突然停止しないようにします。';
 
   @override
-  String get privacyCardWakeLockTitle => 'ウェイクロック';
+  String get privacyCardWakeLockTitle => 'Wake Lock';
 
   @override
   String get privacyPermissions => 'プライバシーと権限';
@@ -601,20 +600,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String queueNOfM(int current, int total) {
-    return 'Queue ($current of $total)';
+    return 'キュー（$current / $total）';
   }
 
   @override
   String queueXOfY(int current, int total) {
-    return 'キュー ($current / $total)';
+    return 'キュー（$current / $total）';
   }
 
   @override
   String get rateLimitMessage =>
-      'GitHubのAPIレート制限（匿名リクエスト60回/時間）に達しました。\n\nGitHubリポジトリを直接開いて新しいリリースを確認してください。';
+      'GitHub APIのレート制限（匿名リクエストは1時間あたり60回）に達しました。\n\n新しいリリースを確認するには、GitHubリポジトリを直接開いてください。';
 
   @override
-  String get rateLimitTitle => 'レート制限超過';
+  String get rateLimitTitle => 'レート制限を超過しました';
 
   @override
   String get refresh => '更新';
@@ -641,7 +640,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get repeatAll => 'すべてリピート';
 
   @override
-  String get repeatOff => 'リピートなし';
+  String get repeatOff => 'リピートオフ';
 
   @override
   String get repeatOne => '1曲リピート';
@@ -657,23 +656,23 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get resetApplicationConfirmMessage =>
-      'すべてのインポートされた音楽ファイルが完全に削除されライブラリがクリアされます。この操作は元に戻せません。';
+      '取り込まれたすべての音声ファイルが完全に削除され、ライブラリが消去されます。この操作は元に戻せません。';
 
   @override
   String get resetApplicationConfirmTitle => 'アプリをリセットしますか？';
 
   @override
-  String get resetApplicationSubtitle => '3秒間長押しして全データを削除します。';
+  String get resetApplicationSubtitle => '3秒間長押しすると、すべてのデータを削除します。';
 
   @override
-  String get resetSpeed => '1.0xにリセット';
+  String get resetSpeed => '1.0xに戻す';
 
   @override
   String get resetStatistics => '統計をリセット';
 
   @override
   String get resetStatisticsConfirmMessage =>
-      '総再生時間、再生回数、トップチャートを含むすべての統計データを永久に削除します。元に戻すことはできません。';
+      '総再生時間、再生回数、トップチャートを含むすべての再生統計が完全に削除されます。この操作は元に戻せません。';
 
   @override
   String get resetStatisticsConfirmTitle => '統計をリセットしますか？';
@@ -683,16 +682,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get resetStatisticsWarning =>
-      'これにより、合計時間、再生回数、トップチャートを含むすべてのリスニング統計が永久に削除されます。この操作は元に戻せません。';
+      '総再生時間、再生回数、トップチャートを含むすべての再生統計が完全に削除されます。この操作は元に戻せません。';
 
   @override
   String get save => '保存';
 
   @override
-  String get saveAsPlaylist => 'Save as Playlist';
+  String get saveAsPlaylist => 'プレイリストとして保存';
 
   @override
-  String get saveQueueAsPlaylist => 'Save Queue as Playlist';
+  String get saveQueueAsPlaylist => 'キューをプレイリストとして保存';
 
   @override
   String get searchAlbumsHint => 'アルバムを検索...';
@@ -704,7 +703,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get searchPlaylistsHint => 'プレイリストを検索...';
 
   @override
-  String get searchSongsHint => '曲、アーティストを検索...';
+  String get searchSongsHint => '曲名、アーティストを検索...';
 
   @override
   String get selectFolder => 'フォルダを選択';
@@ -713,7 +712,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get selectLanguage => '言語を選択';
 
   @override
-  String get selectedDirectory => '選択したディレクトリ：';
+  String get selectedDirectory => '選択したディレクトリ:';
 
   @override
   String get setMusicDirectory => '音楽ディレクトリを設定';
@@ -725,13 +724,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings => '設定';
 
   @override
-  String get setupMusicDirectory => '音楽ディレクトリの設定';
+  String get setupMusicDirectory => '音楽ディレクトリを設定';
 
   @override
-  String get showAudioVisualizer => 'オーディオビジュアライザーを表示';
+  String get showAudioVisualizer => '音声ビジュアライザーを表示';
 
   @override
-  String get showAudioVisualizerSubtitle => 'プレイヤー画面内にオーディオ波形アニメーションを表示します';
+  String get showAudioVisualizerSubtitle =>
+      'プレーヤー画面内で音声波形ビジュアライザーをアニメーション表示します';
 
   @override
   String get showNotifications => '通知を表示';
@@ -754,11 +754,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String songCount(int count) {
-    return '$count 曲';
+    return '$count曲';
   }
 
   @override
-  String get songInfo => '曲の情報';
+  String get songInfo => '曲情報';
 
   @override
   String get songInformation => '曲の情報';
@@ -767,16 +767,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get songs => '曲';
 
   @override
-  String get sort => '並べ替え';
+  String get sort => '並び替え';
 
   @override
-  String get sortAlbumsBy => 'アルバムの並べ替え基準';
+  String get sortAlbumsBy => 'アルバムの並び替え';
 
   @override
-  String get sortArtistsBy => 'アーティストの並べ替え基準';
+  String get sortArtistsBy => 'アーティストの並び替え';
 
   @override
-  String get sortAscending => '昇順で並べ替え';
+  String get sortAscending => '昇順';
 
   @override
   String get sortByAlbumCount => 'アルバム数';
@@ -815,22 +815,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sortByTrackCount => 'トラック数';
 
   @override
-  String get sortDescending => '降順で並べ替え';
+  String get sortDescending => '降順';
 
   @override
-  String get sortPlaylistsBy => 'プレイリストの並べ替え基準';
+  String get sortPlaylistsBy => 'プレイリストの並び替え';
 
   @override
-  String get sortSongsBy => '曲の並べ替え基準';
+  String get sortSongsBy => '曲の並び替え';
 
   @override
-  String get sortSubtitle => '並べ替えの設定はタブごとに保存され、次回起動時に自動適用されます。';
+  String get sortSubtitle => '並び替え設定はタブごとに保存され、次回起動時に自動で適用されます。';
 
   @override
   String get sourceCode => 'ソースコード';
 
   @override
-  String get sourceCodeSubtitle => 'GitHubリポジトリを表示';
+  String get sourceCodeSubtitle => 'GitHubリポジトリを見る';
 
   @override
   String get startTimer => 'タイマーを開始';
@@ -845,42 +845,42 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String syncDuration(String duration) {
-    return '（${duration}ms）';
+    return '${duration}msで完了';
   }
 
   @override
   String get syncExplanation =>
-      'Sonoraはファイルをローカル・オフラインで再生します。このフォルダに新しいトラックをコピーした場合は、以下から同期を実行してください。';
+      'Sonoraはファイルをローカルでオフライン再生します。このフォルダに新しい曲をコピーしたら、下の同期を実行してライブラリに追加してください。';
 
   @override
   String get syncLibraryDatabase => 'ライブラリデータベースを同期しますか？';
 
   @override
   String get syncLibraryDatabaseSubtitle =>
-      '最後のライブラリ同期から少なくとも1ヶ月が経過しました。Sonoraはオフラインで動作します。デバイスフォルダに新しい音楽ファイルを読み込んだ場合は、今すぐ同期を実行して見つけて聴いてください。';
+      '前回のライブラリ同期から少なくとも1か月が経過しています。Sonoraはオフラインで動作するため、端末のフォルダに新しい音楽ファイルを追加した場合は、今すぐ同期して見つけて再生してください。';
 
   @override
   String get syncNow => '今すぐ同期';
 
   @override
   String syncedXSongs(int count, String duration) {
-    return '$count 曲を同期しました$duration。';
+    return '$count曲を同期しました$duration。';
   }
 
   @override
   String get syncing => '同期中...';
 
   @override
-  String get systemDefault => 'システム標準';
+  String get systemDefault => 'システムのデフォルト';
 
   @override
-  String get systemSubtitle => '端末のテーマ設定に従います';
+  String get systemSubtitle => '端末のテーマに従います';
 
   @override
-  String get telegramContact => 'Telegramで連絡';
+  String get telegramContact => 'Telegram連絡先';
 
   @override
-  String get telegramContactSubtitle => '@emredevへお問い合わせ';
+  String get telegramContactSubtitle => '@emredev に連絡';
 
   @override
   String get themeMode => 'テーマモード';
@@ -896,11 +896,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String trackCount(int count) {
-    return '$count トラック';
+    return '$countトラック';
   }
 
   @override
-  String get tryAgain => 'もう一度試す';
+  String get tryAgain => '再試行';
 
   @override
   String get upNext => '次に再生';
@@ -909,7 +909,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get upNextCaps => '次に再生';
 
   @override
-  String get updateAvailable => 'アップデートあり';
+  String get updateAvailable => '更新があります';
 
   @override
   String updateAvailableMessage(String version) {
@@ -917,13 +917,13 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get updateCheckFailed => 'アップデートの確認に失敗しました。インターネット接続を確認してください。';
+  String get updateCheckFailed => '更新の確認に失敗しました。インターネット接続を確認してください。';
 
   @override
   String get useGreetingTitle => 'あいさつタイトルを使用';
 
   @override
-  String get useGreetingTitleSubtitle => 'ホーム画面のアプリ名の代わりに時間帯に応じたあいさつを表示します';
+  String get useGreetingTitleSubtitle => 'ホーム画面でアプリ名の代わりに時間帯に応じたあいさつを表示します';
 
   @override
   String version(String version) {
@@ -931,7 +931,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get viewStatistics => '統計を表示';
+  String get viewStatistics => '統計を見る';
 
   @override
   String get viewStatisticsSubtitle => '再生履歴と統計を確認します';
@@ -943,7 +943,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get welcomeToSonora => 'Sonoraへようこそ';
 
   @override
-  String get yesterday => 'Yesterday';
+  String get yesterday => '昨日';
 
   @override
   String get yourName => 'あなたの名前';
@@ -952,5 +952,5 @@ class AppLocalizationsJa extends AppLocalizations {
   String get yourNameOptional => 'あなたの名前（任意）';
 
   @override
-  String get yourOwnPlaylist => 'あなたのプレイリスト';
+  String get yourOwnPlaylist => '自分のプレイリスト';
 }
