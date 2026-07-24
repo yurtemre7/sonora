@@ -144,91 +144,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             title: Text(context.l10n.favorites),
             centerTitle: true,
             actions: [
-              PopupMenuButton<String>(
+              IconButton(
                 icon: const Icon(Icons.sort_rounded),
-                onSelected: (val) {
-                  if (val.startsWith('sort_')) {
-                    SettingsProvider.instance.saveSortSettings(
-                      favoritesSortBy: val.replaceFirst('sort_', ''),
-                    );
-                  } else if (val.startsWith('asc_')) {
-                    SettingsProvider.instance.saveSortSettings(
-                      favoritesSortAscending: val == 'asc_true',
-                    );
-                  }
-                },
-                itemBuilder: (context) {
-                  var sortBy = SettingsProvider.instance.favoritesSortBy;
-                  var isAsc = SettingsProvider.instance.favoritesSortAscending;
-                  return [
-                    PopupMenuItem(
-                      value: 'sort_name',
-                      child: Row(
-                        children: [
-                          if (sortBy == 'name')
-                            Icon(Icons.check, color: theme.colorScheme.primary)
-                          else
-                            const SizedBox(width: 24),
-                          const SizedBox(width: 8),
-                          Text(context.l10n.sortByName),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'sort_duration',
-                      child: Row(
-                        children: [
-                          if (sortBy == 'duration')
-                            Icon(Icons.check, color: theme.colorScheme.primary)
-                          else
-                            const SizedBox(width: 24),
-                          const SizedBox(width: 8),
-                          Text(context.l10n.sortByDuration),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'sort_date',
-                      child: Row(
-                        children: [
-                          if (sortBy == 'date')
-                            Icon(Icons.check, color: theme.colorScheme.primary)
-                          else
-                            const SizedBox(width: 24),
-                          const SizedBox(width: 8),
-                          Text(context.l10n.sortByDateFavorited),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuDivider(),
-                    PopupMenuItem(
-                      value: 'asc_true',
-                      child: Row(
-                        children: [
-                          if (isAsc)
-                            Icon(Icons.check, color: theme.colorScheme.primary)
-                          else
-                            const SizedBox(width: 24),
-                          const SizedBox(width: 8),
-                          Text(context.l10n.sortAscending),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'asc_false',
-                      child: Row(
-                        children: [
-                          if (!isAsc)
-                            Icon(Icons.check, color: theme.colorScheme.primary)
-                          else
-                            const SizedBox(width: 24),
-                          const SizedBox(width: 8),
-                          Text(context.l10n.sortDescending),
-                        ],
-                      ),
-                    ),
-                  ];
-                },
+                onPressed: () => _showSortBottomSheet(context),
               ),
             ],
           ),
@@ -477,6 +395,85 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _showSortBottomSheet(BuildContext context) {
+    var theme = Theme.of(context);
+    var l10n = context.l10n;
+    var settings = SettingsProvider.instance;
+
+    var options = [
+      (l10n.sortByName, 'name'),
+      (l10n.sortByDuration, 'duration'),
+      (l10n.sortByDateFavorited, 'date'),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.sort,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.sortSubtitle,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      RadioGroup<String>(
+                        groupValue: settings.favoritesSortBy,
+                        onChanged: (val) {
+                          settings.saveSortSettings(favoritesSortBy: val!);
+                          setSheetState(() {});
+                          Navigator.pop(context);
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: options.map((opt) {
+                            return RadioListTile<String>(
+                              title: Text(opt.$1),
+                              value: opt.$2,
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      const Divider(),
+                      SwitchListTile(
+                        title: Text(l10n.sortAscending),
+                        value: settings.favoritesSortAscending,
+                        onChanged: (val) {
+                          settings.saveSortSettings(
+                            favoritesSortAscending: val,
+                          );
+                          setSheetState(() {});
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
