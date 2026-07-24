@@ -508,13 +508,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get play => 'Wiedergabe';
 
   @override
-  String get playAll => 'Spiele alle';
+  String get playAll => 'Wiedergabe';
 
   @override
   String get playNext => 'Als Nächstes abspielen';
 
   @override
-  String get playTooltip => 'Abspielen';
+  String get playTooltip => 'Wiedergabe';
 
   @override
   String get playback => 'Wiedergabe';
@@ -760,10 +760,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get shuffle => 'Zufall';
 
   @override
-  String get shuffleAll => 'Alle zufällig';
+  String get shuffleAll => 'Zufall';
 
   @override
-  String get shufflePlay => 'Zufallswiedergabe';
+  String get shufflePlay => 'Zufall';
 
   @override
   String get sleepTimer => 'Sleep-Timer';
