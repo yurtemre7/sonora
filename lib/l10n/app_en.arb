@@ -85,6 +85,7 @@
     }
   },
   "deletePlaylistConfirmTitle": "Delete Playlist?",
+  "description": "Description",
   "developerProfile": "Developer Profile",
   "developerProfileSubtitle": "Check out yurtemre7 on GitHub",
   "disableShuffle": "Disable shuffle",
@@ -92,6 +93,7 @@
   "download": "Download",
   "dynamicTheme": "Dynamic Theme (Material You)",
   "dynamicThemeSubtitle": "Automatically theme the app using active album art",
+  "editDescription": "Edit description",
   "enableShuffle": "Enable shuffle",
   "enterDurationHint": "Enter duration",
   "enterYourName": "Enter Your Name",
@@ -408,5 +410,6 @@
   "volume": "Volume",
   "welcomeToSonora": "Welcome to Sonora",
   "yourName": "Your Name",
-  "yourNameOptional": "Your Name (Optional)"
+  "yourNameOptional": "Your Name (Optional)",
+  "yourOwnPlaylist": "Your own playlist"
 }

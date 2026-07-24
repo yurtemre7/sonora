@@ -61,6 +61,7 @@
   "deletePlaylist": "Playlist löschen",
   "deletePlaylistConfirmMessage": "\"{name}\" löschen? Dies kann nicht rückgängig gemacht werden.",
   "deletePlaylistConfirmTitle": "Playlist löschen?",
+  "description": "Beschreibung",
   "developerProfile": "Entwicklerprofil",
   "developerProfileSubtitle": "yurtemre7 auf GitHub besuchen",
   "disableShuffle": "Shuffle deaktivieren",
@@ -68,6 +69,7 @@
   "download": "Herunterladen",
   "dynamicTheme": "Dynamisches Theme (Material You)",
   "dynamicThemeSubtitle": "Farben der App automatisch an das aktive Album-Cover anpassen",
+  "editDescription": "Beschreibung bearbeiten",
   "enableShuffle": "Shuffle aktivieren",
   "enterDurationHint": "Dauer eingeben",
   "enterYourName": "Deinen Namen eingeben",
@@ -288,5 +290,6 @@
   "volume": "Lautstärke",
   "welcomeToSonora": "Willkommen bei Sonora",
   "yourName": "Dein Name",
-  "yourNameOptional": "Dein Name (Optional)"
+  "yourNameOptional": "Dein Name (Optional)",
+  "yourOwnPlaylist": "Deine eigene Playlist"
 }

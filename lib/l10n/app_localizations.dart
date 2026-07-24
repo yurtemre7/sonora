@@ -466,6 +466,12 @@ abstract class AppLocalizations {
   /// **'Delete Playlist?'**
   String get deletePlaylistConfirmTitle;
 
+  /// No description provided for @description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get description;
+
   /// No description provided for @developerProfile.
   ///
   /// In en, this message translates to:
@@ -507,6 +513,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Automatically theme the app using active album art'**
   String get dynamicThemeSubtitle;
+
+  /// No description provided for @editDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit description'**
+  String get editDescription;
 
   /// No description provided for @enableShuffle.
   ///
@@ -1827,6 +1839,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your Name (Optional)'**
   String get yourNameOptional;
+
+  /// No description provided for @yourOwnPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own playlist'**
+  String get yourOwnPlaylist;
 }
 
 class _AppLocalizationsDelegate

@@ -201,6 +201,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get deletePlaylistConfirmTitle => 'プレイリストを削除しますか？';
 
   @override
+  String get description => '説明';
+
+  @override
   String get developerProfile => '開発者プロフィール';
 
   @override
@@ -220,6 +223,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get dynamicThemeSubtitle => '再生中のアルバムアートの色に合わせてアプリを自動着色します';
+
+  @override
+  String get editDescription => '説明を編集';
 
   @override
   String get enableShuffle => 'シャッフルをオン';
@@ -922,4 +928,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get yourNameOptional => 'あなたの名前（任意）';
+
+  @override
+  String get yourOwnPlaylist => 'あなたのプレイリスト';
 }

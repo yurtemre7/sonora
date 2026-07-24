@@ -3,12 +3,14 @@ class Playlist {
   final String name;
   final List<int> songIds;
   final String? coverImagePath;
+  final String? description;
 
   Playlist({
     required this.id,
     required this.name,
     required this.songIds,
     this.coverImagePath,
+    this.description,
   });
 
   // Pre-normalized lowercase key computed once at construction time
@@ -19,6 +21,7 @@ class Playlist {
     'name': name,
     'song_ids': songIds,
     'cover_image_path': coverImagePath,
+    'description': description,
   };
 
   factory Playlist.fromJson(Map<String, dynamic> json) {
@@ -27,6 +30,7 @@ class Playlist {
       name: json['name'] as String,
       songIds: List<int>.from(json['song_ids'] as List<dynamic>),
       coverImagePath: json['cover_image_path'] as String?,
+      description: json['description'] as String?,
     );
   }
 }

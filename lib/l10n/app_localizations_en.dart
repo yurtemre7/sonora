@@ -216,6 +216,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deletePlaylistConfirmTitle => 'Delete Playlist?';
 
   @override
+  String get description => 'Description';
+
+  @override
   String get developerProfile => 'Developer Profile';
 
   @override
@@ -236,6 +239,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dynamicThemeSubtitle =>
       'Automatically theme the app using active album art';
+
+  @override
+  String get editDescription => 'Edit description';
 
   @override
   String get enableShuffle => 'Enable shuffle';
@@ -968,4 +974,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yourNameOptional => 'Your Name (Optional)';
+
+  @override
+  String get yourOwnPlaylist => 'Your own playlist';
 }

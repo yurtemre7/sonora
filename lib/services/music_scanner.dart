@@ -1002,6 +1002,29 @@ class MusicScanner {
           name: oldPlaylist.name,
           songIds: oldPlaylist.songIds,
           coverImagePath: coverImagePath,
+          description: oldPlaylist.description,
+        );
+        await savePlaylists(playlists);
+        break;
+      }
+    }
+  }
+
+  /// Updates a playlist's description.
+  Future<void> updatePlaylistDescription(
+    String playlistId,
+    String? description,
+  ) async {
+    var playlists = await getPlaylists();
+    for (var i = 0; i < playlists.length; i++) {
+      if (playlists[i].id == playlistId) {
+        var oldPlaylist = playlists[i];
+        playlists[i] = Playlist(
+          id: oldPlaylist.id,
+          name: oldPlaylist.name,
+          songIds: oldPlaylist.songIds,
+          coverImagePath: oldPlaylist.coverImagePath,
+          description: description,
         );
         await savePlaylists(playlists);
         break;

@@ -61,6 +61,7 @@
   "deletePlaylist": "プレイリストを削除",
   "deletePlaylistConfirmMessage": "「{name}」を削除しますか？この操作は取り消せません。",
   "deletePlaylistConfirmTitle": "プレイリストを削除しますか？",
+  "description": "説明",
   "developerProfile": "開発者プロフィール",
   "developerProfileSubtitle": "GitHubのyurtemre7を見る",
   "disableShuffle": "シャッフルをオフ",
@@ -68,6 +69,7 @@
   "download": "ダウンロード",
   "dynamicTheme": "ダイナミックテーマ (Material You)",
   "dynamicThemeSubtitle": "再生中のアルバムアートの色に合わせてアプリを自動着色します",
+  "editDescription": "説明を編集",
   "enableShuffle": "シャッフルをオン",
   "enterDurationHint": "時間を入力",
   "enterYourName": "名前を入力",
@@ -287,5 +289,6 @@
   "volume": "音量",
   "welcomeToSonora": "Sonoraへようこそ",
   "yourName": "あなたの名前",
-  "yourNameOptional": "あなたの名前（任意）"
+  "yourNameOptional": "あなたの名前（任意）",
+  "yourOwnPlaylist": "あなたのプレイリスト"
 }

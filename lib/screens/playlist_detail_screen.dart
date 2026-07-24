@@ -13,6 +13,7 @@ import 'package:sonora/utils/image_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
+import 'package:sonora/widgets/edit_playlist_description_dialog.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -128,6 +129,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    var l10n = context.l10n;
 
     return ListenableBuilder(
       listenable: widget.playerProvider,
@@ -142,7 +144,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
         _updatePlaylistSongs();
 
         var firstSong = _playlistSongs.isNotEmpty ? _playlistSongs.first : null;
-        var creatorLabel = 'Your own playlist';
+        var creatorLabel = _playlist.description ?? l10n.yourOwnPlaylist;
 
         return Scaffold(
           body: Stack(
@@ -198,6 +200,14 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   onRename: widget.onRenamePlaylist!,
                                 );
                               }
+                            } else if (val == 5) {
+                              EditPlaylistDescriptionDialog.show(
+                                context,
+                                playlist: _playlist,
+                                onEdit: (newDesc) {
+                                  widget.playerProvider.updatePlaylistDescription(_playlist.id, newDesc);
+                                },
+                              );
                             } else if (val == 1) {
                               _deletePlaylist();
                             }
@@ -205,6 +215,16 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                           itemBuilder: (context) {
                             var l10n = context.l10n;
                             return [
+                              PopupMenuItem(
+                                value: 5,
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.description_rounded),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.editDescription),
+                                  ],
+                                ),
+                              ),
                               PopupMenuItem(
                                 value: 3,
                                 child: Row(
@@ -336,14 +356,29 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 24.0,
                               ),
-                              child: Text(
-                                creatorLabel,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(4),
+                                onTap: () {
+                                  EditPlaylistDescriptionDialog.show(
+                                    context,
+                                    playlist: _playlist,
+                                    onEdit: (newDesc) {
+                                      widget.playerProvider.updatePlaylistDescription(_playlist.id, newDesc);
+                                    },
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                  child: Text(
+                                    creatorLabel,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             const SizedBox(height: 8),
