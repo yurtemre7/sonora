@@ -2,20 +2,38 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [Unreleased]
+## [1.12.0] - 2026-07-24
 ### Added
-* Full app localization (English, German, Japanese) via Flutter `intl` — all settings screens, favorites, sort sheet, count labels, and dialogs now use `context.l10n`
-* Language picker in Library Formatting settings (system default / English / German / Japanese)
-
-## [1.11.2] - 2026-07-23
+* Add ability to edit playlist description
+* Add sorting by duration and date favorited
+* Add persistent alphabetical sort action to favorites screen
+* Display language names in their native forms
+* Promote language selector to main settings screen
+* Use plural formatting keys for track/song/album counts
+* Finalize missing UI strings translations
+* Complete localization of all settings screens and favorites
 ### Fixed
-* Downscale background blur images to 120px in detail screens to eliminate GPU/RAM lag when opening playlists, artists, or albums with high-resolution covers
-* Evict stale ImageCache entries when updating playlist cover images so new cropped artwork renders immediately
+* Update german translation for date favorited
+* Standardize German Play and Shuffle translations to Wiedergabe and Zufall
+* Shorten Play All translation in German
+* Localize MFX bottom sheet title and Experimental label
+* Localize Sleep Timer chip label and active stop time string
+* Localize all remaining hardcoded UI strings
+* Complete German du-form pass and localize all remaining screens
+### Changed
+* Refactor: Use bottom sheet for sorting instead of popup menu
+* Chore: Clean up temporary python script
+* Chore: Add some padding on chips
 
-## [1.11.1] - 2026-07-23
+## [1.11.0] - 2026-07-23
+### Added
+* Implement low-res playlist cover cropping, 1:1 scrollbar drag, shuffle seek fix, and update settings
 ### Fixed
-* Render scanned local artist cover artwork (`artist.png`/`artist.jpg`) inside the artist detail screen header and background blur
 * Unify home screen tab bar text font size across all tabs
+* Add READ_MEDIA_IMAGES permission and fix artist image discovery
+### Changed
+* Chore: Add new tests
+* Chore: Format files
 
 ## [1.10.1] - 2026-07-22
 ### Fixed
