@@ -128,61 +128,7 @@ class FormattingSettingsScreen extends StatelessWidget {
                 value: settingsProvider.filterTitleArtist,
                 onChanged: (val) => settingsProvider.setFilterTitleArtist(val),
               ),
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(
-                  context.l10n.language,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              ListTile(
-                title: Text(context.l10n.appLanguage),
-                subtitle: Text(
-                  switch (settingsProvider.appLocale) {
-                    'en' => context.l10n.languageEnglish,
-                    'de' => context.l10n.languageGerman,
-                    'ja' => context.l10n.languageJapanese,
-                    _ => context.l10n.languageSystem,
-                  },
-                ),
-                leading: const Icon(Icons.language_rounded),
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (dialogContext) => SimpleDialog(
-                      title: Text(context.l10n.selectLanguage),
-                      children: [
-                        for (var option in [
-                          ('system', context.l10n.languageSystem),
-                          ('en', context.l10n.languageEnglish),
-                          ('de', context.l10n.languageGerman),
-                          ('ja', context.l10n.languageJapanese),
-                        ])
-                          ListTile(
-                            leading: Icon(
-                              settingsProvider.appLocale == option.$1
-                                  ? Icons.radio_button_checked
-                                  : Icons.radio_button_unchecked,
-                              color: settingsProvider.appLocale == option.$1
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.onSurfaceVariant,
-                            ),
-                            title: Text(option.$2),
-                            onTap: () {
-                              settingsProvider.setAppLocale(option.$1);
-                              Navigator.pop(dialogContext);
-                            },
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+
             ],
           );
         },

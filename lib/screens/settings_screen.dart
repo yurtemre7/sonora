@@ -350,6 +350,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(height: 24),
 
+          // ── Language ──────────────────────────────────────────────────
+          ListTile(
+            leading: const Icon(Icons.language_rounded),
+            title: Text(context.l10n.appLanguage),
+            subtitle: Text(
+              switch (widget.settingsProvider.appLocale) {
+                'en' => context.l10n.languageEnglish,
+                'de' => context.l10n.languageGerman,
+                'ja' => context.l10n.languageJapanese,
+                _ => context.l10n.languageSystem,
+              },
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => SimpleDialog(
+                  title: Text(context.l10n.selectLanguage),
+                  children: [
+                    for (var option in [
+                      ('system', context.l10n.languageSystem),
+                      ('en', context.l10n.languageEnglish),
+                      ('de', context.l10n.languageGerman),
+                      ('ja', context.l10n.languageJapanese),
+                    ])
+                      ListTile(
+                        leading: Icon(
+                          widget.settingsProvider.appLocale == option.$1
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          color: widget.settingsProvider.appLocale == option.$1
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        title: Text(option.$2),
+                        onTap: () {
+                          widget.settingsProvider.setAppLocale(option.$1);
+                          Navigator.pop(dialogContext);
+                        },
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const Divider(height: 24),
+
           // ── Sub Settings ──────────────────────────────────────────────
           ListTile(
             leading: const Icon(Icons.palette_outlined),
