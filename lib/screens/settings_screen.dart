@@ -40,15 +40,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     widget.playerProvider.addListener(_onPlayerProviderUpdate);
+    widget.settingsProvider.addListener(_onProviderUpdate);
   }
 
   @override
   void dispose() {
     widget.playerProvider.removeListener(_onPlayerProviderUpdate);
+    widget.settingsProvider.removeListener(_onProviderUpdate);
     super.dispose();
   }
 
   void _onPlayerProviderUpdate() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _onProviderUpdate() {
     if (mounted) {
       setState(() {});
     }

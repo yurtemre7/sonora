@@ -268,9 +268,9 @@ class SettingsProvider extends ChangeNotifier {
 
   Future<void> setAppLocale(String localeCode) async {
     appLocale = localeCode;
+    notifyListeners();
     var prefs = SharedPreferencesAsync();
     await prefs.setString('app_locale', localeCode);
-    notifyListeners();
   }
 
   Future<void> refreshSyncStats() async {
