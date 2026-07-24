@@ -508,7 +508,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get play => 'Wiedergabe';
 
   @override
-  String get playAll => 'Alle wiedergeben';
+  String get playAll => 'Spiele alle';
 
   @override
   String get playNext => 'Als Nächstes abspielen';
