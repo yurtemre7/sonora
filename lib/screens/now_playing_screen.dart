@@ -114,6 +114,47 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   : Brightness.light,
             ),
             actions: [
+              if (_viewMode == _ViewMode.upNext)
+                IconButton(
+                  icon: const Icon(Icons.playlist_add),
+                  tooltip: context.l10n.saveAsPlaylist,
+                  onPressed: () {
+                    var controller = TextEditingController();
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(context.l10n.saveQueueAsPlaylist),
+                        content: TextField(
+                          controller: controller,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            hintText: context.l10n.playlistName,
+                          ),
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(context.l10n.cancel),
+                          ),
+                          FilledButton(
+                            onPressed: () {
+                              var name = controller.text.trim();
+                              if (name.isNotEmpty) {
+                                Navigator.pop(context);
+                                widget.playerProvider.saveQueueAsPlaylist(name);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Saved $name')),
+                                );
+                              }
+                            },
+                            child: Text(context.l10n.save),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               PopupMenuButton<int>(
                 icon: const Icon(Icons.more_vert_rounded),
                 onSelected: (value) {

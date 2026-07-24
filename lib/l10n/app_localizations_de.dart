@@ -350,6 +350,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get lastSync => 'Letzte Synchronisation';
 
   @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get exportToM3u => 'Export to M3U';
+
+  @override
+  String get saveAsPlaylist => 'Save as Playlist';
+
+  @override
+  String get saveQueueAsPlaylist => 'Save Queue as Playlist';
+
+  @override
+  String get playlistName => 'Playlist-Name';
+
+  @override
+  String get failedToExport => 'Failed to export';
+
+  @override
+  String exportedPlaylist(String name) {
+    return 'Exported playlist: $name';
+  }
+
+  @override
+  String queueNOfM(int current, int total) {
+    return 'Queue ($current of $total)';
+  }
+
+  @override
   String get later => 'Später';
 
   @override
@@ -542,9 +570,6 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get playlistName => 'Playlist-Name';
 
   @override
   String get playlists => 'Playlists';

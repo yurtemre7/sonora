@@ -700,6 +700,54 @@ abstract class AppLocalizations {
   /// **'Last Sync'**
   String get lastSync;
 
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @exportToM3u.
+  ///
+  /// In en, this message translates to:
+  /// **'Export to M3U'**
+  String get exportToM3u;
+
+  /// No description provided for @saveAsPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as Playlist'**
+  String get saveAsPlaylist;
+
+  /// No description provided for @saveQueueAsPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Queue as Playlist'**
+  String get saveQueueAsPlaylist;
+
+  /// No description provided for @playlistName.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist name'**
+  String get playlistName;
+
+  /// No description provided for @failedToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export'**
+  String get failedToExport;
+
+  /// No description provided for @exportedPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported playlist: {name}'**
+  String exportedPlaylist(String name);
+
+  /// No description provided for @queueNOfM.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue ({current} of {total})'**
+  String queueNOfM(int current, int total);
+
   /// No description provided for @later.
   ///
   /// In en, this message translates to:
@@ -1053,12 +1101,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 playlist} other{{count} playlists}}'**
   String playlistCount(int count);
-
-  /// No description provided for @playlistName.
-  ///
-  /// In en, this message translates to:
-  /// **'Playlist name'**
-  String get playlistName;
 
   /// No description provided for @playlists.
   ///

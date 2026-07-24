@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/utils/l10n_extension.dart';
+import 'package:sonora/widgets/custom_equalizer_widget.dart';
 import 'package:sonora/widgets/preset_card.dart';
 import 'package:sonora/widgets/speed_slider.dart';
 
@@ -356,6 +357,9 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                 ),
                               ),
                             ),
+                            const SizedBox(height: 16),
+                            const Divider(height: 32),
+                            CustomEqualizerWidget(playerProvider: player),
                             const SizedBox(height: 32),
                             SafeArea(
                               child: Center(

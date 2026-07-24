@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
@@ -184,11 +185,11 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                       if (widget.onDeletePlaylist != null)
                         PopupMenuButton<int>(
                           icon: const Icon(Icons.more_vert_rounded),
-                          onSelected: (val) {
+                          onSelected: (val) async {
                             if (val == 3) {
-                              _pickCoverImage();
+                              await _pickCoverImage();
                             } else if (val == 4) {
-                              widget.playerProvider.updatePlaylistCover(
+                              await widget.playerProvider.updatePlaylistCover(
                                 _playlist.id,
                                 null,
                               );
@@ -208,6 +209,19 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   widget.playerProvider.updatePlaylistDescription(_playlist.id, newDesc);
                                 },
                               );
+                            } else if (val == 6) {
+                              var exportedMsg = context.l10n.exportedPlaylist(_playlist.name);
+                              var failedMsg = context.l10n.failedToExport;
+                              var file = await widget.playerProvider.exportPlaylistToM3u(_playlist);
+                              if (file != null) {
+                                await SharePlus.instance.share(ShareParams(
+                                  files: [XFile(file.path)],
+                                  text: exportedMsg,
+                                ));
+                              } else {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(failedMsg)));
+                              }
                             } else if (val == 1) {
                               _deletePlaylist();
                             }
@@ -215,6 +229,16 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                           itemBuilder: (context) {
                             var l10n = context.l10n;
                             return [
+                              PopupMenuItem(
+                                value: 6,
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.share_rounded),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.exportToM3u),
+                                  ],
+                                ),
+                              ),
                               PopupMenuItem(
                                 value: 5,
                                 child: Row(

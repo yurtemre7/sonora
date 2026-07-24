@@ -1187,4 +1187,79 @@ class MusicScanner {
   Future<void> setLastSyncMethodUsed(String method) async {
     await _prefs.setString('last_sync_method_used', method);
   }
+
+  /// Bulk creates a playlist from a list of song IDs
+  Future<void> createPlaylistFromSongs(String name, List<int> songIds) async {
+    var playlists = await getPlaylists();
+    var newPlaylist = Playlist(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      songIds: songIds,
+    );
+    playlists.add(newPlaylist);
+    await savePlaylists(playlists);
+  }
+
+  /// Imports an M3U file and creates a new playlist from it.
+  Future<void> importM3u(File m3uFile) async {
+    try {
+      var lines = await m3uFile.readAsLines();
+      var songs = await _readImportedSongsMetadata();
+      var songIds = <int>[];
+
+      for (var line in lines) {
+        line = line.trim();
+        if (line.isEmpty || line.startsWith('#')) continue;
+
+        // Extract filename from the path in the m3u
+        var filename = line.split(RegExp(r'[/\\]')).last;
+        
+        // Find matching song in library
+        var match = songs.where((s) => s.filePath.endsWith(filename)).firstOrNull;
+        if (match != null) {
+          songIds.add(match.id);
+        }
+      }
+
+      if (songIds.isNotEmpty) {
+        var name = m3uFile.path.split(RegExp(r'[/\\]')).last.replaceAll(RegExp(r'\.m3u8?$'), '');
+        var playlists = await getPlaylists();
+        var newPlaylist = Playlist(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          name: name,
+          songIds: songIds,
+          description: 'Imported from M3U',
+        );
+        playlists.add(newPlaylist);
+        await savePlaylists(playlists);
+      }
+    } catch (_) {}
+  }
+
+  /// Exports a playlist to an M3U file in the temporary directory.
+  Future<File?> exportPlaylistToM3u(Playlist playlist) async {
+    try {
+      var songs = await _readImportedSongsMetadata();
+      var playlistSongs = playlist.songIds
+          .map((id) => songs.where((s) => s.id == id).firstOrNull)
+          .where((s) => s != null)
+          .cast<Song>()
+          .toList();
+
+      var tempDir = Directory.systemTemp;
+      var file = File('${tempDir.path}/${playlist.name}.m3u');
+      
+      var buffer = StringBuffer();
+      buffer.writeln('#EXTM3U');
+      for (var song in playlistSongs) {
+        buffer.writeln('#EXTINF:${song.duration.inSeconds},${song.artist} - ${song.title}');
+        buffer.writeln(song.filePath);
+      }
+      
+      await file.writeAsString(buffer.toString());
+      return file;
+    } catch (_) {
+      return null;
+    }
+  }
 }

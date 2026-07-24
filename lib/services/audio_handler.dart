@@ -494,7 +494,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   Future<void> setPitch(double pitch) => player.setPitch(pitch);
 
-  Future<void> setEqMode(String mode) async {
+  Future<void> setEqMode(String mode, {List<double>? customGains}) async {
     var enabled = mode != 'off';
     await equalizer.setEnabled(enabled);
     if (enabled) {
@@ -528,6 +528,8 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
             } else {
               await band.setGain(0.0);
             }
+          } else if (mode == 'custom' && customGains != null && band.index < customGains.length) {
+            await band.setGain(customGains[band.index].clamp(params.minDecibels, params.maxDecibels));
           }
         }
       } catch (e) {

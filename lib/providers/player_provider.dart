@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Platform;
+import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +56,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   var _isReverbEnabled = false;
   var _isLofiEnabled = false;
   var _isBassBoostEnabled = false;
+  var _isCustomEqEnabled = false;
+  List<double>? _customEqGains;
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
   Duration? sleepTimerOriginalDuration;
@@ -127,6 +129,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool get isReverbEnabled => _isReverbEnabled;
   bool get isLofiEnabled => _isLofiEnabled;
   bool get isBassBoostEnabled => _isBassBoostEnabled;
+  bool get isCustomEqEnabled => _isCustomEqEnabled;
+  List<double>? get customEqGains => _customEqGains;
 
   bool get isMfxActive =>
       _isSlowed ||
@@ -137,6 +141,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       _isReverbEnabled ||
       _isLofiEnabled ||
       _isBassBoostEnabled ||
+      _isCustomEqEnabled ||
       _speed != 1.0;
 
   Future<void> _saveMfxSettings() async {
@@ -149,6 +154,12 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await prefs.setBool('mfx_isReverbEnabled', _isReverbEnabled);
     await prefs.setBool('mfx_isLofiEnabled', _isLofiEnabled);
     await prefs.setBool('mfx_isBassBoostEnabled', _isBassBoostEnabled);
+    await prefs.setBool('mfx_isCustomEqEnabled', _isCustomEqEnabled);
+    if (_customEqGains != null) {
+      await prefs.setStringList('mfx_customEqGains', _customEqGains!.map((e) => e.toString()).toList());
+    } else {
+      await prefs.remove('mfx_customEqGains');
+    }
   }
 
   Future<void> setSlowed(bool value) async {
@@ -241,14 +252,26 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await _applyMfx();
   }
 
+  Future<void> setCustomEqBands(List<double> gains) async {
+    _isLofiEnabled = false;
+    _isBassBoostEnabled = false;
+    _isReverbEnabled = false;
+    _isCustomEqEnabled = true;
+    _customEqGains = gains;
+    await _saveMfxSettings();
+    await _applyMfx();
+  }
+
   Future<void> resetAllMfx() async {
     _isSlowed = false;
     _isSuperSlowed = false;
     _isSpedUp = false;
     _isSuperSpedUp = false;
     _isNightcore = false;
+    _isBassBoostEnabled = false;
     _isReverbEnabled = false;
     _isLofiEnabled = false;
+    _isCustomEqEnabled = false;
     _speed = 1.0;
     var prefs = SharedPreferencesAsync();
     await prefs.setDouble('speed', _speed);
@@ -284,8 +307,10 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       eqMode = 'warmth';
     } else if (_isBassBoostEnabled) {
       eqMode = 'bass_boost';
+    } else if (_isCustomEqEnabled) {
+      eqMode = 'custom';
     }
-    await audioHandler.setEqMode(eqMode);
+    await audioHandler.setEqMode(eqMode, customGains: _customEqGains);
     notifyListeners();
   }
 
@@ -856,6 +881,24 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await loadPlaylists();
   }
 
+  Future<void> saveQueueAsPlaylist(String name) async {
+    var scanner = MusicScanner();
+    var songIds = queue.map((s) => s.id).toList();
+    await scanner.createPlaylistFromSongs(name, songIds);
+    await loadPlaylists();
+  }
+
+  Future<void> importM3u(File m3uFile) async {
+    var scanner = MusicScanner();
+    await scanner.importM3u(m3uFile);
+    await loadPlaylists();
+  }
+
+  Future<File?> exportPlaylistToM3u(Playlist playlist) async {
+    var scanner = MusicScanner();
+    return await scanner.exportPlaylistToM3u(playlist);
+  }
+
   Future<void> reorderPlaylistSongs(
     String playlistId,
     List<int> reorderedIds,
@@ -925,6 +968,11 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isLofiEnabled = await prefs.getBool('mfx_isLofiEnabled') ?? false;
     _isBassBoostEnabled =
         await prefs.getBool('mfx_isBassBoostEnabled') ?? false;
+    _isCustomEqEnabled = await prefs.getBool('mfx_isCustomEqEnabled') ?? false;
+    var gains = await prefs.getStringList('mfx_customEqGains');
+    if (gains != null) {
+      _customEqGains = gains.map((e) => double.tryParse(e) ?? 0.0).toList();
+    }
 
     // Apply initial audio settings
     await _applyMfx();

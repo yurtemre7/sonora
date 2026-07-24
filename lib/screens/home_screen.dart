@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
@@ -20,6 +21,7 @@ import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/custom_scrollbar.dart';
+import 'package:sonora/widgets/edit_playlist_description_dialog.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
 import 'package:sonora/widgets/song_tile.dart';
 import 'package:sonora/widgets/update_dialog.dart';
@@ -600,12 +602,29 @@ class _HomeScreenState extends State<HomeScreen>
                       onPressed: onShuffle,
                       tooltip: context.l10n.shufflePlay,
                     )
-                  else
+                  else ...[
+                    IconButton.filledTonal(
+                      icon: const Icon(Icons.file_download_rounded),
+                      tooltip: 'Import M3U',
+                      onPressed: () async {
+                        var result = await FilePicker.pickFiles();
+                        if (result != null && result.files.single.path != null) {
+                          var file = File(result.files.single.path!);
+                          if (file.path.toLowerCase().endsWith('.m3u') || file.path.toLowerCase().endsWith('.m3u8')) {
+                            await widget.playerProvider.importM3u(file);
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Imported')));
+                          }
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 8),
                     IconButton.filledTonal(
                       icon: const Icon(Icons.playlist_add),
                       onPressed: onShuffle,
                       tooltip: context.l10n.createPlaylist,
                     ),
+                  ],
                 ],
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
@@ -1357,6 +1376,26 @@ class _HomeScreenState extends State<HomeScreen>
                                                 ),
                                                 itemBuilder: (context) => [
                                                   PopupMenuItem(
+                                                    value: 6,
+                                                    child: Row(
+                                                      children: [
+                                                        const Icon(Icons.share_rounded),
+                                                        const SizedBox(width: 8),
+                                                        Text(context.l10n.exportToM3u),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  PopupMenuItem(
+                                                    value: 5,
+                                                    child: Row(
+                                                      children: [
+                                                        const Icon(Icons.description_rounded),
+                                                        const SizedBox(width: 8),
+                                                        Text(context.l10n.editDescription),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  PopupMenuItem(
                                                     value: 3,
                                                     child: Row(
                                                       children: [
@@ -1415,8 +1454,29 @@ class _HomeScreenState extends State<HomeScreen>
                                                     ),
                                                   ),
                                                  ],
-                                                onSelected: (val) async {
-                                                  if (val == 3) {
+                                                 onSelected: (val) async {
+                                                  if (val == 6) {
+                                                    var exportedMsg = context.l10n.exportedPlaylist(playlist.name);
+                                                    var failedMsg = context.l10n.failedToExport;
+                                                    var file = await widget.playerProvider.exportPlaylistToM3u(playlist);
+                                                    if (file != null) {
+                                                      await SharePlus.instance.share(ShareParams(
+                                                        files: [XFile(file.path)],
+                                                        text: exportedMsg,
+                                                      ));
+                                                    } else {
+                                                      if (!context.mounted) return;
+                                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(failedMsg)));
+                                                    }
+                                                  } else if (val == 5) {
+                                                    EditPlaylistDescriptionDialog.show(
+                                                      context,
+                                                      playlist: playlist,
+                                                      onEdit: (newDesc) {
+                                                        widget.playerProvider.updatePlaylistDescription(playlist.id, newDesc);
+                                                      },
+                                                    );
+                                                  } else if (val == 3) {
                                                     ScaffoldMessenger.of(
                                                       context,
                                                     ).showSnackBar(

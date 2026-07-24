@@ -2,6 +2,13 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [Unreleased]
+### Added
+* Add ability to save current play queue as a new playlist
+* Implement full Custom Equalizer with multiple frequency bands and built-in presets
+* Expand playlist actions in Home Screen to match details screen (Export to M3U, Edit Description)
+* Localize new playlist actions and queue-saving features
+
 ## [1.12.0] - 2026-07-24
 ### Added
 * Add ability to edit playlist description

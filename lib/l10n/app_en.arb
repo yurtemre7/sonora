@@ -145,6 +145,31 @@
   "languageJapanese": "Japanese",
   "languageSystem": "System Default",
   "lastSync": "Last Sync",
+  "yesterday": "Yesterday",
+  "exportToM3u": "Export to M3U",
+  "saveAsPlaylist": "Save as Playlist",
+  "saveQueueAsPlaylist": "Save Queue as Playlist",
+  "playlistName": "Playlist Name",
+  "failedToExport": "Failed to export",
+  "exportedPlaylist": "Exported playlist: {name}",
+  "@exportedPlaylist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "queueNOfM": "Queue ({current} of {total})",
+  "@queueNOfM": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "later": "Later",
   "libraryFormatting": "Library Formatting",
   "librarySync": "Library Sync",
