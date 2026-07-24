@@ -824,6 +824,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortByTrackCount => 'Track Count';
 
   @override
+  String get sortDescending => 'Sort Descending';
+
+  @override
   String get sortPlaylistsBy => 'Sort Playlists By';
 
   @override

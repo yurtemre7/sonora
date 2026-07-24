@@ -247,6 +247,7 @@
   "sortBySongCount": "曲数",
   "sortByTitle": "タイトル",
   "sortByTrackCount": "トラック数",
+  "sortDescending": "降順で並べ替え",
   "sortPlaylistsBy": "プレイリストの並べ替え基準",
   "sortSongsBy": "曲の並べ替え基準",
   "sortSubtitle": "並べ替えの設定はタブごとに保存され、次回起動時に自動適用されます。",

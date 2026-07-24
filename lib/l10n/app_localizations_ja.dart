@@ -787,6 +787,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sortByTrackCount => 'トラック数';
 
   @override
+  String get sortDescending => '降順で並べ替え';
+
+  @override
   String get sortPlaylistsBy => 'プレイリストの並べ替え基準';
 
   @override

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/utils/format_utils.dart';
@@ -72,7 +73,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     var theme = Theme.of(context);
 
     return ListenableBuilder(
-      listenable: widget.playerProvider,
+      listenable: Listenable.merge([
+        widget.playerProvider,
+        SettingsProvider.instance,
+      ]),
       builder: (context, _) {
         var favSongs = widget.playerProvider.allSongs
             .where((s) => s.isFavorite)
@@ -86,8 +90,67 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           return widget.playerProvider.favoriteArtists.contains(a.nameLower);
         }).toList();
 
+        var sortAsc = SettingsProvider.instance.favoritesSortAscending;
+        favSongs.sort((a, b) => sortAsc ? a.title.compareTo(b.title) : b.title.compareTo(a.title));
+        favAlbums.sort((a, b) => sortAsc ? a.name.compareTo(b.name) : b.name.compareTo(a.name));
+        favArtists.sort((a, b) => sortAsc ? a.name.compareTo(b.name) : b.name.compareTo(a.name));
+
         return Scaffold(
-          appBar: AppBar(title: Text(context.l10n.favorites), centerTitle: true),
+          appBar: AppBar(
+            title: Text(context.l10n.favorites),
+            centerTitle: true,
+            actions: [
+              PopupMenuButton<bool>(
+                icon: const Icon(Icons.sort_rounded),
+                onSelected: (asc) {
+                  SettingsProvider.instance.saveSortSettings(favoritesSortAscending: asc);
+                },
+                itemBuilder: (context) {
+                  var isAsc = SettingsProvider.instance.favoritesSortAscending;
+                  return [
+                    PopupMenuItem(
+                      value: true,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.arrow_downward_rounded,
+                            color: isAsc ? theme.colorScheme.primary : null,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            context.l10n.sortAscending,
+                            style: TextStyle(
+                              color: isAsc ? theme.colorScheme.primary : null,
+                              fontWeight: isAsc ? FontWeight.bold : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: false,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.arrow_upward_rounded,
+                            color: !isAsc ? theme.colorScheme.primary : null,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            context.l10n.sortDescending,
+                            style: TextStyle(
+                              color: !isAsc ? theme.colorScheme.primary : null,
+                              fontWeight: !isAsc ? FontWeight.bold : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
           body: CustomScrollView(
             slivers: [
               if (favArtists.isNotEmpty) ...[

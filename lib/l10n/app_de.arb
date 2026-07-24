@@ -247,6 +247,7 @@
   "sortBySongCount": "Anzahl Songs",
   "sortByTitle": "Titel",
   "sortByTrackCount": "Anzahl Titel",
+  "sortDescending": "Absteigend sortieren",
   "sortPlaylistsBy": "Playlists sortieren nach",
   "sortSongsBy": "Songs sortieren nach",
   "sortSubtitle": "Deine Sortiereinstellung wird pro Tab gespeichert und beim nächsten Start automatisch angewendet.",

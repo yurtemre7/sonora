@@ -323,6 +323,7 @@
   "sortBySongCount": "Song Count",
   "sortByTitle": "Title",
   "sortByTrackCount": "Track Count",
+  "sortDescending": "Sort Descending",
   "sortPlaylistsBy": "Sort Playlists By",
   "sortSongsBy": "Sort Songs By",
   "sortSubtitle": "Your sorting preference will be saved per tab and automatically applied on next startup.",

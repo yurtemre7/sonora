@@ -1582,6 +1582,12 @@ abstract class AppLocalizations {
   /// **'Track Count'**
   String get sortByTrackCount;
 
+  /// No description provided for @sortDescending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort Descending'**
+  String get sortDescending;
+
   /// No description provided for @sortPlaylistsBy.
   ///
   /// In en, this message translates to:
