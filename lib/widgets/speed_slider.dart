@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class SpeedSlider extends StatelessWidget {
   const SpeedSlider({super.key, required this.speed, required this.onChanged});
@@ -33,7 +34,7 @@ class SpeedSlider extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.speed_rounded, size: 20),
                 onPressed: () => onChanged(1.0),
-                tooltip: 'Reset to 1.0x',
+                tooltip: context.l10n.resetSpeed,
                 color: speed == 1.0
                     ? theme.colorScheme.onSurfaceVariant
                     : theme.colorScheme.primary,

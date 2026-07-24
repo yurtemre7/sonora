@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class DebugCachesScreen extends StatefulWidget {
   const DebugCachesScreen({
@@ -174,7 +175,7 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _loadDebugCaches,
-            tooltip: 'Refresh',
+            tooltip: context.l10n.refresh,
           ),
         ],
       ),

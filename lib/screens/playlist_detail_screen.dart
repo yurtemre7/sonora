@@ -100,9 +100,9 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
 
   Future<void> _pickCoverImage() async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('For best results, choose a square image.'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(context.l10n.chooseSquareImage),
+        duration: const Duration(seconds: 2),
       ),
     );
 

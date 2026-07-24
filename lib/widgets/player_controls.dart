@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide RepeatMode;
 
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class PlayerControls extends StatelessWidget {
   const PlayerControls({
@@ -40,7 +41,7 @@ class PlayerControls extends StatelessWidget {
             isShuffled ? Icons.shuffle_on_rounded : Icons.shuffle_rounded,
           ),
           iconSize: 24,
-          tooltip: isShuffled ? 'Disable shuffle' : 'Enable shuffle',
+          tooltip: isShuffled ? context.l10n.disableShuffle : context.l10n.enableShuffle,
           color: isShuffled
               ? theme.colorScheme.primary
               : theme.colorScheme.onSurfaceVariant,
@@ -52,7 +53,7 @@ class PlayerControls extends StatelessWidget {
           onPressed: onPrevious,
           icon: const Icon(Icons.skip_previous_rounded),
           iconSize: 36,
-          tooltip: 'Previous',
+          tooltip: context.l10n.previousTooltip,
           color: theme.colorScheme.onSurface,
         ),
         const SizedBox(width: 8),
@@ -87,7 +88,7 @@ class PlayerControls extends StatelessWidget {
                     : Icons.play_arrow_rounded,
               ),
               iconSize: 36,
-              tooltip: isPlaying ? 'Pause' : 'Play',
+              tooltip: isPlaying ? context.l10n.pauseTooltip : context.l10n.playTooltip,
               color: theme.colorScheme.onPrimary,
             ),
           ),
@@ -99,7 +100,7 @@ class PlayerControls extends StatelessWidget {
           onPressed: onNext,
           icon: const Icon(Icons.skip_next_rounded),
           iconSize: 36,
-          tooltip: 'Next',
+          tooltip: context.l10n.nextTooltip,
           color: theme.colorScheme.onSurface,
         ),
         const SizedBox(width: 12),
@@ -116,10 +117,10 @@ class PlayerControls extends StatelessWidget {
           ),
           iconSize: 24,
           tooltip: repeatMode == RepeatMode.one
-              ? 'Repeat one'
+              ? context.l10n.repeatOne
               : repeatMode == RepeatMode.all
-              ? 'Repeat all'
-              : 'Repeat off',
+              ? context.l10n.repeatAll
+              : context.l10n.repeatOff,
           color: repeatMode != RepeatMode.off
               ? theme.colorScheme.primary
               : theme.colorScheme.onSurfaceVariant,

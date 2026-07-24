@@ -120,13 +120,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   if (value == 1) showSongInfoBottomSheet(context, song);
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 1,
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline_rounded, size: 20),
-                        SizedBox(width: 12),
-                        Text('Song Info'),
+                        const Icon(Icons.info_outline_rounded, size: 20),
+                        const SizedBox(width: 12),
+                        Text(context.l10n.songInfo),
                       ],
                     ),
                   ),

@@ -797,7 +797,7 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         );
                       },
-                      tooltip: 'Favorites',
+                      tooltip: context.l10n.favorites,
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -949,7 +949,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 _searchFocusNode.unfocus();
                                 widget.onOpenSettings();
                               },
-                              tooltip: 'Settings',
+                              tooltip: context.l10n.settings,
                             ),
                             const SizedBox(width: 16),
                           ],
@@ -1356,75 +1356,75 @@ class _HomeScreenState extends State<HomeScreen>
                                                   Icons.more_vert_rounded,
                                                 ),
                                                 itemBuilder: (context) => [
-                                                  const PopupMenuItem(
+                                                  PopupMenuItem(
                                                     value: 3,
                                                     child: Row(
                                                       children: [
-                                                        Icon(
+                                                        const Icon(
                                                           Icons.image_rounded,
                                                         ),
-                                                        SizedBox(width: 8),
-                                                        Text('Change Cover'),
+                                                        const SizedBox(width: 8),
+                                                        Text(context.l10n.changeCover),
                                                       ],
                                                     ),
                                                   ),
                                                   if (playlist.coverImagePath !=
                                                       null)
-                                                    const PopupMenuItem(
+                                                    PopupMenuItem(
                                                       value: 4,
                                                       child: Row(
                                                         children: [
-                                                          Icon(
+                                                          const Icon(
                                                             Icons
                                                                 .hide_image_rounded,
                                                           ),
-                                                          SizedBox(width: 8),
-                                                          Text('Remove Cover'),
+                                                          const SizedBox(width: 8),
+                                                          Text(context.l10n.removeCover),
                                                         ],
                                                       ),
                                                     ),
-                                                  const PopupMenuItem(
+                                                  PopupMenuItem(
                                                     value: 2,
                                                     child: Row(
                                                       children: [
-                                                        Icon(
+                                                        const Icon(
                                                           Icons.edit_rounded,
                                                         ),
-                                                        SizedBox(width: 8),
-                                                        Text('Rename'),
+                                                        const SizedBox(width: 8),
+                                                        Text(context.l10n.rename),
                                                       ],
                                                     ),
                                                   ),
-                                                  const PopupMenuItem(
+                                                  PopupMenuItem(
                                                     value: 1,
                                                     child: Row(
                                                       children: [
-                                                        Icon(
+                                                        const Icon(
                                                           Icons
                                                               .delete_outline_rounded,
                                                           color: Colors.red,
                                                         ),
-                                                        SizedBox(width: 8),
+                                                        const SizedBox(width: 8),
                                                         Text(
-                                                          'Delete',
-                                                          style: TextStyle(
+                                                          context.l10n.delete,
+                                                          style: const TextStyle(
                                                             color: Colors.red,
                                                           ),
                                                         ),
                                                       ],
                                                     ),
                                                   ),
-                                                ],
+                                                 ],
                                                 onSelected: (val) async {
                                                   if (val == 3) {
                                                     ScaffoldMessenger.of(
                                                       context,
                                                     ).showSnackBar(
-                                                      const SnackBar(
+                                                      SnackBar(
                                                         content: Text(
-                                                          'For best results, choose a square image.',
+                                                          context.l10n.chooseSquareImage,
                                                         ),
-                                                        duration: Duration(
+                                                        duration: const Duration(
                                                           seconds: 2,
                                                         ),
                                                       ),

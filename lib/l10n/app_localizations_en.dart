@@ -19,6 +19,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Required to index audio tracks and scan local cover images (artist.jpg / cover.jpg) on your device.';
 
   @override
+  String get addToPlaylist => 'Add to playlist';
+
+  @override
+  String get addToQueue => 'Add to Queue';
+
+  @override
   String albumCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -122,6 +128,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose the primary folder containing your audio tracks (MP3, FLAC, M4A, etc.) to build your initial library database.';
 
   @override
+  String get chooseSquareImage => 'For best results, choose a square image.';
+
+  @override
   String get chooseTheme => 'Choose Theme';
 
   @override
@@ -200,6 +209,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get developerProfileSubtitle => 'Check out yurtemre7 on GitHub';
 
   @override
+  String get disableShuffle => 'Disable shuffle';
+
+  @override
   String get displayedAs => 'Displayed As:';
 
   @override
@@ -213,6 +225,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Automatically theme the app using active album art';
 
   @override
+  String get enableShuffle => 'Enable shuffle';
+
+  @override
   String get enterDurationHint => 'Enter duration';
 
   @override
@@ -220,6 +235,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToLoadChangelog => 'Failed to load changelog.';
+
+  @override
+  String get failedToSelectDirectory =>
+      'Failed to select directory. Please try again.';
+
+  @override
+  String get favoriteRemove => 'Remove Favorite';
+
+  @override
+  String get favoriteSong => 'Favorite Song';
 
   @override
   String get favorites => 'Favorites';
@@ -330,13 +355,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mfxBassBoosted => 'Bass Boosted';
 
   @override
+  String get mfxBassBoostedSubtitle => 'Strong low-frequency bump (+80%)';
+
+  @override
   String get mfxLoFi => 'Lo-Fi / Vintage Room';
+
+  @override
+  String get mfxLoFiSubtitle => 'Aggressive high-cut filter';
 
   @override
   String get mfxResetAll => 'Reset All Effects';
 
   @override
   String get mfxWarmth => 'Warmth (Reverb)';
+
+  @override
+  String get mfxWarmthSubtitle => 'Simulated via EQ (Bass boost, High cut)';
 
   @override
   String minuteAbbr(int min) {
@@ -351,6 +385,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get next => 'Next';
+
+  @override
+  String get nextTooltip => 'Next';
 
   @override
   String get noAlbumsFound => 'No albums found';
@@ -403,11 +440,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Pause music instead of lowering volume when a notification arrives';
 
   @override
+  String get pauseTooltip => 'Pause';
+
+  @override
   String get permissionsExplained => 'Permissions Explained';
 
   @override
   String get permissionsExplanation =>
       'To play and control your music, Sonora needs runtime authorization permissions from your device.';
+
+  @override
+  String get permissionsGrantedSuccess =>
+      'Permissions configured successfully!';
 
   @override
   String get permissionsNeeded => 'Permissions Needed';
@@ -420,6 +464,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playAll => 'Play All';
+
+  @override
+  String get playNext => 'Play Next';
+
+  @override
+  String get playTooltip => 'Play';
 
   @override
   String get playback => 'Playback';
@@ -456,6 +506,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get preview => 'Preview';
+
+  @override
+  String get previousTooltip => 'Previous';
 
   @override
   String get privacyCardDataContent =>
@@ -523,13 +576,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rateLimitTitle => 'Rate Limit Exceeded';
 
   @override
+  String get refresh => 'Refresh';
+
+  @override
   String get removeCover => 'Remove Cover';
+
+  @override
+  String get removeFromPlaylist => 'Remove from playlist';
 
   @override
   String get rename => 'Rename';
 
   @override
   String get renamePlaylist => 'Rename Playlist';
+
+  @override
+  String get repeatAll => 'Repeat all';
+
+  @override
+  String get repeatOff => 'Repeat off';
+
+  @override
+  String get repeatOne => 'Repeat one';
 
   @override
   String get reset => 'Reset';
@@ -549,6 +617,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetApplicationSubtitle => 'Hold for 3 seconds to wipe all data.';
+
+  @override
+  String get resetSpeed => 'Reset to 1.0x';
 
   @override
   String get resetStatistics => 'Reset Statistics';
@@ -629,6 +700,9 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get songInfo => 'Song Info';
 
   @override
   String get songs => 'Songs';

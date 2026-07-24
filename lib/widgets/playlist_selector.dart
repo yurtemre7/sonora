@@ -110,7 +110,7 @@ class _PlaylistSelectorBottomSheetState
                         IconButton.filledTonal(
                           onPressed: _showCreatePlaylistDialog,
                           icon: const Icon(Icons.add_rounded),
-                          tooltip: 'Create Playlist',
+                          tooltip: context.l10n.createPlaylist,
                         ),
                       ],
                     ),

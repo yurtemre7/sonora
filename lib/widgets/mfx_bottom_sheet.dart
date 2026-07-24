@@ -287,9 +287,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                             const SizedBox(height: 16),
                             SwitchListTile(
                               title: Text(context.l10n.mfxWarmth),
-                              subtitle: const Text(
-                                'Simulated via EQ (Bass boost, High cut)',
-                              ),
+                              subtitle: Text(context.l10n.mfxWarmthSubtitle),
                               secondary: Icon(
                                 Icons.graphic_eq_rounded,
                                 color: player.isReverbEnabled
@@ -301,9 +299,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                             ),
                             SwitchListTile(
                               title: Text(context.l10n.mfxLoFi),
-                              subtitle: const Text(
-                                'Aggressive high-cut filter',
-                              ),
+                              subtitle: Text(context.l10n.mfxLoFiSubtitle),
                               secondary: Icon(
                                 Icons.radio_rounded,
                                 color: player.isLofiEnabled
@@ -315,9 +311,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                             ),
                             SwitchListTile(
                               title: Text(context.l10n.mfxBassBoosted),
-                              subtitle: const Text(
-                                'Strong low-frequency bump (+80%)',
-                              ),
+                              subtitle: Text(context.l10n.mfxBassBoostedSubtitle),
                               secondary: Icon(
                                 Icons.speaker_group_rounded,
                                 color: player.isBassBoostEnabled

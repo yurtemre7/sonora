@@ -63,8 +63,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     if (result && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Permissions configured successfully!'),
+        SnackBar(
+          content: Text(context.l10n.permissionsGrantedSuccess),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -87,8 +87,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to select directory. Please try again.'),
+          SnackBar(
+            content: Text(context.l10n.failedToSelectDirectory),
             behavior: SnackBarBehavior.floating,
           ),
         );

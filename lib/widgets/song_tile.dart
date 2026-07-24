@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/playlist_selector.dart';
 import 'package:sonora/widgets/song_info_bottom_sheet.dart';
@@ -151,57 +152,57 @@ class SongTile extends StatelessWidget {
                       },
                       itemBuilder: (context) => [
                         if (playerProvider != null)
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 1,
                             child: Row(
                               children: [
-                                Icon(Icons.playlist_play_rounded, size: 20),
-                                SizedBox(width: 8),
-                                Text('Play Next'),
+                                const Icon(Icons.playlist_play_rounded, size: 20),
+                                const SizedBox(width: 8),
+                                Text(context.l10n.playNext),
                               ],
                             ),
                           ),
                         if (playerProvider != null)
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 2,
                             child: Row(
                               children: [
-                                Icon(Icons.queue_music_rounded, size: 20),
-                                SizedBox(width: 8),
-                                Text('Add to Queue'),
+                                const Icon(Icons.queue_music_rounded, size: 20),
+                                const SizedBox(width: 8),
+                                Text(context.l10n.addToQueue),
                               ],
                             ),
                           ),
                         if (playerProvider != null)
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 4,
                             child: Row(
                               children: [
-                                Icon(Icons.playlist_add_rounded, size: 20),
-                                SizedBox(width: 8),
-                                Text('Add to playlist'),
+                                const Icon(Icons.playlist_add_rounded, size: 20),
+                                const SizedBox(width: 8),
+                                Text(context.l10n.addToPlaylist),
                               ],
                             ),
                           ),
                         if (onRemoveFromPlaylist != null)
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 7,
                             child: Row(
                               children: [
-                                Icon(Icons.playlist_remove_rounded, size: 20),
-                                SizedBox(width: 8),
-                                Text('Remove from playlist'),
+                                const Icon(Icons.playlist_remove_rounded, size: 20),
+                                const SizedBox(width: 8),
+                                Text(context.l10n.removeFromPlaylist),
                               ],
                             ),
                           ),
                         if (playerProvider != null)
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 5,
                             child: Row(
                               children: [
-                                Icon(Icons.info_outline_rounded, size: 20),
-                                SizedBox(width: 8),
-                                Text('Song Info'),
+                                const Icon(Icons.info_outline_rounded, size: 20),
+                                const SizedBox(width: 8),
+                                Text(context.l10n.songInfo),
                               ],
                             ),
                           ),
@@ -230,8 +231,8 @@ class SongTile extends StatelessWidget {
                                     const SizedBox(width: 8),
                                     Text(
                                       isFav
-                                          ? 'Remove Favorite'
-                                          : 'Favorite Song',
+                                          ? context.l10n.favoriteRemove
+                                          : context.l10n.favoriteSong,
                                     ),
                                   ],
                                 );
