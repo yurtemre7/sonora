@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.13.1] - 2026-07-25
+### Fixed
+* Offload, deduplicate, and defer background album artwork color extraction (runs as second-priority background task 3 seconds after library is fully playable)
+
 ## [1.13.0] - 2026-07-25
 ### Added
 * Add automatic CPU ABI detection and in-app APK auto-download updates
