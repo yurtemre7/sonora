@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -34,6 +35,111 @@ class MusicScanner {
       }
     } catch (_) {}
     return localArtistImages;
+  }
+
+  /// Detects and caches local artist cover images (artist.jpg, artist.png, etc.) from the sync folder.
+  Future<Map<String, String>> detectLocalArtistImages(
+    String folderPath,
+    List<Song> songs,
+  ) async {
+    try {
+      var appDir = await getApplicationDocumentsDirectory();
+      var appDocsDirPath = appDir.path;
+
+      var artistImages = await Isolate.run<Map<String, String>>(() {
+        var dir = Directory(folderPath);
+        if (!dir.existsSync()) return {};
+
+        var localImageFiles = <String, List<String>>{};
+        try {
+          for (var entity in dir.listSync(recursive: true, followLinks: false)) {
+            if (entity is File) {
+              var pathLower = entity.path.toLowerCase();
+              if (pathLower.endsWith('.jpg') ||
+                  pathLower.endsWith('.jpeg') ||
+                  pathLower.endsWith('.png') ||
+                  pathLower.endsWith('.webp')) {
+                var parentPath = entity.parent.path;
+                localImageFiles.putIfAbsent(parentPath, () => []).add(entity.path);
+                var normParent = parentPath.replaceAll('\\', '/');
+                localImageFiles.putIfAbsent(normParent, () => []).add(entity.path);
+              }
+            }
+          }
+        } catch (_) {}
+
+        var finalArtistImages = <String, String>{};
+        var normFolderPath = folderPath.replaceAll('\\', '/');
+
+        for (var song in songs) {
+          var lowerArtist = song.artist.trim().toLowerCase();
+          if (lowerArtist.isEmpty || lowerArtist == 'unknown artist') continue;
+
+          var cleanArtist = lowerArtist
+              .split(RegExp(r'[,;/]|\sfeat\.|\sft\.', caseSensitive: false))
+              .first
+              .trim();
+
+          if (finalArtistImages.containsKey(lowerArtist)) continue;
+
+          String? findArtistImage(Directory startDir) {
+            Directory? current = startDir;
+            while (current != null) {
+              var normCurrentPath = current.path.replaceAll('\\', '/');
+              var images =
+                  localImageFiles[current.path] ??
+                  localImageFiles[normCurrentPath];
+              if (images != null && images.isNotEmpty) {
+                for (var img in images) {
+                  var name = img.split(RegExp(r'[/\\]')).last.toLowerCase();
+                  if (name == 'artist.jpg' ||
+                      name == 'artist.png' ||
+                      name == 'artist.webp' ||
+                      name == 'artist.jpeg') {
+                    return img;
+                  }
+                  if (cleanArtist.isNotEmpty &&
+                      (name == '$cleanArtist.jpg' ||
+                       name == '$cleanArtist.png' ||
+                       name == '$cleanArtist.webp' ||
+                       name == '$cleanArtist.jpeg')) {
+                    return img;
+                  }
+                }
+                var dirName =
+                    normCurrentPath.split('/').last.toLowerCase().trim();
+                if (dirName == cleanArtist || dirName == lowerArtist) {
+                  return images.first;
+                }
+              }
+              if (normCurrentPath == normFolderPath) break;
+              var parent = current.parent;
+              if (parent.path == current.path) break;
+              current = parent;
+            }
+            return null;
+          }
+
+          var songFile = File(song.filePath);
+          var match = findArtistImage(songFile.parent);
+          if (match != null) {
+            finalArtistImages[lowerArtist] = match;
+            if (cleanArtist.isNotEmpty) {
+              finalArtistImages[cleanArtist] = match;
+            }
+          }
+        }
+
+        return finalArtistImages;
+      });
+
+      localArtistImages = artistImages;
+      var imagesFile = File('$appDocsDirPath/artist_images.json');
+      await imagesFile.writeAsString(jsonEncode(artistImages));
+      return artistImages;
+    } catch (_) {
+      return localArtistImages;
+    }
   }
 
   /// Queries the cached list of songs from storage instantly.
@@ -228,6 +334,9 @@ class MusicScanner {
         var msSongs = await _scanViaMediaStore(folderPath, cachedSongs);
         if (msSongs != null && msSongs.isNotEmpty) {
           await loadLocalArtistImages();
+          if (localArtistImages.isEmpty) {
+            unawaited(detectLocalArtistImages(folderPath, msSongs));
+          }
 
           var sortSettings = await getTabSortSettings('songs');
           sortSongs(

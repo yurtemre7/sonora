@@ -650,6 +650,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
     notifyListeners();
     _startBackgroundColorExtraction();
+    _startLocalArtistImageDetection();
 
     // Purge stale stats entries for songs that no longer exist in the library
     statsService.syncWithLibrary(allSongs.map((s) => s.id).toSet());
@@ -1158,6 +1159,22 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       }
       notifyListeners();
       _isExtractingColors = false;
+    });
+  }
+
+  void _startLocalArtistImageDetection() {
+    Future(() async {
+      var folderPath = await MusicScanner().getScanFolder();
+      if (folderPath != null && allSongs.isNotEmpty) {
+        var images = await MusicScanner().detectLocalArtistImages(
+          folderPath,
+          allSongs,
+        );
+        if (images.isNotEmpty) {
+          _refreshLibrarySnapshots();
+          notifyListeners();
+        }
+      }
     });
   }
 
