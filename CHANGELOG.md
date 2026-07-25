@@ -2,15 +2,16 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.12.3] - 2026-07-25
+## [1.13.0] - 2026-07-25
 ### Added
-* Add fast native Android MediaStore scanner (<200ms initial scan time) with hybrid fallback
-* Optimize album art resolution and caching
-* Optimize StatsService query lookup complexity from O(N*L) to O(L) using map indexing
-* Add 30 FPS high-precision position stream and zero-latency smooth progress fill rendering across main seek bar, mini player progress strip, and synced lyrics
-* Offload DebugCachesScreen directory listing to background isolate and virtualize debug card lists via Slivers
-* Add automatic device CPU ABI detection and direct APK download selector for GitHub releases (arm64-v8a, armeabi-v7a, x86_64)
-* Add direct in-app APK downloading with live progress bar and native Android package installation prompting
+* Add automatic CPU ABI detection and in-app APK auto-download updates
+* Improve app update with better direct links
+* Improve statistics
+* Improve sorting, image caching and seekbar animation
+* Improve music library scanning
+### Changed
+* Chore: Update README.md and add japanese README_JP.md
+* Chore: Update flutter to 3.44.8
 
 ## [1.12.2] - 2026-07-24
 ### Added
