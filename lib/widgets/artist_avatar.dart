@@ -41,7 +41,8 @@ class ArtistAvatar extends StatelessWidget {
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
               backgroundImage: ResizeImage(
                 FileImage(File(artist.localImagePath!)),
-                width: (radius * 3).toInt(),
+                width: (radius * 3).toInt().clamp(64, 400),
+                height: (radius * 3).toInt().clamp(64, 400),
               ),
             )
           : hasFallback

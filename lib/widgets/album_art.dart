@@ -25,6 +25,9 @@ class AlbumArt extends StatelessWidget {
             ? (constraints.hasBoundedWidth ? constraints.maxWidth : 120.0)
             : size;
 
+        var devicePixelRatio = MediaQuery.of(context).devicePixelRatio.clamp(1.0, 2.5);
+        var targetCacheDim = (resolvedSize * devicePixelRatio).toInt().clamp(64, 800);
+
         return Container(
           width: resolvedSize,
           height: resolvedSize,
@@ -46,7 +49,8 @@ class AlbumArt extends StatelessWidget {
                     width: resolvedSize,
                     height: resolvedSize,
                     fit: BoxFit.cover,
-                    cacheWidth: (resolvedSize * 3).toInt(),
+                    cacheWidth: targetCacheDim,
+                    cacheHeight: targetCacheDim,
                     errorBuilder: (context, error, stackTrace) =>
                         _buildPlaceholder(theme, resolvedSize),
                   )

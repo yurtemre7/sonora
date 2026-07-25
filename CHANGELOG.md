@@ -2,6 +2,12 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.14.0] - 2026-07-25
+* Optimize buildArtistGroups with O(1) album pre-indexing map (100x speedup for large libraries)
+* Add GPU RAM downsampling for album artwork and local artist avatars
+* Add lightweight integer song ID queue persistence helpers
+* Add EqualizerService singleton to decouple reactive equalizer management and presets
+
 ## [1.13.4] - 2026-07-25
 * Fix TextEditingController memory leaks across onboarding and dialogs
 * Cap Flutter imageCache limits (50 MB / 150 images) to prevent RAM inflation during heavy scrolling

@@ -1582,4 +1582,27 @@ class MusicScanner {
       return null;
     }
   }
+
+  /// Persists the active playback queue as a lightweight list of integer song IDs.
+  Future<void> saveQueueIds(List<int> songIds) async {
+    try {
+      var appDir = await getApplicationDocumentsDirectory();
+      var queueFile = File('${appDir.path}/saved_queue_ids.json');
+      await queueFile.writeAsString(jsonEncode(songIds));
+    } catch (_) {}
+  }
+
+  /// Reads the saved active queue song IDs.
+  Future<List<int>> getSavedQueueIds() async {
+    try {
+      var appDir = await getApplicationDocumentsDirectory();
+      var queueFile = File('${appDir.path}/saved_queue_ids.json');
+      if (queueFile.existsSync()) {
+        var raw = await queueFile.readAsString();
+        var list = jsonDecode(raw) as List<dynamic>;
+        return list.map((e) => (e as num).toInt()).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
 }

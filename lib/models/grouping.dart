@@ -85,6 +85,11 @@ List<ArtistGroup> buildArtistGroups(
   List<AlbumGroup> allAlbums, [
   Map<String, String>? localArtistImages,
 ]) {
+  var albumsByArtistMap = <String, List<AlbumGroup>>{};
+  for (var album in allAlbums) {
+    albumsByArtistMap.putIfAbsent(album.artistLower, () => []).add(album);
+  }
+
   var artistsMap = <String, List<Song>>{};
   for (var song in allSongs) {
     var artistName = song.artist.trim().isEmpty
@@ -98,9 +103,7 @@ List<ArtistGroup> buildArtistGroups(
     var lowerName = name.toLowerCase();
     var songs = entry.value;
 
-    var artistAlbums = allAlbums
-        .where((a) => a.artistLower == lowerName)
-        .toList();
+    var artistAlbums = albumsByArtistMap[lowerName] ?? [];
 
     var localImage = localArtistImages?[lowerName];
 
