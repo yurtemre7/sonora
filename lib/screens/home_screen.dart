@@ -239,17 +239,25 @@ class _HomeScreenState extends State<HomeScreen>
       var query = _searchQuery.toLowerCase();
       playlists = playlists.where((p) => p.nameLower.contains(query)).toList();
     }
-    playlists.sort((a, b) {
-      int cmp;
-      if (_playlistSortBy == 'songs') {
-        var aCount = widget.songs.where((s) => a.songIds.contains(s.id)).length;
-        var bCount = widget.songs.where((s) => b.songIds.contains(s.id)).length;
-        cmp = aCount.compareTo(bCount);
-      } else {
-        cmp = a.nameLower.compareTo(b.nameLower);
-      }
-      return _playlistSortAscending ? cmp : -cmp;
-    });
+    if (_playlistSortBy == 'songs') {
+      var validIds = widget.songs.map((s) => s.id).toSet();
+      var songCountMap = {
+        for (var p in playlists)
+          p.id: p.songIds.where(validIds.contains).length,
+      };
+      playlists.sort((a, b) {
+        var cmp = (songCountMap[a.id] ?? 0).compareTo(songCountMap[b.id] ?? 0);
+        if (cmp == 0) {
+          cmp = a.nameLower.compareTo(b.nameLower);
+        }
+        return _playlistSortAscending ? cmp : -cmp;
+      });
+    } else {
+      playlists.sort((a, b) {
+        var cmp = a.nameLower.compareTo(b.nameLower);
+        return _playlistSortAscending ? cmp : -cmp;
+      });
+    }
     return playlists;
   }
 

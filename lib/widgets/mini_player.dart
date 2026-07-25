@@ -108,9 +108,7 @@ class MiniPlayer extends StatelessWidget {
                                     color: theme.colorScheme.onSurface
                                         .withValues(alpha: 0.08),
                                   ),
-                                  AnimatedContainer(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeOut,
+                                  Container(
                                     width: fillWidth,
                                     height: 6,
                                     decoration: BoxDecoration(

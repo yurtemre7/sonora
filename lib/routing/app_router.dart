@@ -360,7 +360,7 @@ class _ShellMiniPlayerState extends State<_ShellMiniPlayer> {
     _lastIndex = currentIndex;
 
     return StreamBuilder<Duration>(
-      stream: widget.playerProvider.audioHandler.player.positionStream,
+      stream: widget.playerProvider.positionStream,
       builder: (context, snapshot) {
         var position = snapshot.data ?? Duration.zero;
         var totalMs = widget.currentSong.duration.inMilliseconds;

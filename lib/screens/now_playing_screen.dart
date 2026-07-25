@@ -1511,7 +1511,7 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
         var viewportHeight = constraints.maxHeight;
 
         return StreamBuilder<Duration>(
-          stream: widget.playerProvider.audioHandler.player.positionStream,
+          stream: widget.playerProvider.positionStream,
           builder: (context, snapshot) {
             var position = snapshot.data ?? Duration.zero;
 

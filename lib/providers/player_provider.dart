@@ -337,8 +337,11 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool get isCompleted =>
       audioHandler.player.processingState == ProcessingState.completed;
 
-  /// Current playback position stream.
-  Stream<Duration> get positionStream => audioHandler.player.positionStream;
+  /// Current playback position stream with high-precision 30 FPS updates.
+  Stream<Duration> get positionStream => audioHandler.player.createPositionStream(
+        minPeriod: const Duration(milliseconds: 33),
+        maxPeriod: const Duration(milliseconds: 50),
+      );
 
   /// Current buffered position stream.
   Stream<Duration> get bufferedPositionStream =>
@@ -1122,13 +1125,10 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
             processedCount++;
             dirty = true;
 
-            // Notify UI and refresh snapshots in batches of 20 to keep UI 100% fluid
+            // Notify UI and refresh snapshots in batches of 20 to keep UI smooth without disk thrashing
             if (processedCount % 20 == 0) {
               _refreshLibrarySnapshots();
               notifyListeners();
-              // Bulk save current progress to disk in a single write operation
-              await MusicScanner().saveAllSongsMetadata(allSongs);
-              dirty = false;
             }
           }
         } catch (_) {}

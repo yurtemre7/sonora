@@ -133,31 +133,41 @@ class _SeekBarState extends State<SeekBar> {
                           // Filled portion (pill shape)
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
-                            width: fillWidth > trackHeight
-                                ? fillWidth
-                                : trackHeight,
                             height: trackHeight,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  theme.colorScheme.primary,
-                                  Color.lerp(
-                                        theme.colorScheme.primary,
-                                        theme.colorScheme.tertiary,
-                                        progress,
-                                      ) ??
-                                      theme.colorScheme.tertiary,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                trackHeight / 2,
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                width: fillWidth > trackHeight
+                                    ? fillWidth
+                                    : trackHeight,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      theme.colorScheme.primary,
+                                      Color.lerp(
+                                            theme.colorScheme.primary,
+                                            theme.colorScheme.tertiary,
+                                            progress,
+                                          ) ??
+                                          theme.colorScheme.tertiary,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    trackHeight / 2,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                           // Thumb dot at the end of the fill
                           if (fillWidth > thumbRadius)
                             Positioned(
-                              left: fillWidth - thumbRadius,
+                              left: (fillWidth - thumbRadius).clamp(
+                                0.0,
+                                trackWidth > thumbRadius * 2
+                                    ? trackWidth - thumbRadius * 2
+                                    : 0.0,
+                              ),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
                                 width: thumbRadius * 2,
