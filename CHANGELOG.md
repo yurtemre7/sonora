@@ -2,8 +2,11 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.15.3] - 2026-07-25
+* Revert top-down pre-gathering artist image scan changes
+
 ## [1.15.2] - 2026-07-25
-* Optimize native Kotlin local artist cover image resolution with single-pass top-down image tree pre-gathering
+* Fix TextEditingController assertion error during dialog exit transitions by binding controllers to StatefulWidget lifecycle
 
 ## [1.15.1] - 2026-07-25
 * Fix TextEditingController assertion error during dialog exit transitions by binding controllers to StatefulWidget lifecycle
