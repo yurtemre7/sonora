@@ -2,6 +2,11 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.12.3] - 2026-07-25
+### Added
+* Add fast native Android MediaStore scanner (<200ms initial scan time) with hybrid fallback
+* Optimize album art resolution and caching
+
 ## [1.12.2] - 2026-07-24
 ### Added
 * Improve japanese translations

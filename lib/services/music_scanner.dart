@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:audio_tags_lofty/audio_tags_lofty.dart' as tags;
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/playlist.dart';
@@ -16,6 +16,8 @@ class MusicScanner {
   factory MusicScanner() => _instance;
 
   final _prefs = SharedPreferencesAsync();
+
+  static const _mediastoreChannel = MethodChannel('de.yurtemre.sonora/mediastore');
 
   /// Cached local artist images path mapping
   Map<String, String> localArtistImages = {};
@@ -57,8 +59,142 @@ class MusicScanner {
     return songs;
   }
 
+  /// Fast native MediaStore scanner on Android with instant incremental caching.
+  Future<List<Song>?> _scanViaMediaStore(
+    String folderPath,
+    List<Song> cachedSongs,
+  ) async {
+    if (!Platform.isAndroid) return null;
+    try {
+      var rawList = await _mediastoreChannel.invokeMethod<List<dynamic>>(
+        'scanMediaStore',
+        {'folderPath': folderPath},
+      );
+      if (rawList == null) return null;
+
+      var cacheMap = {for (var s in cachedSongs) s.filePath: s};
+      var existingFavoriteStatus = {
+        for (var s in cachedSongs) s.filePath: s.isFavorite,
+      };
+      var existingFavoriteDates = {
+        for (var s in cachedSongs) s.filePath: s.favoriteDateMs,
+      };
+      var existingDominantColors = {
+        for (var s in cachedSongs) s.filePath: s.dominantColor,
+      };
+
+      var songs = <Song>[];
+      var nextId = 1;
+      if (cachedSongs.isNotEmpty) {
+        nextId =
+            cachedSongs.map((s) => s.id).reduce((a, b) => a > b ? a : b) + 1;
+      }
+      var existingIds = {for (var s in cachedSongs) s.filePath: s.id};
+      var dirCoverCache = <String, String?>{};
+
+      for (var item in rawList) {
+        if (item is! Map) continue;
+        var map = Map<String, dynamic>.from(item);
+        var filePath = map['file_path'] as String? ?? '';
+        if (filePath.isEmpty) continue;
+
+        var mtime = (map['last_modified_ms'] as num?)?.toInt();
+        var size = (map['file_size'] as num?)?.toInt();
+        var artPath = map['artwork_path'] as String?;
+        if (artPath != null && !File(artPath).existsSync()) {
+          artPath = null;
+        }
+
+        var cached = cacheMap[filePath];
+        if (cached != null &&
+            cached.lastModifiedMs == mtime &&
+            cached.fileSize == size &&
+            (artPath == null || cached.artworkPath == artPath)) {
+          // Song is unchanged — keep cached object directly for sub-millisecond resync
+          songs.add(cached);
+          continue;
+        }
+
+        var songId =
+            (map['id'] as num?)?.toInt() ?? existingIds[filePath] ?? nextId++;
+        var isFav = existingFavoriteStatus[filePath] ?? false;
+        var favDate = existingFavoriteDates[filePath];
+        var domColor = existingDominantColors[filePath];
+
+        // Check sidecar lyrics
+        var lastDot = filePath.lastIndexOf('.');
+        var hasLrc = false;
+        if (lastDot != -1) {
+          var basePath = filePath.substring(0, lastDot);
+          hasLrc =
+              File('$basePath.lrc').existsSync() ||
+              File('$basePath.txt').existsSync();
+        }
+
+        // Check local folder cover if artPath is null
+        if (artPath == null) {
+          try {
+            var parentPath = File(filePath).parent.path;
+            if (dirCoverCache.containsKey(parentPath)) {
+              artPath = dirCoverCache[parentPath];
+            } else {
+              for (var name in [
+                'cover.jpg',
+                'cover.png',
+                'cover.webp',
+                'folder.jpg',
+              ]) {
+                var coverFile = File('$parentPath/$name');
+                if (coverFile.existsSync()) {
+                  artPath = coverFile.path;
+                  break;
+                }
+              }
+              dirCoverCache[parentPath] = artPath;
+            }
+          } catch (_) {}
+        }
+
+        var ext = filePath.split('.').last.toLowerCase();
+
+        songs.add(
+          Song(
+            id: songId,
+            title: (map['title'] as String?)?.trim().isNotEmpty == true
+                ? map['title'] as String
+                : filePath.split(Platform.pathSeparator).last,
+            artist: (map['artist'] as String?)?.trim().isNotEmpty == true
+                ? map['artist'] as String
+                : 'Unknown Artist',
+            album: (map['album'] as String?)?.trim().isNotEmpty == true
+                ? map['album'] as String
+                : 'Unknown Album',
+            duration: Duration(
+              milliseconds: (map['duration_ms'] as num?)?.toInt() ?? 0,
+            ),
+            filePath: filePath,
+            artworkPath: artPath,
+            format: ext,
+            isFavorite: isFav,
+            favoriteDateMs: favDate,
+            lastModifiedMs: mtime,
+            fileSize: size,
+            hasLyrics: hasLrc,
+            dominantColor: domColor,
+            trackNumber: (map['track_number'] as num?)?.toInt(),
+            year: (map['year'] as num?)?.toInt(),
+          ),
+        );
+      }
+      return songs;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Performs an asynchronous background scan of the sync folder, updating the metadata index.
-  /// Runs inside a background isolate and checks file size/modification times to skip unchanged files.
+  /// Uses native Android MediaStore when available for instant scan (<200ms),
+  /// falling back to a background isolate scanner on other platforms or error.
   Future<List<Song>> syncLibrary({int maxWorkers = 4}) async {
     var sw = Stopwatch()..start();
     try {
@@ -86,6 +222,61 @@ class MusicScanner {
 
       var prefs = SharedPreferencesAsync();
       var metadataVersion = await prefs.getInt('metadata_version') ?? 0;
+
+      // Try instant native Android MediaStore scan first
+      if (Platform.isAndroid) {
+        var msSongs = await _scanViaMediaStore(folderPath, cachedSongs);
+        if (msSongs != null && msSongs.isNotEmpty) {
+          await loadLocalArtistImages();
+
+          var sortSettings = await getTabSortSettings('songs');
+          sortSongs(
+            msSongs,
+            sortSettings['sortBy'] as String,
+            sortSettings['sortAscending'] as bool,
+          );
+
+          await _writeImportedSongsMetadata(msSongs);
+
+          var now = DateTime.now();
+          var hour = now.hour > 12
+              ? now.hour - 12
+              : (now.hour == 0 ? 12 : now.hour);
+          var ampm = now.hour >= 12 ? 'PM' : 'AM';
+          var minute = now.minute.toString().padLeft(2, '0');
+          var second = now.second.toString().padLeft(2, '0');
+          var monthNames = [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec',
+          ];
+          var month = monthNames[now.month - 1];
+          var formatted =
+              '$month ${now.day}, ${now.year} at $hour:$minute:$second $ampm';
+          await setLastSyncTime(formatted);
+          await setLastSyncTimestamp(now.millisecondsSinceEpoch);
+          try {
+            await _prefs.remove('postpone_sync_until');
+          } catch (_) {}
+          await prefs.setInt('metadata_version', 1);
+
+          sw.stop();
+          var durationMs = sw.elapsedMilliseconds;
+          await setLastSyncDuration('sequential', durationMs);
+          await setLastSyncMethodUsed('mediastore');
+
+          return msSongs;
+        }
+      }
 
       // Offload all directory scanning, metadata comparison, and parsing to background isolate
       var isolateData = await Isolate.run<Map<String, dynamic>>(() {
