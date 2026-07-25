@@ -2,6 +2,9 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.15.0] - 2026-07-25
+* Decompose monolithic home screen into modular tab widgets (SongsTab, AlbumsTab, ArtistsTab, PlaylistsTab) with 100% preserved state management
+
 ## [1.14.0] - 2026-07-25
 * Optimize buildArtistGroups with O(1) album pre-indexing map (100x speedup for large libraries)
 * Add GPU RAM downsampling for album artwork and local artist avatars
