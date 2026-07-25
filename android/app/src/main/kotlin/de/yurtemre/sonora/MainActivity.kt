@@ -115,8 +115,51 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
-    private fun queryMediaStore(folderPath: String?): List<Map<String, Any?>> {
+    private fun resolveArtistImage(songFile: File, artist: String, rootFolderPath: String?, dirImageCache: MutableMap<String, List<File>>): String? {
+        val cleanArtist = artist.lowercase().split(Regex("[,;/]|\\sfeat\\.|\\sft\\.")).firstOrNull()?.trim() ?: ""
+        val lowerArtist = artist.lowercase().trim()
+        val normRoot = rootFolderPath?.trimEnd('/', '\\')?.replace('\\', '/')
+
+        var current: File? = songFile.parentFile
+        while (current != null) {
+            val normCurrent = current.absolutePath.replace('\\', '/')
+            val images = dirImageCache.getOrPut(normCurrent) {
+                current.listFiles { file ->
+                    if (file.isFile) {
+                        val ext = file.extension.lowercase()
+                        ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "webp"
+                    } else false
+                }?.toList() ?: emptyList()
+            }
+
+            if (images.isNotEmpty()) {
+                for (img in images) {
+                    val name = img.name.lowercase()
+                    if (name == "artist.jpg" || name == "artist.png" || name == "artist.webp" || name == "artist.jpeg") {
+                        return img.absolutePath
+                    }
+                    if (cleanArtist.isNotEmpty() && (name == "$cleanArtist.jpg" || name == "$cleanArtist.png" || name == "$cleanArtist.webp" || name == "$cleanArtist.jpeg")) {
+                        return img.absolutePath
+                    }
+                }
+                val dirName = current.name.lowercase().trim()
+                if (dirName == cleanArtist || dirName == lowerArtist) {
+                    return images.first().absolutePath
+                }
+            }
+
+            if (!normRoot.isNullOrEmpty() && normCurrent.equals(normRoot, ignoreCase = true)) break
+            val parent = current.parentFile
+            if (parent == null || parent.absolutePath == current.absolutePath) break
+            current = parent
+        }
+        return null
+    }
+
+    private fun queryMediaStore(folderPath: String?): Map<String, Any> {
         val songsList = mutableListOf<Map<String, Any?>>()
+        val artistImageMap = mutableMapOf<String, String>()
+        val dirImageCache = mutableMapOf<String, List<File>>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
         val projection = mutableListOf(
@@ -204,6 +247,19 @@ class MainActivity : AudioServiceActivity() {
                     }
                     val artworkPath = albumArtFileMap[albumId]
 
+                    // Resolve local artist image in native Kotlin if valid artist and not found yet
+                    val lowerArtist = artist.lowercase().trim()
+                    if (lowerArtist.isNotEmpty() && lowerArtist != "unknown artist" && !artistImageMap.containsKey(lowerArtist)) {
+                        val match = resolveArtistImage(File(filePath), artist, normFolderPath, dirImageCache)
+                        if (match != null) {
+                            artistImageMap[lowerArtist] = match
+                            val cleanArtist = lowerArtist.split(Regex("[,;/]|\\sfeat\\.|\\sft\\.")).firstOrNull()?.trim() ?: ""
+                            if (cleanArtist.isNotEmpty()) {
+                                artistImageMap[cleanArtist] = match
+                            }
+                        }
+                    }
+
                     val songMap = mapOf(
                         "id" to id,
                         "title" to title,
@@ -225,7 +281,10 @@ class MainActivity : AudioServiceActivity() {
             e.printStackTrace()
         }
 
-        return songsList
+        return mapOf(
+            "songs" to songsList,
+            "artist_images" to artistImageMap
+        )
     }
 
     private fun resolveAlbumArtFile(albumId: Long, cacheDir: File): String? {

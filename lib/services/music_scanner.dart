@@ -172,11 +172,31 @@ class MusicScanner {
   ) async {
     if (!Platform.isAndroid) return null;
     try {
-      var rawList = await _mediastoreChannel.invokeMethod<List<dynamic>>(
+      var response = await _mediastoreChannel.invokeMethod<dynamic>(
         'scanMediaStore',
         {'folderPath': folderPath},
       );
-      if (rawList == null) return null;
+      if (response == null) return null;
+
+      List<dynamic> rawList;
+      if (response is Map) {
+        var map = Map<String, dynamic>.from(response);
+        rawList = map['songs'] as List<dynamic>? ?? [];
+        var artistImagesMap = map['artist_images'] as Map<dynamic, dynamic>?;
+        if (artistImagesMap != null && artistImagesMap.isNotEmpty) {
+          var parsedImages = artistImagesMap.map(
+            (k, v) => MapEntry(k.toString(), v.toString()),
+          );
+          localArtistImages = parsedImages;
+          var appDir = await getApplicationDocumentsDirectory();
+          var imagesFile = File('${appDir.path}/artist_images.json');
+          await imagesFile.writeAsString(jsonEncode(parsedImages));
+        }
+      } else if (response is List) {
+        rawList = response;
+      } else {
+        return null;
+      }
 
       var cacheMap = {for (var s in cachedSongs) s.filePath: s};
       var existingFavoriteStatus = {
