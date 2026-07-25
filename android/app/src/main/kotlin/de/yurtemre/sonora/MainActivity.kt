@@ -159,6 +159,7 @@ class MainActivity : AudioServiceActivity() {
     private fun queryMediaStore(folderPath: String?): Map<String, Any> {
         val songsList = mutableListOf<Map<String, Any?>>()
         val artistImageMap = mutableMapOf<String, String>()
+        val searchedArtists = mutableSetOf<String>()
         val dirImageCache = mutableMapOf<String, List<File>>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
@@ -247,9 +248,10 @@ class MainActivity : AudioServiceActivity() {
                     }
                     val artworkPath = albumArtFileMap[albumId]
 
-                    // Resolve local artist image in native Kotlin if valid artist and not found yet
+                    // Resolve local artist image in native Kotlin if valid artist and not searched yet
                     val lowerArtist = artist.lowercase().trim()
-                    if (lowerArtist.isNotEmpty() && lowerArtist != "unknown artist" && !artistImageMap.containsKey(lowerArtist)) {
+                    if (lowerArtist.isNotEmpty() && lowerArtist != "unknown artist" && !searchedArtists.contains(lowerArtist)) {
+                        searchedArtists.add(lowerArtist)
                         val match = resolveArtistImage(File(filePath), artist, normFolderPath, dirImageCache)
                         if (match != null) {
                             artistImageMap[lowerArtist] = match

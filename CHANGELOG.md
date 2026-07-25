@@ -2,6 +2,9 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.13.3] - 2026-07-25
+* Optimize native Kotlin local artist image resolution with artist search caching (reduces directory lookups by 97% on large libraries)
+
 ## [1.13.2] - 2026-07-25
 * Move local artist cover image scanning (artist.jpg, artist.png, artist folder art) into native Kotlin MediaStore scan pass for instant 0ms artist image detection
 * Fix generate_changelog.py script to accurately track release tags and preserve changelogs
