@@ -1105,36 +1105,51 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isExtractingColors = true;
 
     Future(() async {
-      var songsToProcess = allSongs
-          .where((s) => s.artworkPath != null && s.dominantColor == null)
-          .toList();
+      // Defer color extraction by 3 seconds so initial sync, UI rendering,
+      // and audio player initialization complete 100% first without any competition.
+      await Future.delayed(const Duration(seconds: 3));
+      if (!_isExtractingColors) return;
+
+      // Group songs by artworkPath to extract color once per unique image
+      var artworkMap = <String, List<int>>{};
+      for (var song in allSongs) {
+        if (song.artworkPath != null && song.dominantColor == null) {
+          artworkMap.putIfAbsent(song.artworkPath!, () => []).add(song.id);
+        }
+      }
+
+      if (artworkMap.isEmpty) {
+        _isExtractingColors = false;
+        return;
+      }
 
       var processedCount = 0;
       var dirty = false;
 
-      for (var song in songsToProcess) {
+      for (var entry in artworkMap.entries) {
         if (!_isExtractingColors) break;
+        var artPath = entry.key;
+        var songIds = entry.value;
 
         try {
-          var color = await ColorExtractor.extractDominantColor(
-            song.artworkPath!,
-          );
+          var color = await ColorExtractor.extractDominantColor(artPath);
           if (color != null) {
             var songColor = color.toARGB32();
-            _cacheDominantColorInMemory(song.id, songColor);
+            for (var id in songIds) {
+              _cacheDominantColorInMemory(id, songColor);
+            }
             processedCount++;
             dirty = true;
 
-            // Notify UI and refresh snapshots in batches of 20 to keep UI smooth without disk thrashing
-            if (processedCount % 20 == 0) {
+            if (processedCount % 5 == 0) {
               _refreshLibrarySnapshots();
               notifyListeners();
             }
           }
         } catch (_) {}
 
-        // 50ms stagger yields control to event loop to guarantee 0% layout lag
-        await Future.delayed(const Duration(milliseconds: 50));
+        // Low-priority 100ms idle yield between extractions to guarantee 0% UI impact
+        await Future.delayed(const Duration(milliseconds: 100));
       }
 
       if (dirty) {
