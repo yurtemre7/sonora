@@ -6,6 +6,8 @@ All notable changes to the Sonora music player project are documented in this fi
 ### Added
 * Add fast native Android MediaStore scanner (<200ms initial scan time) with hybrid fallback
 * Optimize album art resolution and caching
+* Optimize StatsService query lookup complexity from O(N*L) to O(L) using map indexing
+* Add 30 FPS high-precision position stream and zero-latency smooth progress fill rendering across main seek bar, mini player progress strip, and synced lyrics
 
 ## [1.12.2] - 2026-07-24
 ### Added

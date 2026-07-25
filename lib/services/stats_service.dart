@@ -207,10 +207,14 @@ class StatsService {
 
   int songCumulativeListenMs(int id) => _data.songCumulativeListenMs[id] ?? 0;
 
+  Map<int, Song> _buildSongMap(List<Song> library) =>
+      {for (var s in library) s.id: s};
+
   int albumListenCount(List<Song> library) {
+    var songMap = _buildSongMap(library);
     var albums = <String>{};
     for (var entry in _data.songPlayCounts.entries) {
-      var song = _findSong(entry.key, library);
+      var song = songMap[entry.key];
       if (song != null) {
         albums.add('${song.album}|||${song.artist}');
       }
@@ -219,9 +223,10 @@ class StatsService {
   }
 
   int artistListenCount(List<Song> library) {
+    var songMap = _buildSongMap(library);
     var artists = <String>{};
     for (var entry in _data.songPlayCounts.entries) {
-      var song = _findSong(entry.key, library);
+      var song = songMap[entry.key];
       if (song != null) {
         artists.add(song.artist);
       }
@@ -237,7 +242,7 @@ class StatsService {
 
   Song? firstPlayedSong(List<Song> library) {
     if (_data.firstPlayedSongId < 0) return null;
-    return _findSong(_data.firstPlayedSongId, library);
+    return _buildSongMap(library)[_data.firstPlayedSongId];
   }
 
   int get totalListeningTimeMs => _data.totalListeningTimeMs;
@@ -254,11 +259,12 @@ class StatsService {
   // ── Top lists ────────────────────────────────────────────────────────────
 
   List<({Song song, int count})> topSongs(int limit, List<Song> library) {
+    var songMap = _buildSongMap(library);
     var sorted = _data.songPlayCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     var result = <({Song song, int count})>[];
     for (var entry in sorted) {
-      var song = _findSong(entry.key, library);
+      var song = songMap[entry.key];
       if (song != null) {
         result.add((song: song, count: entry.value));
         if (result.length >= limit) break;
@@ -271,9 +277,10 @@ class StatsService {
     int limit,
     List<Song> library,
   ) {
+    var songMap = _buildSongMap(library);
     var albumCounts = <String, int>{};
     for (var entry in _data.songPlayCounts.entries) {
-      var song = _findSong(entry.key, library);
+      var song = songMap[entry.key];
       if (song != null) {
         var key = '${song.album}|||${song.artist}';
         albumCounts.update(
@@ -292,9 +299,10 @@ class StatsService {
   }
 
   List<({String artist, int count})> topArtists(int limit, List<Song> library) {
+    var songMap = _buildSongMap(library);
     var artistCounts = <String, int>{};
     for (var entry in _data.songPlayCounts.entries) {
-      var song = _findSong(entry.key, library);
+      var song = songMap[entry.key];
       if (song != null) {
         artistCounts.update(
           song.artist,
@@ -470,12 +478,5 @@ class StatsService {
     _dirty = true;
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 30), _save);
-  }
-
-  Song? _findSong(int id, List<Song> library) {
-    for (var song in library) {
-      if (song.id == id) return song;
-    }
-    return null;
   }
 }
