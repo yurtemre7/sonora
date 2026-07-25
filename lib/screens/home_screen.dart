@@ -660,40 +660,12 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _showCreatePlaylistDialog() async {
-    var textController = TextEditingController();
-    try {
-      await showDialog(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(context.l10n.createPlaylist),
-          content: TextField(
-            controller: textController,
-            autofocus: true,
-            decoration: InputDecoration(hintText: context.l10n.playlistName),
-            textCapitalization: TextCapitalization.sentences,
-          ),
-          actionsAlignment: MainAxisAlignment.spaceBetween,
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(context.l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () async {
-                var name = textController.text.trim();
-                if (name.isNotEmpty) {
-                  Navigator.pop(dialogContext);
-                  await widget.onCreatePlaylist(name);
-                }
-              },
-              child: Text(context.l10n.create),
-            ),
-          ],
-        ),
-      );
-    } finally {
-      textController.dispose();
-    }
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => _CreatePlaylistDialogContent(
+        onCreate: widget.onCreatePlaylist,
+      ),
+    );
   }
 
   Widget _buildSyncPromptBanner(ThemeData theme) {
@@ -1058,6 +1030,63 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         );
       },
+    );
+  }
+}
+
+class _CreatePlaylistDialogContent extends StatefulWidget {
+  const _CreatePlaylistDialogContent({required this.onCreate});
+
+  final Future<void> Function(String name) onCreate;
+
+  @override
+  State<_CreatePlaylistDialogContent> createState() =>
+      _CreatePlaylistDialogContentState();
+}
+
+class _CreatePlaylistDialogContentState
+    extends State<_CreatePlaylistDialogContent> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.createPlaylist),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(hintText: context.l10n.playlistName),
+        textCapitalization: TextCapitalization.sentences,
+      ),
+      actionsAlignment: MainAxisAlignment.spaceBetween,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () async {
+            var name = _controller.text.trim();
+            if (name.isNotEmpty) {
+              Navigator.pop(context);
+              await widget.onCreate(name);
+            }
+          },
+          child: Text(context.l10n.create),
+        ),
+      ],
     );
   }
 }

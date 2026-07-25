@@ -223,44 +223,12 @@ class AppearanceSettingsScreen extends StatelessWidget {
                         title: Text(context.l10n.yourName),
                         subtitle: Text(settingsProvider.userName),
                         onTap: () async {
-                          var controller = TextEditingController(
-                            text: settingsProvider.userName,
+                          var newName = await showDialog<String>(
+                            context: context,
+                            builder: (context) => _UserNameDialogContent(
+                              initialName: settingsProvider.userName,
+                            ),
                           );
-                          String? newName;
-                          try {
-                            newName = await showDialog<String>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text(context.l10n.enterYourName),
-                                content: TextField(
-                                  controller: controller,
-                                  autofocus: true,
-                                  textCapitalization: TextCapitalization.words,
-                                  decoration: InputDecoration(
-                                    hintText: context.l10n.yourName,
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text(context.l10n.cancel),
-                                  ),
-                                  FilledButton(
-                                    onPressed: () {
-                                      var text = controller.text.trim();
-                                      Navigator.pop(
-                                        context,
-                                        text.isEmpty ? 'User' : text,
-                                      );
-                                    },
-                                    child: Text(context.l10n.save),
-                                  ),
-                                ],
-                              ),
-                            );
-                          } finally {
-                            controller.dispose();
-                          }
                           if (newName != null) {
                             settingsProvider.setUserName(newName);
                           }
@@ -273,6 +241,63 @@ class AppearanceSettingsScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _UserNameDialogContent extends StatefulWidget {
+  const _UserNameDialogContent({required this.initialName});
+
+  final String initialName;
+
+  @override
+  State<_UserNameDialogContent> createState() =>
+      _UserNameDialogContentState();
+}
+
+class _UserNameDialogContentState extends State<_UserNameDialogContent> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialName);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.enterYourName),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        textCapitalization: TextCapitalization.words,
+        decoration: InputDecoration(
+          hintText: context.l10n.yourName,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            var text = _controller.text.trim();
+            Navigator.pop(
+              context,
+              text.isEmpty ? 'User' : text,
+            );
+          },
+          child: Text(context.l10n.save),
+        ),
+      ],
     );
   }
 }

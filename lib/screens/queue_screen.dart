@@ -77,40 +77,12 @@ class _QueueScreenState extends State<QueueScreen> {
                 icon: const Icon(Icons.playlist_add),
                 tooltip: context.l10n.saveAsPlaylist,
                 onPressed: () async {
-                  var controller = TextEditingController();
-                  try {
-                    await showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(context.l10n.saveQueueAsPlaylist),
-                        content: TextField(
-                          controller: controller,
-                          autofocus: true,
-                          decoration: InputDecoration(hintText: context.l10n.playlistName),
-                          textCapitalization: TextCapitalization.sentences,
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text(context.l10n.cancel),
-                          ),
-                          FilledButton(
-                            onPressed: () {
-                              var name = controller.text.trim();
-                              if (name.isNotEmpty) {
-                                widget.playerProvider.saveQueueAsPlaylist(name);
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Saved $name')));
-                              }
-                            },
-                            child: Text(context.l10n.save),
-                          ),
-                        ],
-                      ),
-                    );
-                  } finally {
-                    controller.dispose();
-                  }
+                  await showDialog(
+                    context: context,
+                    builder: (context) => _SaveQueueDialogContent(
+                      playerProvider: widget.playerProvider,
+                    ),
+                  );
                 },
               ),
             ],
@@ -259,6 +231,64 @@ class _QueueScreenState extends State<QueueScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+class _SaveQueueDialogContent extends StatefulWidget {
+  const _SaveQueueDialogContent({required this.playerProvider});
+
+  final PlayerProvider playerProvider;
+
+  @override
+  State<_SaveQueueDialogContent> createState() =>
+      _SaveQueueDialogContentState();
+}
+
+class _SaveQueueDialogContentState extends State<_SaveQueueDialogContent> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.saveQueueAsPlaylist),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(hintText: context.l10n.playlistName),
+        textCapitalization: TextCapitalization.sentences,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            var name = _controller.text.trim();
+            if (name.isNotEmpty) {
+              widget.playerProvider.saveQueueAsPlaylist(name);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Saved $name')),
+              );
+            }
+          },
+          child: Text(context.l10n.save),
+        ),
+      ],
     );
   }
 }

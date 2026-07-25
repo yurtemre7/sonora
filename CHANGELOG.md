@@ -2,6 +2,9 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.15.1] - 2026-07-25
+* Fix TextEditingController assertion error during dialog exit transitions by binding controllers to StatefulWidget lifecycle
+
 ## [1.15.0] - 2026-07-25
 * Decompose monolithic home screen into modular tab widgets (SongsTab, AlbumsTab, ArtistsTab, PlaylistsTab) with 100% preserved state management
 

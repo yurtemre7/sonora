@@ -119,44 +119,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   icon: const Icon(Icons.playlist_add),
                   tooltip: context.l10n.saveAsPlaylist,
                   onPressed: () async {
-                    var controller = TextEditingController();
-                    try {
-                      await showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text(context.l10n.saveQueueAsPlaylist),
-                          content: TextField(
-                            controller: controller,
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              hintText: context.l10n.playlistName,
-                            ),
-                            textCapitalization: TextCapitalization.sentences,
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: Text(context.l10n.cancel),
-                            ),
-                            FilledButton(
-                              onPressed: () {
-                                var name = controller.text.trim();
-                                if (name.isNotEmpty) {
-                                  Navigator.pop(context);
-                                  widget.playerProvider.saveQueueAsPlaylist(name);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Saved $name')),
-                                  );
-                                }
-                              },
-                              child: Text(context.l10n.save),
-                            ),
-                          ],
-                        ),
-                      );
-                    } finally {
-                      controller.dispose();
-                    }
+                    await showDialog(
+                      context: context,
+                      builder: (context) => _SaveQueueDialogContent(
+                        playerProvider: widget.playerProvider,
+                      ),
+                    );
                   },
                 ),
               PopupMenuButton<int>(
@@ -1305,45 +1273,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     );
   }
 
-  Future<Duration?> _showCustomTimerDialog(BuildContext context) async {
-    var controller = TextEditingController();
-    try {
-      return await showDialog<Duration?>(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(context.l10n.customSleepTimer),
-            content: TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              autofocus: true,
-              decoration: InputDecoration(
-                suffixText: context.l10n.minutes,
-                hintText: context.l10n.enterDurationHint,
-              ),
-            ),
-            actionsAlignment: MainAxisAlignment.spaceBetween,
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(context.l10n.cancel),
-              ),
-              FilledButton(
-                onPressed: () {
-                  var minutes = int.tryParse(controller.text);
-                  if (minutes != null && minutes > 0) {
-                    Navigator.pop(context, Duration(minutes: minutes));
-                  }
-                },
-                child: Text(context.l10n.next),
-              ),
-            ],
-          );
-        },
-      );
-    } finally {
-      controller.dispose();
-    }
+  Future<Duration?> _showCustomTimerDialog(BuildContext context) {
+    return showDialog<Duration?>(
+      context: context,
+      builder: (context) => const _CustomTimerDialogContent(),
+    );
   }
 }
 
@@ -1605,6 +1539,123 @@ class _SongLyricsOverlayState extends State<SongLyricsOverlay> {
           },
         );
       },
+    );
+  }
+}
+
+class _SaveQueueDialogContent extends StatefulWidget {
+  const _SaveQueueDialogContent({required this.playerProvider});
+
+  final PlayerProvider playerProvider;
+
+  @override
+  State<_SaveQueueDialogContent> createState() =>
+      _SaveQueueDialogContentState();
+}
+
+class _SaveQueueDialogContentState extends State<_SaveQueueDialogContent> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.saveQueueAsPlaylist),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: context.l10n.playlistName,
+        ),
+        textCapitalization: TextCapitalization.sentences,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            var name = _controller.text.trim();
+            if (name.isNotEmpty) {
+              Navigator.pop(context);
+              widget.playerProvider.saveQueueAsPlaylist(name);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Saved $name')),
+              );
+            }
+          },
+          child: Text(context.l10n.save),
+        ),
+      ],
+    );
+  }
+}
+
+class _CustomTimerDialogContent extends StatefulWidget {
+  const _CustomTimerDialogContent();
+
+  @override
+  State<_CustomTimerDialogContent> createState() =>
+      _CustomTimerDialogContentState();
+}
+
+class _CustomTimerDialogContentState
+    extends State<_CustomTimerDialogContent> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.customSleepTimer),
+      content: TextField(
+        controller: _controller,
+        keyboardType: TextInputType.number,
+        autofocus: true,
+        decoration: InputDecoration(
+          suffixText: context.l10n.minutes,
+          hintText: context.l10n.enterDurationHint,
+        ),
+      ),
+      actionsAlignment: MainAxisAlignment.spaceBetween,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            var minutes = int.tryParse(_controller.text);
+            if (minutes != null && minutes > 0) {
+              Navigator.pop(context, Duration(minutes: minutes));
+            }
+          },
+          child: Text(context.l10n.next),
+        ),
+      ],
     );
   }
 }
