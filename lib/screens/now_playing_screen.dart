@@ -118,41 +118,45 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 IconButton(
                   icon: const Icon(Icons.playlist_add),
                   tooltip: context.l10n.saveAsPlaylist,
-                  onPressed: () {
+                  onPressed: () async {
                     var controller = TextEditingController();
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(context.l10n.saveQueueAsPlaylist),
-                        content: TextField(
-                          controller: controller,
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            hintText: context.l10n.playlistName,
+                    try {
+                      await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text(context.l10n.saveQueueAsPlaylist),
+                          content: TextField(
+                            controller: controller,
+                            autofocus: true,
+                            decoration: InputDecoration(
+                              hintText: context.l10n.playlistName,
+                            ),
+                            textCapitalization: TextCapitalization.sentences,
                           ),
-                          textCapitalization: TextCapitalization.sentences,
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(context.l10n.cancel),
+                            ),
+                            FilledButton(
+                              onPressed: () {
+                                var name = controller.text.trim();
+                                if (name.isNotEmpty) {
+                                  Navigator.pop(context);
+                                  widget.playerProvider.saveQueueAsPlaylist(name);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Saved $name')),
+                                  );
+                                }
+                              },
+                              child: Text(context.l10n.save),
+                            ),
+                          ],
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text(context.l10n.cancel),
-                          ),
-                          FilledButton(
-                            onPressed: () {
-                              var name = controller.text.trim();
-                              if (name.isNotEmpty) {
-                                Navigator.pop(context);
-                                widget.playerProvider.saveQueueAsPlaylist(name);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Saved $name')),
-                                );
-                              }
-                            },
-                            child: Text(context.l10n.save),
-                          ),
-                        ],
-                      ),
-                    );
+                      );
+                    } finally {
+                      controller.dispose();
+                    }
                   },
                 ),
               PopupMenuButton<int>(
@@ -1301,41 +1305,45 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     );
   }
 
-  Future<Duration?> _showCustomTimerDialog(BuildContext context) {
+  Future<Duration?> _showCustomTimerDialog(BuildContext context) async {
     var controller = TextEditingController();
-    return showDialog<Duration?>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(context.l10n.customSleepTimer),
-          content: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            autofocus: true,
-            decoration: InputDecoration(
-              suffixText: context.l10n.minutes,
-              hintText: context.l10n.enterDurationHint,
+    try {
+      return await showDialog<Duration?>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(context.l10n.customSleepTimer),
+            content: TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              decoration: InputDecoration(
+                suffixText: context.l10n.minutes,
+                hintText: context.l10n.enterDurationHint,
+              ),
             ),
-          ),
-          actionsAlignment: MainAxisAlignment.spaceBetween,
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(context.l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () {
-                var minutes = int.tryParse(controller.text);
-                if (minutes != null && minutes > 0) {
-                  Navigator.pop(context, Duration(minutes: minutes));
-                }
-              },
-              child: Text(context.l10n.next),
-            ),
-          ],
-        );
-      },
-    );
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(context.l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () {
+                  var minutes = int.tryParse(controller.text);
+                  if (minutes != null && minutes > 0) {
+                    Navigator.pop(context, Duration(minutes: minutes));
+                  }
+                },
+                child: Text(context.l10n.next),
+              ),
+            ],
+          );
+        },
+      );
+    } finally {
+      controller.dispose();
+    }
   }
 }
 

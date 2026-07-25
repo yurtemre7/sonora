@@ -665,37 +665,41 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
-  void _showCreatePlaylistDialog() {
+  Future<void> _showCreatePlaylistDialog() async {
     var textController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.createPlaylist),
-        content: TextField(
-          controller: textController,
-          autofocus: true,
-          decoration: InputDecoration(hintText: context.l10n.playlistName),
-          textCapitalization: TextCapitalization.sentences,
+    try {
+      await showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(context.l10n.createPlaylist),
+          content: TextField(
+            controller: textController,
+            autofocus: true,
+            decoration: InputDecoration(hintText: context.l10n.playlistName),
+            textCapitalization: TextCapitalization.sentences,
+          ),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(context.l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () async {
+                var name = textController.text.trim();
+                if (name.isNotEmpty) {
+                  Navigator.pop(dialogContext);
+                  await widget.onCreatePlaylist(name);
+                }
+              },
+              child: Text(context.l10n.create),
+            ),
+          ],
         ),
-        actionsAlignment: MainAxisAlignment.spaceBetween,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              var name = textController.text.trim();
-              if (name.isNotEmpty) {
-                Navigator.pop(dialogContext);
-                await widget.onCreatePlaylist(name);
-              }
-            },
-            child: Text(context.l10n.create),
-          ),
-        ],
-      ),
-    );
+      );
+    } finally {
+      textController.dispose();
+    }
   }
 
   Widget _buildSyncPromptBanner(ThemeData theme) {

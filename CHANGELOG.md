@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.13.4] - 2026-07-25
+* Fix TextEditingController memory leaks across onboarding and dialogs
+* Cap Flutter imageCache limits (50 MB / 150 images) to prevent RAM inflation during heavy scrolling
+
 ## [1.13.3] - 2026-07-25
 * Optimize native Kotlin local artist image resolution with artist search caching (reduces directory lookups by 97% on large libraries)
 

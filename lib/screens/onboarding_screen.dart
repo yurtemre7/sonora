@@ -33,6 +33,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _checkInitialPermissions();
   }
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
   Future<void> _checkInitialPermissions() async {
     if (!Platform.isAndroid) return;
 
