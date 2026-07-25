@@ -10,6 +10,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Add 30 FPS high-precision position stream and zero-latency smooth progress fill rendering across main seek bar, mini player progress strip, and synced lyrics
 * Offload DebugCachesScreen directory listing to background isolate and virtualize debug card lists via Slivers
 * Add automatic device CPU ABI detection and direct APK download selector for GitHub releases (arm64-v8a, armeabi-v7a, x86_64)
+* Add direct in-app APK downloading with live progress bar and native Android package installation prompting
 
 ## [1.12.2] - 2026-07-24
 ### Added

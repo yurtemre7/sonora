@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UpdateInfo {
@@ -46,6 +48,58 @@ class UpdateService {
       return abi;
     } catch (_) {
       return null;
+    }
+  }
+
+  /// Downloads an APK from [url] with progress updates to the app temporary directory.
+  static Future<String> downloadApk(
+    String url, {
+    required Function(int receivedBytes, int totalBytes) onProgress,
+  }) async {
+    var tempDir = await getTemporaryDirectory();
+    var savePath = '${tempDir.path}/sonora_update.apk';
+    var file = File(savePath);
+    if (file.existsSync()) {
+      try {
+        await file.delete();
+      } catch (_) {}
+    }
+
+    var client = http.Client();
+    var request = http.Request('GET', Uri.parse(url));
+    var response = await client.send(request);
+
+    if (response.statusCode != 200) {
+      throw Exception('HTTP error ${response.statusCode}');
+    }
+
+    var contentLength = response.contentLength ?? 0;
+    var sink = file.openWrite();
+    var received = 0;
+
+    await for (var chunk in response.stream) {
+      sink.add(chunk);
+      received += chunk.length;
+      onProgress(received, contentLength);
+    }
+
+    await sink.flush();
+    await sink.close();
+    client.close();
+
+    return file.path;
+  }
+
+  /// Triggers Android system package installation for the given APK file path.
+  static Future<bool> installApk(String filePath) async {
+    try {
+      const channel = MethodChannel('de.yurtemre.sonora/volume');
+      var success = await channel.invokeMethod<bool>('installApk', {
+        'filePath': filePath,
+      });
+      return success ?? false;
+    } catch (e) {
+      return false;
     }
   }
 

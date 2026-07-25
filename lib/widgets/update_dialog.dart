@@ -14,11 +14,65 @@ class UpdateDialog extends StatefulWidget {
 
 class _UpdateDialogState extends State<UpdateDialog> {
   late String _selectedUrl;
+  var _isDownloading = false;
+  var _downloadProgress = 0.0;
+  String? _statusText;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _selectedUrl = widget.updateInfo.recommendedUrl;
+  }
+
+  Future<void> _startDownloadAndInstall() async {
+    setState(() {
+      _isDownloading = true;
+      _downloadProgress = 0.0;
+      _statusText = 'Preparing download...';
+      _errorMessage = null;
+    });
+
+    try {
+      var filePath = await UpdateService.downloadApk(
+        _selectedUrl,
+        onProgress: (received, total) {
+          if (mounted) {
+            setState(() {
+              _downloadProgress =
+                  total > 0 ? (received / total).clamp(0.0, 1.0) : 0.0;
+              var percentage = (_downloadProgress * 100).toInt();
+              _statusText = 'Downloading update... $percentage%';
+            });
+          }
+        },
+      );
+
+      if (mounted) {
+        setState(() {
+          _statusText = 'Opening installer...';
+        });
+      }
+
+      var installed = await UpdateService.installApk(filePath);
+
+      if (!installed && mounted) {
+        // Fallback to opening URL in browser if direct native installation launch fails
+        var url = Uri.parse(_selectedUrl);
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+          _errorMessage = 'Download failed. Tap to try via browser.';
+        });
+      }
+    }
   }
 
   @override
@@ -48,7 +102,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            if (assets.isNotEmpty) ...[
+            if (assets.isNotEmpty && !_isDownloading) ...[
               const SizedBox(height: 16),
               Text(
                 'Architecture / APK Package',
@@ -111,6 +165,30 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 }).toList(),
               ),
             ],
+            if (_isDownloading) ...[
+              const SizedBox(height: 16),
+              Text(
+                _statusText ?? 'Downloading update...',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: _downloadProgress > 0 ? _downloadProgress : null,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ],
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _errorMessage!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             Text(
               context.l10n.changelogLabel,
@@ -143,22 +221,35 @@ class _UpdateDialogState extends State<UpdateDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(context.l10n.later),
-        ),
-        FilledButton.icon(
-          onPressed: () async {
-            var url = Uri.parse(_selectedUrl);
-            await launchUrl(url, mode: LaunchMode.externalApplication);
-
-            if (context.mounted) {
+        if (!_isDownloading) ...[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(context.l10n.later),
+          ),
+          IconButton(
+            icon: const Icon(Icons.open_in_browser_rounded),
+            tooltip: 'Open link in browser',
+            onPressed: () async {
+              var url = Uri.parse(_selectedUrl);
+              await launchUrl(url, mode: LaunchMode.externalApplication);
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          FilledButton.icon(
+            onPressed: _startDownloadAndInstall,
+            icon: const Icon(Icons.system_update_alt_rounded),
+            label: const Text('Update Now'),
+          ),
+        ] else ...[
+          TextButton(
+            onPressed: () {
               Navigator.of(context).pop();
-            }
-          },
-          icon: const Icon(Icons.download_rounded),
-          label: Text(context.l10n.download),
-        ),
+            },
+            child: Text(context.l10n.cancel),
+          ),
+        ],
       ],
     );
   }
