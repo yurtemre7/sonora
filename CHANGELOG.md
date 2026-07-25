@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.13.2] - 2026-07-25
+* Move local artist cover image scanning (artist.jpg, artist.png, artist folder art) into native Kotlin MediaStore scan pass for instant 0ms artist image detection
+* Fix generate_changelog.py script to accurately track release tags and preserve changelogs
+
 ## [1.13.1] - 2026-07-25
 ### Fixed
 * Offload, deduplicate, and defer background album artwork color extraction (runs as second-priority background task 3 seconds after library is fully playable)
@@ -148,6 +152,31 @@ All notable changes to the Sonora music player project are documented in this fi
 * Internet permission, stats playtime calculation, and theme mode toggle
 
 ## [1.8.2] - 2026-07-21
+* Add community and support section to settings
+* Redesign and enforce onboarding completion
+* Highlight update tile when update is pending
+* Add changelog viewer
+* Add automatic GitHub release checker
+* Support sidecar cover.jpg as album artwork fallback
+* Address user feedback on navigation bar, track sorting, playlist reordering, and local artist images
+* Default pause on duck to false
+* Add safe area
+* Update the launchUrl to not check the Url as this leads to an error
+* Add safe area to changelog screen
+* Playlist reordering UI flash
+* Disable automatic update check in debug mode
+* Chore: Add build number +1 back
+* Refactor: Introduce SettingsProvider for eager setting loads
+* Refactor: Split settings into sub-screens and add danger zone logic
+* Chore: Update flutter to 3.44.7
+
+## [1.8.1] - 2026-07-21
+### Fixed
+* Address user feedback on navigation bar, track sorting, playlist reordering, and local artist images
+### Changed
+* Chore: Add build number +1 back
+
+## [1.8.0] - 2026-07-20
 ### Added
 * Add community and support section to settings
 * Redesign and enforce onboarding completion
@@ -156,7 +185,6 @@ All notable changes to the Sonora music player project are documented in this fi
 * Add automatic GitHub release checker
 * Support sidecar cover.jpg as album artwork fallback
 ### Fixed
-* Address user feedback on navigation bar, track sorting, playlist reordering, and local artist images
 * Default pause on duck to false
 * Add safe area
 * Update the launchUrl to not check the Url as this leads to an error
@@ -164,7 +192,6 @@ All notable changes to the Sonora music player project are documented in this fi
 * Playlist reordering UI flash
 * Disable automatic update check in debug mode
 ### Changed
-* Chore: Add build number +1 back
 * Refactor: Introduce SettingsProvider for eager setting loads
 * Refactor: Split settings into sub-screens and add danger zone logic
 * Chore: Update flutter to 3.44.7
@@ -229,11 +256,25 @@ All notable changes to the Sonora music player project are documented in this fi
 * Apply saved tab sorting on app start and group duplicate album names by artist
 ### Changed
 * Chore: Remove wrong popscopes
+* Chore: Refresh changelog with router refresh dedup fix
 * Perf: Only refresh go_router when gate state actually changes to eliminate startup route log spam
+* Chore: Refresh changelog with Now Playing back gesture fix
+* Chore: Refresh changelog with dart format updates
 * Chore: Run dart format to apply standard formatting style across all files
+* Chore: Refresh changelog with lint fixes
 * Chore: Fix minor dart lint warnings to ensure clean static analysis
+* Chore: Refresh changelog with benchmark tests removal
 * Chore: Remove redundant and slow benchmark tests to speed up test runs
+* Chore: Refresh changelog with stable sorting fix
+* Chore: Refresh changelog with unique themes bucketing fix
+* Chore: Refresh changelog with extractor performance optimizations
 * Perf: Batch disk writes and defer library updates in color extractor to prevent lag
+* Chore: Refresh changelog with layout overflow fix
+* Chore: Refresh changelog with active theme extraction spinner
+* Chore: Refresh changelog with background color extractor feature
+* Chore: Refresh changelog with sorting and lyrics updates
+* Chore: Refresh changelog with sequential sync update
+* Chore: Refresh changelog
 * Chore: Fix folder name on README.md
 * Chore: Add cupertino icons dependency for flutter build warning to disappear
 
@@ -261,12 +302,12 @@ All notable changes to the Sonora music player project are documented in this fi
 ## [1.4.2] - 2026-07-15
 ### Added
 * Implement performance optimizations: pre-normalized lowercase keys and lifted filtered lists
-* Add library benchmark tests for 100/500/5000/100k song libraries
 ### Fixed
 * Sync audio handler _rawPlaylist after resync and eliminate redundant filtered list recomputation per build frame
 ### Changed
 * Reduce max benchmark size from 100k to 10k songs (more realistic)
 * Perf: Cache lowercase keys on Song/AlbumGroup/ArtistGroup; lift filtered list computation to one per rebuild
+* Add library benchmark tests for 100/500/5000/100k song libraries
 
 ## [1.4.1] - 2026-07-15
 ### Added
@@ -379,23 +420,39 @@ All notable changes to the Sonora music player project are documented in this fi
 ### Changed
 * Chore: Add windows support
 
-## [1.1.13] - 2026-07-10
-### Added
-* Support both synchronized LRC and plain text TXT lyrics file loading
-* Add tap-to-seek lyrics navigation and restore large thumbnail size
+## [1.1.14] - 2026-07-10
 ### Changed
 * Chore: Add GitHub auto-generated release notes to release tags
 * Chore: Revert build-apk runner back to ubuntu-latest
 * Chore: Switch build-apk runner to macos-latest for faster builds
 
+## [1.1.13] - 2026-07-10
+### Added
+* Support both synchronized LRC and plain text TXT lyrics file loading
+
+## [1.1.12] - 2026-07-10
+### Added
+* Add tap-to-seek lyrics navigation and restore large thumbnail size
+
 ## [1.1.11] - 2026-07-10
 ### Added
 * Seek to beginning on back button if song has played more than 3 seconds
+
+## [1.1.10] - 2026-07-10
 ### Fixed
 * Resolve placeholder sizing collapse when size is double.maxFinite
 * Catch just_audio loading interrupted exceptions during rapid track changes
+
+## [1.1.8] - 2026-07-10
+### Fixed
 * Maintain AlbumArt placeholder dimensions when sizing is infinite
+
+## [1.1.7] - 2026-07-10
+### Fixed
 * Check for lyrics file status change during fast-path cache validation
+
+## [1.1.6] - 2026-07-10
+### Fixed
 * Resolve light mode text legibility and prevent vertical layout overflow on small screens
 
 ## [1.1.5] - 2026-07-10
@@ -403,14 +460,22 @@ All notable changes to the Sonora music player project are documented in this fi
 * Detect lyrics file existence during library sync to avoid UI thread I/O checks
 
 ## [1.1.4] - 2026-07-10
+* Implement synchronized lrc lyrics overlay with auto-scrolling centering
+* Chore: Support unreleased commits section in generate_changelog.py
+* Chore: Add generate_changelog.py helper script and document usage in AGENTS.md
+
+## [1.1.3] - 2026-07-10
 ### Added
 * Implement synchronized lrc lyrics overlay with auto-scrolling centering
 ### Changed
 * Chore: Support unreleased commits section in generate_changelog.py
 * Chore: Add generate_changelog.py helper script and document usage in AGENTS.md
+* Docs: Remove wavy progress bar mentions from CHANGELOG.md
+* Docs: Condense changelog entries for minimal and concise formatting
+* Chore: Clarify changelog brevity and code analysis thoroughness in AGENTS.md
+* Chore: Document minimal changes and conventional commits guidelines in AGENTS.md
 
 ## [1.1.2] - 2026-07-10
-### Changed
 * Docs: Remove wavy progress bar mentions from CHANGELOG.md
 * Docs: Condense changelog entries for minimal and concise formatting
 * Chore: Clarify changelog brevity and code analysis thoroughness in AGENTS.md

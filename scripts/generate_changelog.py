@@ -1,35 +1,13 @@
 import subprocess
 import re
+import datetime
+import os
 
 def run_command(cmd):
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
     if result.returncode != 0:
         return ""
     return result.stdout.strip()
-
-def get_tags():
-    tags_raw = run_command("git tag --sort=-v:refname")
-    if not tags_raw:
-        return []
-    return [t for t in tags_raw.split('\n') if t.strip()]
-
-def get_tag_date(tag):
-    return run_command(f"git log -1 --format=%as {tag}")
-
-def get_commits_between(prev_tag, current_tag):
-    range_str = f"{prev_tag}..{current_tag}" if prev_tag else current_tag
-    commits_raw = run_command(f'git log {range_str} --no-merges --pretty=format:"%s"')
-    if not commits_raw:
-        return []
-    return [c for c in commits_raw.split('\n') if c.strip()]
-
-def parse_commit(commit_msg):
-    match = re.match(r'^(\w+)(?:\(([^)]+)\))?:\s*(.*)$', commit_msg)
-    if match:
-        commit_type = match.group(1).lower()
-        message = match.group(3)
-        return commit_type, message
-    return None, commit_msg
 
 def get_pubspec_version():
     try:
@@ -40,132 +18,149 @@ def get_pubspec_version():
                     return val.split('+')[0]
     except Exception:
         pass
-    return "Unreleased"
+    return ""
+
+def parse_changelog_existing():
+    """Parses existing manual entries in CHANGELOG.md to ensure manually written bullet points are preserved."""
+    if not os.path.exists('CHANGELOG.md'):
+        return {}
+    
+    version_sections = {}
+    current_version = None
+    
+    with open('CHANGELOG.md', 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        
+    for line in lines:
+        line_str = line.strip()
+        version_match = re.match(r'^##\s*\[([^\]]+)\](?:\s*-\s*(.*))?', line_str)
+        if version_match:
+            current_version = version_match.group(1).strip()
+            date_str = version_match.group(2).strip() if version_match.group(2) else ""
+            if current_version not in version_sections:
+                version_sections[current_version] = {'date': date_str, 'content': []}
+        elif current_version and line_str.startswith('*'):
+            version_sections[current_version]['content'].append(line_str)
+            
+    return version_sections
 
 def generate_changelog():
-    tags = get_tags()
+    pub_version = get_pubspec_version()
+    existing_sections = parse_changelog_existing()
+    today = datetime.date.today().isoformat()
     
-    changelog_content = [
+    # Get git commits log with commit hash, date, and subject
+    git_log_raw = run_command('git log --pretty=format:"%h|%as|%s"')
+    commits = []
+    if git_log_raw:
+        for line in git_log_raw.split('\n'):
+            parts = line.split('|', 2)
+            if len(parts) == 3:
+                commits.append({'hash': parts[0], 'date': parts[1], 'subject': parts[2]})
+                
+    # Group commits by version boundaries
+    version_buckets = {}
+    current_ver = pub_version if pub_version else "Unreleased"
+    
+    if current_ver not in version_buckets:
+        version_buckets[current_ver] = {'date': today, 'added': [], 'fixed': [], 'changed': []}
+        
+    for c in commits:
+        subj = c['subject']
+        date = c['date']
+        
+        # Check if this commit marks a release version bump
+        rel_match = re.match(r'^release:\s*v?(\d+\.\d+\.\d+)', subj, re.IGNORECASE)
+        if rel_match:
+            ver = rel_match.group(1)
+            # Check if there's descriptive text after release
+            desc = re.sub(r'^release:\s*v?\d+\.\d+\.\d+(?:\+\d+)?(?:\s*-\s*|\s*:\s*|\s+)?', '', subj, flags=re.IGNORECASE).strip()
+            if desc and not re.match(r'^\d+$', desc):
+                desc_cap = desc[0].upper() + desc[1:]
+                version_buckets[current_ver]['changed'].append(desc_cap)
+            
+            # Switch to the version defined by the release commit for subsequent earlier commits
+            current_ver = ver
+            if current_ver not in version_buckets:
+                version_buckets[current_ver] = {'date': date, 'added': [], 'fixed': [], 'changed': []}
+            continue
+
+        if current_ver not in version_buckets:
+            version_buckets[current_ver] = {'date': date, 'added': [], 'fixed': [], 'changed': []}
+            
+        # Parse conventional commit type
+        msg_match = re.match(r'^(\w+)(?:\(([^)]+)\))?:\s*(.*)$', subj)
+        if msg_match:
+            ctype = msg_match.group(1).lower()
+            msg = msg_match.group(3).strip()
+            if not msg:
+                continue
+            msg_cap = msg[0].upper() + msg[1:]
+            
+            if ctype == 'feat':
+                version_buckets[current_ver]['added'].append(msg_cap)
+            elif ctype == 'fix':
+                version_buckets[current_ver]['fixed'].append(msg_cap)
+            elif ctype in ['refactor', 'style', 'perf', 'docs', 'chore']:
+                version_buckets[current_ver]['changed'].append(f"{ctype.capitalize()}: {msg_cap}")
+            else:
+                version_buckets[current_ver]['changed'].append(msg_cap)
+        else:
+            msg_lower = subj.lower()
+            subj_cap = subj[0].upper() + subj[1:]
+            if msg_lower.startswith('add') or 'implement' in msg_lower:
+                version_buckets[current_ver]['added'].append(subj_cap)
+            elif msg_lower.startswith('fix') or 'prevent' in msg_lower:
+                version_buckets[current_ver]['fixed'].append(subj_cap)
+            elif not any(x in msg_lower for x in ["merge branch", "bump version"]):
+                version_buckets[current_ver]['changed'].append(subj_cap)
+                
+    changelog_lines = [
         "# Changelog\n",
         "All notable changes to the Sonora music player project are documented in this file.\n"
     ]
     
-    if tags:
-        unreleased = get_commits_between(tags[0], "HEAD")
-        if unreleased:
-            added = []
-            fixed = []
-            changed = []
-            for commit in unreleased:
-                if any(x in commit.lower() for x in ["release: v", "bump version", "merge branch", "refresh changelog"]):
-                    continue
-                commit_type, msg = parse_commit(commit)
-                if msg:
-                    msg = msg[0].upper() + msg[1:]
-                
-                # Skip version-only commits (e.g., "1.6.0", "1.4.3")
-                if msg and re.match(r'^\d+\.\d+\.\d+', msg):
-                    continue
-                
-                if commit_type == 'feat':
-                    added.append(msg)
-                elif commit_type == 'fix':
-                    fixed.append(msg)
-                elif commit_type in ['refactor', 'style', 'perf', 'docs', 'chore']:
-                    changed.append(f"{commit_type.capitalize()}: {msg}")
-                else:
-                    msg_lower = msg.lower()
-                    if msg_lower.startswith('add') or 'implement' in msg_lower:
-                        added.append(msg)
-                    elif msg_lower.startswith('fix') or 'prevent' in msg_lower:
-                        fixed.append(msg)
-                    else:
-                        changed.append(msg)
-                        
-            if added or fixed or changed:
-                import datetime
-                pub_version = get_pubspec_version()
-                today = datetime.date.today().isoformat()
-                latest_tag_clean = tags[0].lstrip('v').split('+')[0] if tags else ""
-                
-                if pub_version == latest_tag_clean:
-                    changelog_content.append("## [Unreleased]")
-                else:
-                    changelog_content.append(f"## [{pub_version}] - {today}")
-
-                if added:
-                    changelog_content.append("### Added")
-                    for item in added:
-                        changelog_content.append(f"* {item}")
-                if fixed:
-                    changelog_content.append("### Fixed")
-                    for item in fixed:
-                        changelog_content.append(f"* {item}")
-                if changed:
-                    changelog_content.append("### Changed")
-                    for item in changed:
-                        changelog_content.append(f"* {item}")
-                changelog_content.append("")
-
-    for i, tag in enumerate(tags):
-        tag_date = get_tag_date(tag)
-        version_clean = tag.lstrip('v').split('+')[0]
-        
-        prev_tag = tags[i+1] if i + 1 < len(tags) else None
-        commits = get_commits_between(prev_tag, tag)
-        
-        added = []
-        fixed = []
-        changed = []
-        
-        for commit in commits:
-            if any(x in commit.lower() for x in ["release: v", "bump version", "merge branch", "refresh changelog"]):
-                continue
-                
-            commit_type, msg = parse_commit(commit)
-            if msg:
-                msg = msg[0].upper() + msg[1:]
+    # Combine version buckets with existing sections to ensure nothing is lost
+    all_versions = list(version_buckets.keys())
+    for ex_ver in existing_sections:
+        if ex_ver not in all_versions and ex_ver != "Unreleased":
+            all_versions.append(ex_ver)
             
-            # Skip version-only commits (e.g., "1.6.0", "1.4.3")
-            if msg and re.match(r'^\d+\.\d+\.\d+', msg):
-                continue
-                
-            if commit_type == 'feat':
-                added.append(msg)
-            elif commit_type == 'fix':
-                fixed.append(msg)
-            elif commit_type in ['refactor', 'style', 'perf', 'docs', 'chore']:
-                changed.append(f"{commit_type.capitalize()}: {msg}")
-            else:
-                msg_lower = msg.lower()
-                if msg_lower.startswith('add') or 'implement' in msg_lower:
-                    added.append(msg)
-                elif msg_lower.startswith('fix') or 'prevent' in msg_lower:
-                    fixed.append(msg)
-                else:
-                    changed.append(msg)
-                    
-        # Only add version section if there's actual content
-        if added or fixed or changed:
-            changelog_content.append(f"## [{version_clean}] - {tag_date}")
+    for ver in all_versions:
+        bdata = version_buckets.get(ver, {'date': today, 'added': [], 'fixed': [], 'changed': []})
+        ex_data = existing_sections.get(ver, {'date': bdata['date'], 'content': []})
+        date_str = bdata['date'] if bdata['date'] else (ex_data['date'] if ex_data['date'] else today)
+        
+        added = list(dict.fromkeys(bdata['added']))
+        fixed = list(dict.fromkeys(bdata['fixed']))
+        changed = list(dict.fromkeys(bdata['changed']))
+        
+        manual_bullets = ex_data['content']
+        
+        if added or fixed or changed or manual_bullets:
+            changelog_lines.append(f"## [{ver}] - {date_str}")
             
             if added:
-                changelog_content.append("### Added")
+                changelog_lines.append("### Added")
                 for item in added:
-                    changelog_content.append(f"* {item}")
+                    changelog_lines.append(f"* {item}")
             if fixed:
-                changelog_content.append("### Fixed")
+                changelog_lines.append("### Fixed")
                 for item in fixed:
-                    changelog_content.append(f"* {item}")
+                    changelog_lines.append(f"* {item}")
             if changed:
-                changelog_content.append("### Changed")
+                changelog_lines.append("### Changed")
                 for item in changed:
-                    changelog_content.append(f"* {item}")
+                    changelog_lines.append(f"* {item}")
                     
-            changelog_content.append("")
-        
-    with open('CHANGELOG.md', 'w') as f:
-        f.write('\n'.join(changelog_content))
+            if manual_bullets and not (added or fixed or changed):
+                for bullet in manual_bullets:
+                    changelog_lines.append(bullet)
+                    
+            changelog_lines.append("")
+            
+    with open('CHANGELOG.md', 'w', encoding='utf-8') as f:
+        f.write('\n'.join(changelog_lines))
         
     print("CHANGELOG.md generated successfully!")
 
