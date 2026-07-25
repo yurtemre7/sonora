@@ -115,7 +115,7 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
-    private fun resolveArtistImage(songFile: File, artist: String, rootFolderPath: String?, dirImageCache: MutableMap<String, List<File>>): String? {
+    private fun resolveArtistImage(songFile: File, artist: String, rootFolderPath: String?, imagesByFolder: Map<String, List<File>>): String? {
         val cleanArtist = artist.lowercase().split(Regex("[,;/]|\\sfeat\\.|\\sft\\.")).firstOrNull()?.trim() ?: ""
         val lowerArtist = artist.lowercase().trim()
         val normRoot = rootFolderPath?.trimEnd('/', '\\')?.replace('\\', '/')
@@ -123,14 +123,7 @@ class MainActivity : AudioServiceActivity() {
         var current: File? = songFile.parentFile
         while (current != null) {
             val normCurrent = current.absolutePath.replace('\\', '/')
-            val images = dirImageCache.getOrPut(normCurrent) {
-                current.listFiles { file ->
-                    if (file.isFile) {
-                        val ext = file.extension.lowercase()
-                        ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "webp"
-                    } else false
-                }?.toList() ?: emptyList()
-            }
+            val images = imagesByFolder[normCurrent] ?: emptyList()
 
             if (images.isNotEmpty()) {
                 for (img in images) {
@@ -160,7 +153,6 @@ class MainActivity : AudioServiceActivity() {
         val songsList = mutableListOf<Map<String, Any?>>()
         val artistImageMap = mutableMapOf<String, String>()
         val searchedArtists = mutableSetOf<String>()
-        val dirImageCache = mutableMapOf<String, List<File>>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
         val projection = mutableListOf(
@@ -185,6 +177,29 @@ class MainActivity : AudioServiceActivity() {
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
 
         val normFolderPath = folderPath?.trimEnd('/', '\\')?.replace('\\', '/')
+
+        // Pre-gather all image files in 1 single top-down recursive pass
+        val imagesByFolder = mutableMapOf<String, MutableList<File>>()
+        if (!normFolderPath.isNullOrEmpty()) {
+            val rootDir = File(normFolderPath)
+            if (rootDir.exists() && rootDir.isDirectory) {
+                try {
+                    rootDir.walkTopDown().maxDepth(5).onEnter { file ->
+                        !file.name.startsWith(".")
+                    }.forEach { file ->
+                        if (file.isFile) {
+                            val ext = file.extension.lowercase()
+                            if (ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "webp") {
+                                val parentPath = file.parentFile?.absolutePath?.replace('\\', '/') ?: ""
+                                if (parentPath.isNotEmpty()) {
+                                    imagesByFolder.getOrPut(parentPath) { mutableListOf() }.add(file)
+                                }
+                            }
+                        }
+                    }
+                } catch (_: Exception) {}
+            }
+        }
 
         // Pre-cache album artwork files
         val albumArtFileMap = mutableMapOf<Long, String?>()
@@ -252,7 +267,7 @@ class MainActivity : AudioServiceActivity() {
                     val lowerArtist = artist.lowercase().trim()
                     if (lowerArtist.isNotEmpty() && lowerArtist != "unknown artist" && !searchedArtists.contains(lowerArtist)) {
                         searchedArtists.add(lowerArtist)
-                        val match = resolveArtistImage(File(filePath), artist, normFolderPath, dirImageCache)
+                        val match = resolveArtistImage(File(filePath), artist, normFolderPath, imagesByFolder)
                         if (match != null) {
                             artistImageMap[lowerArtist] = match
                             val cleanArtist = lowerArtist.split(Regex("[,;/]|\\sfeat\\.|\\sft\\.")).firstOrNull()?.trim() ?: ""
