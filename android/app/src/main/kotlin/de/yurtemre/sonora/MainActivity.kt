@@ -42,6 +42,18 @@ class MainActivity : AudioServiceActivity() {
                 "getAndroidSdk" -> {
                     result.success(Build.VERSION.SDK_INT)
                 }
+                "getDeviceAbi" -> {
+                    val abis = Build.SUPPORTED_ABIS
+                    val primaryAbi = if (abis != null && abis.isNotEmpty()) abis[0] else ""
+                    val normalizedAbi = when {
+                        primaryAbi.contains("arm64", ignoreCase = true) || primaryAbi.contains("aarch64", ignoreCase = true) -> "arm64-v8a"
+                        primaryAbi.contains("v7", ignoreCase = true) || primaryAbi.contains("arm", ignoreCase = true) -> "armeabi-v7a"
+                        primaryAbi.contains("x86_64", ignoreCase = true) -> "x86_64"
+                        primaryAbi.contains("x86", ignoreCase = true) -> "x86"
+                        else -> primaryAbi
+                    }
+                    result.success(normalizedAbi)
+                }
                 else -> result.notImplemented()
             }
         }

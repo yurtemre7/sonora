@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sonora/providers/player_provider.dart';
@@ -43,21 +44,25 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
     var lastSyncTs = await scanner.getLastSyncTimestamp();
     var artistImages = await scanner.loadLocalArtistImages();
 
-    var filesList = <String>[];
     var folderPath = widget.settingsProvider.scanFolder;
+    var filesList = <String>[];
     if (folderPath != null) {
       try {
-        var dir = Directory(folderPath);
-        if (dir.existsSync()) {
-          for (var entity in dir.listSync(
-            recursive: true,
-            followLinks: false,
-          )) {
-            if (entity is File) {
-              filesList.add(entity.path);
+        filesList = await Isolate.run<List<String>>(() {
+          var list = <String>[];
+          var dir = Directory(folderPath);
+          if (dir.existsSync()) {
+            for (var entity in dir.listSync(
+              recursive: true,
+              followLinks: false,
+            )) {
+              if (entity is File) {
+                list.add(entity.path);
+              }
             }
           }
-        }
+          return list;
+        });
       } catch (_) {}
     }
 
@@ -79,7 +84,7 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
   ) {
     var theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0, left: 16, right: 16),
       child: Row(
         children: [
           Icon(icon, color: theme.colorScheme.primary, size: 22),
@@ -99,20 +104,23 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
 
   Widget _buildGroupCard(BuildContext context, List<Widget> children) {
     var theme = Theme.of(context);
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      child: Card(
+        elevation: 0,
+        color: theme.colorScheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: children,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children,
+          ),
         ),
       ),
     );
@@ -163,6 +171,7 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    var allSongs = widget.playerProvider.allSongs;
 
     return Scaffold(
       appBar: AppBar(
@@ -182,156 +191,173 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SelectionArea(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                children: [
+              child: CustomScrollView(
+                slivers: [
                   // 1. Environment & Build Info
-                  _buildSectionHeader(
-                    context,
-                    'Environment & Build',
-                    Icons.developer_mode_rounded,
+                  SliverToBoxAdapter(
+                    child: _buildSectionHeader(
+                      context,
+                      'Environment & Build',
+                      Icons.developer_mode_rounded,
+                    ),
                   ),
-                  _buildGroupCard(context, [
-                    _buildKeyValueRow(
-                      context,
-                      'kDebugMode',
-                      '$kDebugMode',
-                      isCode: true,
-                    ),
-                    _buildKeyValueRow(
-                      context,
-                      'kReleaseMode',
-                      '$kReleaseMode',
-                      isCode: true,
-                    ),
-                    _buildKeyValueRow(
-                      context,
-                      'kProfileMode',
-                      '$kProfileMode',
-                      isCode: true,
-                    ),
-                  ]),
+                  SliverToBoxAdapter(
+                    child: _buildGroupCard(context, [
+                      _buildKeyValueRow(
+                        context,
+                        'kDebugMode',
+                        '$kDebugMode',
+                        isCode: true,
+                      ),
+                      _buildKeyValueRow(
+                        context,
+                        'kReleaseMode',
+                        '$kReleaseMode',
+                        isCode: true,
+                      ),
+                      _buildKeyValueRow(
+                        context,
+                        'kProfileMode',
+                        '$kProfileMode',
+                        isCode: true,
+                      ),
+                    ]),
+                  ),
 
                   // 2. Scanner & Storage Cache State
-                  _buildSectionHeader(
-                    context,
-                    'MusicScanner & Sync State',
-                    Icons.sync_rounded,
+                  SliverToBoxAdapter(
+                    child: _buildSectionHeader(
+                      context,
+                      'MusicScanner & Sync State',
+                      Icons.sync_rounded,
+                    ),
                   ),
-                  _buildGroupCard(context, [
-                    _buildKeyValueRow(
-                      context,
-                      'Scan Folder',
-                      widget.settingsProvider.scanFolder ?? 'Not configured',
-                      isCode: true,
-                    ),
-                    _buildKeyValueRow(
-                      context,
-                      'Last Sync Time',
-                      _lastSyncTime ?? 'Never',
-                    ),
-                    _buildKeyValueRow(
-                      context,
-                      'Last Sync Epoch',
-                      '${_lastSyncTs ?? "None"}',
-                      isCode: true,
-                    ),
-                  ]),
+                  SliverToBoxAdapter(
+                    child: _buildGroupCard(context, [
+                      _buildKeyValueRow(
+                        context,
+                        'Scan Folder',
+                        widget.settingsProvider.scanFolder ?? 'Not configured',
+                        isCode: true,
+                      ),
+                      _buildKeyValueRow(
+                        context,
+                        'Last Sync Time',
+                        _lastSyncTime ?? 'Never',
+                      ),
+                      _buildKeyValueRow(
+                        context,
+                        'Last Sync Epoch',
+                        '${_lastSyncTs ?? "None"}',
+                        isCode: true,
+                      ),
+                    ]),
+                  ),
 
                   // 3. In-Memory Player Counts & Statistics
-                  _buildSectionHeader(
-                    context,
-                    'In-Memory Player Caches',
-                    Icons.storage_rounded,
+                  SliverToBoxAdapter(
+                    child: _buildSectionHeader(
+                      context,
+                      'In-Memory Player Caches',
+                      Icons.storage_rounded,
+                    ),
                   ),
-                  _buildGroupCard(context, [
-                    _buildKeyValueRow(
-                      context,
-                      'Total Songs Loaded',
-                      '${widget.playerProvider.allSongs.length}',
-                    ),
-                    _buildKeyValueRow(
-                      context,
-                      'Cached Albums',
-                      '${widget.playerProvider.cachedAlbums.length}',
-                    ),
-                    _buildKeyValueRow(
-                      context,
-                      'Cached Artists',
-                      '${widget.playerProvider.cachedArtists.length}',
-                    ),
-                    _buildKeyValueRow(
-                      context,
-                      'Active Queue Length',
-                      '${widget.playerProvider.queue.length}',
-                    ),
-                    _buildKeyValueRow(
-                      context,
-                      'User Playlists',
-                      '${widget.playerProvider.playlists.length}',
-                    ),
-                    _buildKeyValueRow(
-                      context,
-                      'Favorite Albums Count',
-                      '${widget.playerProvider.favoriteAlbums.length}',
-                    ),
-                    _buildKeyValueRow(
-                      context,
-                      'Favorite Artists Count',
-                      '${widget.playerProvider.favoriteArtists.length}',
-                    ),
-                  ]),
+                  SliverToBoxAdapter(
+                    child: _buildGroupCard(context, [
+                      _buildKeyValueRow(
+                        context,
+                        'Total Songs Loaded',
+                        '${allSongs.length}',
+                      ),
+                      _buildKeyValueRow(
+                        context,
+                        'Cached Albums',
+                        '${widget.playerProvider.cachedAlbums.length}',
+                      ),
+                      _buildKeyValueRow(
+                        context,
+                        'Cached Artists',
+                        '${widget.playerProvider.cachedArtists.length}',
+                      ),
+                      _buildKeyValueRow(
+                        context,
+                        'Active Queue Length',
+                        '${widget.playerProvider.queue.length}',
+                      ),
+                      _buildKeyValueRow(
+                        context,
+                        'User Playlists',
+                        '${widget.playerProvider.playlists.length}',
+                      ),
+                      _buildKeyValueRow(
+                        context,
+                        'Favorite Albums Count',
+                        '${widget.playerProvider.favoriteAlbums.length}',
+                      ),
+                      _buildKeyValueRow(
+                        context,
+                        'Favorite Artists Count',
+                        '${widget.playerProvider.favoriteArtists.length}',
+                      ),
+                    ]),
+                  ),
 
                   // 4. Local Artist Image Mappings
-                  _buildSectionHeader(
-                    context,
-                    'Detected Artist Cover Images',
-                    Icons.image_search_rounded,
+                  SliverToBoxAdapter(
+                    child: _buildSectionHeader(
+                      context,
+                      'Detected Artist Cover Images',
+                      Icons.image_search_rounded,
+                    ),
                   ),
-                  _buildGroupCard(
-                    context,
-                    _localArtistImages.isEmpty
-                        ? [
-                            Text(
-                              'No local artist image mappings detected in cache.',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
+                  SliverToBoxAdapter(
+                    child: _buildGroupCard(
+                      context,
+                      _localArtistImages.isEmpty
+                          ? [
+                              Text(
+                                'No local artist image mappings detected in cache.',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                          ]
-                        : _localArtistImages.entries.map((entry) {
-                            return _buildKeyValueRow(
-                              context,
-                              entry.key,
-                              entry.value,
-                              isCode: true,
-                            );
-                          }).toList(),
+                            ]
+                          : _localArtistImages.entries.map((entry) {
+                              return _buildKeyValueRow(
+                                context,
+                                entry.key,
+                                entry.value,
+                                isCode: true,
+                              );
+                            }).toList(),
+                    ),
                   ),
 
-                  // 5. Complete Scanned Music Files List
-                  _buildSectionHeader(
-                    context,
-                    'All Scanned Music Files (${widget.playerProvider.allSongs.length})',
-                    Icons.library_music_rounded,
+                  // 5. Complete Scanned Music Files List (Virtualized Lazy Slivers)
+                  SliverToBoxAdapter(
+                    child: _buildSectionHeader(
+                      context,
+                      'All Scanned Music Files (${allSongs.length})',
+                      Icons.library_music_rounded,
+                    ),
                   ),
-                  if (widget.playerProvider.allSongs.isEmpty)
-                    _buildGroupCard(context, [
-                      Text(
-                        'No music files scanned in current session.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                  if (allSongs.isEmpty)
+                    SliverToBoxAdapter(
+                      child: _buildGroupCard(context, [
+                        Text(
+                          'No music files scanned in current session.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                    ])
+                      ]),
+                    )
                   else
-                    ...widget.playerProvider.allSongs.map((song) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: _buildGroupCard(context, [
+                    SliverList.builder(
+                      itemCount: allSongs.length,
+                      itemBuilder: (context, index) {
+                        var song = allSongs[index];
+                        return _buildGroupCard(context, [
                           _buildKeyValueRow(
                             context,
                             'Title / ID',
@@ -351,42 +377,57 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
                             song.artworkPath ?? 'None (No embedded artwork)',
                             isCode: true,
                           ),
-                        ]),
-                      );
-                    }),
-                  // 6. All Physical Discovered Files on Disk
-                  _buildSectionHeader(
-                    context,
-                    'All Physical Files Discovered in Root (${_physicalFiles.length})',
-                    Icons.folder_open_rounded,
+                        ]);
+                      },
+                    ),
+
+                  // 6. All Physical Discovered Files on Disk (Virtualized Lazy Slivers)
+                  SliverToBoxAdapter(
+                    child: _buildSectionHeader(
+                      context,
+                      'All Physical Files Discovered in Root (${_physicalFiles.length})',
+                      Icons.folder_open_rounded,
+                    ),
                   ),
                   if (_physicalFiles.isEmpty)
-                    _buildGroupCard(context, [
-                      Text(
-                        'No physical files found in root scan directory.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                    SliverToBoxAdapter(
+                      child: _buildGroupCard(context, [
+                        Text(
+                          'No physical files found in root scan directory.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                    ])
+                      ]),
+                    )
                   else
-                    _buildGroupCard(
-                      context,
-                      _physicalFiles.map((path) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: SelectableText(
-                            path,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontFamily: 'monospace',
-                              fontSize: 13,
-                              color: theme.colorScheme.tertiary,
+                    SliverToBoxAdapter(
+                      child: _buildGroupCard(
+                        context,
+                        [
+                          SizedBox(
+                            height: (_physicalFiles.length * 32.0).clamp(60.0, 400.0),
+                            child: ListView.builder(
+                              itemCount: _physicalFiles.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: SelectableText(
+                                    _physicalFiles[index],
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontFamily: 'monospace',
+                                      fontSize: 13,
+                                      color: theme.colorScheme.tertiary,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                        );
-                      }).toList(),
+                        ],
+                      ),
                     ),
-                  const SizedBox(height: 24),
+                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
                 ],
               ),
             ),

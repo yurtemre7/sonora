@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,11 +8,17 @@ class UpdateInfo {
   final String version;
   final String changelog;
   final String downloadUrl;
+  final Map<String, String> apkAssets;
+  final String? recommendedAbi;
+  final String recommendedUrl;
 
   UpdateInfo({
     required this.version,
     required this.changelog,
     required this.downloadUrl,
+    required this.apkAssets,
+    this.recommendedAbi,
+    required this.recommendedUrl,
   });
 }
 
@@ -30,6 +37,17 @@ class UpdateResult {
 class UpdateService {
   static const _githubApiUrl =
       'https://api.github.com/repos/yurtemre7/sonora/releases/latest';
+
+  /// Queries the native platform to get the device CPU ABI.
+  static Future<String?> getDeviceAbi() async {
+    try {
+      const channel = MethodChannel('de.yurtemre.sonora/volume');
+      var abi = await channel.invokeMethod<String>('getDeviceAbi');
+      return abi;
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// Checks for an update via GitHub API releases.
   static Future<UpdateResult> checkForUpdate() async {
@@ -55,11 +73,51 @@ class UpdateService {
             // Fetch latest changelog from main repository as well
             await fetchChangelog(forceRefresh: true);
 
+            var assets = data['assets'] as List<dynamic>? ?? [];
+            var apkAssets = <String, String>{};
+
+            for (var asset in assets) {
+              if (asset is! Map<String, dynamic>) continue;
+              var name = (asset['name'] as String? ?? '').toLowerCase();
+              var url = asset['browser_download_url'] as String?;
+              if (url == null) continue;
+
+              if (name.contains('arm64-v8a')) {
+                apkAssets['arm64-v8a'] = url;
+              } else if (name.contains('armeabi-v7a')) {
+                apkAssets['armeabi-v7a'] = url;
+              } else if (name.contains('x86_64')) {
+                apkAssets['x86_64'] = url;
+              } else if (name.contains('x86')) {
+                apkAssets['x86'] = url;
+              }
+            }
+
+            var detectedAbi = await getDeviceAbi();
+            String? matchedAbi;
+            String chosenUrl;
+
+            if (detectedAbi != null && apkAssets.containsKey(detectedAbi)) {
+              matchedAbi = detectedAbi;
+              chosenUrl = apkAssets[detectedAbi]!;
+            } else if (apkAssets.containsKey('arm64-v8a')) {
+              matchedAbi = 'arm64-v8a';
+              chosenUrl = apkAssets['arm64-v8a']!;
+            } else if (apkAssets.isNotEmpty) {
+              matchedAbi = apkAssets.keys.first;
+              chosenUrl = apkAssets.values.first;
+            } else {
+              chosenUrl = htmlUrl;
+            }
+
             return UpdateResult(
               update: UpdateInfo(
                 version: tagName,
                 changelog: body,
                 downloadUrl: htmlUrl,
+                apkAssets: apkAssets,
+                recommendedAbi: matchedAbi,
+                recommendedUrl: chosenUrl,
               ),
             );
           } else {
