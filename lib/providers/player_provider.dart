@@ -319,6 +319,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     audioHandler.onCustomAction = (action) {
       if (action == 'extendSleepTimer') {
         extendSleepTimer(const Duration(minutes: 1));
+      } else if (action == 'stopSleepTimer') {
+        stopSleepTimer();
       }
     };
     SleepTimerNotificationService.onAddOneMin = () {

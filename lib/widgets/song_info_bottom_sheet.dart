@@ -23,7 +23,9 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
             color: theme.colorScheme.surfaceContainerHigh,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
-          child: SafeArea(
+          child: Material(
+            color: Colors.transparent,
+            child: SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -160,7 +162,8 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
             ),
           ),
         ),
-      );
+      ),
+    );
     },
   );
 }

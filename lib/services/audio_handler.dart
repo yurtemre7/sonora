@@ -108,13 +108,20 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
           MediaControl.skipToPrevious,
           if (playing) MediaControl.pause else MediaControl.play,
           MediaControl.skipToNext,
-          if (sleepTimerActive)
+          if (sleepTimerActive) ...[
             MediaControl(
-              androidIcon: 'drawable/ic_menu_add',
+              androidIcon: 'drawable/ic_launcher_monochrome',
               label: sleepTimerExtendLabel,
               action: MediaAction.custom,
               customAction: const CustomMediaAction(name: 'extendSleepTimer'),
             ),
+            const MediaControl(
+              androidIcon: 'drawable/ic_launcher_monochrome',
+              label: 'End timer',
+              action: MediaAction.custom,
+              customAction: CustomMediaAction(name: 'stopSleepTimer'),
+            ),
+          ],
         ],
         systemActions: const {
           MediaAction.seek,

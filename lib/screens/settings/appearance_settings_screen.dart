@@ -46,7 +46,9 @@ class AppearanceSettingsScreen extends StatelessWidget {
       useRootNavigator: true,
       builder: (sheetContext) {
         return SafeArea(
-          child: ListenableBuilder(
+          child: Material(
+            color: Colors.transparent,
+            child: ListenableBuilder(
             listenable: themeProvider,
             builder: (ctx, _) {
               var currentMode = themeProvider.themeMode;
@@ -98,9 +100,10 @@ class AppearanceSettingsScreen extends StatelessWidget {
               );
             },
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 
   @override

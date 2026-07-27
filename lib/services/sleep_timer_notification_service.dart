@@ -3,13 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-@pragma('vm:entry-point')
-void notificationTapBackground(NotificationResponse notificationResponse) {
-  if (notificationResponse.actionId != null) {
-    SleepTimerNotificationService.handleAction(notificationResponse.actionId!);
-  }
-}
-
 class SleepTimerNotificationService {
   static final _instance = SleepTimerNotificationService._internal();
 
@@ -48,7 +41,6 @@ class SleepTimerNotificationService {
           handleAction(response.actionId!);
         }
       },
-      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
     var androidPlugin =
@@ -102,10 +94,12 @@ class SleepTimerNotificationService {
         AndroidNotificationAction(
           'add_1_min',
           'Add 1 min',
+          showsUserInterface: true,
         ),
         AndroidNotificationAction(
           'end_timer',
           'End timer',
+          showsUserInterface: true,
         ),
       ],
     );

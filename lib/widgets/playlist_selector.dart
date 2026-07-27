@@ -74,7 +74,9 @@ class _PlaylistSelectorBottomSheetState
                 top: Radius.circular(28),
               ),
             ),
-            child: SafeArea(
+            child: Material(
+              color: Colors.transparent,
+              child: SafeArea(
               child: Padding(
                 padding: EdgeInsets.only(
                   top: 8,
@@ -297,9 +299,10 @@ class _PlaylistSelectorBottomSheetState
               ),
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 
   void _showCreatePlaylistDialog() {

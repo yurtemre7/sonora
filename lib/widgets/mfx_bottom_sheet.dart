@@ -106,9 +106,11 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                       // Handle
                       Center(
                         child: Container(
@@ -383,10 +385,11 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                   ),
                 ),
               ),
-            );
-          },
-        );
-      },
-    );
-  }
+            ),
+          );
+        },
+      );
+    },
+  );
+}
 }
