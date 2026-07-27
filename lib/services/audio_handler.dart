@@ -5,6 +5,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonora/services/android_auto_media_browser.dart';
 
 /// Custom [AudioHandler] for Sonora that provides background audio playback,
 /// media notification controls, and lock-screen integration.
@@ -16,6 +17,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   final equalizer = AndroidEqualizer();
   late final AudioPlayer player;
+
+  /// Media browser for Android Auto / Automotive OS.
+  final mediaBrowser = AndroidAutoMediaBrowser();
 
   // The full playlist (logical queue) of MediaItems.
   List<MediaItem> _rawPlaylist = [];
@@ -640,6 +644,99 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     if (!keepPlaying) {
       await player.stop();
       await super.onTaskRemoved();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Android Auto / Automotive OS media browsing
+  // ---------------------------------------------------------------------------
+
+  /// Callback invoked when Android Auto requests playback via `playFromMediaId`.
+  ///
+  /// Set by [PlayerProvider] to bridge the media browser's song resolution
+  /// with the app's queue management and playback pipeline.
+  void Function(List<MediaItem> mediaItems, int startIndex)? onPlayFromBrowser;
+
+  @override
+  Future<List<MediaItem>> getChildren(
+    String parentMediaId, [
+    Map<String, dynamic>? options,
+  ]) async {
+    return mediaBrowser.getChildren(parentMediaId);
+  }
+
+  @override
+  Future<MediaItem?> getMediaItem(String mediaId) async {
+    return mediaBrowser.getItem(mediaId);
+  }
+
+  @override
+  Future<List<MediaItem>> search(
+    String query, [
+    Map<String, dynamic>? extras,
+  ]) async {
+    return mediaBrowser.search(query);
+  }
+
+  @override
+  Future<void> playFromMediaId(
+    String mediaId, [
+    Map<String, dynamic>? extras,
+  ]) async {
+    var result = mediaBrowser.resolveForPlayback(mediaId);
+    if (result == null) return;
+
+    var (songs, startIndex) = result;
+    var mediaItems = songs
+        .map(
+          (s) => MediaItem(
+            id: Uri.file(s.filePath).toString(),
+            title: s.displayTitle,
+            artist: s.artist,
+            album: s.album,
+            duration: s.duration,
+            artUri:
+                s.artworkPath != null ? Uri.file(s.artworkPath!) : null,
+          ),
+        )
+        .toList();
+
+    if (onPlayFromBrowser != null) {
+      onPlayFromBrowser!(mediaItems, startIndex);
+    } else {
+      await loadPlaylist(mediaItems, initialIndex: startIndex);
+      await play();
+    }
+  }
+
+  @override
+  Future<void> playFromSearch(
+    String query, [
+    Map<String, dynamic>? extras,
+  ]) async {
+    var result = mediaBrowser.resolveSearchForPlayback(query);
+    if (result == null) return;
+
+    var (songs, startIndex) = result;
+    var mediaItems = songs
+        .map(
+          (s) => MediaItem(
+            id: Uri.file(s.filePath).toString(),
+            title: s.displayTitle,
+            artist: s.artist,
+            album: s.album,
+            duration: s.duration,
+            artUri:
+                s.artworkPath != null ? Uri.file(s.artworkPath!) : null,
+          ),
+        )
+        .toList();
+
+    if (onPlayFromBrowser != null) {
+      onPlayFromBrowser!(mediaItems, startIndex);
+    } else {
+      await loadPlaylist(mediaItems, initialIndex: startIndex);
+      await play();
     }
   }
 }

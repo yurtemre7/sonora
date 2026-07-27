@@ -329,6 +329,22 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     SleepTimerNotificationService.onEndTimer = () {
       stopSleepTimer();
     };
+
+    // Android Auto: bridge media browser playback requests to PlayerProvider.
+    audioHandler.onPlayFromBrowser = (mediaItems, startIndex) {
+      // Resolve MediaItems back to Song objects from the library.
+      var songs = <Song>[];
+      for (var item in mediaItems) {
+        var song = allSongs.where(
+          (s) => Uri.file(s.filePath).toString() == item.id,
+        ).firstOrNull;
+        if (song != null) songs.add(song);
+      }
+      if (songs.isEmpty) return;
+
+      var targetIndex = startIndex.clamp(0, songs.length - 1);
+      playSong(songs[targetIndex], songs);
+    };
   }
 
   // ── Derived getters ───────────────────────────────────────────────────────
@@ -675,6 +691,14 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
           : {},
     );
     uniqueThemeCount = AppTheme.precomputeThemes(allSongs);
+
+    // Keep Android Auto / Automotive OS browse tree in sync.
+    audioHandler.mediaBrowser.updateLibrary(
+      songs: allSongs,
+      albums: cachedAlbums,
+      artists: cachedArtists,
+      playlists: playlists,
+    );
   }
 
   /// Toggles a song's favorite status in the cache index and favorite playlist.
