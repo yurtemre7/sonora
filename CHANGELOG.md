@@ -2,6 +2,12 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.16.1] - 2026-07-27
+### Added
+* Add sleep timer push notification with actions and improve sleep timer bottom sheet UI
+### Fixed
+* Add isCoreLibraryDesugaringEnabled for push notifications package
+
 ## [1.16.0] - 2026-07-27
 ### Changed
 * Chore: Update packages
