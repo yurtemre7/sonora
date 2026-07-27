@@ -12,6 +12,7 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/services/sleep_timer_notification_service.dart';
 import 'package:sonora/services/stats_service.dart';
 import 'package:sonora/theme/app_theme.dart';
 import 'package:sonora/utils/color_extractor.dart';
@@ -319,6 +320,12 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       if (action == 'extendSleepTimer') {
         extendSleepTimer(const Duration(minutes: 1));
       }
+    };
+    SleepTimerNotificationService.onAddOneMin = () {
+      extendSleepTimer(const Duration(minutes: 1));
+    };
+    SleepTimerNotificationService.onEndTimer = () {
+      stopSleepTimer();
     };
   }
 
@@ -1193,10 +1200,12 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isFadingOut = false;
 
     _updateMediaNotificationControls();
+    SleepTimerNotificationService().updateTimerNotification(duration);
 
     _sleepTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (sleepTimerDuration == null) {
         timer.cancel();
+        SleepTimerNotificationService().cancelNotification();
         return;
       }
 
@@ -1218,6 +1227,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         currentIndex = -1;
 
         _updateMediaNotificationControls();
+        SleepTimerNotificationService().cancelNotification();
         notifyListeners();
       } else {
         sleepTimerDuration = remaining;
@@ -1233,6 +1243,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
           );
         }
 
+        SleepTimerNotificationService().updateTimerNotification(remaining);
         notifyListeners();
       }
     });
@@ -1250,6 +1261,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       _isFadingOut = false;
     }
     _updateMediaNotificationControls();
+    SleepTimerNotificationService().cancelNotification();
     notifyListeners();
   }
 
@@ -1266,6 +1278,10 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       audioHandler.player.setVolume(_originalVolumeBeforeFade);
     }
     _updateMediaNotificationControls();
+    if (sleepTimerDuration != null) {
+      SleepTimerNotificationService()
+          .updateTimerNotification(sleepTimerDuration!);
+    }
     notifyListeners();
   }
 }

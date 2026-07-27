@@ -12,6 +12,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   audio_tags_lofty
+  flutter_local_notifications_windows
   jni
 )
 

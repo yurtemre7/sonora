@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.16.0] - 2026-07-27
+### Changed
+* Chore: Update packages
+
 ## [1.15.3] - 2026-07-25
 * Revert top-down pre-gathering artist image scan changes
 

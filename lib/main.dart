@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'package:sonora/app.dart';
 import 'package:sonora/services/audio_handler.dart';
+import 'package:sonora/services/sleep_timer_notification_service.dart';
 import 'package:sonora/services/volume_service.dart';
 
 late SonoraAudioHandler audioHandler;
@@ -33,6 +34,9 @@ Future<void> main() async {
       androidNotificationIcon: 'drawable/ic_launcher_monochrome',
     ),
   );
+
+  // Initialize sleep timer notifications
+  await SleepTimerNotificationService().initialize();
 
   // Ensure media volume is audible (handles muted phone)
   var volumeService = VolumeService();
