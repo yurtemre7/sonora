@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 
@@ -212,14 +213,18 @@ class StatsService {
 
   int albumListenCount(List<Song> library) {
     var songMap = _buildSongMap(library);
-    var albums = <String>{};
+    var albumGroups = buildAlbumGroups(library);
+    var listenedAlbums = <AlbumGroup>{};
     for (var entry in _data.songPlayCounts.entries) {
       var song = songMap[entry.key];
       if (song != null) {
-        albums.add('${song.album}|||${song.artist}');
+        var group = albumGroups.where((a) => a.songs.any((s) => s.id == song.id)).firstOrNull;
+        if (group != null) {
+          listenedAlbums.add(group);
+        }
       }
     }
-    return albums.length;
+    return listenedAlbums.length;
   }
 
   int artistListenCount(List<Song> library) {
@@ -228,7 +233,9 @@ class StatsService {
     for (var entry in _data.songPlayCounts.entries) {
       var song = songMap[entry.key];
       if (song != null) {
-        artists.add(song.artist);
+        for (var a in parseIndividualArtists(song.artist)) {
+          artists.add(a.toLowerCase());
+        }
       }
     }
     return artists.length;
@@ -278,44 +285,50 @@ class StatsService {
     List<Song> library,
   ) {
     var songMap = _buildSongMap(library);
-    var albumCounts = <String, int>{};
+    var albumGroups = buildAlbumGroups(library);
+    var albumCounts = <AlbumGroup, int>{};
     for (var entry in _data.songPlayCounts.entries) {
       var song = songMap[entry.key];
       if (song != null) {
-        var key = '${song.album}|||${song.artist}';
-        albumCounts.update(
-          key,
-          (v) => v + entry.value,
-          ifAbsent: () => entry.value,
-        );
+        var group = albumGroups.where((a) => a.songs.any((s) => s.id == song.id)).firstOrNull;
+        if (group != null) {
+          albumCounts.update(
+            group,
+            (v) => v + entry.value,
+            ifAbsent: () => entry.value,
+          );
+        }
       }
     }
     var sorted = albumCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     return sorted.take(limit).map((e) {
-      var parts = e.key.split('|||');
-      return (album: parts[0], artist: parts[1], count: e.value);
+      return (album: e.key.name, artist: e.key.artist, count: e.value);
     }).toList();
   }
 
   List<({String artist, int count})> topArtists(int limit, List<Song> library) {
     var songMap = _buildSongMap(library);
-    var artistCounts = <String, int>{};
+    var artistCounts = <String, ({String displayName, int count})>{};
     for (var entry in _data.songPlayCounts.entries) {
       var song = songMap[entry.key];
       if (song != null) {
-        artistCounts.update(
-          song.artist,
-          (v) => v + entry.value,
-          ifAbsent: () => entry.value,
-        );
+        for (var artistName in parseIndividualArtists(song.artist)) {
+          var lower = artistName.toLowerCase();
+          var current = artistCounts[lower];
+          if (current == null) {
+            artistCounts[lower] = (displayName: artistName, count: entry.value);
+          } else {
+            artistCounts[lower] = (displayName: current.displayName, count: current.count + entry.value);
+          }
+        }
       }
     }
-    var sorted = artistCounts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    var sorted = artistCounts.values.toList()
+      ..sort((a, b) => b.count.compareTo(a.count));
     return sorted
         .take(limit)
-        .map((e) => (artist: e.key, count: e.value))
+        .map((e) => (artist: e.displayName, count: e.count))
         .toList();
   }
 

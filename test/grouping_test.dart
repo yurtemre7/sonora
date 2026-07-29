@@ -122,4 +122,61 @@ void main() {
       expect(artists.first.albums.single.name, 'Unknown Album');
     },
   );
+
+  test(
+    'parseIndividualArtists splits multi-artist tags and unifies album tracks',
+    () {
+      var songs = [
+        Song(
+          id: 10,
+          title: 'Track 1',
+          artist: 'Ufo361, Capital Bra, Sonu Lal',
+          album: '808',
+          duration: const Duration(minutes: 3),
+          filePath: '/tmp/808_1.mp3',
+        ),
+        Song(
+          id: 11,
+          title: 'Track 2',
+          artist: 'Ufo361, Gzuz, RAF Camora',
+          album: '808',
+          duration: const Duration(minutes: 3),
+          filePath: '/tmp/808_2.mp3',
+        ),
+      ];
+
+      // Test parsing individual artists
+      expect(
+        parseIndividualArtists('Ufo361, Capital Bra, Sonu Lal'),
+        ['Ufo361', 'Capital Bra', 'Sonu Lal'],
+      );
+      expect(
+        parseIndividualArtists('Drake feat. Future & Young Thug'),
+        ['Drake', 'Future', 'Young Thug'],
+      );
+
+      // Test album unification
+      var albums = buildAlbumGroups(songs);
+      expect(albums.length, 1);
+      expect(albums.first.name, '808');
+      expect(albums.first.artist, 'Ufo361');
+      expect(albums.first.songs.length, 2);
+
+      // Test individual artist grouping (no combined entries)
+      var artists = buildArtistGroups(songs, albums);
+      var artistNames = artists.map((a) => a.name).toList();
+      expect(artistNames, [
+        'Capital Bra',
+        'Gzuz',
+        'RAF Camora',
+        'Sonu Lal',
+        'Ufo361',
+      ]);
+
+      var ufoGroup = artists.firstWhere((a) => a.name == 'Ufo361');
+      expect(ufoGroup.songs.length, 2);
+      var gzuzGroup = artists.firstWhere((a) => a.name == 'Gzuz');
+      expect(gzuzGroup.songs.length, 1);
+    },
+  );
 }
