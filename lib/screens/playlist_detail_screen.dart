@@ -407,7 +407,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '${_playlistSongs.length} ${_playlistSongs.length == 1 ? 'song' : 'songs'} • ${formatTotalDuration(_playlistSongs)}',
+                              '${context.l10n.songCount(_playlistSongs.length)} • ${formatTotalDuration(_playlistSongs)}',
                               style: theme.textTheme.labelMedium?.copyWith(
                                 color: theme.colorScheme.primary,
                                 fontWeight: FontWeight.bold,
@@ -479,7 +479,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                'Playlist is empty',
+                                context.l10n.playlistIsEmpty,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.bold,
@@ -487,7 +487,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Go to the Songs list and use the song menu to add music to this playlist.',
+                                context.l10n.playlistIsEmptySubtitle,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant
                                       .withValues(alpha: 0.7),

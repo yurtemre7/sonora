@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class CustomEqualizerWidget extends StatefulWidget {
   final PlayerProvider playerProvider;
@@ -21,6 +22,23 @@ class _CustomEqualizerWidgetState extends State<CustomEqualizerWidget> {
     'Jazz': [0.4, 0.2, -0.2, 0.2, 0.4],
     'Classical': [0.5, 0.3, -0.2, 0.4, 0.4],
   };
+
+  String _getPresetLabel(BuildContext context, String key) {
+    switch (key) {
+      case 'Flat':
+        return context.l10n.eqFlat;
+      case 'Pop':
+        return context.l10n.eqPop;
+      case 'Rock':
+        return context.l10n.eqRock;
+      case 'Jazz':
+        return context.l10n.eqJazz;
+      case 'Classical':
+        return context.l10n.eqClassical;
+      default:
+        return key;
+    }
+  }
 
   @override
   void initState() {
@@ -61,7 +79,7 @@ class _CustomEqualizerWidgetState extends State<CustomEqualizerWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Custom Equalizer',
+                    context.l10n.customEqualizer,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -91,7 +109,7 @@ class _CustomEqualizerWidgetState extends State<CustomEqualizerWidget> {
                   itemBuilder: (context, index) {
                     var entry = _presets.entries.elementAt(index);
                     return ActionChip(
-                      label: Text(entry.key),
+                      label: Text(_getPresetLabel(context, entry.key)),
                       onPressed: () {
                         setState(() {
                           var fractions = entry.value;

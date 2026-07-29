@@ -969,4 +969,242 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yourOwnPlaylist => 'Your own playlist';
+
+  @override
+  String get metadataGroup => 'Metadata';
+
+  @override
+  String get fileInfoGroup => 'File Info';
+
+  @override
+  String get audioPropertiesGroup => 'Audio Properties';
+
+  @override
+  String get titleLabel => 'Title';
+
+  @override
+  String get artistLabel => 'Artist';
+
+  @override
+  String get albumLabel => 'Album';
+
+  @override
+  String get trackLabel => 'Track';
+
+  @override
+  String get genreLabel => 'Genre';
+
+  @override
+  String get yearLabel => 'Year';
+
+  @override
+  String get durationLabel => 'Duration';
+
+  @override
+  String get filePathLabel => 'File Path';
+
+  @override
+  String get formatLabel => 'Format';
+
+  @override
+  String get bitrateLabel => 'Bitrate';
+
+  @override
+  String get sampleRateLabel => 'Sample Rate';
+
+  @override
+  String get mfxSuperSlowed => 'Super Slowed';
+
+  @override
+  String get mfxSlowed => 'Slowed';
+
+  @override
+  String get mfxNormal => 'Normal';
+
+  @override
+  String get mfxSpedUp => 'Sped Up';
+
+  @override
+  String get mfxNightcore => 'Nightcore';
+
+  @override
+  String get mfxSuperSpedUp => 'Super Sped Up';
+
+  @override
+  String mfxSpeedSubtitle(String speed) {
+    return '${speed}x Speed';
+  }
+
+  @override
+  String get customEqualizer => 'Custom Equalizer';
+
+  @override
+  String get eqFlat => 'Flat';
+
+  @override
+  String get eqPop => 'Pop';
+
+  @override
+  String get eqRock => 'Rock';
+
+  @override
+  String get eqJazz => 'Jazz';
+
+  @override
+  String get eqClassical => 'Classical';
+
+  @override
+  String get addToFavorites => 'Add to favorites';
+
+  @override
+  String get removeFromFavorites => 'Remove from favorites';
+
+  @override
+  String get noPlaylistsYet => 'No playlists yet';
+
+  @override
+  String get noPlaylistsYetSubtitle =>
+      'Create custom playlists to group and organize your synced music files.';
+
+  @override
+  String get totalListeningTime => 'Total Listening Time';
+
+  @override
+  String get completeListens => 'Complete\nListens';
+
+  @override
+  String get skips => 'Skips';
+
+  @override
+  String get restarts => 'Restarts';
+
+  @override
+  String get funFacts => 'Fun Facts';
+
+  @override
+  String get firstSongPlayed => 'First Song Played';
+
+  @override
+  String get mostPlayedSong => 'Most Played Song';
+
+  @override
+  String get uniqueSongsPlayed => 'Unique Songs Played';
+
+  @override
+  String get shuffleSessions => 'Shuffle Sessions';
+
+  @override
+  String get mostActiveDay => 'Most Active Day';
+
+  @override
+  String get mostPlayedSongs => 'Most Played Songs';
+
+  @override
+  String get noSongStatsYet =>
+      'No listening data yet.\nStart playing music to see your top songs!';
+
+  @override
+  String get mostPlayedAlbums => 'Most Played Albums';
+
+  @override
+  String get noAlbumStatsYet =>
+      'No listening data yet.\nStart playing music to see your top albums!';
+
+  @override
+  String get mostPlayedArtists => 'Most Played Artists';
+
+  @override
+  String get noArtistStatsYet =>
+      'No listening data yet.\nStart playing music to see your top artists!';
+
+  @override
+  String get mostPlayedPlaylists => 'Most Played Playlists';
+
+  @override
+  String get noPlaylistStatsYet =>
+      'No listening data yet.\nPlay music from playlists to see them here!';
+
+  @override
+  String playsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plays',
+      one: '1 play',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String startsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count starts',
+      one: '1 start',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String songsCountShort(int count) {
+    return '$count songs';
+  }
+
+  @override
+  String get importM3u => 'Import M3U';
+
+  @override
+  String get importedPlaylist => 'Playlist imported';
+
+  @override
+  String get playlistIsEmpty => 'Playlist is empty';
+
+  @override
+  String get playlistIsEmptySubtitle =>
+      'Go to the Songs list and use the song menu to add music to this playlist.';
+
+  @override
+  String playlistDeleted(String name) {
+    return 'Playlist \"$name\" deleted.';
+  }
+
+  @override
+  String get chooseFolderSubtitle =>
+      'Choose a folder directory on your device to scan and play music from.';
+
+  @override
+  String noMusicFilesInFolderSubtitle(String folder) {
+    return 'Please put some audio files (e.g. .mp3, .m4a) in the folder:\n\n$folder';
+  }
+
+  @override
+  String removedFromQueue(String title) {
+    return 'Removed \"$title\" from queue';
+  }
+
+  @override
+  String get nowPlaying => 'Now Playing';
+
+  @override
+  String get fromThisAlbum => 'From this album';
+
+  @override
+  String moreByArtist(String artist) {
+    return 'More by $artist';
+  }
+
+  @override
+  String savedPlaylist(String name) {
+    return 'Saved $name';
+  }
+
+  @override
+  String get collapse => 'Collapse';
+
+  @override
+  String get minimize => 'Minimize';
+
+  @override
+  String get debugCacheInfo => 'Debug Cache Info';
 }

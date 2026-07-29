@@ -52,7 +52,7 @@ class PlaylistsTab extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'No playlists yet',
+                context.l10n.noPlaylistsYet,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
@@ -61,7 +61,7 @@ class PlaylistsTab extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Create custom playlists to group and organize your synced music files.',
+                context.l10n.noPlaylistsYetSubtitle,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
@@ -71,7 +71,7 @@ class PlaylistsTab extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onCreatePlaylistDialog,
                 icon: const Icon(Icons.playlist_add_rounded),
-                label: const Text('Create Playlist'),
+                label: Text(context.l10n.createPlaylist),
               ),
             ],
           ),
@@ -278,15 +278,15 @@ class PlaylistsTab extends StatelessWidget {
                   } else if (val == 1) {
                     var confirmed = await ConfirmDeleteDialog.show(
                       context,
-                      title: 'Delete Playlist?',
-                      message: 'Delete "${playlist.name}"? This cannot be undone.',
+                      title: context.l10n.deletePlaylistConfirmTitle,
+                      message: context.l10n.deletePlaylistConfirmMessage(playlist.name),
                     );
                     if (confirmed != true) return;
                     await onDeletePlaylist(playlist.id);
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Playlist "${playlist.name}" deleted.'),
+                        content: Text(context.l10n.playlistDeleted(playlist.name)),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );

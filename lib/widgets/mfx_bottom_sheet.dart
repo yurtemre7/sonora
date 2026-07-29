@@ -216,8 +216,8 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                               child: Row(
                                 children: [
                                   PresetCard(
-                                    title: 'Super Slowed',
-                                    subtitle: '0.70x Speed',
+                                    title: context.l10n.mfxSuperSlowed,
+                                    subtitle: context.l10n.mfxSpeedSubtitle('0.70'),
                                     icon: Icons.fast_rewind_rounded,
                                     isSelected: player.isSuperSlowed,
                                     onTap: () {
@@ -226,8 +226,8 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                     },
                                   ),
                                   PresetCard(
-                                    title: 'Slowed',
-                                    subtitle: '0.85x Speed',
+                                    title: context.l10n.mfxSlowed,
+                                    subtitle: context.l10n.mfxSpeedSubtitle('0.85'),
                                     icon: Icons.fast_rewind_rounded,
                                     isSelected: player.isSlowed,
                                     onTap: () {
@@ -236,8 +236,8 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                     },
                                   ),
                                   PresetCard(
-                                    title: 'Normal',
-                                    subtitle: '1.0x Speed',
+                                    title: context.l10n.mfxNormal,
+                                    subtitle: context.l10n.mfxSpeedSubtitle('1.0'),
                                     icon: Icons.play_arrow_rounded,
                                     isSelected:
                                         !player.isSuperSlowed &&
@@ -255,8 +255,8 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                     },
                                   ),
                                   PresetCard(
-                                    title: 'Sped Up',
-                                    subtitle: '1.25x Speed',
+                                    title: context.l10n.mfxSpedUp,
+                                    subtitle: context.l10n.mfxSpeedSubtitle('1.25'),
                                     icon: Icons.fast_forward_rounded,
                                     isSelected: player.isSpedUp,
                                     onTap: () {
@@ -265,8 +265,8 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                     },
                                   ),
                                   PresetCard(
-                                    title: 'Nightcore',
-                                    subtitle: '1.30x Speed',
+                                    title: context.l10n.mfxNightcore,
+                                    subtitle: context.l10n.mfxSpeedSubtitle('1.30'),
                                     icon: Icons.bolt_rounded,
                                     isSelected: player.isNightcore,
                                     onTap: () {
@@ -275,8 +275,8 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                     },
                                   ),
                                   PresetCard(
-                                    title: 'Super Sped Up',
-                                    subtitle: '1.50x Speed',
+                                    title: context.l10n.mfxSuperSpedUp,
+                                    subtitle: context.l10n.mfxSpeedSubtitle('1.50'),
                                     icon: Icons.fast_forward_rounded,
                                     isSelected: player.isSuperSpedUp,
                                     onTap: () {

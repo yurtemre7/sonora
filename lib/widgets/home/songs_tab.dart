@@ -47,7 +47,7 @@ class SongsTab extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 scanFolder == null
-                    ? 'Set Music Directory'
+                    ? context.l10n.setMusicDirectory
                     : context.l10n.noMusicFilesFound,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -58,8 +58,8 @@ class SongsTab extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 scanFolder == null
-                    ? 'Choose a folder directory on your device to scan and play music from.'
-                    : 'Please put some audio files (e.g. .mp3, .m4a) in the folder:\n\n$scanFolder',
+                    ? context.l10n.chooseFolderSubtitle
+                    : context.l10n.noMusicFilesInFolderSubtitle(scanFolder!),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),

@@ -60,27 +60,27 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                       children: [
                         _buildInfoGroup(
                           theme: theme,
-                          title: 'Metadata',
+                          title: context.l10n.metadataGroup,
                           children: [
-                            _buildInfoRow('Title', song.displayTitle, theme),
-                            _buildInfoRow('Artist', song.artist, theme),
-                            _buildInfoRow('Album', song.album, theme),
+                            _buildInfoRow(context.l10n.titleLabel, song.displayTitle, theme),
+                            _buildInfoRow(context.l10n.artistLabel, song.artist, theme),
+                            _buildInfoRow(context.l10n.albumLabel, song.album, theme),
                             if (song.trackNumber != null)
                               _buildInfoRow(
-                                'Track',
+                                context.l10n.trackLabel,
                                 song.trackNumber.toString(),
                                 theme,
                               ),
                             if (song.genre != null)
-                              _buildInfoRow('Genre', song.genre!, theme),
+                              _buildInfoRow(context.l10n.genreLabel, song.genre!, theme),
                             if (song.year != null)
                               _buildInfoRow(
-                                'Year',
+                                context.l10n.yearLabel,
                                 song.year.toString(),
                                 theme,
                               ),
                             _buildInfoRow(
-                              'Duration',
+                              context.l10n.durationLabel,
                               song.durationFormatted,
                               theme,
                               isLast: true,
@@ -89,10 +89,10 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                         ),
                         _buildInfoGroup(
                           theme: theme,
-                          title: 'File Info',
+                          title: context.l10n.fileInfoGroup,
                           children: [
                             _buildInfoRow(
-                              'File Path',
+                              context.l10n.filePathLabel,
                               song.filePath,
                               theme,
                               isPath: true,
@@ -125,7 +125,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                               const SizedBox.shrink()
                             else
                               _buildInfoRow(
-                                'Format',
+                                context.l10n.formatLabel,
                                 song.format!.toUpperCase(),
                                 theme,
                                 isLast: true,
@@ -135,18 +135,18 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                         if (song.bitrate != null || song.samplerate != null)
                           _buildInfoGroup(
                             theme: theme,
-                            title: 'Audio Properties',
+                            title: context.l10n.audioPropertiesGroup,
                             children: [
                               if (song.bitrate != null)
                                 _buildInfoRow(
-                                  'Bitrate',
+                                  context.l10n.bitrateLabel,
                                   '${song.bitrate} kbps',
                                   theme,
                                   isLast: song.samplerate == null,
                                 ),
                               if (song.samplerate != null)
                                 _buildInfoRow(
-                                  'Sample Rate',
+                                  context.l10n.sampleRateLabel,
                                   '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
                                   theme,
                                   isLast: true,

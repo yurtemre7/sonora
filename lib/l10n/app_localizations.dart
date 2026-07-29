@@ -1825,6 +1825,408 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your own playlist'**
   String get yourOwnPlaylist;
+
+  /// No description provided for @metadataGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata'**
+  String get metadataGroup;
+
+  /// No description provided for @fileInfoGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'File Info'**
+  String get fileInfoGroup;
+
+  /// No description provided for @audioPropertiesGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Properties'**
+  String get audioPropertiesGroup;
+
+  /// No description provided for @titleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get titleLabel;
+
+  /// No description provided for @artistLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist'**
+  String get artistLabel;
+
+  /// No description provided for @albumLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Album'**
+  String get albumLabel;
+
+  /// No description provided for @trackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get trackLabel;
+
+  /// No description provided for @genreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Genre'**
+  String get genreLabel;
+
+  /// No description provided for @yearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get yearLabel;
+
+  /// No description provided for @durationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get durationLabel;
+
+  /// No description provided for @filePathLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'File Path'**
+  String get filePathLabel;
+
+  /// No description provided for @formatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get formatLabel;
+
+  /// No description provided for @bitrateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bitrate'**
+  String get bitrateLabel;
+
+  /// No description provided for @sampleRateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Rate'**
+  String get sampleRateLabel;
+
+  /// No description provided for @mfxSuperSlowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Super Slowed'**
+  String get mfxSuperSlowed;
+
+  /// No description provided for @mfxSlowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Slowed'**
+  String get mfxSlowed;
+
+  /// No description provided for @mfxNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get mfxNormal;
+
+  /// No description provided for @mfxSpedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sped Up'**
+  String get mfxSpedUp;
+
+  /// No description provided for @mfxNightcore.
+  ///
+  /// In en, this message translates to:
+  /// **'Nightcore'**
+  String get mfxNightcore;
+
+  /// No description provided for @mfxSuperSpedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Super Sped Up'**
+  String get mfxSuperSpedUp;
+
+  /// No description provided for @mfxSpeedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{speed}x Speed'**
+  String mfxSpeedSubtitle(String speed);
+
+  /// No description provided for @customEqualizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Equalizer'**
+  String get customEqualizer;
+
+  /// No description provided for @eqFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat'**
+  String get eqFlat;
+
+  /// No description provided for @eqPop.
+  ///
+  /// In en, this message translates to:
+  /// **'Pop'**
+  String get eqPop;
+
+  /// No description provided for @eqRock.
+  ///
+  /// In en, this message translates to:
+  /// **'Rock'**
+  String get eqRock;
+
+  /// No description provided for @eqJazz.
+  ///
+  /// In en, this message translates to:
+  /// **'Jazz'**
+  String get eqJazz;
+
+  /// No description provided for @eqClassical.
+  ///
+  /// In en, this message translates to:
+  /// **'Classical'**
+  String get eqClassical;
+
+  /// No description provided for @addToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favorites'**
+  String get addToFavorites;
+
+  /// No description provided for @removeFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get removeFromFavorites;
+
+  /// No description provided for @noPlaylistsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No playlists yet'**
+  String get noPlaylistsYet;
+
+  /// No description provided for @noPlaylistsYetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create custom playlists to group and organize your synced music files.'**
+  String get noPlaylistsYetSubtitle;
+
+  /// No description provided for @totalListeningTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Listening Time'**
+  String get totalListeningTime;
+
+  /// No description provided for @completeListens.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete\nListens'**
+  String get completeListens;
+
+  /// No description provided for @skips.
+  ///
+  /// In en, this message translates to:
+  /// **'Skips'**
+  String get skips;
+
+  /// No description provided for @restarts.
+  ///
+  /// In en, this message translates to:
+  /// **'Restarts'**
+  String get restarts;
+
+  /// No description provided for @funFacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Fun Facts'**
+  String get funFacts;
+
+  /// No description provided for @firstSongPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'First Song Played'**
+  String get firstSongPlayed;
+
+  /// No description provided for @mostPlayedSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Played Song'**
+  String get mostPlayedSong;
+
+  /// No description provided for @uniqueSongsPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unique Songs Played'**
+  String get uniqueSongsPlayed;
+
+  /// No description provided for @shuffleSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle Sessions'**
+  String get shuffleSessions;
+
+  /// No description provided for @mostActiveDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Active Day'**
+  String get mostActiveDay;
+
+  /// No description provided for @mostPlayedSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Played Songs'**
+  String get mostPlayedSongs;
+
+  /// No description provided for @noSongStatsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No listening data yet.\nStart playing music to see your top songs!'**
+  String get noSongStatsYet;
+
+  /// No description provided for @mostPlayedAlbums.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Played Albums'**
+  String get mostPlayedAlbums;
+
+  /// No description provided for @noAlbumStatsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No listening data yet.\nStart playing music to see your top albums!'**
+  String get noAlbumStatsYet;
+
+  /// No description provided for @mostPlayedArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Played Artists'**
+  String get mostPlayedArtists;
+
+  /// No description provided for @noArtistStatsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No listening data yet.\nStart playing music to see your top artists!'**
+  String get noArtistStatsYet;
+
+  /// No description provided for @mostPlayedPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Played Playlists'**
+  String get mostPlayedPlaylists;
+
+  /// No description provided for @noPlaylistStatsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No listening data yet.\nPlay music from playlists to see them here!'**
+  String get noPlaylistStatsYet;
+
+  /// No description provided for @playsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 play} other{{count} plays}}'**
+  String playsCount(int count);
+
+  /// No description provided for @startsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 start} other{{count} starts}}'**
+  String startsCount(int count);
+
+  /// No description provided for @songsCountShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} songs'**
+  String songsCountShort(int count);
+
+  /// No description provided for @importM3u.
+  ///
+  /// In en, this message translates to:
+  /// **'Import M3U'**
+  String get importM3u;
+
+  /// No description provided for @importedPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist imported'**
+  String get importedPlaylist;
+
+  /// No description provided for @playlistIsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist is empty'**
+  String get playlistIsEmpty;
+
+  /// No description provided for @playlistIsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the Songs list and use the song menu to add music to this playlist.'**
+  String get playlistIsEmptySubtitle;
+
+  /// No description provided for @playlistDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist \"{name}\" deleted.'**
+  String playlistDeleted(String name);
+
+  /// No description provided for @chooseFolderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a folder directory on your device to scan and play music from.'**
+  String get chooseFolderSubtitle;
+
+  /// No description provided for @noMusicFilesInFolderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please put some audio files (e.g. .mp3, .m4a) in the folder:\n\n{folder}'**
+  String noMusicFilesInFolderSubtitle(String folder);
+
+  /// No description provided for @removedFromQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed \"{title}\" from queue'**
+  String removedFromQueue(String title);
+
+  /// No description provided for @nowPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Now Playing'**
+  String get nowPlaying;
+
+  /// No description provided for @fromThisAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'From this album'**
+  String get fromThisAlbum;
+
+  /// No description provided for @moreByArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'More by {artist}'**
+  String moreByArtist(String artist);
+
+  /// No description provided for @savedPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {name}'**
+  String savedPlaylist(String name);
+
+  /// No description provided for @collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get collapse;
+
+  /// No description provided for @minimize.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize'**
+  String get minimize;
+
+  /// No description provided for @debugCacheInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug Cache Info'**
+  String get debugCacheInfo;
 }
 
 class _AppLocalizationsDelegate

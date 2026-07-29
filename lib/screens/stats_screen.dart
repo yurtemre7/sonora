@@ -47,7 +47,7 @@ class _StatsScreenState extends State<StatsScreen> {
       context,
       title: context.l10n.resetStatisticsTitle,
       message: context.l10n.resetStatisticsWarning,
-      confirmLabel: 'Reset',
+      confirmLabel: context.l10n.reset,
     );
     if (confirmed == true && mounted) {
       await _statsService.reset();
@@ -220,7 +220,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Total Listening Time',
+                  context.l10n.totalListeningTime,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onPrimaryContainer.withValues(
                       alpha: 0.7,
@@ -241,7 +241,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 child: _MetricCard(
                   icon: Icons.check_circle_rounded,
                   value: '${stats.completeSongListens}',
-                  label: 'Complete\nListens',
+                  label: context.l10n.completeListens,
                   theme: theme,
                 ),
               ),
@@ -250,7 +250,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 child: _MetricCard(
                   icon: Icons.album_rounded,
                   value: '$albumCount',
-                  label: 'Albums',
+                  label: context.l10n.albums,
                   theme: theme,
                 ),
               ),
@@ -263,7 +263,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 child: _MetricCard(
                   icon: Icons.mic_rounded,
                   value: '$artistCount',
-                  label: 'Artists',
+                  label: context.l10n.artists,
                   theme: theme,
                 ),
               ),
@@ -272,7 +272,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 child: _MetricCard(
                   icon: Icons.playlist_play_rounded,
                   value: '$playlistCount',
-                  label: 'Playlists',
+                  label: context.l10n.playlists,
                   theme: theme,
                 ),
               ),
@@ -285,7 +285,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 child: _MetricCard(
                   icon: Icons.skip_next_rounded,
                   value: '${stats.totalSkips}',
-                  label: 'Skips',
+                  label: context.l10n.skips,
                   theme: theme,
                 ),
               ),
@@ -294,7 +294,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 child: _MetricCard(
                   icon: Icons.replay_rounded,
                   value: '${stats.totalRestarts}',
-                  label: 'Restarts',
+                  label: context.l10n.restarts,
                   theme: theme,
                 ),
               ),
@@ -305,7 +305,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
           // Fun facts section
           Text(
-            'Fun Facts',
+            context.l10n.funFacts,
             style: theme.textTheme.titleSmall?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
@@ -317,7 +317,7 @@ class _StatsScreenState extends State<StatsScreen> {
               context,
               theme,
               Icons.emoji_events_rounded,
-              'First Song Played',
+              context.l10n.firstSongPlayed,
               firstSong.displayTitle,
             ),
           if (firstSong != null) const SizedBox(height: 8),
@@ -326,7 +326,7 @@ class _StatsScreenState extends State<StatsScreen> {
               context,
               theme,
               Icons.trending_up_rounded,
-              'Most Played Song',
+              context.l10n.mostPlayedSong,
               '${topSong.song.displayTitle} (${topSong.count}x)',
             ),
           if (topSong != null) const SizedBox(height: 8),
@@ -334,23 +334,23 @@ class _StatsScreenState extends State<StatsScreen> {
             context,
             theme,
             Icons.music_note_rounded,
-            'Unique Songs Played',
-            '$totalUnique songs',
+            context.l10n.uniqueSongsPlayed,
+            context.l10n.songsCountShort(totalUnique),
           ),
           const SizedBox(height: 8),
           _buildFactRow(
             context,
             theme,
             Icons.shuffle_rounded,
-            'Shuffle Sessions',
-            '${stats.shuffleSessionStarts} starts',
+            context.l10n.shuffleSessions,
+            context.l10n.startsCount(stats.shuffleSessionStarts),
           ),
           const SizedBox(height: 8),
           _buildFactRow(
             context,
             theme,
             Icons.calendar_today_rounded,
-            'Most Active Day',
+            context.l10n.mostActiveDay,
             activeDay,
           ),
 
@@ -422,7 +422,7 @@ class _StatsScreenState extends State<StatsScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 8, bottom: 16),
             child: Text(
-              'Most Played Songs',
+              context.l10n.mostPlayedSongs,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -432,7 +432,7 @@ class _StatsScreenState extends State<StatsScreen> {
             Expanded(
               child: Center(
                 child: Text(
-                  'No listening data yet.\nStart playing music to see your top songs!',
+                  context.l10n.noSongStatsYet,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -488,7 +488,7 @@ class _StatsScreenState extends State<StatsScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 8, bottom: 16),
             child: Text(
-              'Most Played Albums',
+              context.l10n.mostPlayedAlbums,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -498,7 +498,7 @@ class _StatsScreenState extends State<StatsScreen> {
             Expanded(
               child: Center(
                 child: Text(
-                  'No listening data yet.\nStart playing music to see your top albums!',
+                  context.l10n.noAlbumStatsYet,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -563,7 +563,7 @@ class _StatsScreenState extends State<StatsScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 8, bottom: 16),
             child: Text(
-              'Most Played Artists',
+              context.l10n.mostPlayedArtists,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -573,7 +573,7 @@ class _StatsScreenState extends State<StatsScreen> {
             Expanded(
               child: Center(
                 child: Text(
-                  'No listening data yet.\nStart playing music to see your top artists!',
+                  context.l10n.noArtistStatsYet,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -643,7 +643,7 @@ class _StatsScreenState extends State<StatsScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${entry.count} plays',
+                                context.l10n.playsCount(entry.count),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.primary,
                                   fontWeight: FontWeight.w600,
@@ -689,7 +689,7 @@ class _StatsScreenState extends State<StatsScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 8, bottom: 16),
             child: Text(
-              'Most Played Playlists',
+              context.l10n.mostPlayedPlaylists,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -699,7 +699,7 @@ class _StatsScreenState extends State<StatsScreen> {
             Expanded(
               child: Center(
                 child: Text(
-                  'No listening data yet.\nPlay music from playlists to see them here!',
+                  context.l10n.noPlaylistStatsYet,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -771,7 +771,7 @@ class _StatsScreenState extends State<StatsScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '$songCount songs · ${entry.count} plays',
+                                '${context.l10n.songCount(songCount)} · ${context.l10n.playsCount(entry.count)}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
@@ -1057,25 +1057,25 @@ class _TopSongCardState extends State<_TopSongCard> {
                         _buildStatItem(
                           context,
                           icon: Icons.play_arrow_rounded,
-                          label: 'Plays',
+                          label: context.l10n.play,
                           value: '${widget.entry.count}',
                         ),
                         _buildStatItem(
                           context,
                           icon: Icons.timer_rounded,
-                          label: 'Playtime',
+                          label: context.l10n.durationLabel,
                           value: playtimeStr,
                         ),
                         _buildStatItem(
                           context,
                           icon: Icons.skip_next_rounded,
-                          label: 'Skips',
+                          label: context.l10n.skips,
                           value: '${_statsService.songSkipCount(song.id)}',
                         ),
                         _buildStatItem(
                           context,
                           icon: Icons.replay_rounded,
-                          label: 'Restarts',
+                          label: context.l10n.restarts,
                           value: '${_statsService.songRestartCount(song.id)}',
                         ),
                       ],

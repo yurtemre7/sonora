@@ -415,5 +415,137 @@
   "yesterday": "Yesterday",
   "yourName": "Your Name",
   "yourNameOptional": "Your Name (Optional)",
-  "yourOwnPlaylist": "Your own playlist"
+  "yourOwnPlaylist": "Your own playlist",
+  "metadataGroup": "Metadata",
+  "fileInfoGroup": "File Info",
+  "audioPropertiesGroup": "Audio Properties",
+  "titleLabel": "Title",
+  "artistLabel": "Artist",
+  "albumLabel": "Album",
+  "trackLabel": "Track",
+  "genreLabel": "Genre",
+  "yearLabel": "Year",
+  "durationLabel": "Duration",
+  "filePathLabel": "File Path",
+  "formatLabel": "Format",
+  "bitrateLabel": "Bitrate",
+  "sampleRateLabel": "Sample Rate",
+  "mfxSuperSlowed": "Super Slowed",
+  "mfxSlowed": "Slowed",
+  "mfxNormal": "Normal",
+  "mfxSpedUp": "Sped Up",
+  "mfxNightcore": "Nightcore",
+  "mfxSuperSpedUp": "Super Sped Up",
+  "mfxSpeedSubtitle": "{speed}x Speed",
+  "@mfxSpeedSubtitle": {
+    "placeholders": {
+      "speed": {
+        "type": "String"
+      }
+    }
+  },
+  "customEqualizer": "Custom Equalizer",
+  "eqFlat": "Flat",
+  "eqPop": "Pop",
+  "eqRock": "Rock",
+  "eqJazz": "Jazz",
+  "eqClassical": "Classical",
+  "addToFavorites": "Add to favorites",
+  "removeFromFavorites": "Remove from favorites",
+  "noPlaylistsYet": "No playlists yet",
+  "noPlaylistsYetSubtitle": "Create custom playlists to group and organize your synced music files.",
+  "totalListeningTime": "Total Listening Time",
+  "completeListens": "Complete\nListens",
+  "skips": "Skips",
+  "restarts": "Restarts",
+  "funFacts": "Fun Facts",
+  "firstSongPlayed": "First Song Played",
+  "mostPlayedSong": "Most Played Song",
+  "uniqueSongsPlayed": "Unique Songs Played",
+  "shuffleSessions": "Shuffle Sessions",
+  "mostActiveDay": "Most Active Day",
+  "mostPlayedSongs": "Most Played Songs",
+  "noSongStatsYet": "No listening data yet.\nStart playing music to see your top songs!",
+  "mostPlayedAlbums": "Most Played Albums",
+  "noAlbumStatsYet": "No listening data yet.\nStart playing music to see your top albums!",
+  "mostPlayedArtists": "Most Played Artists",
+  "noArtistStatsYet": "No listening data yet.\nStart playing music to see your top artists!",
+  "mostPlayedPlaylists": "Most Played Playlists",
+  "noPlaylistStatsYet": "No listening data yet.\nPlay music from playlists to see them here!",
+  "playsCount": "{count, plural, =1{1 play} other{{count} plays}}",
+  "@playsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "startsCount": "{count, plural, =1{1 start} other{{count} starts}}",
+  "@startsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "songsCountShort": "{count} songs",
+  "@songsCountShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importM3u": "Import M3U",
+  "importedPlaylist": "Playlist imported",
+  "playlistIsEmpty": "Playlist is empty",
+  "playlistIsEmptySubtitle": "Go to the Songs list and use the song menu to add music to this playlist.",
+  "playlistDeleted": "Playlist \"{name}\" deleted.",
+  "@playlistDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseFolderSubtitle": "Choose a folder directory on your device to scan and play music from.",
+  "noMusicFilesInFolderSubtitle": "Please put some audio files (e.g. .mp3, .m4a) in the folder:\n\n{folder}",
+  "@noMusicFilesInFolderSubtitle": {
+    "placeholders": {
+      "folder": {
+        "type": "String"
+      }
+    }
+  },
+  "removedFromQueue": "Removed \"{title}\" from queue",
+  "@removedFromQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "nowPlaying": "Now Playing",
+  "fromThisAlbum": "From this album",
+  "moreByArtist": "More by {artist}",
+  "@moreByArtist": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "close": "Close",
+  "back": "Back",
+  "savedPlaylist": "Saved {name}",
+  "@savedPlaylist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "collapse": "Collapse",
+  "minimize": "Minimize",
+  "debugCacheInfo": "Debug Cache Info"
 }

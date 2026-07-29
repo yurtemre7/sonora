@@ -607,7 +607,7 @@ class _HomeScreenState extends State<HomeScreen>
                   else ...[
                     IconButton.filledTonal(
                       icon: const Icon(Icons.file_download_rounded),
-                      tooltip: 'Import M3U',
+                      tooltip: context.l10n.importM3u,
                       onPressed: () async {
                         var result = await FilePicker.pickFiles();
                         if (result != null && result.files.single.path != null) {
@@ -615,7 +615,9 @@ class _HomeScreenState extends State<HomeScreen>
                           if (file.path.toLowerCase().endsWith('.m3u') || file.path.toLowerCase().endsWith('.m3u8')) {
                             await widget.playerProvider.importM3u(file);
                             if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Imported')));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(context.l10n.importedPlaylist)),
+                            );
                           }
                         }
                       },

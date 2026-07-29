@@ -923,4 +923,226 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get yourOwnPlaylist => '自分のプレイリスト';
+
+  @override
+  String get metadataGroup => 'メタデータ';
+
+  @override
+  String get fileInfoGroup => 'ファイル情報';
+
+  @override
+  String get audioPropertiesGroup => 'オーディオプロパティ';
+
+  @override
+  String get titleLabel => 'タイトル';
+
+  @override
+  String get artistLabel => 'アーティスト';
+
+  @override
+  String get albumLabel => 'アルバム';
+
+  @override
+  String get trackLabel => 'トラック';
+
+  @override
+  String get genreLabel => 'ジャンル';
+
+  @override
+  String get yearLabel => '年';
+
+  @override
+  String get durationLabel => '再生時間';
+
+  @override
+  String get filePathLabel => 'ファイルパス';
+
+  @override
+  String get formatLabel => 'フォーマット';
+
+  @override
+  String get bitrateLabel => 'ビットレート';
+
+  @override
+  String get sampleRateLabel => 'サンプルレート';
+
+  @override
+  String get mfxSuperSlowed => 'スーパースロード';
+
+  @override
+  String get mfxSlowed => 'スロード';
+
+  @override
+  String get mfxNormal => 'ノーマル';
+
+  @override
+  String get mfxSpedUp => 'スピードアップ';
+
+  @override
+  String get mfxNightcore => 'ナイトコア';
+
+  @override
+  String get mfxSuperSpedUp => 'スーパースピードアップ';
+
+  @override
+  String mfxSpeedSubtitle(String speed) {
+    return '${speed}x スピード';
+  }
+
+  @override
+  String get customEqualizer => 'カスタムイコライザー';
+
+  @override
+  String get eqFlat => 'フラット';
+
+  @override
+  String get eqPop => 'ポップ';
+
+  @override
+  String get eqRock => 'ロック';
+
+  @override
+  String get eqJazz => 'ジャズ';
+
+  @override
+  String get eqClassical => 'クラシック';
+
+  @override
+  String get addToFavorites => 'お気に入りに追加';
+
+  @override
+  String get removeFromFavorites => 'お気に入りから削除';
+
+  @override
+  String get noPlaylistsYet => 'プレイリストがまだありません';
+
+  @override
+  String get noPlaylistsYetSubtitle =>
+      '同期した音楽ファイルをグループ化して整理するためにカスタムプレイリストを作成しましょう。';
+
+  @override
+  String get totalListeningTime => '総再生時間';
+
+  @override
+  String get completeListens => '完奏回数';
+
+  @override
+  String get skips => 'スキップ数';
+
+  @override
+  String get restarts => '再開数';
+
+  @override
+  String get funFacts => 'ファンファクト';
+
+  @override
+  String get firstSongPlayed => '最初に再生した曲';
+
+  @override
+  String get mostPlayedSong => '最も再生した曲';
+
+  @override
+  String get uniqueSongsPlayed => '再生したユニークな曲';
+
+  @override
+  String get shuffleSessions => 'シャッフルセッション';
+
+  @override
+  String get mostActiveDay => '最もアクティブな曜日';
+
+  @override
+  String get mostPlayedSongs => '再生数の多い曲';
+
+  @override
+  String get noSongStatsYet => '再生データがまだありません。\n音楽を聴き始めると、ここにトップ曲が表示されます！';
+
+  @override
+  String get mostPlayedAlbums => '再生数の多いアルバム';
+
+  @override
+  String get noAlbumStatsYet => '再生データがまだありません。\n音楽を聴き始めると、ここにトップアルバムが表示されます！';
+
+  @override
+  String get mostPlayedArtists => '再生数の多いアーティスト';
+
+  @override
+  String get noArtistStatsYet =>
+      '再生データがまだありません。\n音楽を聴き始めると、ここにトップアーティストが表示されます！';
+
+  @override
+  String get mostPlayedPlaylists => '再生数の多いプレイリスト';
+
+  @override
+  String get noPlaylistStatsYet =>
+      '再生データがまだありません。\nプレイリストから音楽を再生すると、ここに表示されます！';
+
+  @override
+  String playsCount(int count) {
+    return '$count 回再生';
+  }
+
+  @override
+  String startsCount(int count) {
+    return '$count 回';
+  }
+
+  @override
+  String songsCountShort(int count) {
+    return '$count 曲';
+  }
+
+  @override
+  String get importM3u => 'M3Uからインポート';
+
+  @override
+  String get importedPlaylist => 'プレイリストをインポートしました';
+
+  @override
+  String get playlistIsEmpty => 'プレイリストは空です';
+
+  @override
+  String get playlistIsEmptySubtitle => '曲一覧に移動し、曲メニューからこのプレイリストに音楽を追加してください。';
+
+  @override
+  String playlistDeleted(String name) {
+    return 'プレイリスト「$name」を削除しました。';
+  }
+
+  @override
+  String get chooseFolderSubtitle => '端末内のフォルダを選択して、音楽をスキャン・再生します。';
+
+  @override
+  String noMusicFilesInFolderSubtitle(String folder) {
+    return 'フォルダに音声ファイル（.mp3, .m4aなど）を配置してください:\n\n$folder';
+  }
+
+  @override
+  String removedFromQueue(String title) {
+    return '「$title」をキューから削除しました';
+  }
+
+  @override
+  String get nowPlaying => '再生中';
+
+  @override
+  String get fromThisAlbum => 'このアルバムから';
+
+  @override
+  String moreByArtist(String artist) {
+    return '$artistのその他の曲';
+  }
+
+  @override
+  String savedPlaylist(String name) {
+    return '「$name」を保存しました';
+  }
+
+  @override
+  String get collapse => '折りたたむ';
+
+  @override
+  String get minimize => '最小化';
+
+  @override
+  String get debugCacheInfo => 'デバッグキャッシュ情報';
 }

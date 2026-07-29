@@ -134,7 +134,7 @@ class _QueueScreenState extends State<QueueScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Removed "${song.displayTitle}" from queue',
+                              context.l10n.removedFromQueue(song.displayTitle),
                             ),
                             duration: const Duration(seconds: 2),
                             behavior: SnackBarBehavior.floating,

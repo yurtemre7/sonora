@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 class AnimatedFavoriteButton extends StatefulWidget {
   final bool isFavorite;
@@ -67,8 +68,8 @@ class _AnimatedFavoriteButtonState extends State<AnimatedFavoriteButton>
           size: widget.size,
         ),
         tooltip: widget.isFavorite
-            ? 'Remove from favorites'
-            : 'Add to favorites',
+            ? context.l10n.removeFromFavorites
+            : context.l10n.addToFavorites,
         onPressed: _handleToggle,
       ),
     );

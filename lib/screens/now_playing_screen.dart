@@ -17,6 +17,7 @@ import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/ambient_glow.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
+import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/audio_visualizer.dart';
 import 'package:sonora/widgets/marquee_text.dart';
 import 'package:sonora/widgets/mfx_bottom_sheet.dart';
@@ -87,7 +88,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                     : Icons.arrow_back_rounded,
               ),
               iconSize: _viewMode == _ViewMode.player ? 32 : 24,
-              tooltip: _viewMode == _ViewMode.player ? 'Close' : 'Back',
+              tooltip: _viewMode == _ViewMode.player
+                  ? context.l10n.collapse
+                  : context.l10n.back,
               onPressed: () {
                 if (_viewMode == _ViewMode.player) {
                   closeRoute(context);
@@ -98,7 +101,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             ),
             title: Text(
               _viewMode == _ViewMode.player
-                  ? 'Now Playing'
+                  ? context.l10n.nowPlaying
                   : _viewMode == _ViewMode.upNext
                       ? context.l10n.upNext
                       : _viewMode == _ViewMode.lyrics
@@ -750,7 +753,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
-              'From this album',
+              context.l10n.fromThisAlbum,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -772,7 +775,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
-              'More by ${song.artist}',
+              context.l10n.moreByArtist(song.artist),
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -1011,8 +1014,76 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   }
 
   void _showArtistSheet(BuildContext context, String artistName) {
-    var artist = buildArtistGroup(artistName, widget.playerProvider.allSongs);
-    if (artist.songs.isEmpty) return;
+    var artists = parseIndividualArtists(artistName);
+    if (artists.isEmpty) return;
+
+    if (artists.length == 1) {
+      var artist = buildArtistGroup(
+        artists.first,
+        widget.playerProvider.allSongs,
+      );
+      if (artist.songs.isEmpty) return;
+      _openArtistDetailModal(context, artist);
+    } else {
+      showModalBottomSheet(
+        context: context,
+        useSafeArea: true,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (context) {
+          var theme = Theme.of(context);
+          return Material(
+            color: Colors.transparent,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        context.l10n.artists,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    ...artists.map((name) {
+                      var group = buildArtistGroup(
+                        name,
+                        widget.playerProvider.allSongs,
+                      );
+                      return ListTile(
+                        leading: ArtistAvatar(artist: group, radius: 20),
+                        title: Text(group.name),
+                        subtitle: Text(
+                          '${group.songs.length} ${context.l10n.songs}',
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _openArtistDetailModal(context, group);
+                        },
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  void _openArtistDetailModal(BuildContext context, ArtistGroup artist) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1366,7 +1437,7 @@ class _SaveQueueDialogContentState extends State<_SaveQueueDialogContent> {
               Navigator.pop(context);
               widget.playerProvider.saveQueueAsPlaylist(name);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Saved $name')),
+                SnackBar(content: Text(context.l10n.savedPlaylist(name))),
               );
             }
           },
