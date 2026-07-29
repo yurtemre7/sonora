@@ -2,15 +2,13 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [Unreleased]
-### Added
-* Add localization support (EN/JA) for Song Info metadata fields, MFX presets & Custom Equalizer, Favorite button tooltips, empty playlists state, Import M3U actions, and Stats screen.
+## [1.16.3] - 2026-07-29
 ### Fixed
-* Optimize DebugCacheInfo screen performance for large music libraries (500+ songs) by virtualizing slivers and replacing heavy text selection nodes
-* Localize Now Playing screen header (`Now Playing` / `再生中`), down arrow tooltip (`Collapse` / `折りたたむ`), navigation tooltips (`Back`), and Related tab section titles (`From this album` / `More by...`)
-* Localize all empty state titles, subtitles, zero-song counts (`0 songs` / `0 曲`), Reset confirmation action labels, and M3U import tooltips across the app
-* Unify album tracks sharing the same album name into a single album entry regardless of featuring artist tags per track
-* Split multi-artist tags so each artist receives their own dedicated artist entry without duplicate combination strings
+* Add full EN/JA localization for Song Info, MFX, Stats, Now Playing, empty states, and M3U actions
+* Improve album and artist detection
+### Changed
+* Docs: Update CHANGELOG.md with recent fixes and l10n additions
+* Perf: Optimize DebugCacheInfo screen with virtualized slivers for large libraries
 
 ## [1.16.2] - 2026-07-27
 ### Added
