@@ -6,7 +6,10 @@ All notable changes to the Sonora music player project are documented in this fi
 ### Fixed
 * Add full EN/JA localization for Song Info, MFX, Stats, Now Playing, empty states, and M3U actions
 * Improve album and artist detection
+* Smooth out immersive mode toggle animation on Now Playing cover art and prevent image decode churn
+* Prevent push notification permission prompt on app launch so it only appears on the onboarding permissions page
 ### Changed
+* Upgrade `permission_handler` to `^13.0.0` (with Android `compileSdk = 37` target)
 * Docs: Update CHANGELOG.md with recent fixes and l10n additions
 * Perf: Optimize DebugCacheInfo screen with virtualized slivers for large libraries
 
