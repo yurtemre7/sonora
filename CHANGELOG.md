@@ -2,14 +2,15 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.16.3] - 2026-07-29
+## [1.16.3] - 2026-07-31
 ### Fixed
+* Defer notification permission request to onboarding permissions slide
+* Smooth out cover art scaling during immersive mode toggle and quantize cache dimensions
 * Add full EN/JA localization for Song Info, MFX, Stats, Now Playing, empty states, and M3U actions
 * Improve album and artist detection
-* Smooth out immersive mode toggle animation on Now Playing cover art and prevent image decode churn
-* Prevent push notification permission prompt on app launch so it only appears on the onboarding permissions page
 ### Changed
-* Upgrade `permission_handler` to `^13.0.0` (with Android `compileSdk = 37` target)
+* Docs: Update CHANGELOG.md with recent fixes and dependency upgrades
+* Chore: Upgrade permission_handler to ^13.0.0
 * Docs: Update CHANGELOG.md with recent fixes and l10n additions
 * Perf: Optimize DebugCacheInfo screen with virtualized slivers for large libraries
 
