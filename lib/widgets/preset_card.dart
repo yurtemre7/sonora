@@ -39,7 +39,6 @@ class PresetCard extends StatelessWidget {
           width: 140,
           padding: const EdgeInsets.all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
@@ -51,6 +50,8 @@ class PresetCard extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: isSelected
@@ -59,8 +60,11 @@ class PresetCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
+              const Spacer(),
               Text(
                 subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: isSelected
                       ? theme.colorScheme.onPrimaryContainer.withValues(

@@ -213,78 +213,81 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                               ),
-                              child: Row(
-                                children: [
-                                  PresetCard(
-                                    title: context.l10n.mfxSuperSlowed,
-                                    subtitle: context.l10n.mfxSpeedSubtitle('0.70'),
-                                    icon: Icons.fast_rewind_rounded,
-                                    isSelected: player.isSuperSlowed,
-                                    onTap: () {
-                                      player.setSuperSlowed(true);
-                                      _scrollToIndex(0);
-                                    },
-                                  ),
-                                  PresetCard(
-                                    title: context.l10n.mfxSlowed,
-                                    subtitle: context.l10n.mfxSpeedSubtitle('0.85'),
-                                    icon: Icons.fast_rewind_rounded,
-                                    isSelected: player.isSlowed,
-                                    onTap: () {
-                                      player.setSlowed(true);
-                                      _scrollToIndex(1);
-                                    },
-                                  ),
-                                  PresetCard(
-                                    title: context.l10n.mfxNormal,
-                                    subtitle: context.l10n.mfxSpeedSubtitle('1.0'),
-                                    icon: Icons.play_arrow_rounded,
-                                    isSelected:
-                                        !player.isSuperSlowed &&
-                                        !player.isSlowed &&
-                                        !player.isSpedUp &&
-                                        !player.isSuperSpedUp &&
-                                        !player.isNightcore,
-                                    onTap: () {
-                                      player.setSuperSlowed(false);
-                                      player.setSlowed(false);
-                                      player.setSpedUp(false);
-                                      player.setSuperSpedUp(false);
-                                      player.setNightcore(false);
-                                      _scrollToIndex(2);
-                                    },
-                                  ),
-                                  PresetCard(
-                                    title: context.l10n.mfxSpedUp,
-                                    subtitle: context.l10n.mfxSpeedSubtitle('1.25'),
-                                    icon: Icons.fast_forward_rounded,
-                                    isSelected: player.isSpedUp,
-                                    onTap: () {
-                                      player.setSpedUp(true);
-                                      _scrollToIndex(3);
-                                    },
-                                  ),
-                                  PresetCard(
-                                    title: context.l10n.mfxNightcore,
-                                    subtitle: context.l10n.mfxSpeedSubtitle('1.30'),
-                                    icon: Icons.bolt_rounded,
-                                    isSelected: player.isNightcore,
-                                    onTap: () {
-                                      player.setNightcore(true);
-                                      _scrollToIndex(4);
-                                    },
-                                  ),
-                                  PresetCard(
-                                    title: context.l10n.mfxSuperSpedUp,
-                                    subtitle: context.l10n.mfxSpeedSubtitle('1.50'),
-                                    icon: Icons.fast_forward_rounded,
-                                    isSelected: player.isSuperSpedUp,
-                                    onTap: () {
-                                      player.setSuperSpedUp(true);
-                                      _scrollToIndex(5);
-                                    },
-                                  ),
-                                ],
+                              child: IntrinsicHeight(
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    PresetCard(
+                                      title: context.l10n.mfxSuperSlowed,
+                                      subtitle: context.l10n.mfxSpeedSubtitle('0.70'),
+                                      icon: Icons.fast_rewind_rounded,
+                                      isSelected: player.isSuperSlowed,
+                                      onTap: () {
+                                        player.setSuperSlowed(true);
+                                        _scrollToIndex(0);
+                                      },
+                                    ),
+                                    PresetCard(
+                                      title: context.l10n.mfxSlowed,
+                                      subtitle: context.l10n.mfxSpeedSubtitle('0.85'),
+                                      icon: Icons.fast_rewind_rounded,
+                                      isSelected: player.isSlowed,
+                                      onTap: () {
+                                        player.setSlowed(true);
+                                        _scrollToIndex(1);
+                                      },
+                                    ),
+                                    PresetCard(
+                                      title: context.l10n.mfxNormal,
+                                      subtitle: context.l10n.mfxSpeedSubtitle('1.0'),
+                                      icon: Icons.play_arrow_rounded,
+                                      isSelected:
+                                          !player.isSuperSlowed &&
+                                          !player.isSlowed &&
+                                          !player.isSpedUp &&
+                                          !player.isSuperSpedUp &&
+                                          !player.isNightcore,
+                                      onTap: () {
+                                        player.setSuperSlowed(false);
+                                        player.setSlowed(false);
+                                        player.setSpedUp(false);
+                                        player.setSuperSpedUp(false);
+                                        player.setNightcore(false);
+                                        _scrollToIndex(2);
+                                      },
+                                    ),
+                                    PresetCard(
+                                      title: context.l10n.mfxSpedUp,
+                                      subtitle: context.l10n.mfxSpeedSubtitle('1.25'),
+                                      icon: Icons.fast_forward_rounded,
+                                      isSelected: player.isSpedUp,
+                                      onTap: () {
+                                        player.setSpedUp(true);
+                                        _scrollToIndex(3);
+                                      },
+                                    ),
+                                    PresetCard(
+                                      title: context.l10n.mfxNightcore,
+                                      subtitle: context.l10n.mfxSpeedSubtitle('1.30'),
+                                      icon: Icons.bolt_rounded,
+                                      isSelected: player.isNightcore,
+                                      onTap: () {
+                                        player.setNightcore(true);
+                                        _scrollToIndex(4);
+                                      },
+                                    ),
+                                    PresetCard(
+                                      title: context.l10n.mfxSuperSpedUp,
+                                      subtitle: context.l10n.mfxSpeedSubtitle('1.50'),
+                                      icon: Icons.fast_forward_rounded,
+                                      isSelected: player.isSuperSpedUp,
+                                      onTap: () {
+                                        player.setSuperSpedUp(true);
+                                        _scrollToIndex(5);
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                             const SizedBox(height: 16),
