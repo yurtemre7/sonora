@@ -58,7 +58,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     var theme = Theme.of(context);
 
     return ListenableBuilder(
-      listenable: widget.playerProvider,
+      listenable: Listenable.merge([
+        widget.playerProvider,
+        SettingsProvider.instance,
+      ]),
       builder: (context, _) {
         var song = widget.playerProvider.currentSong;
         var currentIndex = widget.playerProvider.currentIndex;
@@ -340,12 +343,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                             child: AlbumArt(
                               key: ValueKey(song.id),
                               artworkPath: song.artworkPath,
-                              size: SettingsProvider.instance.immersiveMode
-                                  ? constraints.maxWidth
-                                  : min(
-                                      MediaQuery.sizeOf(context).width * 0.80,
-                                      300.0,
-                                    ),
+                              size: double.infinity,
                               borderRadius: 28,
                             ),
                           ),

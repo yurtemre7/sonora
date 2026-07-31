@@ -26,7 +26,8 @@ class AlbumArt extends StatelessWidget {
             : size;
 
         var devicePixelRatio = MediaQuery.of(context).devicePixelRatio.clamp(1.0, 2.5);
-        var targetCacheDim = (resolvedSize * devicePixelRatio).toInt().clamp(64, 800);
+        var rawCacheDim = (resolvedSize * devicePixelRatio).toInt();
+        var targetCacheDim = ((rawCacheDim / 128).ceil() * 128).clamp(128, 800);
 
         return Container(
           width: resolvedSize,
