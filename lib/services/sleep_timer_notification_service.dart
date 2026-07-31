@@ -43,14 +43,6 @@ class SleepTimerNotificationService {
       },
     );
 
-    var androidPlugin =
-        _notificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-
-    if (androidPlugin != null) {
-      await androidPlugin.requestNotificationsPermission();
-    }
-
     _initialized = true;
   }
 
