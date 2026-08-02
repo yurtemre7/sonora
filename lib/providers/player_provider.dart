@@ -42,6 +42,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   var currentIndex = -1;
   var isShuffled = false;
   RepeatMode repeatMode = RepeatMode.off;
+  var _hasRestoredLastPlayed = false;
   var _isExtractingColors = false;
   bool get isExtractingColors => _isExtractingColors;
 
@@ -433,6 +434,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     queue = [];
     _originalQueue = [];
     currentIndex = -1;
+    await _clearLastPlayedState();
     notifyListeners();
   }
 
@@ -665,9 +667,14 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     allSongs = List<Song>.from(songs);
     _refreshLibrarySnapshots();
     if (currentIndex < 0 || queue.isEmpty) {
-      // Nothing playing — replace queue entirely.
-      queue = List<Song>.from(songs);
-      _originalQueue = List<Song>.from(songs);
+      if (!_hasRestoredLastPlayed) {
+        _hasRestoredLastPlayed = true;
+        restoreLastPlayedState(allSongs);
+      } else {
+        // Nothing playing — replace queue entirely.
+        queue = List<Song>.from(songs);
+        _originalQueue = List<Song>.from(songs);
+      }
     } else {
       // A song is playing — keep the queue intact but refresh the audio
       // handler's raw playlist metadata so index-based skips stay correct.
@@ -790,6 +797,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
           currentIndex = index;
           notifyListeners();
         }
+        _saveLastPlayedState();
       }
     });
   }
@@ -802,6 +810,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   void _listenToPlaybackState() {
     _playingSub = audioHandler.player.playingStream.listen((isPlaying) {
       notifyListeners();
+      _saveLastPlayedState();
       if (isPlaying) {
         _statsTimer ??= Timer.periodic(const Duration(seconds: 1), (_) {
           var song = currentSong;
@@ -826,8 +835,11 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
       statsService.flush();
+      _saveLastPlayedState();
     }
   }
 
@@ -1023,6 +1035,109 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       _extractThemeColorForSong(currentSong!);
     }
     notifyListeners();
+  }
+
+  Future<void> _saveLastPlayedState() async {
+    if (currentSong == null) return;
+    try {
+      var prefs = SharedPreferencesAsync();
+      await prefs.setInt('last_played_song_id', currentSong!.id);
+      await prefs.setStringList(
+        'last_played_queue_ids',
+        queue.map((s) => s.id.toString()).toList(),
+      );
+      await prefs.setStringList(
+        'last_played_original_queue_ids',
+        _originalQueue.map((s) => s.id.toString()).toList(),
+      );
+      await prefs.setInt(
+        'last_played_position_ms',
+        audioHandler.player.position.inMilliseconds,
+      );
+      await prefs.setBool('last_played_is_shuffled', isShuffled);
+    } catch (_) {}
+  }
+
+  Future<void> _clearLastPlayedState() async {
+    try {
+      var prefs = SharedPreferencesAsync();
+      await prefs.remove('last_played_song_id');
+      await prefs.remove('last_played_queue_ids');
+      await prefs.remove('last_played_original_queue_ids');
+      await prefs.remove('last_played_position_ms');
+      await prefs.remove('last_played_is_shuffled');
+    } catch (_) {}
+  }
+
+  /// Restores the last played song, position, and queue state from storage.
+  Future<void> restoreLastPlayedState([List<Song>? targetSongs]) async {
+    var library = targetSongs ?? allSongs;
+    if (library.isEmpty) return;
+    if (currentIndex >= 0 && queue.isNotEmpty) return;
+
+    try {
+      var prefs = SharedPreferencesAsync();
+      var savedSongId = await prefs.getInt('last_played_song_id');
+      if (savedSongId == null) return;
+
+      var songMap = {for (var s in library) s.id: s};
+      var targetSong = songMap[savedSongId];
+      if (targetSong == null) return;
+
+      var savedQueueIds =
+          await prefs.getStringList('last_played_queue_ids') ?? [];
+      var savedOrigIds =
+          await prefs.getStringList('last_played_original_queue_ids') ?? [];
+      var savedPositionMs =
+          await prefs.getInt('last_played_position_ms') ?? 0;
+      var savedShuffled =
+          await prefs.getBool('last_played_is_shuffled') ?? false;
+
+      var restoredQueue = <Song>[];
+      for (var idStr in savedQueueIds) {
+        var id = int.tryParse(idStr);
+        if (id != null && songMap.containsKey(id)) {
+          restoredQueue.add(songMap[id]!);
+        }
+      }
+      if (restoredQueue.isEmpty) {
+        restoredQueue = [targetSong];
+      }
+
+      var restoredOrigQueue = <Song>[];
+      for (var idStr in savedOrigIds) {
+        var id = int.tryParse(idStr);
+        if (id != null && songMap.containsKey(id)) {
+          restoredOrigQueue.add(songMap[id]!);
+        }
+      }
+      if (restoredOrigQueue.isEmpty) {
+        restoredOrigQueue = List<Song>.from(restoredQueue);
+      }
+
+      var index = restoredQueue.indexWhere((s) => s.id == savedSongId);
+      if (index < 0) index = 0;
+
+      queue = restoredQueue;
+      _originalQueue = restoredOrigQueue;
+      currentIndex = index;
+      isShuffled = savedShuffled;
+
+      var mediaItems = queue.map(_songToMediaItem).toList();
+      var initialPos = Duration(milliseconds: savedPositionMs);
+
+      await audioHandler.loadPlaylist(
+        mediaItems,
+        initialIndex: currentIndex,
+        initialPosition: initialPos,
+      );
+
+      if (settingsProvider.useDynamicTheme) {
+        _extractThemeColorForSong(targetSong);
+      }
+
+      notifyListeners();
+    } catch (_) {}
   }
 
   Future<void> setDefaultThemeColor(Color color) async {
