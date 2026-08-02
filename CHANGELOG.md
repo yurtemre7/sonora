@@ -2,18 +2,25 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.16.4] - 2026-08-02
+## [1.17.0] - 2026-08-02
 ### Added
+* Improve sync directory search algorithm
 * Add toggle to remember last played song on startup (defaults to on)
 * Persist and restore last played song, position, and queue state on app reopen
 ### Fixed
 * Sync native and Dart multi-artist image resolution and fallback logic
+### Changed
+* Chore: Update packages
+* Docs: Update CHANGELOG.md with setting toggle feature
+* Docs: Update CHANGELOG.md with last played song persistence feature
+* Docs: Update CHANGELOG.md with artist image resolution fix
+
+## [1.16.4] - 2026-07-31
+### Fixed
 * Align MFX speed preset card heights when title text overflows
 * Defer notification permission request to onboarding permissions slide
 * Smooth out cover art scaling during immersive mode toggle and quantize cache dimensions
 ### Changed
-* Docs: Update CHANGELOG.md with last played song persistence feature
-* Docs: Update CHANGELOG.md with artist image resolution fix
 * Docs: Regenerate CHANGELOG.md using scripts/generate_changelog.py
 * Docs: Update CHANGELOG.md with recent fixes and dependency upgrades
 * Chore: Upgrade permission_handler to ^13.0.0
