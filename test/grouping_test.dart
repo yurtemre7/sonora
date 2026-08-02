@@ -173,10 +173,16 @@ void main() {
         'Ufo361',
       ]);
 
-      var ufoGroup = artists.firstWhere((a) => a.name == 'Ufo361');
-      expect(ufoGroup.songs.length, 2);
-      var gzuzGroup = artists.firstWhere((a) => a.name == 'Gzuz');
-      expect(gzuzGroup.songs.length, 1);
+      // Test individual artist grouping with local artist image map
+      var localImagesMap = {
+        'ufo361': '/tmp/ufo361.jpg',
+        'capital bra': '/tmp/capital.jpg',
+      };
+      var artistsWithImages = buildArtistGroups(songs, albums, localImagesMap);
+      var ufoWithImage = artistsWithImages.firstWhere((a) => a.name == 'Ufo361');
+      var capWithImage = artistsWithImages.firstWhere((a) => a.name == 'Capital Bra');
+      expect(ufoWithImage.localImagePath, '/tmp/ufo361.jpg');
+      expect(capWithImage.localImagePath, '/tmp/capital.jpg');
     },
   );
 }

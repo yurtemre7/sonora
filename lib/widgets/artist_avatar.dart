@@ -18,10 +18,23 @@ class ArtistAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    var hasLocalImage = artist.localImagePath != null;
-    var fallbackArtworkPath = artist.songs.isNotEmpty
-        ? artist.songs.first.artworkPath
-        : null;
+    String? localImagePath;
+    if (artist.localImagePath != null &&
+        File(artist.localImagePath!).existsSync()) {
+      localImagePath = artist.localImagePath;
+    }
+
+    String? fallbackArtworkPath;
+    if (localImagePath == null) {
+      for (var song in artist.songs) {
+        if (song.artworkPath != null && File(song.artworkPath!).existsSync()) {
+          fallbackArtworkPath = song.artworkPath;
+          break;
+        }
+      }
+    }
+
+    var hasLocalImage = localImagePath != null;
     var hasFallback = fallbackArtworkPath != null;
 
     return Container(
@@ -40,7 +53,7 @@ class ArtistAvatar extends StatelessWidget {
               radius: radius,
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
               backgroundImage: ResizeImage(
-                FileImage(File(artist.localImagePath!)),
+                FileImage(File(localImagePath)),
                 width: (radius * 3).toInt().clamp(64, 400),
                 height: (radius * 3).toInt().clamp(64, 400),
               ),

@@ -72,6 +72,43 @@ class MusicScanner {
         var finalArtistImages = <String, String>{};
         var normFolderPath = folderPath.replaceAll('\\', '/');
 
+        String? findArtistImage(String targetArtistLower, Directory startDir) {
+          Directory? current = startDir;
+          while (current != null) {
+            var normCurrentPath = current.path.replaceAll('\\', '/');
+            var images =
+                localImageFiles[current.path] ??
+                localImageFiles[normCurrentPath];
+            if (images != null && images.isNotEmpty) {
+              for (var img in images) {
+                var name = img.split(RegExp(r'[/\\]')).last.toLowerCase();
+                if (name == 'artist.jpg' ||
+                    name == 'artist.png' ||
+                    name == 'artist.webp' ||
+                    name == 'artist.jpeg') {
+                  return img;
+                }
+                if (name == '$targetArtistLower.jpg' ||
+                    name == '$targetArtistLower.png' ||
+                    name == '$targetArtistLower.webp' ||
+                    name == '$targetArtistLower.jpeg') {
+                  return img;
+                }
+              }
+              var dirName =
+                  normCurrentPath.split('/').last.toLowerCase().trim();
+              if (dirName == targetArtistLower) {
+                return images.first;
+              }
+            }
+            if (normCurrentPath == normFolderPath) break;
+            var parent = current.parent;
+            if (parent.path == current.path) break;
+            current = parent;
+          }
+          return null;
+        }
+
         for (var song in songs) {
           var artists = parseIndividualArtists(song.artist);
           for (var artistName in artists) {
@@ -79,47 +116,20 @@ class MusicScanner {
             if (lowerArtist.isEmpty || lowerArtist == 'unknown artist') continue;
             if (finalArtistImages.containsKey(lowerArtist)) continue;
 
-            String? findArtistImage(Directory startDir) {
-              Directory? current = startDir;
-              while (current != null) {
-                var normCurrentPath = current.path.replaceAll('\\', '/');
-                var images =
-                    localImageFiles[current.path] ??
-                    localImageFiles[normCurrentPath];
-                if (images != null && images.isNotEmpty) {
-                  for (var img in images) {
-                    var name = img.split(RegExp(r'[/\\]')).last.toLowerCase();
-                    if (name == 'artist.jpg' ||
-                        name == 'artist.png' ||
-                        name == 'artist.webp' ||
-                        name == 'artist.jpeg') {
-                      return img;
-                    }
-                    if (name == '$lowerArtist.jpg' ||
-                        name == '$lowerArtist.png' ||
-                        name == '$lowerArtist.webp' ||
-                        name == '$lowerArtist.jpeg') {
-                      return img;
-                    }
-                  }
-                  var dirName =
-                      normCurrentPath.split('/').last.toLowerCase().trim();
-                  if (dirName == lowerArtist) {
-                    return images.first;
-                  }
-                }
-                if (normCurrentPath == normFolderPath) break;
-                var parent = current.parent;
-                if (parent.path == current.path) break;
-                current = parent;
-              }
-              return null;
-            }
-
             var songFile = File(song.filePath);
-            var match = findArtistImage(songFile.parent);
+            var match = findArtistImage(lowerArtist, songFile.parent);
             if (match != null) {
               finalArtistImages[lowerArtist] = match;
+            }
+          }
+
+          var rawLower = song.artist.trim().toLowerCase();
+          if (rawLower.isNotEmpty &&
+              rawLower != 'unknown artist' &&
+              !finalArtistImages.containsKey(rawLower)) {
+            var match = findArtistImage(rawLower, File(song.filePath).parent);
+            if (match != null) {
+              finalArtistImages[rawLower] = match;
             }
           }
         }

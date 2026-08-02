@@ -115,9 +115,27 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
-    private fun resolveArtistImage(songFile: File, artist: String, rootFolderPath: String?, dirImageCache: MutableMap<String, List<File>>): String? {
-        val cleanArtist = artist.lowercase().split(Regex("[,;/]|\\sfeat\\.|\\sft\\.")).firstOrNull()?.trim() ?: ""
-        val lowerArtist = artist.lowercase().trim()
+    private fun parseIndividualArtistsKotlin(artistString: String): List<String> {
+        val trimmed = artistString.trim()
+        if (trimmed.isEmpty()) return listOf("unknown artist")
+        val rawList = trimmed.split(Regex("[,;/&\\\\]|\\s+(?:feat\\.?|ft\\.?|featuring|vs\\.?|with|[xX\\+])\\s+", RegexOption.IGNORE_CASE))
+        val result = mutableListOf<String>()
+        val seen = mutableSetOf<String>()
+        for (name in rawList) {
+            var clean = name.trim().replace(Regex("^[(\\[\\s]+|[)\\]\\s]+$"), "").trim()
+            if (clean.isNotEmpty()) {
+                val lower = clean.lowercase()
+                if (!seen.contains(lower)) {
+                    seen.add(lower)
+                    result.add(clean)
+                }
+            }
+        }
+        return if (result.isEmpty()) listOf("unknown artist") else result
+    }
+
+    private fun resolveArtistImage(songFile: File, artistName: String, rootFolderPath: String?, dirImageCache: MutableMap<String, List<File>>): String? {
+        val lowerArtist = artistName.lowercase().trim()
         val normRoot = rootFolderPath?.trimEnd('/', '\\')?.replace('\\', '/')
 
         var current: File? = songFile.parentFile
@@ -138,12 +156,12 @@ class MainActivity : AudioServiceActivity() {
                     if (name == "artist.jpg" || name == "artist.png" || name == "artist.webp" || name == "artist.jpeg") {
                         return img.absolutePath
                     }
-                    if (cleanArtist.isNotEmpty() && (name == "$cleanArtist.jpg" || name == "$cleanArtist.png" || name == "$cleanArtist.webp" || name == "$cleanArtist.jpeg")) {
+                    if (name == "$lowerArtist.jpg" || name == "$lowerArtist.png" || name == "$lowerArtist.webp" || name == "$lowerArtist.jpeg") {
                         return img.absolutePath
                     }
                 }
                 val dirName = current.name.lowercase().trim()
-                if (dirName == cleanArtist || dirName == lowerArtist) {
+                if (dirName == lowerArtist) {
                     return images.first().absolutePath
                 }
             }
@@ -248,17 +266,23 @@ class MainActivity : AudioServiceActivity() {
                     }
                     val artworkPath = albumArtFileMap[albumId]
 
-                    // Resolve local artist image in native Kotlin if valid artist and not searched yet
-                    val lowerArtist = artist.lowercase().trim()
-                    if (lowerArtist.isNotEmpty() && lowerArtist != "unknown artist" && !searchedArtists.contains(lowerArtist)) {
-                        searchedArtists.add(lowerArtist)
+                    // Resolve local artist image in native Kotlin for all parsed individual artists
+                    val parsedArtists = parseIndividualArtistsKotlin(artist)
+                    for (artistName in parsedArtists) {
+                        val lowerArtist = artistName.lowercase().trim()
+                        if (lowerArtist.isNotEmpty() && lowerArtist != "unknown artist" && !searchedArtists.contains(lowerArtist)) {
+                            searchedArtists.add(lowerArtist)
+                            val match = resolveArtistImage(File(filePath), artistName, normFolderPath, dirImageCache)
+                            if (match != null) {
+                                artistImageMap[lowerArtist] = match
+                            }
+                        }
+                    }
+                    val fullLower = artist.lowercase().trim()
+                    if (fullLower.isNotEmpty() && fullLower != "unknown artist" && !artistImageMap.containsKey(fullLower)) {
                         val match = resolveArtistImage(File(filePath), artist, normFolderPath, dirImageCache)
                         if (match != null) {
-                            artistImageMap[lowerArtist] = match
-                            val cleanArtist = lowerArtist.split(Regex("[,;/]|\\sfeat\\.|\\sft\\.")).firstOrNull()?.trim() ?: ""
-                            if (cleanArtist.isNotEmpty()) {
-                                artistImageMap[cleanArtist] = match
-                            }
+                            artistImageMap[fullLower] = match
                         }
                     }
 

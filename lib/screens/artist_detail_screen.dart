@@ -25,8 +25,18 @@ class ArtistDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    var firstSong = artist.songs.first;
-    var imagePath = artist.localImagePath ?? firstSong.artworkPath;
+    String? imagePath;
+    if (artist.localImagePath != null &&
+        File(artist.localImagePath!).existsSync()) {
+      imagePath = artist.localImagePath;
+    } else {
+      for (var song in artist.songs) {
+        if (song.artworkPath != null && File(song.artworkPath!).existsSync()) {
+          imagePath = song.artworkPath;
+          break;
+        }
+      }
+    }
 
     return Scaffold(
       body: Stack(
