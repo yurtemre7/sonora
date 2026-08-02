@@ -2,8 +2,9 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.16.4] - 2026-07-31
+## [1.16.4] - 2026-08-02
 ### Fixed
+* Sync native and Dart multi-artist image resolution and fallback logic
 * Align MFX speed preset card heights when title text overflows
 * Defer notification permission request to onboarding permissions slide
 * Smooth out cover art scaling during immersive mode toggle and quantize cache dimensions
