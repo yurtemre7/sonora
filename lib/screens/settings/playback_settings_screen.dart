@@ -44,6 +44,17 @@ class PlaybackSettingsScreen extends StatelessWidget {
                       },
                     ),
                     SwitchListTile(
+                      secondary: const Icon(Icons.history_rounded),
+                      title: Text(context.l10n.restoreLastPlayedSong),
+                      subtitle: Text(
+                        context.l10n.restoreLastPlayedSongSubtitle,
+                      ),
+                      value: settingsProvider.restoreLastPlayedSong,
+                      onChanged: (val) {
+                        settingsProvider.setRestoreLastPlayedSong(val);
+                      },
+                    ),
+                    SwitchListTile(
                       secondary: const Icon(
                         Icons.notifications_paused_rounded,
                       ),

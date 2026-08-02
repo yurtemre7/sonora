@@ -95,6 +95,8 @@
   "infoSubtitle": "アプリ情報、更新、更新履歴、危険な操作",
   "keepPlayingOnClose": "アプリ終了後も再生を継続",
   "keepPlayingOnCloseSubtitle": "アプリをスワイプして閉じても、バックグラウンドで再生を続けます",
+  "restoreLastPlayedSong": "最後に再生した曲を記憶",
+  "restoreLastPlayedSongSubtitle": "Sonora起動時に最後に再生した曲とキューを自動的に復元します",
   "language": "言語",
   "languageEnglish": "英語",
   "languageJapanese": "日本語",

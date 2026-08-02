@@ -29,6 +29,7 @@ class SettingsProvider extends ChangeNotifier {
   var favoritesSortAscending = false;
 
   var keepPlayingOnClose = false;
+  var restoreLastPlayedSong = true;
   var pauseOnDuck = false;
   var filterTitleFeatures = false;
   var filterTitleArtist = false;
@@ -84,6 +85,8 @@ class SettingsProvider extends ChangeNotifier {
         await prefs.getBool('favorites_sort_ascending') ?? false;
 
     keepPlayingOnClose = await prefs.getBool('keep_playing_on_close') ?? false;
+    restoreLastPlayedSong =
+        await prefs.getBool('restore_last_played_song') ?? true;
     pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
     filterTitleFeatures = await prefs.getBool('filter_title_features') ?? false;
     filterTitleArtist = await prefs.getBool('filter_title_artist') ?? false;
@@ -125,6 +128,13 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     var prefs = SharedPreferencesAsync();
     await prefs.setBool('keep_playing_on_close', value);
+  }
+
+  Future<void> setRestoreLastPlayedSong(bool value) async {
+    restoreLastPlayedSong = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('restore_last_played_song', value);
   }
 
   Future<void> setPauseOnDuck(

@@ -331,6 +331,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keep playing music in the background when swiped away';
 
   @override
+  String get restoreLastPlayedSong => 'Remember last played song';
+
+  @override
+  String get restoreLastPlayedSongSubtitle =>
+      'Automatically restore the last played song and queue when opening Sonora';
+
+  @override
   String get language => 'Language';
 
   @override

@@ -668,6 +668,18 @@ abstract class AppLocalizations {
   /// **'Keep playing music in the background when swiped away'**
   String get keepPlayingOnCloseSubtitle;
 
+  /// No description provided for @restoreLastPlayedSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember last played song'**
+  String get restoreLastPlayedSong;
+
+  /// No description provided for @restoreLastPlayedSongSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically restore the last played song and queue when opening Sonora'**
+  String get restoreLastPlayedSongSubtitle;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:

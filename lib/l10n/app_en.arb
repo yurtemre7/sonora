@@ -147,6 +147,8 @@
   "infoSubtitle": "About, updates, changelog, danger zone",
   "keepPlayingOnClose": "Keep playing on app close",
   "keepPlayingOnCloseSubtitle": "Keep playing music in the background when swiped away",
+  "restoreLastPlayedSong": "Remember last played song",
+  "restoreLastPlayedSongSubtitle": "Automatically restore the last played song and queue when opening Sonora",
   "language": "Language",
   "languageEnglish": "English",
   "languageJapanese": "Japanese",

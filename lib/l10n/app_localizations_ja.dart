@@ -311,6 +311,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get keepPlayingOnCloseSubtitle => 'アプリをスワイプして閉じても、バックグラウンドで再生を続けます';
 
   @override
+  String get restoreLastPlayedSong => '最後に再生した曲を記憶';
+
+  @override
+  String get restoreLastPlayedSongSubtitle =>
+      'Sonora起動時に最後に再生した曲とキューを自動的に復元します';
+
+  @override
   String get language => '言語';
 
   @override

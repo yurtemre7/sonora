@@ -1071,6 +1071,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Restores the last played song, position, and queue state from storage.
   Future<void> restoreLastPlayedState([List<Song>? targetSongs]) async {
+    if (!settingsProvider.restoreLastPlayedSong) return;
     var library = targetSongs ?? allSongs;
     if (library.isEmpty) return;
     if (currentIndex >= 0 && queue.isNotEmpty) return;
