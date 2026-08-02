@@ -96,8 +96,9 @@ class MainActivity : AudioServiceActivity() {
             when (call.method) {
                 "scanMediaStore" -> {
                     val folderPath = call.argument<String>("folderPath")
+                    val isFast = call.argument<Boolean>("isFast") ?: false
                     Thread {
-                        val songs = queryMediaStore(folderPath)
+                        val songs = queryMediaStore(folderPath, isFast)
                         runOnUiThread {
                             result.success(songs)
                         }
@@ -134,35 +135,30 @@ class MainActivity : AudioServiceActivity() {
         return if (result.isEmpty()) listOf("unknown artist") else result
     }
 
-    private fun resolveArtistImage(songFile: File, artistName: String, rootFolderPath: String?, dirImageCache: MutableMap<String, List<File>>): String? {
+    private fun resolveArtistImageFast(songFile: File, artistName: String, rootFolderPath: String?, folderFilesMap: MutableMap<String, Set<String>>): String? {
         val lowerArtist = artistName.lowercase().trim()
         val normRoot = rootFolderPath?.trimEnd('/', '\\')?.replace('\\', '/')
 
         var current: File? = songFile.parentFile
         while (current != null) {
             val normCurrent = current.absolutePath.replace('\\', '/')
-            val images = dirImageCache.getOrPut(normCurrent) {
-                current.listFiles { file ->
-                    if (file.isFile) {
-                        val ext = file.extension.lowercase()
-                        ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "webp"
-                    } else false
-                }?.toList() ?: emptyList()
+            val filesInDir = folderFilesMap.getOrPut(normCurrent) {
+                current.listFiles { file -> file.isFile }?.map { it.name.lowercase() }?.toSet() ?: emptySet()
             }
 
-            if (images.isNotEmpty()) {
-                for (img in images) {
-                    val name = img.name.lowercase()
-                    if (name == "artist.jpg" || name == "artist.png" || name == "artist.webp" || name == "artist.jpeg") {
-                        return img.absolutePath
-                    }
-                    if (name == "$lowerArtist.jpg" || name == "$lowerArtist.png" || name == "$lowerArtist.webp" || name == "$lowerArtist.jpeg") {
-                        return img.absolutePath
+            if (filesInDir.isNotEmpty()) {
+                val candidateNames = listOf("artist.jpg", "artist.png", "artist.webp", "artist.jpeg", "$lowerArtist.jpg", "$lowerArtist.png", "$lowerArtist.webp", "$lowerArtist.jpeg")
+                for (cand in candidateNames) {
+                    if (filesInDir.contains(cand)) {
+                        return File(current, cand).absolutePath
                     }
                 }
                 val dirName = current.name.lowercase().trim()
                 if (dirName == lowerArtist) {
-                    return images.first().absolutePath
+                    val firstImage = current.listFiles { f -> f.isFile && f.extension.lowercase() in listOf("jpg", "jpeg", "png", "webp") }?.firstOrNull()
+                    if (firstImage != null) {
+                        return firstImage.absolutePath
+                    }
                 }
             }
 
@@ -174,11 +170,13 @@ class MainActivity : AudioServiceActivity() {
         return null
     }
 
-    private fun queryMediaStore(folderPath: String?): Map<String, Any> {
+    private fun queryMediaStore(folderPath: String?, isFast: Boolean = false): Map<String, Any> {
+        val totalStart = System.currentTimeMillis()
         val songsList = mutableListOf<Map<String, Any?>>()
         val artistImageMap = mutableMapOf<String, String>()
         val searchedArtists = mutableSetOf<String>()
-        val dirImageCache = mutableMapOf<String, List<File>>()
+        val folderFilesMap = mutableMapOf<String, Set<String>>()
+        val missingAlbumIds = mutableListOf<Long>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
         val projection = mutableListOf(
@@ -200,91 +198,112 @@ class MainActivity : AudioServiceActivity() {
         }
 
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
-        val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
+        val sortOrder: String? = null
 
         val normFolderPath = folderPath?.trimEnd('/', '\\')?.replace('\\', '/')
-
-        // Pre-cache album artwork files
         val albumArtFileMap = mutableMapOf<Long, String?>()
+        val cacheArtDir = File(cacheDir, "album_art")
+        if (!cacheArtDir.exists()) {
+            cacheArtDir.mkdirs()
+        }
+
+        var queryCursorMs: Long = 0
+        var cursorLoopMs: Long = 0
 
         try {
-            contentResolver.query(
+            val queryStart = System.currentTimeMillis()
+            val cursor = contentResolver.query(
                 uri,
                 projection.toTypedArray(),
                 selection,
                 null,
                 sortOrder
-            )?.use { cursor ->
-                val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
-                val titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
-                val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-                val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
-                val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
-                val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
-                val albumIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
-                val trackCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
-                val yearCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR)
-                val dateModifiedCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
-                val sizeCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
+            )
+            queryCursorMs = System.currentTimeMillis() - queryStart
 
-                val cacheArtDir = File(cacheDir, "album_art")
-                if (!cacheArtDir.exists()) {
-                    cacheArtDir.mkdirs()
-                }
+            cursor?.use { c ->
+                val loopStart = System.currentTimeMillis()
+                val idCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+                val titleCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
+                val artistCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
+                val albumCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
+                val durationCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
+                val dataCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+                val albumIdCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+                val trackCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
+                val yearCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR)
+                val dateModifiedCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
+                val sizeCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
 
-                while (cursor.moveToNext()) {
-                    val filePath = cursor.getString(dataCol) ?: continue
+                while (c.moveToNext()) {
+                    val filePath = c.getString(dataCol) ?: continue
                     if (filePath.isEmpty()) continue
 
-                    // Check folderPath filter if provided
                     if (!normFolderPath.isNullOrEmpty()) {
                         val normFilePath = filePath.replace('\\', '/')
-                        if (!normFilePath.startsWith(normFolderPath, ignoreCase = true)) {
+                        val altNormFolder = if (normFolderPath.startsWith("/sdcard", ignoreCase = true)) {
+                            normFolderPath.replaceFirst("/sdcard", "/storage/emulated/0", ignoreCase = true)
+                        } else if (normFolderPath.startsWith("/storage/emulated/0", ignoreCase = true)) {
+                            normFolderPath.replaceFirst("/storage/emulated/0", "/sdcard", ignoreCase = true)
+                        } else {
+                            normFolderPath
+                        }
+                        if (!normFilePath.startsWith(normFolderPath, ignoreCase = true) &&
+                            !normFilePath.startsWith(altNormFolder, ignoreCase = true)) {
                             continue
                         }
                     }
 
-                    val id = cursor.getLong(idCol)
-                    val rawTitle = cursor.getString(titleCol) ?: ""
-                    val rawArtist = cursor.getString(artistCol) ?: ""
-                    val rawAlbum = cursor.getString(albumCol) ?: ""
-                    val duration = cursor.getLong(durationCol)
-                    val albumId = cursor.getLong(albumIdCol)
-                    val track = cursor.getInt(trackCol)
-                    val year = cursor.getInt(yearCol)
-                    val dateModified = cursor.getLong(dateModifiedCol) * 1000L
-                    val size = cursor.getLong(sizeCol)
+                    val id = c.getLong(idCol)
+                    val rawTitle = c.getString(titleCol) ?: ""
+                    val rawArtist = c.getString(artistCol) ?: ""
+                    val rawAlbum = c.getString(albumCol) ?: ""
+                    val duration = c.getLong(durationCol)
+                    val albumId = c.getLong(albumIdCol)
+                    val track = c.getInt(trackCol)
+                    val year = c.getInt(yearCol)
+                    val dateModified = c.getLong(dateModifiedCol) * 1000L
+                    val size = c.getLong(sizeCol)
 
-                    // Format title / artist / album if MediaStore returns defaults like <unknown>
                     val title = if (rawTitle.isNotEmpty()) rawTitle else File(filePath).nameWithoutExtension
                     val artist = if (rawArtist.isNotEmpty() && rawArtist != "<unknown>") rawArtist else "Unknown Artist"
                     val album = if (rawAlbum.isNotEmpty() && rawAlbum != "<unknown>") rawAlbum else "Unknown Album"
 
-                    // Resolve or copy album art JPEG for this albumId if not done yet
+                    // Resolve album art JPEG instantly from cache without blocking IO
                     if (!albumArtFileMap.containsKey(albumId)) {
-                        albumArtFileMap[albumId] = resolveAlbumArtFile(albumId, cacheArtDir)
-                    }
-                    val artworkPath = albumArtFileMap[albumId]
-
-                    // Resolve local artist image in native Kotlin for all parsed individual artists
-                    val parsedArtists = parseIndividualArtistsKotlin(artist)
-                    for (artistName in parsedArtists) {
-                        val lowerArtist = artistName.lowercase().trim()
-                        if (lowerArtist.isNotEmpty() && lowerArtist != "unknown artist" && !searchedArtists.contains(lowerArtist)) {
-                            searchedArtists.add(lowerArtist)
-                            val match = resolveArtistImage(File(filePath), artistName, normFolderPath, dirImageCache)
-                            if (match != null) {
-                                artistImageMap[lowerArtist] = match
+                        val cachedArtFile = File(cacheArtDir, "art_album_$albumId.jpg")
+                        if (cachedArtFile.exists() && cachedArtFile.length() > 0) {
+                            albumArtFileMap[albumId] = cachedArtFile.absolutePath
+                        } else {
+                            albumArtFileMap[albumId] = null
+                            if (albumId > 0) {
+                                missingAlbumIds.add(albumId)
                             }
                         }
                     }
-                    val fullLower = artist.lowercase().trim()
-                    if (fullLower.isNotEmpty() && fullLower != "unknown artist" && !artistImageMap.containsKey(fullLower)) {
-                        val match = resolveArtistImage(File(filePath), artist, normFolderPath, dirImageCache)
-                        if (match != null) {
-                            artistImageMap[fullLower] = match
+                    val artworkPath = albumArtFileMap[albumId]
+
+                    // If not in fast mode, perform local artist image resolution
+                    if (!isFast) {
+                        val parsedArtists = parseIndividualArtistsKotlin(artist)
+                        val songFile = File(filePath)
+                        for (artistName in parsedArtists) {
+                            val lowerArtist = artistName.lowercase().trim()
+                            if (lowerArtist.isNotEmpty() && lowerArtist != "unknown artist" && !searchedArtists.contains(lowerArtist)) {
+                                searchedArtists.add(lowerArtist)
+                                val match = resolveArtistImageFast(songFile, artistName, normFolderPath, folderFilesMap)
+                                if (match != null) {
+                                    artistImageMap[lowerArtist] = match
+                                }
+                            }
                         }
                     }
+
+                    val dotIdx = filePath.lastIndexOf('.')
+                    val hasLyrics = if (dotIdx > 0) {
+                        val prefix = filePath.substring(0, dotIdx)
+                        File("$prefix.lrc").exists() || File("$prefix.txt").exists()
+                    } else false
 
                     val songMap = mapOf(
                         "id" to id,
@@ -298,26 +317,142 @@ class MainActivity : AudioServiceActivity() {
                         "year" to year,
                         "last_modified_ms" to dateModified,
                         "file_size" to size,
-                        "album_id" to albumId
+                        "album_id" to albumId,
+                        "has_lyrics" to hasLyrics
                     )
                     songsList.add(songMap)
                 }
+                cursorLoopMs = System.currentTimeMillis() - loopStart
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
+        // Determine if this is a first scan (cache is cold — no album art files exist yet)
+        val cacheWasEmpty = albumArtFileMap.values.all { it == null } && missingAlbumIds.isNotEmpty()
+
+        if (cacheWasEmpty) {
+            // First scan: extract album art AND resolve artist images synchronously
+            for (aId in missingAlbumIds.distinct()) {
+                val artFile = File(cacheArtDir, "art_album_$aId.jpg")
+                if (!artFile.exists() || artFile.length() == 0L) {
+                    val albumUri = ContentUris.withAppendedId(
+                        Uri.parse("content://media/external/audio/albumart"),
+                        aId
+                    )
+                    try {
+                        contentResolver.openInputStream(albumUri)?.use { input ->
+                            FileOutputStream(artFile).use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                    } catch (_: Exception) {
+                        artFile.delete()
+                    }
+                }
+                // Patch artworkPath in songsList for this albumId
+                if (artFile.exists() && artFile.length() > 0) {
+                    val artPath = artFile.absolutePath
+                    albumArtFileMap[aId] = artPath
+                    for (i in songsList.indices) {
+                        val s = songsList[i]
+                        if ((s["album_id"] as? Long) == aId) {
+                            songsList[i] = s.toMutableMap().also { it["artwork_path"] = artPath }
+                        }
+                    }
+                }
+            }
+            // Also resolve artist images on first scan
+            for (song in songsList) {
+                val fPath = song["file_path"] as? String ?: continue
+                val rArtist = song["artist"] as? String ?: continue
+                val parsed = parseIndividualArtistsKotlin(rArtist)
+                for (aName in parsed) {
+                    val lower = aName.lowercase().trim()
+                    if (lower.isNotEmpty() && lower != "unknown artist" && !searchedArtists.contains(lower)) {
+                        searchedArtists.add(lower)
+                        val match = resolveArtistImageFast(File(fPath), aName, normFolderPath, folderFilesMap)
+                        if (match != null) artistImageMap[lower] = match
+                    }
+                }
+            }
+        } else if (isFast && missingAlbumIds.isNotEmpty()) {
+            // Subsequent scans: extract missing artwork + artist images in background (non-blocking)
+            val songsCopy = ArrayList(songsList)
+            Thread {
+                for (aId in missingAlbumIds.distinct()) {
+                    val artFile = File(cacheArtDir, "art_album_$aId.jpg")
+                    if (!artFile.exists() || artFile.length() == 0L) {
+                        val albumUri = ContentUris.withAppendedId(
+                            Uri.parse("content://media/external/audio/albumart"),
+                            aId
+                        )
+                        try {
+                            contentResolver.openInputStream(albumUri)?.use { input ->
+                                FileOutputStream(artFile).use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
+                        } catch (_: Exception) {
+                            artFile.delete()
+                        }
+                    }
+                }
+                // Resolve artist images and persist results so Dart can read them next scan
+                val bgArtistMap = mutableMapOf<String, String>()
+                val bgSearched = mutableSetOf<String>()
+                for (song in songsCopy) {
+                    val fPath = song["file_path"] as? String ?: continue
+                    val rArtist = song["artist"] as? String ?: continue
+                    val parsed = parseIndividualArtistsKotlin(rArtist)
+                    for (aName in parsed) {
+                        val lower = aName.lowercase().trim()
+                        if (lower.isNotEmpty() && lower != "unknown artist" && !bgSearched.contains(lower)) {
+                            bgSearched.add(lower)
+                            val match = resolveArtistImageFast(File(fPath), aName, normFolderPath, folderFilesMap)
+                            if (match != null) bgArtistMap[lower] = match
+                        }
+                    }
+                }
+                // Persist to artist_images.json for Dart to read on next loadLocalArtistImages()
+                if (bgArtistMap.isNotEmpty()) {
+                    try {
+                        val appDocDir = applicationContext.getExternalFilesDir(null)
+                            ?: applicationContext.filesDir
+                        val imagesFile = java.io.File(appDocDir, "artist_images.json")
+                        val existing = if (imagesFile.exists()) {
+                            try {
+                                org.json.JSONObject(imagesFile.readText())
+                            } catch (_: Exception) { org.json.JSONObject() }
+                        } else org.json.JSONObject()
+                        for ((k, v) in bgArtistMap) existing.put(k, v)
+                        imagesFile.writeText(existing.toString())
+                    } catch (_: Exception) {}
+                }
+            }.start()
+        }
+
+        val totalKotlinMs = System.currentTimeMillis() - totalStart
+
         return mapOf(
             "songs" to songsList,
-            "artist_images" to artistImageMap
+            "artist_images" to artistImageMap,
+            "perf_query_cursor_ms" to queryCursorMs,
+            "perf_cursor_loop_ms" to cursorLoopMs,
+            "perf_total_kotlin_ms" to totalKotlinMs
         )
     }
 
-    private fun resolveAlbumArtFile(albumId: Long, cacheDir: File): String? {
+    private fun resolveAlbumArtFile(albumId: Long, cacheDir: File, isFast: Boolean = false, missingAlbumIds: MutableList<Long>? = null): String? {
         if (albumId <= 0) return null
         val artFile = File(cacheDir, "art_album_$albumId.jpg")
         if (artFile.exists() && artFile.length() > 0) {
             return artFile.absolutePath
+        }
+
+        if (isFast) {
+            missingAlbumIds?.add(albumId)
+            return null
         }
 
         val albumUri = ContentUris.withAppendedId(

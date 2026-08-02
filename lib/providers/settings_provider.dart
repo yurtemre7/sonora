@@ -30,6 +30,7 @@ class SettingsProvider extends ChangeNotifier {
 
   var keepPlayingOnClose = false;
   var restoreLastPlayedSong = true;
+
   var pauseOnDuck = false;
   var filterTitleFeatures = false;
   var filterTitleArtist = false;
@@ -40,6 +41,7 @@ class SettingsProvider extends ChangeNotifier {
   String? scanFolder;
   String? lastSyncTime;
   int? lastSyncDuration;
+  String? lastPerfLog;
 
   var _isLoaded = false;
   bool get isLoaded => _isLoaded;
@@ -87,6 +89,7 @@ class SettingsProvider extends ChangeNotifier {
     keepPlayingOnClose = await prefs.getBool('keep_playing_on_close') ?? false;
     restoreLastPlayedSong =
         await prefs.getBool('restore_last_played_song') ?? true;
+
     pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
     filterTitleFeatures = await prefs.getBool('filter_title_features') ?? false;
     filterTitleArtist = await prefs.getBool('filter_title_artist') ?? false;
@@ -96,7 +99,7 @@ class SettingsProvider extends ChangeNotifier {
 
     scanFolder = await scanner.getScanFolder();
     lastSyncTime = await scanner.getLastSyncTime();
-    lastSyncDuration = await scanner.getLastSyncDuration('sequential');
+    lastSyncDuration = await scanner.getLastSyncDuration('last');
 
     _isLoaded = true;
     notifyListeners();
@@ -136,6 +139,8 @@ class SettingsProvider extends ChangeNotifier {
     var prefs = SharedPreferencesAsync();
     await prefs.setBool('restore_last_played_song', value);
   }
+
+
 
   Future<void> setPauseOnDuck(
     bool value,
@@ -285,9 +290,11 @@ class SettingsProvider extends ChangeNotifier {
 
   Future<void> refreshSyncStats() async {
     var scanner = MusicScanner();
+    var prefs = SharedPreferencesAsync();
     scanFolder = await scanner.getScanFolder();
     lastSyncTime = await scanner.getLastSyncTime();
-    lastSyncDuration = await scanner.getLastSyncDuration('sequential');
+    lastPerfLog = await prefs.getString('last_perf_log');
+    lastSyncDuration = await scanner.getLastSyncDuration('last');
     notifyListeners();
   }
 }

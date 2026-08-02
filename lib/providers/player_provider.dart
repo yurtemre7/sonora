@@ -1312,6 +1312,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _startLocalArtistImageDetection() {
+    if (MusicScanner().localArtistImages.isNotEmpty) return;
     Future(() async {
       var folderPath = await MusicScanner().getScanFolder();
       if (folderPath != null && allSongs.isNotEmpty) {

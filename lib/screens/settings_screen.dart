@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonora/l10n/app_localizations_en.dart';
 import 'package:sonora/l10n/app_localizations_ja.dart';
@@ -188,7 +189,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             height: 1.3,
                           ),
                         ),
-                        const SizedBox(height: 16),
+
                         LayoutBuilder(
                           builder: (context, constraints) {
                             return Container(
@@ -326,6 +327,59 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                           ],
                         ),
+                        if (widget.settingsProvider.lastPerfLog != null &&
+                            widget.settingsProvider.lastPerfLog!.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Performance Benchmark Logs'),
+                                  content: SingleChildScrollView(
+                                    child: SelectableText(
+                                      widget.settingsProvider.lastPerfLog!,
+                                      style: const TextStyle(
+                                        fontFamily: 'monospace',
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Clipboard.setData(
+                                          ClipboardData(
+                                            text: widget
+                                                .settingsProvider
+                                                .lastPerfLog!,
+                                          ),
+                                        );
+                                        Navigator.of(context).pop();
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Performance log copied to clipboard!',
+                                            ),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      },
+                                      child: const Text('Copy Logs'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                      child: const Text('Close'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.analytics_rounded, size: 16),
+                            label: const Text('Copy Performance Benchmark Logs'),
+                          ),
+                        ],
                       ],
                     ),
                   ),

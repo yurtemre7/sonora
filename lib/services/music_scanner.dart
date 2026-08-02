@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:audio_tags_lofty/audio_tags_lofty.dart' as tags;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,15 +25,26 @@ class MusicScanner {
   /// Cached local artist images path mapping
   Map<String, String> localArtistImages = {};
 
-  /// Loads cached local artist images mapping from disk.
+  /// Loads cached local artist images mapping.
   Future<Map<String, String>> loadLocalArtistImages() async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var imagesFile = File('${appDir.path}/artist_images.json');
-      if (imagesFile.existsSync()) {
-        var map =
-            jsonDecode(await imagesFile.readAsString()) as Map<String, dynamic>;
+      var prefStr = await _prefs.getString('artist_images_json');
+      if (prefStr != null && prefStr.isNotEmpty) {
+        var map = jsonDecode(prefStr) as Map<String, dynamic>;
         localArtistImages = map.map((k, v) => MapEntry(k, v.toString()));
+      } else {
+        var appDir = await getApplicationDocumentsDirectory();
+        var imagesFile = File('${appDir.path}/artist_images.json');
+        if (imagesFile.existsSync()) {
+          var map =
+              jsonDecode(await imagesFile.readAsString())
+                  as Map<String, dynamic>;
+          localArtistImages = map.map((k, v) => MapEntry(k, v.toString()));
+          await _prefs.setString(
+            'artist_images_json',
+            jsonEncode(localArtistImages),
+          );
+        }
       }
     } catch (_) {}
     return localArtistImages;
@@ -138,8 +150,12 @@ class MusicScanner {
       });
 
       localArtistImages = artistImages;
-      var imagesFile = File('$appDocsDirPath/artist_images.json');
-      await imagesFile.writeAsString(jsonEncode(artistImages));
+      var jsonStr = jsonEncode(artistImages);
+      await _prefs.setString('artist_images_json', jsonStr);
+      try {
+        var imagesFile = File('$appDocsDirPath/artist_images.json');
+        await imagesFile.writeAsString(jsonStr);
+      } catch (_) {}
       return artistImages;
     } catch (_) {
       return localArtistImages;
@@ -170,22 +186,36 @@ class MusicScanner {
   }
 
   /// Fast native MediaStore scanner on Android with instant incremental caching.
-  Future<List<Song>?> _scanViaMediaStore(
+  Future<Map<String, dynamic>?> _scanViaMediaStore(
     String folderPath,
-    List<Song> cachedSongs,
-  ) async {
+    List<Song> cachedSongs, {
+    bool isFast = false,
+  }) async {
     if (!Platform.isAndroid) return null;
     try {
+      var swChannel = Stopwatch()..start();
       var response = await _mediastoreChannel.invokeMethod<dynamic>(
         'scanMediaStore',
-        {'folderPath': folderPath},
+        {'folderPath': folderPath, 'isFast': isFast},
       );
+      swChannel.stop();
+      var channelMs = swChannel.elapsedMilliseconds;
+
       if (response == null) return null;
 
-      List<dynamic> rawList;
+      var swParse = Stopwatch()..start();
+      List<dynamic> rawList = [];
+      int? kQueryMs;
+      int? kLoopMs;
+      int? kTotalMs;
+
       if (response is Map) {
-        var map = Map<String, dynamic>.from(response);
+        var map = Map<dynamic, dynamic>.from(response);
         rawList = map['songs'] as List<dynamic>? ?? [];
+        kQueryMs = int.tryParse(map['perf_query_cursor_ms']?.toString() ?? '');
+        kLoopMs = int.tryParse(map['perf_cursor_loop_ms']?.toString() ?? '');
+        kTotalMs = int.tryParse(map['perf_total_kotlin_ms']?.toString() ?? '');
+
         var artistImagesMap = map['artist_images'] as Map<dynamic, dynamic>?;
         if (artistImagesMap != null && artistImagesMap.isNotEmpty) {
           var parsedImages = artistImagesMap.map(
@@ -220,7 +250,6 @@ class MusicScanner {
             cachedSongs.map((s) => s.id).reduce((a, b) => a > b ? a : b) + 1;
       }
       var existingIds = {for (var s in cachedSongs) s.filePath: s.id};
-      var dirCoverCache = <String, String?>{};
 
       for (var item in rawList) {
         if (item is! Map) continue;
@@ -231,17 +260,27 @@ class MusicScanner {
         var mtime = (map['last_modified_ms'] as num?)?.toInt();
         var size = (map['file_size'] as num?)?.toInt();
         var artPath = map['artwork_path'] as String?;
-        if (artPath != null && !File(artPath).existsSync()) {
-          artPath = null;
+
+        var dotIdx = filePath.lastIndexOf('.');
+        var hasLrc = (map['has_lyrics'] as bool?);
+        if (hasLrc == null && dotIdx > 0) {
+          var prefix = filePath.substring(0, dotIdx);
+          hasLrc = File('$prefix.lrc').existsSync() ||
+              File('$prefix.txt').existsSync();
         }
+        hasLrc ??= false;
 
         var cached = cacheMap[filePath];
         if (cached != null &&
             cached.lastModifiedMs == mtime &&
             cached.fileSize == size &&
             (artPath == null || cached.artworkPath == artPath)) {
-          // Song is unchanged — keep cached object directly for sub-millisecond resync
-          songs.add(cached);
+          // Song is unchanged — verify if lyrics file was added/removed
+          if (cached.hasLyrics != hasLrc) {
+            songs.add(cached.copyWith(hasLyrics: hasLrc));
+          } else {
+            songs.add(cached);
+          }
           continue;
         }
 
@@ -250,41 +289,6 @@ class MusicScanner {
         var isFav = existingFavoriteStatus[filePath] ?? false;
         var favDate = existingFavoriteDates[filePath];
         var domColor = existingDominantColors[filePath];
-
-        // Check sidecar lyrics
-        var lastDot = filePath.lastIndexOf('.');
-        var hasLrc = false;
-        if (lastDot != -1) {
-          var basePath = filePath.substring(0, lastDot);
-          hasLrc =
-              File('$basePath.lrc').existsSync() ||
-              File('$basePath.txt').existsSync();
-        }
-
-        // Check local folder cover if artPath is null
-        if (artPath == null) {
-          try {
-            var parentPath = File(filePath).parent.path;
-            if (dirCoverCache.containsKey(parentPath)) {
-              artPath = dirCoverCache[parentPath];
-            } else {
-              for (var name in [
-                'cover.jpg',
-                'cover.png',
-                'cover.webp',
-                'folder.jpg',
-              ]) {
-                var coverFile = File('$parentPath/$name');
-                if (coverFile.existsSync()) {
-                  artPath = coverFile.path;
-                  break;
-                }
-              }
-              dirCoverCache[parentPath] = artPath;
-            }
-          } catch (_) {}
-        }
-
         var ext = filePath.split('.').last.toLowerCase();
 
         songs.add(
@@ -309,23 +313,164 @@ class MusicScanner {
             favoriteDateMs: favDate,
             lastModifiedMs: mtime,
             fileSize: size,
-            hasLyrics: hasLrc,
             dominantColor: domColor,
             trackNumber: (map['track_number'] as num?)?.toInt(),
             year: (map['year'] as num?)?.toInt(),
+            hasLyrics: hasLrc,
           ),
         );
       }
-      return songs;
+
+      swParse.stop();
+      var parseMs = swParse.elapsedMilliseconds;
+
+      return {
+        'songs': songs,
+        'channel_ms': channelMs,
+        'parse_ms': parseMs,
+        'kotlin_query_ms': kQueryMs,
+        'kotlin_loop_ms': kLoopMs,
+        'kotlin_total_ms': kTotalMs,
+      };
     } catch (_) {
       return null;
     }
   }
 
   /// Performs an asynchronous background scan of the sync folder, updating the metadata index.
-  /// Uses native Android MediaStore when available for instant scan (<200ms),
-  /// falling back to a background isolate scanner on other platforms or error.
   Future<List<Song>> syncLibrary({int maxWorkers = 4}) async {
+    return await syncLibraryFast(maxWorkers: maxWorkers);
+  }
+
+  /// Optimized sub-second background library scan.
+  /// Eliminates blocking file system stat calls and defers disk metadata serialization.
+  Future<List<Song>> syncLibraryFast({int maxWorkers = 4}) async {
+    var swTotal = Stopwatch()..start();
+    try {
+      var swReadCache = Stopwatch()..start();
+      var folderPath = await getScanFolder();
+      var cachedSongs = await _readImportedSongsMetadata();
+      swReadCache.stop();
+      var readCacheMs = swReadCache.elapsedMilliseconds;
+
+      if (folderPath != null && folderPath.isNotEmpty) {
+        var dir = Directory(folderPath);
+        if (!dir.existsSync()) {
+          unawaited(_writeImportedSongsMetadata([]));
+          return [];
+        }
+      }
+
+      var prefs = SharedPreferencesAsync();
+
+      if (Platform.isAndroid) {
+        var scanResult = await _scanViaMediaStore(
+          folderPath ?? '',
+          cachedSongs,
+          isFast: true,
+        );
+        if (scanResult != null) {
+          var msSongs = scanResult['songs'] as List<Song>? ?? [];
+          var swArtistImages = Stopwatch()..start();
+          await loadLocalArtistImages();
+          swArtistImages.stop();
+          var artistImagesMs = swArtistImages.elapsedMilliseconds;
+
+          var swSort = Stopwatch()..start();
+          var sortSettings = await getTabSortSettings('songs');
+          sortSongs(
+            msSongs,
+            sortSettings['sortBy'] as String,
+            sortSettings['sortAscending'] as bool,
+          );
+          swSort.stop();
+          var sortMs = swSort.elapsedMilliseconds;
+
+          var swSave = Stopwatch()..start();
+          unawaited(_writeImportedSongsMetadata(msSongs));
+          swSave.stop();
+          var saveMs = swSave.elapsedMilliseconds;
+
+          var now = DateTime.now();
+          var formatted = _formatTimestamp(now);
+          await setLastSyncTime(formatted);
+          await setLastSyncTimestamp(now.millisecondsSinceEpoch);
+          await prefs.setInt('metadata_version', 1);
+
+          swTotal.stop();
+          var totalMs = swTotal.elapsedMilliseconds;
+
+          var channelMs = scanResult['channel_ms'] as int? ?? 0;
+          var parseMs = scanResult['parse_ms'] as int? ?? 0;
+          var kQueryMs = scanResult['kotlin_query_ms'] as int?;
+          var kLoopMs = scanResult['kotlin_loop_ms'] as int?;
+          var kTotalMs = scanResult['kotlin_total_ms'] as int?;
+
+          var perfLog = '''
+==== SONORA PERFORMANCE LOG ====
+• Total Scan Duration: ${totalMs}ms
+• Songs Scanned: ${msSongs.length}
+• Read Cache (Dart): ${readCacheMs}ms
+• MethodChannel Roundtrip: ${channelMs}ms
+  └─ Kotlin Query Cursor: ${kQueryMs ?? '?'}ms
+  └─ Kotlin Cursor Loop: ${kLoopMs ?? '?'}ms
+  └─ Kotlin Total Execution: ${kTotalMs ?? '?'}ms
+  └─ IPC Serialization Overhead: ${(channelMs - (kTotalMs ?? 0))}ms
+• Parse JSON Payload (Dart): ${parseMs}ms
+• Load Local Artist Images (Dart): ${artistImagesMs}ms
+• Sort Library (Dart): ${sortMs}ms
+• Save Preferences (Dart): ${saveMs}ms
+=================================''';
+
+          debugPrint(perfLog);
+          await prefs.setString('last_perf_log', perfLog);
+
+          await setLastSyncDuration('last', totalMs);
+
+          return msSongs;
+        }
+      }
+
+      if (folderPath == null) {
+        var verified =
+            cachedSongs.where((s) => File(s.filePath).existsSync()).toList();
+        unawaited(_writeImportedSongsMetadata(verified));
+        return verified;
+      }
+
+      return await syncLibraryLegacy(maxWorkers: maxWorkers);
+    } catch (_) {
+      swTotal.stop();
+      return await _readImportedSongsMetadata();
+    }
+  }
+
+  String _formatTimestamp(DateTime now) {
+    var hour =
+        now.hour > 12 ? now.hour - 12 : (now.hour == 0 ? 12 : now.hour);
+    var ampm = now.hour >= 12 ? 'PM' : 'AM';
+    var minute = now.minute.toString().padLeft(2, '0');
+    var second = now.second.toString().padLeft(2, '0');
+    var monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    var month = monthNames[now.month - 1];
+    return '$month ${now.day}, ${now.year} at $hour:$minute:$second $ampm';
+  }
+
+  /// Legacy sequential syncLibrary method for benchmark comparisons.
+  Future<List<Song>> syncLibraryLegacy({int maxWorkers = 4}) async {
     var sw = Stopwatch()..start();
     try {
       var folderPath = await getScanFolder();
@@ -355,7 +500,8 @@ class MusicScanner {
 
       // Try instant native Android MediaStore scan first
       if (Platform.isAndroid) {
-        var msSongs = await _scanViaMediaStore(folderPath, cachedSongs);
+        var msResult = await _scanViaMediaStore(folderPath, cachedSongs);
+        var msSongs = msResult?['songs'] as List<Song>?;
         if (msSongs != null && msSongs.isNotEmpty) {
           await loadLocalArtistImages();
           if (localArtistImages.isEmpty) {
@@ -404,8 +550,7 @@ class MusicScanner {
 
           sw.stop();
           var durationMs = sw.elapsedMilliseconds;
-          await setLastSyncDuration('sequential', durationMs);
-          await setLastSyncMethodUsed('mediastore');
+          await setLastSyncDuration('last', durationMs);
 
           return msSongs;
         }
@@ -803,8 +948,7 @@ class MusicScanner {
 
       sw.stop();
       var durationMs = sw.elapsedMilliseconds;
-      await setLastSyncDuration('sequential', durationMs);
-      await setLastSyncMethodUsed('sequential');
+      await setLastSyncDuration('last', durationMs);
 
       return resultSongs;
     } catch (e, stack) {
@@ -1196,18 +1340,30 @@ class MusicScanner {
 
   // --- Playlists API ---
 
-  /// Reads the playlists list from playlists.json.
+  /// Reads the playlists list from SharedPreferencesAsync (with fallback migration to playlists.json).
   Future<List<Playlist>> getPlaylists() async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var file = File('${appDir.path}/playlists.json');
+      var prefContent = await _prefs.getString('playlists_json');
       var list = <Playlist>[];
-      if (file.existsSync()) {
-        var content = await file.readAsString();
-        var jsonList = jsonDecode(content) as List<dynamic>;
+
+      if (prefContent != null && prefContent.isNotEmpty) {
+        var jsonList = jsonDecode(prefContent) as List<dynamic>;
         list = jsonList
             .map((item) => Playlist.fromJson(item as Map<String, dynamic>))
             .toList();
+      } else {
+        // Fallback to legacy disk file if present
+        var appDir = await getApplicationDocumentsDirectory();
+        var file = File('${appDir.path}/playlists.json');
+        if (file.existsSync()) {
+          var content = await file.readAsString();
+          var jsonList = jsonDecode(content) as List<dynamic>;
+          list = jsonList
+              .map((item) => Playlist.fromJson(item as Map<String, dynamic>))
+              .toList();
+          // Save to SharedPreferencesAsync
+          await savePlaylists(list);
+        }
       }
 
       // Migrate existing users by removing the legacy favorites playlist
@@ -1221,13 +1377,19 @@ class MusicScanner {
     }
   }
 
-  /// Writes the playlists list to playlists.json.
+  /// Writes the playlists list to SharedPreferencesAsync and disk backup.
   Future<void> savePlaylists(List<Playlist> playlists) async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var file = File('${appDir.path}/playlists.json');
       var jsonList = playlists.map((p) => p.toJson()).toList();
-      await file.writeAsString(jsonEncode(jsonList));
+      var jsonStr = jsonEncode(jsonList);
+      await _prefs.setString('playlists_json', jsonStr);
+
+      // Keep legacy file updated as double backup so playlists are NEVER lost
+      try {
+        var appDir = await getApplicationDocumentsDirectory();
+        var file = File('${appDir.path}/playlists.json');
+        await file.writeAsString(jsonStr);
+      } catch (_) {}
     } catch (_) {}
   }
 
@@ -1392,11 +1554,19 @@ class MusicScanner {
 
   Future<List<Song>> _readImportedSongsMetadata() async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var jsonFile = File('${appDir.path}/imported_songs.json');
-      if (!jsonFile.existsSync()) return [];
+      var prefContent = await _prefs.getString('imported_songs_json');
+      String content;
 
-      var content = await jsonFile.readAsString();
+      if (prefContent != null && prefContent.isNotEmpty) {
+        content = prefContent;
+      } else {
+        var appDir = await getApplicationDocumentsDirectory();
+        var jsonFile = File('${appDir.path}/imported_songs.json');
+        if (!jsonFile.existsSync()) return [];
+        content = await jsonFile.readAsString();
+        await _prefs.setString('imported_songs_json', content);
+      }
+
       var jsonList = jsonDecode(content) as List<dynamic>;
 
       return jsonList.map((item) {
@@ -1412,7 +1582,10 @@ class MusicScanner {
           bitrate: item['bitrate'] as int?,
           samplerate: item['samplerate'] as int?,
           isFavorite: item['is_favorite'] as bool? ?? false,
-          favoriteDateMs: item['favorite_date_ms'] as int? ?? (item['is_favorite'] == true ? DateTime.now().millisecondsSinceEpoch : null),
+          favoriteDateMs: item['favorite_date_ms'] as int? ??
+              (item['is_favorite'] == true
+                  ? DateTime.now().millisecondsSinceEpoch
+                  : null),
           lastModifiedMs: item['last_modified_ms'] as int?,
           fileSize: item['file_size'] as int?,
           hasLyrics: item['has_lyrics'] == true,
@@ -1430,9 +1603,6 @@ class MusicScanner {
 
   Future<void> _writeImportedSongsMetadata(List<Song> songs) async {
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var jsonFile = File('${appDir.path}/imported_songs.json');
-
       var jsonList = songs
           .map(
             (s) => {
@@ -1460,7 +1630,14 @@ class MusicScanner {
           )
           .toList();
 
-      await jsonFile.writeAsString(jsonEncode(jsonList));
+      var jsonStr = jsonEncode(jsonList);
+      await _prefs.setString('imported_songs_json', jsonStr);
+
+      try {
+        var appDir = await getApplicationDocumentsDirectory();
+        var jsonFile = File('${appDir.path}/imported_songs.json');
+        await jsonFile.writeAsString(jsonStr);
+      } catch (_) {}
     } catch (_) {}
   }
 
@@ -1504,13 +1681,7 @@ class MusicScanner {
     await _prefs.setInt('last_sync_duration_$method', durationMs);
   }
 
-  Future<String?> getLastSyncMethodUsed() async {
-    return await _prefs.getString('last_sync_method_used');
-  }
 
-  Future<void> setLastSyncMethodUsed(String method) async {
-    await _prefs.setString('last_sync_method_used', method);
-  }
 
   /// Bulk creates a playlist from a list of song IDs
   Future<void> createPlaylistFromSongs(String name, List<int> songIds) async {
