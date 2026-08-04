@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,11 +46,16 @@ class _SonoraAppState extends State<SonoraApp> {
   final _settingsProvider = SettingsProvider();
   var _showOnboarding = false;
   var _showSyncPrompt = false;
+  var _showLoadingWarning = false;
+  var _showError = false;
+  Timer? _loadingWarningTimer;
+  Timer? _loadingTimeoutTimer;
 
   // Sentinel values so the first _syncRouterState() always fires a refresh.
   var _prevIsLoading = false;
   var _prevShowOnboarding = true;
   var _prevHasPermission = false;
+  var _prevShowError = false;
 
   @override
   void initState() {
@@ -61,6 +68,7 @@ class _SonoraAppState extends State<SonoraApp> {
     _appRouter = SonoraAppRouter(
       refreshListenable: _routerRefreshNotifier,
       loadingBuilder: _buildLoadingScreen,
+      errorBuilder: _buildErrorScreen,
       permissionBuilder: _buildPermissionScreen,
       playerProvider: _playerProvider,
       themeProvider: _themeProvider,
@@ -101,6 +109,8 @@ class _SonoraAppState extends State<SonoraApp> {
 
   @override
   void dispose() {
+    _loadingWarningTimer?.cancel();
+    _loadingTimeoutTimer?.cancel();
     _playerProvider.removeListener(_syncFromProvider);
     _playerProvider.dispose();
     _settingsProvider.dispose();
@@ -125,26 +135,75 @@ class _SonoraAppState extends State<SonoraApp> {
     // fire on every PlayerProvider notifyListeners() call.
     if (_isLoading == _prevIsLoading &&
         _showOnboarding == _prevShowOnboarding &&
-        _hasPermission == _prevHasPermission) {
+        _hasPermission == _prevHasPermission &&
+        _showError == _prevShowError) {
       return;
     }
     _prevIsLoading = _isLoading;
     _prevShowOnboarding = _showOnboarding;
     _prevHasPermission = _hasPermission;
+    _prevShowError = _showError;
 
     _appRouter.updateGateState(
       isLoading: _isLoading,
       showOnboarding: _showOnboarding,
       hasPermission: _hasPermission,
+      hasError: _showError,
     );
     _routerRefreshNotifier.refresh();
+  }
+
+  void _cancelLoadingTimers() {
+    _loadingWarningTimer?.cancel();
+    _loadingWarningTimer = null;
+    _loadingTimeoutTimer?.cancel();
+    _loadingTimeoutTimer = null;
+    _showLoadingWarning = false;
   }
 
   Future<void> _loadSongs() async {
     setState(() {
       _isLoading = true;
+      _showError = false;
+      _showLoadingWarning = false;
     });
 
+    // Start 15s warning timer
+    _loadingWarningTimer?.cancel();
+    _loadingWarningTimer = Timer(const Duration(seconds: 15), () {
+      if (!mounted || !_isLoading) return;
+      setState(() {
+        _showLoadingWarning = true;
+      });
+    });
+
+    // Start 30s hard timeout
+    _loadingTimeoutTimer?.cancel();
+    _loadingTimeoutTimer = Timer(const Duration(seconds: 30), () {
+      if (!mounted || !_isLoading) return;
+      _cancelLoadingTimers();
+      setState(() {
+        _isLoading = false;
+        _showError = true;
+      });
+      _syncRouterState();
+    });
+
+    try {
+      await _loadSongsCore();
+    } catch (e) {
+      debugPrint('Sonora: _loadSongs failed: $e');
+      if (!mounted) return;
+      _cancelLoadingTimers();
+      setState(() {
+        _isLoading = false;
+        _showError = true;
+      });
+      _syncRouterState();
+    }
+  }
+
+  Future<void> _loadSongsCore() async {
     await _settingsProvider.loadSettings();
 
     // Check if onboarding is completed
@@ -153,6 +212,7 @@ class _SonoraAppState extends State<SonoraApp> {
         await prefs.getBool('onboarding_completed') ?? false;
     if (!onboardingComplete) {
       if (!mounted) return;
+      _cancelLoadingTimers();
       setState(() {
         _isLoading = false;
         _showOnboarding = true;
@@ -165,6 +225,7 @@ class _SonoraAppState extends State<SonoraApp> {
     if (!mounted) return;
 
     if (!granted) {
+      _cancelLoadingTimers();
       setState(() {
         _isLoading = false;
         _hasPermission = false;
@@ -185,6 +246,7 @@ class _SonoraAppState extends State<SonoraApp> {
     if (folder == null) {
       // No folder configured - show onboarding to select one
       if (!mounted) return;
+      _cancelLoadingTimers();
       setState(() {
         _showOnboarding = true;
         _isLoading = false;
@@ -219,6 +281,7 @@ class _SonoraAppState extends State<SonoraApp> {
     }
 
     if (!mounted) return;
+    _cancelLoadingTimers();
     setState(() {
       _scanFolder = folder;
       _songs = scannedSongs;
@@ -304,7 +367,107 @@ class _SonoraAppState extends State<SonoraApp> {
   }
 
   Widget _buildLoadingScreen(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            if (_showLoadingWarning) ...[
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  'Loading is taking longer than expected…',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorScreen(BuildContext context) {
+    var colorScheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 80,
+                color: colorScheme.error,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Sonora failed to load',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'The app got stuck during startup. '
+                'This can happen when background processes '
+                'prevent a clean restart.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              FilledButton.icon(
+                onPressed: () => SystemNavigator.pop(),
+                icon: const Icon(Icons.close_rounded),
+                label: const Text('Force Close App'),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: _clearAppDataAndRestart,
+                icon: const Icon(Icons.delete_sweep_rounded),
+                label: const Text('Clear App Data & Retry'),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Try force-closing first. If the problem '
+                'persists, clear app data to reset.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _clearAppDataAndRestart() async {
+    try {
+      var prefs = SharedPreferencesAsync();
+      await prefs.clear().timeout(
+        const Duration(seconds: 3),
+        onTimeout: () {},
+      );
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() {
+      _showError = false;
+      _songs = [];
+      _scanFolder = null;
+    });
+    _syncRouterState();
+    _loadSongs();
   }
 
   Widget _buildPermissionScreen(BuildContext context) {

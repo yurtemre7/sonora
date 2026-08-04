@@ -14,4 +14,5 @@ class AppRoutes {
   static const settingsFormatting = '/settings/formatting';
   static const settingsInfo = '/settings/info';
   static const settingsPrivacy = '/settings/privacy';
+  static const error = '/error';
 }

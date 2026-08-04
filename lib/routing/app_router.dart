@@ -28,6 +28,7 @@ class SonoraAppRouter {
     required this.refreshListenable,
     required this.loadingBuilder,
     required this.permissionBuilder,
+    required this.errorBuilder,
     required this.playerProvider,
     required this.themeProvider,
     required this.settingsProvider,
@@ -47,6 +48,7 @@ class SonoraAppRouter {
   final Listenable refreshListenable;
   final WidgetBuilder loadingBuilder;
   final WidgetBuilder permissionBuilder;
+  final WidgetBuilder errorBuilder;
   final PlayerProvider playerProvider;
   final ThemeProvider themeProvider;
   final SettingsProvider settingsProvider;
@@ -77,6 +79,13 @@ class SonoraAppRouter {
         _lastLoggedPath = path;
       }
 
+      if (_hasError) {
+        if (path != AppRoutes.error) {
+          Logger.meguru(path, AppRoutes.error);
+        }
+        return path == AppRoutes.error ? null : AppRoutes.error;
+      }
+
       if (_isLoading) {
         if (path != AppRoutes.loading) {
           Logger.meguru(path, AppRoutes.loading);
@@ -100,7 +109,8 @@ class SonoraAppRouter {
 
       if (path == AppRoutes.loading ||
           path == AppRoutes.onboarding ||
-          path == AppRoutes.permission) {
+          path == AppRoutes.permission ||
+          path == AppRoutes.error) {
         Logger.meguru(path, AppRoutes.home);
         return AppRoutes.home;
       }
@@ -111,6 +121,10 @@ class SonoraAppRouter {
       GoRoute(
         path: AppRoutes.loading,
         builder: (context, state) => loadingBuilder(context),
+      ),
+      GoRoute(
+        path: AppRoutes.error,
+        builder: (context, state) => errorBuilder(context),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
@@ -290,10 +304,12 @@ class SonoraAppRouter {
   bool get _isLoading => _loading;
   bool get _showOnboarding => _onboarding;
   bool get _hasPermission => _permissionGranted;
+  bool get _hasError => _error;
 
   var _loading = true;
   var _onboarding = false;
   var _permissionGranted = true;
+  var _error = false;
   var _lastLoggedPath = '';
 
   /// Guards against stacking duplicate Now Playing sheets.
@@ -303,10 +319,12 @@ class SonoraAppRouter {
     required bool isLoading,
     required bool showOnboarding,
     required bool hasPermission,
+    bool hasError = false,
   }) {
     _loading = isLoading;
     _onboarding = showOnboarding;
     _permissionGranted = hasPermission;
+    _error = hasError;
   }
 
   void _openNowPlayingSheet(BuildContext context) {
