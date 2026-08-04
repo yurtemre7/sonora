@@ -516,6 +516,22 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                             _playlistSongs.map((s) => s.id).toList(),
                           );
                         },
+                        proxyDecorator: (child, index, animation) {
+                          return AnimatedBuilder(
+                            animation: animation,
+                            builder: (context, child) {
+                              var animValue = Curves.easeInOut.transform(animation.value);
+                              var elevation = animValue * 6.0;
+                              return Material(
+                                elevation: elevation,
+                                color: Colors.transparent,
+                                shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.2),
+                                child: child,
+                              );
+                            },
+                            child: child,
+                          );
+                        },
                         itemBuilder: (context, index) {
                           var song = _playlistSongs[index];
                           var isCurrent =

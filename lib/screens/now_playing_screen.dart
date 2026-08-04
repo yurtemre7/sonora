@@ -839,9 +839,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
         var queue = widget.playerProvider.queue;
         var current = widget.playerProvider.currentSong;
         var currentIndex = widget.playerProvider.currentIndex;
-        var displayOffset = currentIndex > 0 ? currentIndex - 1 : 0;
-        var displayQueue = queue.sublist(displayOffset);
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -859,30 +856,41 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             ),
             Expanded(
               child: ReorderableListView.builder(
-                itemCount: displayQueue.length,
+                itemCount: queue.length,
+                buildDefaultDragHandles: false,
                 onReorderItem: (oldIndex, newIndex) {
-                  widget.playerProvider.reorderQueue(
-                    oldIndex + displayOffset,
-                    newIndex + displayOffset,
+                  widget.playerProvider.reorderQueue(oldIndex, newIndex);
+                },
+                proxyDecorator: (child, index, animation) {
+                  return AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      var animValue = Curves.easeInOut.transform(animation.value);
+                      var elevation = animValue * 6.0;
+                      return Material(
+                        elevation: elevation,
+                        color: Colors.transparent,
+                        shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.2),
+                        child: child,
+                      );
+                    },
+                    child: child,
                   );
                 },
                 itemBuilder: (context, index) {
-                  var song = displayQueue[index];
-                  var actualIndex = index + displayOffset;
+                  var song = queue[index];
                   var isCurrent =
                       current != null &&
                       song.id == current.id &&
-                      actualIndex == currentIndex;
-                  var isOld = actualIndex < currentIndex;
+                      index == currentIndex;
+                  var isOld = index < currentIndex;
 
                   return Column(
-                    key: ValueKey<String>('${song.id}_$actualIndex'),
+                    key: ValueKey<String>('np_queue_${song.id}_$index'),
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Dismissible(
-                        key: ValueKey<String>(
-                          'dismiss_${song.id}_$actualIndex',
-                        ),
+                        key: ValueKey<String>('np_dismiss_${song.id}_$index'),
                         direction: DismissDirection.endToStart,
                         background: Container(
                           color: theme.colorScheme.errorContainer,
@@ -922,12 +930,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                             opacity: isOld ? 0.35 : 1.0,
                             child: Row(
                               children: [
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 2),
                                 ReorderableDragStartListener(
                                   index: index,
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0,
+                                      horizontal: 4.0,
                                     ),
                                     child: Icon(
                                       Icons.drag_handle_rounded,
@@ -935,13 +943,14 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                           .withValues(
                                             alpha: isOld ? 0.25 : 0.5,
                                           ),
+                                      size: 20,
                                     ),
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 36,
+                                  width: 26,
                                   child: Text(
-                                    '${actualIndex + 1}',
+                                    '${index + 1}',
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: isCurrent
                                           ? theme.colorScheme.primary
@@ -956,7 +965,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: 2),
                                 Expanded(
                                   child: SongTile(
                                     hideMenu: true,
@@ -966,7 +975,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                     onTap: () {
                                       if (!isCurrent) {
                                         widget.playerProvider.audioHandler
-                                            .skipToQueueItem(actualIndex);
+                                            .skipToQueueItem(index);
                                       }
                                     },
                                   ),
@@ -976,7 +985,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                           ),
                         ),
                       ),
-                      if (index < displayQueue.length - 1)
+                      if (index < queue.length - 1)
                         Padding(
                           padding: const EdgeInsets.only(left: 20),
                           child: Divider(
