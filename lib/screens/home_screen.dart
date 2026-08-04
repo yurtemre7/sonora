@@ -569,6 +569,9 @@ class _HomeScreenState extends State<HomeScreen>
                       3 => context.l10n.searchPlaylistsHint,
                       _ => context.l10n.searchSongsHint,
                     },
+                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                     prefixIcon: const Icon(Icons.search_rounded),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
@@ -610,13 +613,17 @@ class _HomeScreenState extends State<HomeScreen>
                       tooltip: context.l10n.importM3u,
                       onPressed: () async {
                         var result = await FilePicker.pickFiles();
-                        if (result != null && result.files.single.path != null) {
+                        if (result != null &&
+                            result.files.single.path != null) {
                           var file = File(result.files.single.path!);
-                          if (file.path.toLowerCase().endsWith('.m3u') || file.path.toLowerCase().endsWith('.m3u8')) {
+                          if (file.path.toLowerCase().endsWith('.m3u') ||
+                              file.path.toLowerCase().endsWith('.m3u8')) {
                             await widget.playerProvider.importM3u(file);
                             if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(context.l10n.importedPlaylist)),
+                              SnackBar(
+                                content: Text(context.l10n.importedPlaylist),
+                              ),
                             );
                           }
                         }
@@ -664,9 +671,8 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _showCreatePlaylistDialog() async {
     await showDialog(
       context: context,
-      builder: (dialogContext) => _CreatePlaylistDialogContent(
-        onCreate: widget.onCreatePlaylist,
-      ),
+      builder: (dialogContext) =>
+          _CreatePlaylistDialogContent(onCreate: widget.onCreatePlaylist),
     );
   }
 
@@ -775,10 +781,54 @@ class _HomeScreenState extends State<HomeScreen>
                 SliverAppBar(
                   floating: true,
                   pinned: true,
-                  backgroundColor: theme.colorScheme.surfaceContainer,
+                  backgroundColor: theme.colorScheme.surface,
                   elevation: 0,
                   scrolledUnderElevation: 0,
-                  expandedHeight: 120,
+                  centerTitle: false,
+                  title: ListenableBuilder(
+                    listenable: SettingsProvider.instance,
+                    builder: (context, _) {
+                      if (SettingsProvider.instance.useGreetingTitle) {
+                        var hour = DateTime.now().hour;
+                        String greeting;
+                        var userName = SettingsProvider.instance.userName;
+                        if (hour < 12) {
+                          greeting = context.l10n.goodMorning(userName);
+                        } else if (hour < 17) {
+                          greeting = context.l10n.goodAfternoon(userName);
+                        } else {
+                          greeting = context.l10n.goodEvening(userName);
+                        }
+                        return Text(
+                          greeting,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                            color: theme.colorScheme.primary,
+                          ),
+                        );
+                      }
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            context.l10n.appTitle,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.5,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.headphones,
+                            color: theme.colorScheme.primary,
+                            size: 22,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                   actions: [
                     IconButton(
                       icon: const Icon(Icons.favorite_rounded),
@@ -798,160 +848,100 @@ class _HomeScreenState extends State<HomeScreen>
                       },
                       tooltip: context.l10n.favorites,
                     ),
+                    IconButton(
+                      icon: const Icon(Icons.settings_rounded),
+                      onPressed: () {
+                        _searchFocusNode.unfocus();
+                        widget.onOpenSettings();
+                      },
+                      tooltip: context.l10n.settings,
+                    ),
                     const SizedBox(width: 8),
                   ],
-                  flexibleSpace: FlexibleSpaceBar(
-                    titlePadding: const EdgeInsets.only(left: 20, bottom: 60),
-                    title: ListenableBuilder(
-                      listenable: SettingsProvider.instance,
-                      builder: (context, _) {
-                        if (SettingsProvider.instance.useGreetingTitle) {
-                          var hour = DateTime.now().hour;
-                          String greeting;
-                          var userName = SettingsProvider.instance.userName;
-                          if (hour < 12) {
-                            greeting = context.l10n.goodMorning(userName);
-                          } else if (hour < 17) {
-                            greeting = context.l10n.goodAfternoon(userName);
-                          } else {
-                            greeting = context.l10n.goodEvening(userName);
-                          }
-                          return Text(
-                            greeting,
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: -0.5,
-                              color: theme.colorScheme.primary,
-                            ),
-                          );
-                        }
-                        return Wrap(
-                          alignment: WrapAlignment.center,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Text(
-                              context.l10n.appTitle,
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.5,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Icon(
-                              Icons.headphones,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
                   bottom: PreferredSize(
-                    preferredSize: Size.fromHeight(widget.isSyncing ? 56 : 54),
+                    preferredSize: Size.fromHeight(widget.isSyncing ? 52 : 50),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (widget.isSyncing)
                           const LinearProgressIndicator(minHeight: 2),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                height: 38,
-                                margin: const EdgeInsets.only(
-                                  left: 16,
-                                  top: 8,
-                                  bottom: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceContainerHigh,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: theme.colorScheme.outlineVariant
-                                        .withValues(alpha: 0.3),
-                                  ),
-                                ),
-                                child: TabBar(
-                                  onTap: (index) {
-                                    if (!_tabController.indexIsChanging) {
-                                      _scrollController.animateTo(
-                                        0,
-                                        duration: const Duration(
-                                          milliseconds: 300,
-                                        ),
-                                        curve: Curves.easeOutCubic,
-                                      );
-                                    }
-                                  },
-                                  controller: _tabController,
-                                  dividerColor: Colors.transparent,
-                                  indicatorSize: TabBarIndicatorSize.tab,
-                                  splashBorderRadius: BorderRadius.circular(18),
-                                  indicator: BoxDecoration(
-                                    color: theme.colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                  labelPadding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
-                                  ),
-                                  labelColor:
-                                      theme.colorScheme.onPrimaryContainer,
-                                  labelStyle: theme.textTheme.labelMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                  unselectedLabelColor:
-                                      theme.colorScheme.onSurfaceVariant,
-                                  unselectedLabelStyle: theme
-                                      .textTheme
-                                      .labelMedium
-                                      ?.copyWith(fontSize: 13),
-                                  tabs: [
-                                    Tab(
-                                      child: Text(
-                                        context.l10n.songs,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    Tab(
-                                      child: Text(
-                                        context.l10n.albums,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    Tab(
-                                      child: Text(
-                                        context.l10n.artists,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    Tab(
-                                      child: Text(
-                                        context.l10n.playlists,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 6,
+                          ),
+                          child: Container(
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: theme.colorScheme.outlineVariant
+                                    .withValues(alpha: 0.3),
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(Icons.settings_rounded),
-                              onPressed: () {
-                                _searchFocusNode.unfocus();
-                                widget.onOpenSettings();
+                            child: TabBar(
+                              onTap: (index) {
+                                if (!_tabController.indexIsChanging) {
+                                  _scrollController.animateTo(
+                                    0,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOutCubic,
+                                  );
+                                }
                               },
-                              tooltip: context.l10n.settings,
+                              controller: _tabController,
+                              dividerColor: Colors.transparent,
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              splashBorderRadius: BorderRadius.circular(18),
+                              indicator: BoxDecoration(
+                                color: theme.colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              labelPadding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              labelColor: theme.colorScheme.onPrimaryContainer,
+                              labelStyle: theme.textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                              unselectedLabelColor:
+                                  theme.colorScheme.onSurfaceVariant,
+                              unselectedLabelStyle: theme.textTheme.labelMedium
+                                  ?.copyWith(fontSize: 13),
+                              tabs: [
+                                Tab(
+                                  child: Text(
+                                    context.l10n.songs,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Tab(
+                                  child: Text(
+                                    context.l10n.albums,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Tab(
+                                  child: Text(
+                                    context.l10n.artists,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Tab(
+                                  child: Text(
+                                    context.l10n.playlists,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 16),
-                          ],
+                          ),
                         ),
                       ],
                     ),
@@ -1006,7 +996,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 filteredPlaylists: filteredPlaylists,
                                 playerProvider: widget.playerProvider,
                                 onUnfocusSearch: _searchFocusNode.unfocus,
-                                onCreatePlaylistDialog: _showCreatePlaylistDialog,
+                                onCreatePlaylistDialog:
+                                    _showCreatePlaylistDialog,
                                 onDeletePlaylist: widget.onDeletePlaylist,
                                 onRenamePlaylist: widget.onRenamePlaylist,
                               );
