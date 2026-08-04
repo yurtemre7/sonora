@@ -2,6 +2,13 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.18.0] - 2026-08-04
+### Fixed
+* Improve queue reorder
+* Overflow on debug settings
+* Make hintTextStyle same so the searchbar does not have variable height
+* Add loading screen timeout with error recovery to prevent infinite hang
+
 ## [1.17.0] - 2026-08-02
 ### Added
 * Improve sync directory search algorithm
