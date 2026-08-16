@@ -313,19 +313,19 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                     ],
                     backgroundColor: Colors.transparent,
                     elevation: 0,
-                    expandedHeight: 320,
+                    expandedHeight: 340,
                     flexibleSpace: FlexibleSpaceBar(
                       background: SafeArea(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 12),
                             Hero(
                               tag: 'playlist_art_${_playlist.id}',
                               child: _playlist.coverImagePath != null
                                   ? Container(
-                                      width: 180,
-                                      height: 180,
+                                      width: 160,
+                                      height: 160,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(24),
                                         image: DecorationImage(
@@ -333,7 +333,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                             FileImage(
                                               File(_playlist.coverImagePath!),
                                             ),
-                                            width: 540,
+                                            width: 480,
                                           ),
                                           fit: BoxFit.cover,
                                         ),
@@ -342,12 +342,12 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   : firstSong != null
                                   ? AlbumArt(
                                       artworkPath: firstSong.artworkPath,
-                                      size: 180,
+                                      size: 160,
                                       borderRadius: 24,
                                     )
                                   : Container(
-                                      width: 180,
-                                      height: 180,
+                                      width: 160,
+                                      height: 160,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(24),
                                         gradient: LinearGradient(
