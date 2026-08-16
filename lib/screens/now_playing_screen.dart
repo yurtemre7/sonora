@@ -106,10 +106,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
               _viewMode == _ViewMode.player
                   ? context.l10n.nowPlaying
                   : _viewMode == _ViewMode.upNext
-                      ? context.l10n.upNext
-                      : _viewMode == _ViewMode.lyrics
-                          ? context.l10n.lyrics
-                          : context.l10n.related,
+                  ? context.l10n.upNext
+                  : _viewMode == _ViewMode.lyrics
+                  ? context.l10n.lyrics
+                  : context.l10n.related,
             ),
             systemOverlayStyle: SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
@@ -465,7 +465,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                           : Icons.lyrics_outlined,
                       label: context.l10n.lyrics,
                       active: _showLyrics,
-                      onPressed: () => setState(() => _showLyrics = !_showLyrics),
+                      onPressed: () =>
+                          setState(() => _showLyrics = !_showLyrics),
                     ),
                   ),
                 Padding(
@@ -620,7 +621,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  context.l10n.stopInX(_formatDuration(widget.playerProvider.sleepTimerDuration!)),
+                  context.l10n.stopInX(
+                    _formatDuration(widget.playerProvider.sleepTimerDuration!),
+                  ),
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -651,7 +654,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       padding: const EdgeInsets.only(top: 8, bottom: 16),
       child: Row(
         children: [
-          _bottomTab(theme, _ViewMode.upNext, context.l10n.upNextCaps, true, context.l10n.upNext),
+          _bottomTab(
+            theme,
+            _ViewMode.upNext,
+            context.l10n.upNextCaps,
+            true,
+            context.l10n.upNext,
+          ),
           const SizedBox(width: 8),
           _bottomTab(
             theme,
@@ -865,12 +874,16 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   return AnimatedBuilder(
                     animation: animation,
                     builder: (context, child) {
-                      var animValue = Curves.easeInOut.transform(animation.value);
+                      var animValue = Curves.easeInOut.transform(
+                        animation.value,
+                      );
                       var elevation = animValue * 6.0;
                       return Material(
                         elevation: elevation,
                         color: Colors.transparent,
-                        shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.2),
+                        shadowColor: theme.colorScheme.shadow.withValues(
+                          alpha: 0.2,
+                        ),
                         child: child,
                       );
                     },
@@ -1427,9 +1440,7 @@ class _SaveQueueDialogContentState extends State<_SaveQueueDialogContent> {
       content: TextField(
         controller: _controller,
         autofocus: true,
-        decoration: InputDecoration(
-          hintText: context.l10n.playlistName,
-        ),
+        decoration: InputDecoration(hintText: context.l10n.playlistName),
         textCapitalization: TextCapitalization.sentences,
       ),
       actions: [

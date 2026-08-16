@@ -20,7 +20,9 @@ class MusicScanner {
 
   final _prefs = SharedPreferencesAsync();
 
-  static const _mediastoreChannel = MethodChannel('de.yurtemre.sonora/mediastore');
+  static const _mediastoreChannel = MethodChannel(
+    'de.yurtemre.sonora/mediastore',
+  );
 
   /// Cached local artist images path mapping
   Map<String, String> localArtistImages = {};
@@ -36,9 +38,9 @@ class MusicScanner {
         var appDir = await getApplicationDocumentsDirectory();
         var imagesFile = File('${appDir.path}/artist_images.json');
         if (imagesFile.existsSync()) {
-          var map =
-              jsonDecode(await imagesFile.readAsString())
-                  as Map<String, dynamic>;
+          var map = jsonDecode(
+            await imagesFile.readAsString(),
+          ) as Map<String, dynamic>;
           localArtistImages = map.map((k, v) => MapEntry(k, v.toString()));
           await _prefs.setString(
             'artist_images_json',
@@ -65,7 +67,10 @@ class MusicScanner {
 
         var localImageFiles = <String, List<String>>{};
         try {
-          for (var entity in dir.listSync(recursive: true, followLinks: false)) {
+          for (var entity in dir.listSync(
+            recursive: true,
+            followLinks: false,
+          )) {
             if (entity is File) {
               var pathLower = entity.path.toLowerCase();
               if (pathLower.endsWith('.jpg') ||
@@ -73,9 +78,13 @@ class MusicScanner {
                   pathLower.endsWith('.png') ||
                   pathLower.endsWith('.webp')) {
                 var parentPath = entity.parent.path;
-                localImageFiles.putIfAbsent(parentPath, () => []).add(entity.path);
+                localImageFiles
+                    .putIfAbsent(parentPath, () => [])
+                    .add(entity.path);
                 var normParent = parentPath.replaceAll('\\', '/');
-                localImageFiles.putIfAbsent(normParent, () => []).add(entity.path);
+                localImageFiles
+                    .putIfAbsent(normParent, () => [])
+                    .add(entity.path);
               }
             }
           }
@@ -107,8 +116,11 @@ class MusicScanner {
                   return img;
                 }
               }
-              var dirName =
-                  normCurrentPath.split('/').last.toLowerCase().trim();
+              var dirName = normCurrentPath
+                  .split('/')
+                  .last
+                  .toLowerCase()
+                  .trim();
               if (dirName == targetArtistLower) {
                 return images.first;
               }
@@ -125,7 +137,9 @@ class MusicScanner {
           var artists = parseIndividualArtists(song.artist);
           for (var artistName in artists) {
             var lowerArtist = artistName.trim().toLowerCase();
-            if (lowerArtist.isEmpty || lowerArtist == 'unknown artist') continue;
+            if (lowerArtist.isEmpty || lowerArtist == 'unknown artist') {
+              continue;
+            }
             if (finalArtistImages.containsKey(lowerArtist)) continue;
 
             var songFile = File(song.filePath);
@@ -265,7 +279,8 @@ class MusicScanner {
         var hasLrc = (map['has_lyrics'] as bool?);
         if (hasLrc == null && dotIdx > 0) {
           var prefix = filePath.substring(0, dotIdx);
-          hasLrc = File('$prefix.lrc').existsSync() ||
+          hasLrc =
+              File('$prefix.lrc').existsSync() ||
               File('$prefix.txt').existsSync();
         }
         hasLrc ??= false;
@@ -406,7 +421,8 @@ class MusicScanner {
           var kLoopMs = scanResult['kotlin_loop_ms'] as int?;
           var kTotalMs = scanResult['kotlin_total_ms'] as int?;
 
-          var perfLog = '''
+          var perfLog =
+              '''
 ==== SONORA PERFORMANCE LOG ====
 • Total Scan Duration: ${totalMs}ms
 • Songs Scanned: ${msSongs.length}
@@ -432,8 +448,9 @@ class MusicScanner {
       }
 
       if (folderPath == null) {
-        var verified =
-            cachedSongs.where((s) => File(s.filePath).existsSync()).toList();
+        var verified = cachedSongs
+            .where((s) => File(s.filePath).existsSync())
+            .toList();
         unawaited(_writeImportedSongsMetadata(verified));
         return verified;
       }
@@ -446,8 +463,7 @@ class MusicScanner {
   }
 
   String _formatTimestamp(DateTime now) {
-    var hour =
-        now.hour > 12 ? now.hour - 12 : (now.hour == 0 ? 12 : now.hour);
+    var hour = now.hour > 12 ? now.hour - 12 : (now.hour == 0 ? 12 : now.hour);
     var ampm = now.hour >= 12 ? 'PM' : 'AM';
     var minute = now.minute.toString().padLeft(2, '0');
     var second = now.second.toString().padLeft(2, '0');
@@ -648,12 +664,10 @@ class MusicScanner {
               var lastDotLrc = file.path.lastIndexOf('.');
               var hasLrc =
                   lastDotLrc != -1 &&
-                  (File(
-                        '${file.path.substring(0, lastDotLrc)}.lrc',
-                      ).existsSync() ||
-                      File(
-                        '${file.path.substring(0, lastDotLrc)}.txt',
-                      ).existsSync());
+                  (File('${file.path.substring(0, lastDotLrc)}.lrc')
+                          .existsSync() ||
+                      File('${file.path.substring(0, lastDotLrc)}.txt')
+                          .existsSync());
 
               if (cached.lastModifiedMs == mtime &&
                   cached.fileSize == size &&
@@ -782,9 +796,8 @@ class MusicScanner {
 
               // Fallback to filename parsing
               if (trackNumber == null) {
-                var match = RegExp(
-                  r'^(\d+)\s*[-_.]?\s*',
-                ).firstMatch(file.uri.pathSegments.last);
+                var match = RegExp(r'^(\d+)\s*[-_.]?\s*')
+                    .firstMatch(file.uri.pathSegments.last);
                 if (match != null) {
                   trackNumber = int.tryParse(match.group(1)!);
                 }
@@ -1402,7 +1415,9 @@ class MusicScanner {
       if (songIndex >= 0) {
         var song = songs[songIndex];
         var newFavoriteStatus = !song.isFavorite;
-        var newFavoriteDateMs = newFavoriteStatus ? DateTime.now().millisecondsSinceEpoch : null;
+        var newFavoriteDateMs = newFavoriteStatus
+            ? DateTime.now().millisecondsSinceEpoch
+            : null;
 
         songs[songIndex] = song.copyWith(
           isFavorite: newFavoriteStatus,
@@ -1582,7 +1597,8 @@ class MusicScanner {
           bitrate: item['bitrate'] as int?,
           samplerate: item['samplerate'] as int?,
           isFavorite: item['is_favorite'] as bool? ?? false,
-          favoriteDateMs: item['favorite_date_ms'] as int? ??
+          favoriteDateMs:
+              item['favorite_date_ms'] as int? ??
               (item['is_favorite'] == true
                   ? DateTime.now().millisecondsSinceEpoch
                   : null),
@@ -1681,8 +1697,6 @@ class MusicScanner {
     await _prefs.setInt('last_sync_duration_$method', durationMs);
   }
 
-
-
   /// Bulk creates a playlist from a list of song IDs
   Future<void> createPlaylistFromSongs(String name, List<int> songIds) async {
     var playlists = await getPlaylists();
@@ -1708,16 +1722,21 @@ class MusicScanner {
 
         // Extract filename from the path in the m3u
         var filename = line.split(RegExp(r'[/\\]')).last;
-        
+
         // Find matching song in library
-        var match = songs.where((s) => s.filePath.endsWith(filename)).firstOrNull;
+        var match = songs
+            .where((s) => s.filePath.endsWith(filename))
+            .firstOrNull;
         if (match != null) {
           songIds.add(match.id);
         }
       }
 
       if (songIds.isNotEmpty) {
-        var name = m3uFile.path.split(RegExp(r'[/\\]')).last.replaceAll(RegExp(r'\.m3u8?$'), '');
+        var name = m3uFile.path
+            .split(RegExp(r'[/\\]'))
+            .last
+            .replaceAll(RegExp(r'\.m3u8?$'), '');
         var playlists = await getPlaylists();
         var newPlaylist = Playlist(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -1743,14 +1762,16 @@ class MusicScanner {
 
       var tempDir = Directory.systemTemp;
       var file = File('${tempDir.path}/${playlist.name}.m3u');
-      
+
       var buffer = StringBuffer();
       buffer.writeln('#EXTM3U');
       for (var song in playlistSongs) {
-        buffer.writeln('#EXTINF:${song.duration.inSeconds},${song.artist} - ${song.title}');
+        buffer.writeln(
+          '#EXTINF:${song.duration.inSeconds},${song.artist} - ${song.title}',
+        );
         buffer.writeln(song.filePath);
       }
-      
+
       await file.writeAsString(buffer.toString());
       return file;
     } catch (_) {

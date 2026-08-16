@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -64,80 +65,69 @@ void main() {
       expect(artistPng.existsSync(), isTrue, reason: 'artist.png should exist');
     });
 
-    test(
-      'MusicScanner importFromFolder scans audio files and extracts metadata correctly',
-      () async {
-        var scanner = MusicScanner();
-        var songs = await scanner.importFromFolder(musicDir.path);
+    test('MusicScanner importFromFolder scans audio files and extracts metadata correctly', () async {
+      var scanner = MusicScanner();
+      var songs = await scanner.importFromFolder(musicDir.path);
 
-        expect(
-          songs,
-          isNotEmpty,
-          reason: 'Scanner should discover audio files in test/music',
-        );
-        expect(songs.length, equals(2));
+      expect(
+        songs,
+        isNotEmpty,
+        reason: 'Scanner should discover audio files in test/music',
+      );
+      expect(songs.length, equals(2));
 
-        var songPlain = songs.firstWhere((s) => s.filePath == audioMp3.path);
-        var songWithCover = songs.firstWhere(
-          (s) => s.filePath == audioCoverMp3.path,
-        );
+      var songPlain = songs.firstWhere((s) => s.filePath == audioMp3.path);
+      var songWithCover = songs.firstWhere(
+        (s) => s.filePath == audioCoverMp3.path,
+      );
 
-        // Verify metadata parsing for audio files
-        expect(songPlain.title, isNotEmpty);
-        expect(songPlain.artist, isNotNull);
-        expect(songPlain.album, isNotNull);
-        expect(songPlain.fileSize, equals(audioMp3.statSync().size));
+      // Verify metadata parsing for audio files
+      expect(songPlain.title, isNotEmpty);
+      expect(songPlain.artist, isNotNull);
+      expect(songPlain.album, isNotNull);
+      expect(songPlain.fileSize, equals(audioMp3.statSync().size));
 
-        expect(songWithCover.title, isNotEmpty);
-        expect(songWithCover.filePath, equals(audioCoverMp3.path));
+      expect(songWithCover.title, isNotEmpty);
+      expect(songWithCover.filePath, equals(audioCoverMp3.path));
 
-        // Verify local artist image extraction mapping (artist.png in emre directory)
-        var artistImages = scanner.localArtistImages;
-        expect(
-          artistImages.keys.any(
-            (k) =>
-                k.contains('emre') ||
-                k.contains(songPlain.artist.toLowerCase()),
-          ),
-          isTrue,
-          reason: 'Artist emre image should be detected',
-        );
-        var artistImagePath =
-            artistImages['emre'] ??
-            artistImages[songPlain.artist.toLowerCase()] ??
-            artistImages.values.firstWhere((v) => v.contains('artist.png'));
-        expect(artistImagePath, equals(artistPng.path));
-      },
-    );
+      // Verify local artist image extraction mapping (artist.png in emre directory)
+      var artistImages = scanner.localArtistImages;
+      expect(
+        artistImages.keys.any(
+          (k) =>
+              k.contains('emre') || k.contains(songPlain.artist.toLowerCase()),
+        ),
+        isTrue,
+        reason: 'Artist emre image should be detected',
+      );
+      var artistImagePath =
+          artistImages['emre'] ??
+          artistImages[songPlain.artist.toLowerCase()] ??
+          artistImages.values.firstWhere((v) => v.contains('artist.png'));
+      expect(artistImagePath, equals(artistPng.path));
+    });
 
-    test(
-      'Grouping functions construct AlbumGroup and ArtistGroup with extracted songs',
-      () async {
-        var scanner = MusicScanner();
-        var songs = await scanner.importFromFolder(musicDir.path);
-        var albums = buildAlbumGroups(songs);
-        var artists = buildArtistGroups(
-          songs,
-          albums,
-          scanner.localArtistImages,
-        );
+    test('Grouping functions construct AlbumGroup and ArtistGroup with extracted songs', () async {
+      var scanner = MusicScanner();
+      var songs = await scanner.importFromFolder(musicDir.path);
+      var albums = buildAlbumGroups(songs);
+      var artists = buildArtistGroups(songs, albums, scanner.localArtistImages);
 
-        expect(albums, isNotEmpty);
-        expect(artists, isNotEmpty);
+      expect(albums, isNotEmpty);
+      expect(artists, isNotEmpty);
 
-        var emreArtist = artists.firstWhere(
-          (a) =>
-              a.name.toLowerCase().contains('emre') ||
-              a.name == songs.first.artist,
-        );
-        expect(
-          emreArtist.localImagePath,
-          equals(artistPng.path),
-          reason: 'ArtistGroup should map artist.png from artist directory',
-        );
-        expect(emreArtist.songs.length, equals(2));
-      },
-    );
+      var emreArtist = artists.firstWhere(
+        (a) =>
+            a.name.toLowerCase().contains('emre') ||
+            a.name == songs.first.artist,
+      );
+      expect(
+        emreArtist.localImagePath,
+        equals(artistPng.path),
+        reason: 'ArtistGroup should map artist.png from artist directory',
+      );
+      expect(emreArtist.songs.length, equals(2));
+    });
   });
 
   group('Widget Tests using Scanned Music Data', () {

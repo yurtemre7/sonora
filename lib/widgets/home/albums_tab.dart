@@ -47,12 +47,7 @@ class AlbumsTab extends StatelessWidget {
       key: const PageStorageKey<String>('albums_grid'),
       primary: true,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 12,
-        bottom: 120,
-      ),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 120),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 16,

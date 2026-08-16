@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -411,9 +412,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             : theme.colorScheme.onSurfaceVariant,
                       ),
                       title: Text(context.l10n.accessAudioAndImageFiles),
-                      subtitle: Text(
-                        context.l10n.accessAudioSubtitle,
-                      ),
+                      subtitle: Text(context.l10n.accessAudioSubtitle),
                     ),
                     const Divider(height: 24),
                     ListTile(
@@ -426,9 +425,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             : theme.colorScheme.onSurfaceVariant,
                       ),
                       title: Text(context.l10n.showNotifications),
-                      subtitle: Text(
-                        context.l10n.showNotificationsSubtitle,
-                      ),
+                      subtitle: Text(context.l10n.showNotificationsSubtitle),
                     ),
                   ],
                 ),

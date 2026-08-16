@@ -58,7 +58,10 @@ class EqualizerService {
       var bands = parameters.bands;
       for (var i = 0; i < bands.length && i < gains.length; i++) {
         var band = bands[i];
-        var gain = gains[i].clamp(parameters.minDecibels, parameters.maxDecibels);
+        var gain = gains[i].clamp(
+          parameters.minDecibels,
+          parameters.maxDecibels,
+        );
         await band.setGain(gain);
       }
       await _prefs.setStringList(

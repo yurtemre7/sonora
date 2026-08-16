@@ -42,7 +42,9 @@ class SongsTab extends StatelessWidget {
                     ? Icons.folder_open_rounded
                     : Icons.music_off_rounded,
                 size: 64,
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.4,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -61,7 +63,9 @@ class SongsTab extends StatelessWidget {
                     ? context.l10n.chooseFolderSubtitle
                     : context.l10n.noMusicFilesInFolderSubtitle(scanFolder!),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.7,
+                  ),
                 ),
                 textAlign: TextAlign.center,
               ),

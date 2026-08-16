@@ -379,9 +379,8 @@ class _SonoraAppState extends State<SonoraApp> {
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Text(
                   'Loading is taking longer than expected…',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium
+                      ?.copyWith(color: Theme.of(context).colorScheme.error),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -409,9 +408,8 @@ class _SonoraAppState extends State<SonoraApp> {
               const SizedBox(height: 24),
               Text(
                 'Sonora failed to load',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.headlineSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
@@ -419,9 +417,8 @@ class _SonoraAppState extends State<SonoraApp> {
                 'The app got stuck during startup. '
                 'This can happen when background processes '
                 'prevent a clean restart.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -455,10 +452,7 @@ class _SonoraAppState extends State<SonoraApp> {
   Future<void> _clearAppDataAndRestart() async {
     try {
       var prefs = SharedPreferencesAsync();
-      await prefs.clear().timeout(
-        const Duration(seconds: 3),
-        onTimeout: () {},
-      );
+      await prefs.clear().timeout(const Duration(seconds: 3), onTimeout: () {});
     } catch (_) {}
     if (!mounted) return;
     setState(() {
@@ -486,9 +480,8 @@ class _SonoraAppState extends State<SonoraApp> {
               const SizedBox(height: 24),
               Text(
                 'Access to Music Files',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.headlineMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
@@ -683,7 +676,8 @@ class _SonoraAppState extends State<SonoraApp> {
                     scaffoldMessengerKey: _scaffoldMessengerKey,
                     title: 'Sonora',
                     locale: _settingsProvider.currentLocale,
-                    localizationsDelegates: AppLocalizations.localizationsDelegates,
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
                     supportedLocales: AppLocalizations.supportedLocales,
                     theme: AppTheme.getTheme(
                       Brightness.light,

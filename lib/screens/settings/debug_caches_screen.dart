@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:isolate';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sonora/models/song.dart';
@@ -85,7 +86,12 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
   ) {
     var theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0, left: 16, right: 16),
+      padding: const EdgeInsets.only(
+        top: 16.0,
+        bottom: 8.0,
+        left: 16,
+        right: 16,
+      ),
       child: Row(
         children: [
           Icon(icon, color: theme.colorScheme.primary, size: 22),
@@ -330,14 +336,21 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
                     itemBuilder: (context, index) {
                       var entry = _localArtistImages.entries.elementAt(index);
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 2.0,
+                        ),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12.0,
+                            vertical: 8.0,
+                          ),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.surfaceContainerLow,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                              color: theme.colorScheme.outlineVariant
+                                  .withValues(alpha: 0.4),
                             ),
                           ),
                           child: Row(
@@ -426,9 +439,15 @@ class _DebugCachesScreenState extends State<DebugCachesScreen> {
                     itemBuilder: (context, index) {
                       var filePath = _physicalFiles[index];
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 2.0,
+                        ),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12.0,
+                            vertical: 6.0,
+                          ),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.surfaceContainerLow,
                             borderRadius: BorderRadius.circular(8),

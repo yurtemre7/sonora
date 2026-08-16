@@ -32,7 +32,8 @@ class PlaylistsTab extends StatelessWidget {
   final VoidCallback onUnfocusSearch;
   final VoidCallback onCreatePlaylistDialog;
   final Future<void> Function(String playlistId) onDeletePlaylist;
-  final Future<void> Function(String playlistId, String newName) onRenamePlaylist;
+  final Future<void> Function(String playlistId, String newName)
+  onRenamePlaylist;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +49,9 @@ class PlaylistsTab extends StatelessWidget {
               Icon(
                 Icons.queue_music_rounded,
                 size: 64,
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.4,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -63,7 +66,9 @@ class PlaylistsTab extends StatelessWidget {
               Text(
                 context.l10n.noPlaylistsYetSubtitle,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.7,
+                  ),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -215,24 +220,34 @@ class PlaylistsTab extends StatelessWidget {
                 ],
                 onSelected: (val) async {
                   if (val == 6) {
-                    var exportedMsg = context.l10n.exportedPlaylist(playlist.name);
+                    var exportedMsg = context.l10n.exportedPlaylist(
+                      playlist.name,
+                    );
                     var failedMsg = context.l10n.failedToExport;
-                    var file = await playerProvider.exportPlaylistToM3u(playlist);
+                    var file = await playerProvider.exportPlaylistToM3u(
+                      playlist,
+                    );
                     if (file != null) {
-                      await SharePlus.instance.share(ShareParams(
-                        files: [XFile(file.path)],
-                        text: exportedMsg,
-                      ));
+                      await SharePlus.instance.share(
+                        ShareParams(
+                          files: [XFile(file.path)],
+                          text: exportedMsg,
+                        ),
+                      );
                     } else {
                       if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(failedMsg)));
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(failedMsg)));
                     }
                   } else if (val == 5) {
                     EditPlaylistDescriptionDialog.show(
                       context,
                       playlist: playlist,
                       onEdit: (newDesc) {
-                        playerProvider.updatePlaylistDescription(playlist.id, newDesc);
+                        playerProvider.updatePlaylistDescription(
+                          playlist.id,
+                          newDesc,
+                        );
                       },
                     );
                   } else if (val == 3) {
@@ -242,11 +257,15 @@ class PlaylistsTab extends StatelessWidget {
                         duration: const Duration(seconds: 2),
                       ),
                     );
-                    var result = await FilePicker.pickFiles(type: FileType.image);
-                    if (result != null && result.files.single.path != null) {
-                      var sourceFile = File(result.files.single.path!);
+                    var result = await FilePicker.pickFiles(
+                      type: FileType.image,
+                    );
+                    if (result.isNotEmpty && result.single.path != null) {
+                      var sourceFile = File(result.single.path!);
                       var appDir = await getApplicationDocumentsDirectory();
-                      var coversDir = Directory('${appDir.path}/playlist_covers');
+                      var coversDir = Directory(
+                        '${appDir.path}/playlist_covers',
+                      );
                       if (!coversDir.existsSync()) {
                         coversDir.createSync(recursive: true);
                       }
@@ -265,10 +284,7 @@ class PlaylistsTab extends StatelessWidget {
                       );
                     }
                   } else if (val == 4) {
-                    await playerProvider.updatePlaylistCover(
-                      playlist.id,
-                      null,
-                    );
+                    await playerProvider.updatePlaylistCover(playlist.id, null);
                   } else if (val == 2) {
                     RenamePlaylistDialog.show(
                       context,
@@ -279,14 +295,18 @@ class PlaylistsTab extends StatelessWidget {
                     var confirmed = await ConfirmDeleteDialog.show(
                       context,
                       title: context.l10n.deletePlaylistConfirmTitle,
-                      message: context.l10n.deletePlaylistConfirmMessage(playlist.name),
+                      message: context.l10n.deletePlaylistConfirmMessage(
+                        playlist.name,
+                      ),
                     );
                     if (confirmed != true) return;
                     await onDeletePlaylist(playlist.id);
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(context.l10n.playlistDeleted(playlist.name)),
+                        content: Text(
+                          context.l10n.playlistDeleted(playlist.name),
+                        ),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );

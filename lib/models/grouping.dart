@@ -97,8 +97,11 @@ List<AlbumGroup> buildAlbumGroups(List<Song> allSongs) {
 
   for (var song in allSongs) {
     var primaryArtist = parseIndividualArtists(song.artist).first;
-    var albumName = song.album.trim().isEmpty ? 'Unknown Album' : song.album.trim();
-    if (primaryArtist == 'Unknown Artist' || albumName.toLowerCase() == 'unknown album') {
+    var albumName = song.album.trim().isEmpty
+        ? 'Unknown Album'
+        : song.album.trim();
+    if (primaryArtist == 'Unknown Artist' ||
+        albumName.toLowerCase() == 'unknown album') {
       var key = 'unknown album|||unknown artist';
       rawAlbumMap.putIfAbsent(key, () => []).add(song);
     } else {
@@ -119,11 +122,13 @@ List<AlbumGroup> buildAlbumGroups(List<Song> allSongs) {
 
     if (entry.key.startsWith('unknown album|||')) {
       var artistName = parseIndividualArtists(songs.first.artist).first;
-      albumGroups.add(AlbumGroup(
-        name: 'Unknown Album',
-        artist: artistName,
-        songs: _sortAlbumSongs(songs),
-      ));
+      albumGroups.add(
+        AlbumGroup(
+          name: 'Unknown Album',
+          artist: artistName,
+          songs: _sortAlbumSongs(songs),
+        ),
+      );
       continue;
     }
 
@@ -164,47 +169,55 @@ List<AlbumGroup> buildAlbumGroups(List<Song> allSongs) {
 
     if (commonArtists.isNotEmpty) {
       var albumArtistLower = commonArtists.first;
-      var displayArtist = parseIndividualArtists(songs.first.artist)
-          .firstWhere(
-            (a) => a.toLowerCase() == albumArtistLower,
-            orElse: () => artistCased[albumArtistLower] ?? 'Various Artists',
-          );
+      var displayArtist = parseIndividualArtists(songs.first.artist).firstWhere(
+        (a) => a.toLowerCase() == albumArtistLower,
+        orElse: () => artistCased[albumArtistLower] ?? 'Various Artists',
+      );
 
-      albumGroups.add(AlbumGroup(
-        name: firstSongAlbumName,
-        artist: displayArtist,
-        songs: _sortAlbumSongs(songs),
-      ));
+      albumGroups.add(
+        AlbumGroup(
+          name: firstSongAlbumName,
+          artist: displayArtist,
+          songs: _sortAlbumSongs(songs),
+        ),
+      );
     } else if (dominantArtistLower != null && maxCount > (songs.length / 2)) {
       var displayArtist = artistCased[dominantArtistLower]!;
-      albumGroups.add(AlbumGroup(
-        name: firstSongAlbumName,
-        artist: displayArtist,
-        songs: _sortAlbumSongs(songs),
-      ));
+      albumGroups.add(
+        AlbumGroup(
+          name: firstSongAlbumName,
+          artist: displayArtist,
+          songs: _sortAlbumSongs(songs),
+        ),
+      );
     } else if (artistCounts.length == 1) {
       var displayArtist = artistCased.values.first;
-      albumGroups.add(AlbumGroup(
-        name: firstSongAlbumName,
-        artist: displayArtist,
-        songs: _sortAlbumSongs(songs),
-      ));
+      albumGroups.add(
+        AlbumGroup(
+          name: firstSongAlbumName,
+          artist: displayArtist,
+          songs: _sortAlbumSongs(songs),
+        ),
+      );
     } else {
       // Split into separate albums if there are distinct main artists
       var subGroups = <String, List<Song>>{};
       for (var song in songs) {
-        var primaryLower = parseIndividualArtists(song.artist).first.toLowerCase();
+        var primaryLower = parseIndividualArtists(song.artist).first
+            .toLowerCase();
         subGroups.putIfAbsent(primaryLower, () => []).add(song);
       }
 
       for (var subEntry in subGroups.entries) {
         var subSongs = subEntry.value;
         var displayArtist = parseIndividualArtists(subSongs.first.artist).first;
-        albumGroups.add(AlbumGroup(
-          name: firstSongAlbumName,
-          artist: displayArtist,
-          songs: _sortAlbumSongs(subSongs),
-        ));
+        albumGroups.add(
+          AlbumGroup(
+            name: firstSongAlbumName,
+            artist: displayArtist,
+            songs: _sortAlbumSongs(subSongs),
+          ),
+        );
       }
     }
   }
@@ -294,11 +307,7 @@ AlbumGroup buildAlbumGroup(
       .firstOrNull;
   if (matchByAlbum != null) return matchByAlbum;
 
-  return AlbumGroup(
-    name: albumName,
-    artist: artistName,
-    songs: [],
-  );
+  return AlbumGroup(name: albumName, artist: artistName, songs: []);
 }
 
 ArtistGroup buildArtistGroup(
@@ -316,9 +325,5 @@ ArtistGroup buildArtistGroup(
     }
   }
 
-  return ArtistGroup(
-    name: artistName,
-    songs: [],
-    albums: [],
-  );
+  return ArtistGroup(name: artistName, songs: [], albums: []);
 }

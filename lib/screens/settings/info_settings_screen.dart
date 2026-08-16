@@ -226,8 +226,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                             content: Text(context.l10n.rateLimitMessage),
                             actions: [
                               TextButton(
-                                onPressed: () =>
-                                    Navigator.pop(dialogContext),
+                                onPressed: () => Navigator.pop(dialogContext),
                                 child: Text(context.l10n.cancel),
                               ),
                               FilledButton.icon(

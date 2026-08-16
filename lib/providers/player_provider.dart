@@ -158,7 +158,10 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await prefs.setBool('mfx_isBassBoostEnabled', _isBassBoostEnabled);
     await prefs.setBool('mfx_isCustomEqEnabled', _isCustomEqEnabled);
     if (_customEqGains != null) {
-      await prefs.setStringList('mfx_customEqGains', _customEqGains!.map((e) => e.toString()).toList());
+      await prefs.setStringList(
+        'mfx_customEqGains',
+        _customEqGains!.map((e) => e.toString()).toList(),
+      );
     } else {
       await prefs.remove('mfx_customEqGains');
     }
@@ -336,9 +339,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       // Resolve MediaItems back to Song objects from the library.
       var songs = <Song>[];
       for (var item in mediaItems) {
-        var song = allSongs.where(
-          (s) => Uri.file(s.filePath).toString() == item.id,
-        ).firstOrNull;
+        var song = allSongs
+            .where((s) => Uri.file(s.filePath).toString() == item.id)
+            .firstOrNull;
         if (song != null) songs.add(song);
       }
       if (songs.isEmpty) return;
@@ -364,7 +367,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       audioHandler.player.processingState == ProcessingState.completed;
 
   /// Current playback position stream with high-precision 30 FPS updates.
-  Stream<Duration> get positionStream => audioHandler.player.createPositionStream(
+  Stream<Duration> get positionStream =>
+      audioHandler.player.createPositionStream(
         minPeriod: const Duration(milliseconds: 33),
         maxPeriod: const Duration(milliseconds: 50),
       );
@@ -1089,8 +1093,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
           await prefs.getStringList('last_played_queue_ids') ?? [];
       var savedOrigIds =
           await prefs.getStringList('last_played_original_queue_ids') ?? [];
-      var savedPositionMs =
-          await prefs.getInt('last_played_position_ms') ?? 0;
+      var savedPositionMs = await prefs.getInt('last_played_position_ms') ?? 0;
       var savedShuffled =
           await prefs.getBool('last_played_is_shuffled') ?? false;
 
@@ -1422,8 +1425,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
     _updateMediaNotificationControls();
     if (sleepTimerDuration != null) {
-      SleepTimerNotificationService()
-          .updateTimerNotification(sleepTimerDuration!);
+      SleepTimerNotificationService().updateTimerNotification(
+        sleepTimerDuration!,
+      );
     }
     notifyListeners();
   }

@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sonora/models/song.dart';
@@ -26,144 +27,160 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
           child: Material(
             color: Colors.transparent,
             child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 16),
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.4,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.4,
+                        ),
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.songInformation,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 16),
+                  Text(
+                    context.l10n.songInformation,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: Scrollbar(
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      children: [
-                        _buildInfoGroup(
-                          theme: theme,
-                          title: context.l10n.metadataGroup,
-                          children: [
-                            _buildInfoRow(context.l10n.titleLabel, song.displayTitle, theme),
-                            _buildInfoRow(context.l10n.artistLabel, song.artist, theme),
-                            _buildInfoRow(context.l10n.albumLabel, song.album, theme),
-                            if (song.trackNumber != null)
-                              _buildInfoRow(
-                                context.l10n.trackLabel,
-                                song.trackNumber.toString(),
-                                theme,
-                              ),
-                            if (song.genre != null)
-                              _buildInfoRow(context.l10n.genreLabel, song.genre!, theme),
-                            if (song.year != null)
-                              _buildInfoRow(
-                                context.l10n.yearLabel,
-                                song.year.toString(),
-                                theme,
-                              ),
-                            _buildInfoRow(
-                              context.l10n.durationLabel,
-                              song.durationFormatted,
-                              theme,
-                              isLast: true,
-                            ),
-                          ],
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: Scrollbar(
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                        _buildInfoGroup(
-                          theme: theme,
-                          title: context.l10n.fileInfoGroup,
-                          children: [
-                            _buildInfoRow(
-                              context.l10n.filePathLabel,
-                              song.filePath,
-                              theme,
-                              isPath: true,
-                            ),
-                            if (song.fileSize != null)
+                        children: [
+                          _buildInfoGroup(
+                            theme: theme,
+                            title: context.l10n.metadataGroup,
+                            children: [
                               _buildInfoRow(
-                                context.l10n.fileSize,
-                                _formatFileSize(song.fileSize!),
+                                context.l10n.titleLabel,
+                                song.displayTitle,
                                 theme,
                               ),
-                            if (song.lastModifiedMs != null)
                               _buildInfoRow(
-                                context.l10n.dateModified,
-                                _formatDate(
-                                  context,
-                                  DateTime.fromMillisecondsSinceEpoch(
-                                    song.lastModifiedMs!,
-                                  ),
+                                context.l10n.artistLabel,
+                                song.artist,
+                                theme,
+                              ),
+                              _buildInfoRow(
+                                context.l10n.albumLabel,
+                                song.album,
+                                theme,
+                              ),
+                              if (song.trackNumber != null)
+                                _buildInfoRow(
+                                  context.l10n.trackLabel,
+                                  song.trackNumber.toString(),
+                                  theme,
                                 ),
-                                theme,
-                              ),
-                            if (stat != null && stat.changed != stat.modified)
+                              if (song.genre != null)
+                                _buildInfoRow(
+                                  context.l10n.genreLabel,
+                                  song.genre!,
+                                  theme,
+                                ),
+                              if (song.year != null)
+                                _buildInfoRow(
+                                  context.l10n.yearLabel,
+                                  song.year.toString(),
+                                  theme,
+                                ),
                               _buildInfoRow(
-                                context.l10n.dateCreated,
-                                _formatDate(context, stat.changed),
-                                theme,
-                                isLast: song.format == null,
-                              ),
-                            if (song.format == null)
-                              const SizedBox.shrink()
-                            else
-                              _buildInfoRow(
-                                context.l10n.formatLabel,
-                                song.format!.toUpperCase(),
+                                context.l10n.durationLabel,
+                                song.durationFormatted,
                                 theme,
                                 isLast: true,
                               ),
-                          ],
-                        ),
-                        if (song.bitrate != null || song.samplerate != null)
+                            ],
+                          ),
                           _buildInfoGroup(
                             theme: theme,
-                            title: context.l10n.audioPropertiesGroup,
+                            title: context.l10n.fileInfoGroup,
                             children: [
-                              if (song.bitrate != null)
+                              _buildInfoRow(
+                                context.l10n.filePathLabel,
+                                song.filePath,
+                                theme,
+                                isPath: true,
+                              ),
+                              if (song.fileSize != null)
                                 _buildInfoRow(
-                                  context.l10n.bitrateLabel,
-                                  '${song.bitrate} kbps',
+                                  context.l10n.fileSize,
+                                  _formatFileSize(song.fileSize!),
                                   theme,
-                                  isLast: song.samplerate == null,
                                 ),
-                              if (song.samplerate != null)
+                              if (song.lastModifiedMs != null)
                                 _buildInfoRow(
-                                  context.l10n.sampleRateLabel,
-                                  '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
+                                  context.l10n.dateModified,
+                                  _formatDate(
+                                    context,
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                      song.lastModifiedMs!,
+                                    ),
+                                  ),
+                                  theme,
+                                ),
+                              if (stat != null && stat.changed != stat.modified)
+                                _buildInfoRow(
+                                  context.l10n.dateCreated,
+                                  _formatDate(context, stat.changed),
+                                  theme,
+                                  isLast: song.format == null,
+                                ),
+                              if (song.format == null)
+                                const SizedBox.shrink()
+                              else
+                                _buildInfoRow(
+                                  context.l10n.formatLabel,
+                                  song.format!.toUpperCase(),
                                   theme,
                                   isLast: true,
                                 ),
                             ],
                           ),
-                        const SizedBox(height: 16),
-                      ],
+                          if (song.bitrate != null || song.samplerate != null)
+                            _buildInfoGroup(
+                              theme: theme,
+                              title: context.l10n.audioPropertiesGroup,
+                              children: [
+                                if (song.bitrate != null)
+                                  _buildInfoRow(
+                                    context.l10n.bitrateLabel,
+                                    '${song.bitrate} kbps',
+                                    theme,
+                                    isLast: song.samplerate == null,
+                                  ),
+                                if (song.samplerate != null)
+                                  _buildInfoRow(
+                                    context.l10n.sampleRateLabel,
+                                    '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
+                                    theme,
+                                    isLast: true,
+                                  ),
+                              ],
+                            ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
     },
   );
 }

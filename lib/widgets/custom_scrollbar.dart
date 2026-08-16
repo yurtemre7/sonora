@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class CustomScrollbar extends StatefulWidget {
@@ -152,9 +153,8 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
                       width: _isDragging ? 12 : 8,
                       height: thumbHeight,
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withValues(alpha: 0.6),
+                        color: Theme.of(context).colorScheme.primary
+                            .withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),

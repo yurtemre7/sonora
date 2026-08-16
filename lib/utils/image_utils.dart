@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:isolate';
+
 import 'package:image/image.dart' as img;
 
 /// Processing utility for playlist cover images.

@@ -156,7 +156,10 @@ class SongTile extends StatelessWidget {
                             value: 1,
                             child: Row(
                               children: [
-                                const Icon(Icons.playlist_play_rounded, size: 20),
+                                const Icon(
+                                  Icons.playlist_play_rounded,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(context.l10n.playNext),
                               ],
@@ -178,7 +181,10 @@ class SongTile extends StatelessWidget {
                             value: 4,
                             child: Row(
                               children: [
-                                const Icon(Icons.playlist_add_rounded, size: 20),
+                                const Icon(
+                                  Icons.playlist_add_rounded,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(context.l10n.addToPlaylist),
                               ],
@@ -189,7 +195,10 @@ class SongTile extends StatelessWidget {
                             value: 7,
                             child: Row(
                               children: [
-                                const Icon(Icons.playlist_remove_rounded, size: 20),
+                                const Icon(
+                                  Icons.playlist_remove_rounded,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(context.l10n.removeFromPlaylist),
                               ],
@@ -200,7 +209,10 @@ class SongTile extends StatelessWidget {
                             value: 5,
                             child: Row(
                               children: [
-                                const Icon(Icons.info_outline_rounded, size: 20),
+                                const Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(context.l10n.songInfo),
                               ],

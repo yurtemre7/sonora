@@ -128,7 +128,6 @@ class FormattingSettingsScreen extends StatelessWidget {
                 value: settingsProvider.filterTitleArtist,
                 onChanged: (val) => settingsProvider.setFilterTitleArtist(val),
               ),
-
             ],
           );
         },

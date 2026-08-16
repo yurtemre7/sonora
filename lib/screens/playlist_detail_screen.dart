@@ -109,8 +109,8 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
     );
 
     var result = await FilePicker.pickFiles(type: FileType.image);
-    if (result != null && result.files.single.path != null) {
-      var sourceFile = File(result.files.single.path!);
+    if (result.isNotEmpty && result.single.path != null) {
+      var sourceFile = File(result.single.path!);
       var appDir = await getApplicationDocumentsDirectory();
       var coversDir = Directory('${appDir.path}/playlist_covers');
       if (!coversDir.existsSync()) {
@@ -206,21 +206,32 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                 context,
                                 playlist: _playlist,
                                 onEdit: (newDesc) {
-                                  widget.playerProvider.updatePlaylistDescription(_playlist.id, newDesc);
+                                  widget.playerProvider
+                                      .updatePlaylistDescription(
+                                        _playlist.id,
+                                        newDesc,
+                                      );
                                 },
                               );
                             } else if (val == 6) {
-                              var exportedMsg = context.l10n.exportedPlaylist(_playlist.name);
+                              var exportedMsg = context.l10n.exportedPlaylist(
+                                _playlist.name,
+                              );
                               var failedMsg = context.l10n.failedToExport;
-                              var file = await widget.playerProvider.exportPlaylistToM3u(_playlist);
+                              var file = await widget.playerProvider
+                                  .exportPlaylistToM3u(_playlist);
                               if (file != null) {
-                                await SharePlus.instance.share(ShareParams(
-                                  files: [XFile(file.path)],
-                                  text: exportedMsg,
-                                ));
+                                await SharePlus.instance.share(
+                                  ShareParams(
+                                    files: [XFile(file.path)],
+                                    text: exportedMsg,
+                                  ),
+                                );
                               } else {
                                 if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(failedMsg)));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(failedMsg)),
+                                );
                               }
                             } else if (val == 1) {
                               _deletePlaylist();
@@ -387,12 +398,19 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                     context,
                                     playlist: _playlist,
                                     onEdit: (newDesc) {
-                                      widget.playerProvider.updatePlaylistDescription(_playlist.id, newDesc);
+                                      widget.playerProvider
+                                          .updatePlaylistDescription(
+                                            _playlist.id,
+                                            newDesc,
+                                          );
                                     },
                                   );
                                 },
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                    vertical: 4.0,
+                                  ),
                                   child: Text(
                                     creatorLabel,
                                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -520,12 +538,15 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                           return AnimatedBuilder(
                             animation: animation,
                             builder: (context, child) {
-                              var animValue = Curves.easeInOut.transform(animation.value);
+                              var animValue = Curves.easeInOut.transform(
+                                animation.value,
+                              );
                               var elevation = animValue * 6.0;
                               return Material(
                                 elevation: elevation,
                                 color: Colors.transparent,
-                                shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.2),
+                                shadowColor: theme.colorScheme.shadow
+                                    .withValues(alpha: 0.2),
                                 child: child,
                               );
                             },

@@ -208,8 +208,9 @@ class StatsService {
 
   int songCumulativeListenMs(int id) => _data.songCumulativeListenMs[id] ?? 0;
 
-  Map<int, Song> _buildSongMap(List<Song> library) =>
-      {for (var s in library) s.id: s};
+  Map<int, Song> _buildSongMap(List<Song> library) => {
+    for (var s in library) s.id: s,
+  };
 
   int albumListenCount(List<Song> library) {
     var songMap = _buildSongMap(library);
@@ -218,7 +219,9 @@ class StatsService {
     for (var entry in _data.songPlayCounts.entries) {
       var song = songMap[entry.key];
       if (song != null) {
-        var group = albumGroups.where((a) => a.songs.any((s) => s.id == song.id)).firstOrNull;
+        var group = albumGroups
+            .where((a) => a.songs.any((s) => s.id == song.id))
+            .firstOrNull;
         if (group != null) {
           listenedAlbums.add(group);
         }
@@ -290,7 +293,9 @@ class StatsService {
     for (var entry in _data.songPlayCounts.entries) {
       var song = songMap[entry.key];
       if (song != null) {
-        var group = albumGroups.where((a) => a.songs.any((s) => s.id == song.id)).firstOrNull;
+        var group = albumGroups
+            .where((a) => a.songs.any((s) => s.id == song.id))
+            .firstOrNull;
         if (group != null) {
           albumCounts.update(
             group,
@@ -319,7 +324,10 @@ class StatsService {
           if (current == null) {
             artistCounts[lower] = (displayName: artistName, count: entry.value);
           } else {
-            artistCounts[lower] = (displayName: current.displayName, count: current.count + entry.value);
+            artistCounts[lower] = (
+              displayName: current.displayName,
+              count: current.count + entry.value,
+            );
           }
         }
       }

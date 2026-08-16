@@ -103,7 +103,9 @@ class _QueueScreenState extends State<QueueScreen> {
                     return Material(
                       elevation: elevation,
                       color: Colors.transparent,
-                      shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.2),
+                      shadowColor: theme.colorScheme.shadow.withValues(
+                        alpha: 0.2,
+                      ),
                       child: child,
                     );
                   },
@@ -293,9 +295,8 @@ class _SaveQueueDialogContentState extends State<_SaveQueueDialogContent> {
             if (name.isNotEmpty) {
               widget.playerProvider.saveQueueAsPlaylist(name);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Saved $name')),
-              );
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text('Saved $name')));
             }
           },
           child: Text(context.l10n.save),

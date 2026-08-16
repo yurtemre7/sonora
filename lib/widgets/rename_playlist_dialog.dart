@@ -19,10 +19,8 @@ class RenamePlaylistDialog extends StatefulWidget {
   }) async {
     await showDialog(
       context: context,
-      builder: (dialogContext) => RenamePlaylistDialog(
-        playlist: playlist,
-        onRename: onRename,
-      ),
+      builder: (dialogContext) =>
+          RenamePlaylistDialog(playlist: playlist, onRename: onRename),
     );
   }
 

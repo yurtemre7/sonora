@@ -140,8 +140,6 @@ class SettingsProvider extends ChangeNotifier {
     await prefs.setBool('restore_last_played_song', value);
   }
 
-
-
   Future<void> setPauseOnDuck(
     bool value,
     SonoraAudioHandler audioHandler,

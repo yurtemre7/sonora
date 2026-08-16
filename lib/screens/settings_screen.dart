@@ -248,7 +248,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       null) ...[
                                     const SizedBox(height: 4),
                                     Text(
-                                      context.l10n.syncDuration(widget.settingsProvider.lastSyncDuration.toString()),
+                                      context.l10n.syncDuration(
+                                        widget.settingsProvider.lastSyncDuration
+                                            .toString(),
+                                      ),
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
                                             color: theme
@@ -281,15 +284,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                               ? ' in ${widget.settingsProvider.lastSyncDuration}ms'
                                               : '';
 
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(context.l10n.syncedXSongs(widget.playerProvider.allSongs.length, durationText)),
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-                                            ),
-                                          );
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    context.l10n.syncedXSongs(
+                                                      widget
+                                                          .playerProvider
+                                                          .allSongs
+                                                          .length,
+                                                      durationText,
+                                                    ),
+                                                  ),
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                ),
+                                              );
                                         } finally {
                                           if (context.mounted) {
                                             setState(() {
@@ -328,14 +338,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                         if (widget.settingsProvider.lastPerfLog != null &&
-                            widget.settingsProvider.lastPerfLog!.isNotEmpty) ...[
+                            widget
+                                .settingsProvider
+                                .lastPerfLog!
+                                .isNotEmpty) ...[
                           const SizedBox(height: 16),
                           OutlinedButton.icon(
                             onPressed: () {
                               showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  title: const Text('Performance Benchmark Logs'),
+                                  title: const Text(
+                                    'Performance Benchmark Logs',
+                                  ),
                                   content: SingleChildScrollView(
                                     child: SelectableText(
                                       widget.settingsProvider.lastPerfLog!,
@@ -356,7 +371,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                           ),
                                         );
                                         Navigator.of(context).pop();
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           const SnackBar(
                                             content: Text(
                                               'Performance log copied to clipboard!',
@@ -377,7 +394,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               );
                             },
                             icon: const Icon(Icons.analytics_rounded, size: 16),
-                            label: const Text('Copy Performance Benchmark Logs'),
+                            label: const Text(
+                              'Copy Performance Benchmark Logs',
+                            ),
                           ),
                         ],
                       ],
@@ -418,13 +437,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.language_rounded),
             title: Text(context.l10n.appLanguage),
-            subtitle: Text(
-              switch (widget.settingsProvider.appLocale) {
-                'en' => AppLocalizationsEn().arbLanguage,
-                'ja' => AppLocalizationsJa().arbLanguage,
-                _ => context.l10n.systemDefault,
-              },
-            ),
+            subtitle: Text(switch (widget.settingsProvider.appLocale) {
+              'en' => AppLocalizationsEn().arbLanguage,
+              'ja' => AppLocalizationsJa().arbLanguage,
+              _ => context.l10n.systemDefault,
+            }),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               showDialog(

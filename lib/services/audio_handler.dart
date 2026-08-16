@@ -539,8 +539,15 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
             } else {
               await band.setGain(0.0);
             }
-          } else if (mode == 'custom' && customGains != null && band.index < customGains.length) {
-            await band.setGain(customGains[band.index].clamp(params.minDecibels, params.maxDecibels));
+          } else if (mode == 'custom' &&
+              customGains != null &&
+              band.index < customGains.length) {
+            await band.setGain(
+              customGains[band.index].clamp(
+                params.minDecibels,
+                params.maxDecibels,
+              ),
+            );
           }
         }
       } catch (e) {
@@ -695,8 +702,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
             artist: s.artist,
             album: s.album,
             duration: s.duration,
-            artUri:
-                s.artworkPath != null ? Uri.file(s.artworkPath!) : null,
+            artUri: s.artworkPath != null ? Uri.file(s.artworkPath!) : null,
           ),
         )
         .toList();
@@ -726,8 +732,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
             artist: s.artist,
             album: s.album,
             duration: s.duration,
-            artUri:
-                s.artworkPath != null ? Uri.file(s.artworkPath!) : null,
+            artUri: s.artworkPath != null ? Uri.file(s.artworkPath!) : null,
           ),
         )
         .toList();

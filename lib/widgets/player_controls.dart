@@ -41,7 +41,9 @@ class PlayerControls extends StatelessWidget {
             isShuffled ? Icons.shuffle_on_rounded : Icons.shuffle_rounded,
           ),
           iconSize: 24,
-          tooltip: isShuffled ? context.l10n.disableShuffle : context.l10n.enableShuffle,
+          tooltip: isShuffled
+              ? context.l10n.disableShuffle
+              : context.l10n.enableShuffle,
           color: isShuffled
               ? theme.colorScheme.primary
               : theme.colorScheme.onSurfaceVariant,
@@ -88,7 +90,9 @@ class PlayerControls extends StatelessWidget {
                     : Icons.play_arrow_rounded,
               ),
               iconSize: 36,
-              tooltip: isPlaying ? context.l10n.pauseTooltip : context.l10n.playTooltip,
+              tooltip: isPlaying
+                  ? context.l10n.pauseTooltip
+                  : context.l10n.playTooltip,
               color: theme.colorScheme.onPrimary,
             ),
           ),

@@ -19,24 +19,26 @@ class EditPlaylistDescriptionDialog extends StatefulWidget {
   }) {
     return showDialog(
       context: context,
-      builder: (context) => EditPlaylistDescriptionDialog(
-        playlist: playlist,
-        onEdit: onEdit,
-      ),
+      builder: (context) =>
+          EditPlaylistDescriptionDialog(playlist: playlist, onEdit: onEdit),
     );
   }
 
   @override
-  State<EditPlaylistDescriptionDialog> createState() => _EditPlaylistDescriptionDialogState();
+  State<EditPlaylistDescriptionDialog> createState() =>
+      _EditPlaylistDescriptionDialogState();
 }
 
-class _EditPlaylistDescriptionDialogState extends State<EditPlaylistDescriptionDialog> {
+class _EditPlaylistDescriptionDialogState
+    extends State<EditPlaylistDescriptionDialog> {
   late TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.playlist.description ?? '');
+    _controller = TextEditingController(
+      text: widget.playlist.description ?? '',
+    );
   }
 
   @override
@@ -67,7 +69,9 @@ class _EditPlaylistDescriptionDialogState extends State<EditPlaylistDescriptionD
         ),
         FilledButton(
           onPressed: () {
-            widget.onEdit(_controller.text.trim().isEmpty ? null : _controller.text.trim());
+            widget.onEdit(
+              _controller.text.trim().isEmpty ? null : _controller.text.trim(),
+            );
             Navigator.pop(context);
           },
           child: Text(l10n.save),

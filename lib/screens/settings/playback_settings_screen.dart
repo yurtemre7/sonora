@@ -55,9 +55,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
                       },
                     ),
                     SwitchListTile(
-                      secondary: const Icon(
-                        Icons.notifications_paused_rounded,
-                      ),
+                      secondary: const Icon(Icons.notifications_paused_rounded),
                       title: Text(context.l10n.pauseOnDuck),
                       subtitle: Text(context.l10n.pauseOnDuckSubtitle),
                       value: settingsProvider.pauseOnDuck,
@@ -82,9 +80,10 @@ class PlaybackSettingsScreen extends StatelessWidget {
                       title: Text(context.l10n.defaultSleepTimer),
                       subtitle: Text(context.l10n.defaultSleepTimerSubtitle),
                       trailing: DropdownButton<int>(
-                        value: [5, 10, 15, 20, 25, 30, 45, 60].contains(
-                          settingsProvider.sleepTimerDefaultMinutes,
-                        )
+                        value:
+                            [5, 10, 15, 20, 25, 30, 45, 60].contains(
+                              settingsProvider.sleepTimerDefaultMinutes,
+                            )
                             ? settingsProvider.sleepTimerDefaultMinutes
                             : 60,
                         underline: const SizedBox(),

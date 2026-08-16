@@ -63,13 +63,13 @@ class _CustomEqualizerWidgetState extends State<CustomEqualizerWidget> {
         var params = snapshot.data!;
         // params is AndroidEqualizerParameters
         var bands = params.bands;
-        
+
         if (_gains.isEmpty || _gains.length != bands.length) {
           _gains = List.filled(bands.length, 0.0);
         }
 
         var isEqActive = player.isCustomEqEnabled;
-        
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -105,7 +105,8 @@ class _CustomEqualizerWidgetState extends State<CustomEqualizerWidget> {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: _presets.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 8),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 8),
                   itemBuilder: (context, index) {
                     var entry = _presets.entries.elementAt(index);
                     return ActionChip(
@@ -115,11 +116,14 @@ class _CustomEqualizerWidgetState extends State<CustomEqualizerWidget> {
                           var fractions = entry.value;
                           for (var i = 0; i < bands.length; i++) {
                             // Map bands index to 5-band fraction index
-                            var mappedIndex = (i / bands.length * fractions.length).floor().clamp(0, fractions.length - 1);
+                            var mappedIndex =
+                                (i / bands.length * fractions.length)
+                                    .floor()
+                                    .clamp(0, fractions.length - 1);
                             var fraction = fractions[mappedIndex];
-                            _gains[i] = fraction >= 0 
-                                ? fraction * params.maxDecibels 
-                                : -fraction * params.minDecibels; 
+                            _gains[i] = fraction >= 0
+                                ? fraction * params.maxDecibels
+                                : -fraction * params.minDecibels;
                           }
                           player.setCustomEqBands(_gains);
                         });
@@ -140,54 +144,56 @@ class _CustomEqualizerWidgetState extends State<CustomEqualizerWidget> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: List.generate(bands.length, (index) {
-                      var band = bands[index];
-                      var freq = band.centerFrequency;
-                      var freqLabel = freq >= 1000 
-                          ? '${(freq / 1000).toStringAsFixed(0)}k'
-                          : '${freq.toStringAsFixed(0)}';
+                        var band = bands[index];
+                        var freq = band.centerFrequency;
+                        var freqLabel = freq >= 1000
+                            ? '${(freq / 1000).toStringAsFixed(0)}k'
+                            : '${freq.toStringAsFixed(0)}';
 
-                      return Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: Column(
-                          children: [
-                            Expanded(
-                              child: RotatedBox(
-                                quarterTurns: 3,
-                                child: Slider(
-                                  value: _gains[index],
-                                  min: params.minDecibels,
-                                  max: params.maxDecibels,
-                                  onChanged: (val) {
-                                    setState(() {
-                                      _gains[index] = val;
-                                    });
-                                  },
-                                  onChangeEnd: (val) {
-                                    player.setCustomEqBands(_gains);
-                                  },
+                        return Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4.0,
+                            ),
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: RotatedBox(
+                                    quarterTurns: 3,
+                                    child: Slider(
+                                      value: _gains[index],
+                                      min: params.minDecibels,
+                                      max: params.maxDecibels,
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _gains[index] = val;
+                                        });
+                                      },
+                                      onChangeEnd: (val) {
+                                        player.setCustomEqBands(_gains);
+                                      },
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  freqLabel,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              freqLabel,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      ],
-    );
+          ],
+        );
       },
     );
   }

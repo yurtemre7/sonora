@@ -87,41 +87,38 @@ void main() {
     },
   );
 
-  test(
-    'Unknown artist songs are bundled into consolidated Unknown Artist / Unknown Album',
-    () {
-      var songs = [
-        Song(
-          id: 1,
-          title: 'Song 1',
-          artist: '',
-          album: 'Some Album',
-          duration: const Duration(minutes: 3),
-          filePath: '/tmp/u1.mp3',
-        ),
-        Song(
-          id: 2,
-          title: 'Song 2',
-          artist: 'Unknown Artist',
-          album: '',
-          duration: const Duration(minutes: 4),
-          filePath: '/tmp/u2.mp3',
-        ),
-      ];
+  test('Unknown artist songs are bundled into consolidated Unknown Artist / Unknown Album', () {
+    var songs = [
+      Song(
+        id: 1,
+        title: 'Song 1',
+        artist: '',
+        album: 'Some Album',
+        duration: const Duration(minutes: 3),
+        filePath: '/tmp/u1.mp3',
+      ),
+      Song(
+        id: 2,
+        title: 'Song 2',
+        artist: 'Unknown Artist',
+        album: '',
+        duration: const Duration(minutes: 4),
+        filePath: '/tmp/u2.mp3',
+      ),
+    ];
 
-      var albums = buildAlbumGroups(songs);
-      // Both songs should go into Artist: 'Unknown Artist', Album: 'Unknown Album'
-      expect(albums.length, 1);
-      expect(albums.first.name, 'Unknown Album');
-      expect(albums.first.artist, 'Unknown Artist');
-      expect(albums.first.songs.length, 2);
+    var albums = buildAlbumGroups(songs);
+    // Both songs should go into Artist: 'Unknown Artist', Album: 'Unknown Album'
+    expect(albums.length, 1);
+    expect(albums.first.name, 'Unknown Album');
+    expect(albums.first.artist, 'Unknown Artist');
+    expect(albums.first.songs.length, 2);
 
-      var artists = buildArtistGroups(songs, albums);
-      expect(artists.length, 1);
-      expect(artists.first.name, 'Unknown Artist');
-      expect(artists.first.albums.single.name, 'Unknown Album');
-    },
-  );
+    var artists = buildArtistGroups(songs, albums);
+    expect(artists.length, 1);
+    expect(artists.first.name, 'Unknown Artist');
+    expect(artists.first.albums.single.name, 'Unknown Album');
+  });
 
   test(
     'parseIndividualArtists splits multi-artist tags and unifies album tracks',
@@ -146,14 +143,16 @@ void main() {
       ];
 
       // Test parsing individual artists
-      expect(
-        parseIndividualArtists('Ufo361, Capital Bra, Sonu Lal'),
-        ['Ufo361', 'Capital Bra', 'Sonu Lal'],
-      );
-      expect(
-        parseIndividualArtists('Drake feat. Future & Young Thug'),
-        ['Drake', 'Future', 'Young Thug'],
-      );
+      expect(parseIndividualArtists('Ufo361, Capital Bra, Sonu Lal'), [
+        'Ufo361',
+        'Capital Bra',
+        'Sonu Lal',
+      ]);
+      expect(parseIndividualArtists('Drake feat. Future & Young Thug'), [
+        'Drake',
+        'Future',
+        'Young Thug',
+      ]);
 
       // Test album unification
       var albums = buildAlbumGroups(songs);
@@ -179,8 +178,12 @@ void main() {
         'capital bra': '/tmp/capital.jpg',
       };
       var artistsWithImages = buildArtistGroups(songs, albums, localImagesMap);
-      var ufoWithImage = artistsWithImages.firstWhere((a) => a.name == 'Ufo361');
-      var capWithImage = artistsWithImages.firstWhere((a) => a.name == 'Capital Bra');
+      var ufoWithImage = artistsWithImages.firstWhere(
+        (a) => a.name == 'Ufo361',
+      );
+      var capWithImage = artistsWithImages.firstWhere(
+        (a) => a.name == 'Capital Bra',
+      );
       expect(ufoWithImage.localImagePath, '/tmp/ufo361.jpg');
       expect(capWithImage.localImagePath, '/tmp/capital.jpg');
     },

@@ -49,61 +49,63 @@ class AppearanceSettingsScreen extends StatelessWidget {
           child: Material(
             color: Colors.transparent,
             child: ListenableBuilder(
-            listenable: themeProvider,
-            builder: (ctx, _) {
-              var currentMode = themeProvider.themeMode;
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-                    child: Text(
-                      ctx.l10n.chooseTheme,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+              listenable: themeProvider,
+              builder: (ctx, _) {
+                var currentMode = themeProvider.themeMode;
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+                      child: Text(
+                        ctx.l10n.chooseTheme,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  RadioGroup<ThemeMode>(
-                    groupValue: currentMode,
-                    onChanged: (value) {
-                      if (value == null) return;
-                      themeProvider.setThemeMode(value);
-                      Navigator.pop(sheetContext);
-                    },
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        RadioListTile<ThemeMode>(
-                          value: ThemeMode.system,
-                          title: Text(ctx.l10n.systemDefault),
-                          subtitle: Text(ctx.l10n.systemSubtitle),
-                          secondary: const Icon(Icons.brightness_auto_rounded),
-                        ),
-                        RadioListTile<ThemeMode>(
-                          value: ThemeMode.light,
-                          title: Text(ctx.l10n.light),
-                          subtitle: Text(ctx.l10n.lightSubtitle),
-                          secondary: const Icon(Icons.light_mode_rounded),
-                        ),
-                        RadioListTile<ThemeMode>(
-                          value: ThemeMode.dark,
-                          title: Text(ctx.l10n.dark),
-                          subtitle: Text(ctx.l10n.darkSubtitle),
-                          secondary: const Icon(Icons.dark_mode_rounded),
-                        ),
-                      ],
+                    RadioGroup<ThemeMode>(
+                      groupValue: currentMode,
+                      onChanged: (value) {
+                        if (value == null) return;
+                        themeProvider.setThemeMode(value);
+                        Navigator.pop(sheetContext);
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          RadioListTile<ThemeMode>(
+                            value: ThemeMode.system,
+                            title: Text(ctx.l10n.systemDefault),
+                            subtitle: Text(ctx.l10n.systemSubtitle),
+                            secondary: const Icon(
+                              Icons.brightness_auto_rounded,
+                            ),
+                          ),
+                          RadioListTile<ThemeMode>(
+                            value: ThemeMode.light,
+                            title: Text(ctx.l10n.light),
+                            subtitle: Text(ctx.l10n.lightSubtitle),
+                            secondary: const Icon(Icons.light_mode_rounded),
+                          ),
+                          RadioListTile<ThemeMode>(
+                            value: ThemeMode.dark,
+                            title: Text(ctx.l10n.dark),
+                            subtitle: Text(ctx.l10n.darkSubtitle),
+                            secondary: const Icon(Icons.dark_mode_rounded),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              );
-            },
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+            ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
   }
 
   @override
@@ -175,8 +177,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       title: Text(context.l10n.dynamicTheme),
                       subtitle: Text(context.l10n.dynamicThemeSubtitle),
                       value: settingsProvider.useDynamicTheme,
-                      onChanged: (val) =>
-                          settingsProvider.setDynamicTheme(val),
+                      onChanged: (val) => settingsProvider.setDynamicTheme(val),
                     ),
                     SwitchListTile(
                       secondary: const Icon(Icons.account_box_outlined),
@@ -191,9 +192,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                     SwitchListTile(
                       secondary: const Icon(Icons.bar_chart_rounded),
                       title: Text(context.l10n.showAudioVisualizer),
-                      subtitle: Text(
-                        context.l10n.showAudioVisualizerSubtitle,
-                      ),
+                      subtitle: Text(context.l10n.showAudioVisualizerSubtitle),
                       value: settingsProvider.showVisualizer,
                       onChanged: (val) =>
                           settingsProvider.setShowVisualizer(val),
@@ -254,8 +253,7 @@ class _UserNameDialogContent extends StatefulWidget {
   final String initialName;
 
   @override
-  State<_UserNameDialogContent> createState() =>
-      _UserNameDialogContentState();
+  State<_UserNameDialogContent> createState() => _UserNameDialogContentState();
 }
 
 class _UserNameDialogContentState extends State<_UserNameDialogContent> {
@@ -281,9 +279,7 @@ class _UserNameDialogContentState extends State<_UserNameDialogContent> {
         controller: _controller,
         autofocus: true,
         textCapitalization: TextCapitalization.words,
-        decoration: InputDecoration(
-          hintText: context.l10n.yourName,
-        ),
+        decoration: InputDecoration(hintText: context.l10n.yourName),
       ),
       actions: [
         TextButton(
@@ -293,10 +289,7 @@ class _UserNameDialogContentState extends State<_UserNameDialogContent> {
         FilledButton(
           onPressed: () {
             var text = _controller.text.trim();
-            Navigator.pop(
-              context,
-              text.isEmpty ? 'User' : text,
-            );
+            Navigator.pop(context, text.isEmpty ? 'User' : text);
           },
           child: Text(context.l10n.save),
         ),

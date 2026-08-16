@@ -613,9 +613,8 @@ class _HomeScreenState extends State<HomeScreen>
                       tooltip: context.l10n.importM3u,
                       onPressed: () async {
                         var result = await FilePicker.pickFiles();
-                        if (result != null &&
-                            result.files.single.path != null) {
-                          var file = File(result.files.single.path!);
+                        if (result.isNotEmpty && result.single.path != null) {
+                          var file = File(result.single.path!);
                           if (file.path.toLowerCase().endsWith('.m3u') ||
                               file.path.toLowerCase().endsWith('.m3u8')) {
                             await widget.playerProvider.importM3u(file);

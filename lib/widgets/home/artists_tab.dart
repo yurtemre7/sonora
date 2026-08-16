@@ -56,11 +56,7 @@ class ArtistsTab extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: ArtistAvatar(
-                artist: artist,
-                radius: 24,
-                iconSize: 28,
-              ),
+              leading: ArtistAvatar(artist: artist, radius: 24, iconSize: 28),
               title: Text(
                 artist.name,
                 style: theme.textTheme.titleMedium?.copyWith(

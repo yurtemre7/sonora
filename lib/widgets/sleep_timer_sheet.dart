@@ -16,10 +16,7 @@ void showSleepTimerBottomSheet(
 }
 
 class SleepTimerBottomSheet extends StatefulWidget {
-  const SleepTimerBottomSheet({
-    super.key,
-    required this.playerProvider,
-  });
+  const SleepTimerBottomSheet({super.key, required this.playerProvider});
 
   final PlayerProvider playerProvider;
 
@@ -35,8 +32,8 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
   @override
   void initState() {
     super.initState();
-    var defaultMin =
-        SettingsProvider.instance.sleepTimerDefaultMinutes.toDouble();
+    var defaultMin = SettingsProvider.instance.sleepTimerDefaultMinutes
+        .toDouble();
     _selectedMinutes = defaultMin.clamp(1.0, 60.0);
   }
 
@@ -65,9 +62,7 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
         return Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(28),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: Material(
             color: Colors.transparent,
@@ -158,7 +153,9 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                                 Navigator.pop(context);
                               },
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 foregroundColor: theme.colorScheme.error,
                               ),
                               child: Text(context.l10n.cancelTimer),
@@ -173,7 +170,9 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                                 );
                               },
                               style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                               ),
                               child: Text(context.l10n.plusOneMin),
                             ),
@@ -248,8 +247,7 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: _presetMinutes.map((min) {
-                            var isSelected =
-                                _selectedMinutes.round() == min;
+                            var isSelected = _selectedMinutes.round() == min;
                             var isDefault =
                                 min ==
                                 SettingsProvider
@@ -274,11 +272,11 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                                         width: 2.0,
                                       )
                                     : (isDefault
-                                        ? BorderSide(
-                                            color: theme.colorScheme.primary,
-                                            width: 1.5,
-                                          )
-                                        : null),
+                                          ? BorderSide(
+                                              color: theme.colorScheme.primary,
+                                              width: 1.5,
+                                            )
+                                          : null),
                                 labelStyle: TextStyle(
                                   fontWeight: isSelected || isDefault
                                       ? FontWeight.bold
@@ -286,13 +284,12 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                                   color: isSelected
                                       ? theme.colorScheme.onPrimary
                                       : (isDefault
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.onSurface),
+                                            ? theme.colorScheme.primary
+                                            : theme.colorScheme.onSurface),
                                 ),
                                 selectedColor: theme.colorScheme.primary,
-                                backgroundColor: theme
-                                    .colorScheme
-                                    .surfaceContainerHighest,
+                                backgroundColor:
+                                    theme.colorScheme.surfaceContainerHighest,
                               ),
                             );
                           }).toList(),

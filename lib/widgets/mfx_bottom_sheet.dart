@@ -111,288 +111,306 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                      // Handle
-                      Center(
-                        child: Container(
-                          margin: const EdgeInsets.only(top: 12, bottom: 16),
-                          width: 32,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.onSurfaceVariant
-                                .withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(2),
+                        // Handle
+                        Center(
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 12, bottom: 16),
+                            width: 32,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.auto_awesome,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              context.l10n.musicEffects,
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.auto_awesome,
+                                color: theme.colorScheme.primary,
                               ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.tertiaryContainer,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                context.l10n.experimental,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.onTertiaryContainer,
+                              const SizedBox(width: 12),
+                              Text(
+                                context.l10n.musicEffects,
+                                style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: ListView(
-                          padding: const EdgeInsets.only(bottom: 24),
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    context.l10n.presetSpeedAndPitch,
-                                    style: theme.textTheme.titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.tertiaryContainer,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  context.l10n.experimental,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color:
+                                        theme.colorScheme.onTertiaryContainer,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  if (player.isSuperSlowed ||
-                                      player.isSlowed ||
-                                      player.isSpedUp ||
-                                      player.isSuperSpedUp ||
-                                      player.isNightcore)
-                                    TextButton(
-                                      style: TextButton.styleFrom(
-                                        visualDensity: VisualDensity.compact,
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                      onPressed: () {
-                                        player.resetAllMfx();
-                                        _scrollToIndex(2);
-                                      },
-                                      child: Text(context.l10n.resetAll),
-                                    )
-                                  else
-                                    TextButton(
-                                      style: TextButton.styleFrom(
-                                        visualDensity: VisualDensity.compact,
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                      onPressed: null,
-                                      child: const Text(''),
-                                    ),
-                                ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            SingleChildScrollView(
-                              controller: _scrollController,
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: IntrinsicHeight(
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: ListView(
+                            padding: const EdgeInsets.only(bottom: 24),
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    PresetCard(
-                                      title: context.l10n.mfxSuperSlowed,
-                                      subtitle: context.l10n.mfxSpeedSubtitle('0.70'),
-                                      icon: Icons.fast_rewind_rounded,
-                                      isSelected: player.isSuperSlowed,
-                                      onTap: () {
-                                        player.setSuperSlowed(true);
-                                        _scrollToIndex(0);
-                                      },
+                                    Text(
+                                      context.l10n.presetSpeedAndPitch,
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
-                                    PresetCard(
-                                      title: context.l10n.mfxSlowed,
-                                      subtitle: context.l10n.mfxSpeedSubtitle('0.85'),
-                                      icon: Icons.fast_rewind_rounded,
-                                      isSelected: player.isSlowed,
-                                      onTap: () {
-                                        player.setSlowed(true);
-                                        _scrollToIndex(1);
-                                      },
-                                    ),
-                                    PresetCard(
-                                      title: context.l10n.mfxNormal,
-                                      subtitle: context.l10n.mfxSpeedSubtitle('1.0'),
-                                      icon: Icons.play_arrow_rounded,
-                                      isSelected:
-                                          !player.isSuperSlowed &&
-                                          !player.isSlowed &&
-                                          !player.isSpedUp &&
-                                          !player.isSuperSpedUp &&
-                                          !player.isNightcore,
-                                      onTap: () {
-                                        player.setSuperSlowed(false);
-                                        player.setSlowed(false);
-                                        player.setSpedUp(false);
-                                        player.setSuperSpedUp(false);
-                                        player.setNightcore(false);
-                                        _scrollToIndex(2);
-                                      },
-                                    ),
-                                    PresetCard(
-                                      title: context.l10n.mfxSpedUp,
-                                      subtitle: context.l10n.mfxSpeedSubtitle('1.25'),
-                                      icon: Icons.fast_forward_rounded,
-                                      isSelected: player.isSpedUp,
-                                      onTap: () {
-                                        player.setSpedUp(true);
-                                        _scrollToIndex(3);
-                                      },
-                                    ),
-                                    PresetCard(
-                                      title: context.l10n.mfxNightcore,
-                                      subtitle: context.l10n.mfxSpeedSubtitle('1.30'),
-                                      icon: Icons.bolt_rounded,
-                                      isSelected: player.isNightcore,
-                                      onTap: () {
-                                        player.setNightcore(true);
-                                        _scrollToIndex(4);
-                                      },
-                                    ),
-                                    PresetCard(
-                                      title: context.l10n.mfxSuperSpedUp,
-                                      subtitle: context.l10n.mfxSpeedSubtitle('1.50'),
-                                      icon: Icons.fast_forward_rounded,
-                                      isSelected: player.isSuperSpedUp,
-                                      onTap: () {
-                                        player.setSuperSpedUp(true);
-                                        _scrollToIndex(5);
-                                      },
-                                    ),
+                                    if (player.isSuperSlowed ||
+                                        player.isSlowed ||
+                                        player.isSpedUp ||
+                                        player.isSuperSpedUp ||
+                                        player.isNightcore)
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                          visualDensity: VisualDensity.compact,
+                                          padding: EdgeInsets.zero,
+                                        ),
+                                        onPressed: () {
+                                          player.resetAllMfx();
+                                          _scrollToIndex(2);
+                                        },
+                                        child: Text(context.l10n.resetAll),
+                                      )
+                                    else
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                          visualDensity: VisualDensity.compact,
+                                          padding: EdgeInsets.zero,
+                                        ),
+                                        onPressed: null,
+                                        child: const Text(''),
+                                      ),
                                   ],
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 16),
-                            SwitchListTile(
-                              title: Text(context.l10n.mfxWarmth),
-                              subtitle: Text(context.l10n.mfxWarmthSubtitle),
-                              secondary: Icon(
-                                Icons.graphic_eq_rounded,
-                                color: player.isReverbEnabled
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurfaceVariant,
-                              ),
-                              value: player.isReverbEnabled,
-                              onChanged: player.setReverbEnabled,
-                            ),
-                            SwitchListTile(
-                              title: Text(context.l10n.mfxLoFi),
-                              subtitle: Text(context.l10n.mfxLoFiSubtitle),
-                              secondary: Icon(
-                                Icons.radio_rounded,
-                                color: player.isLofiEnabled
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurfaceVariant,
-                              ),
-                              value: player.isLofiEnabled,
-                              onChanged: player.setLofiEnabled,
-                            ),
-                            SwitchListTile(
-                              title: Text(context.l10n.mfxBassBoosted),
-                              subtitle: Text(context.l10n.mfxBassBoostedSubtitle),
-                              secondary: Icon(
-                                Icons.speaker_group_rounded,
-                                color: player.isBassBoostEnabled
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurfaceVariant,
-                              ),
-                              value: player.isBassBoostEnabled,
-                              onChanged: player.setBassBoostEnabled,
-                            ),
-                            const Divider(height: 32),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Text(
-                                context.l10n.customSpeed,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                              const SizedBox(height: 8),
+                              SingleChildScrollView(
+                                controller: _scrollController,
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Opacity(
-                              opacity:
-                                  (player.isSlowed ||
-                                      player.isSpedUp ||
-                                      player.isSuperSlowed ||
-                                      player.isSuperSpedUp ||
-                                      player.isNightcore)
-                                  ? 0.5
-                                  : 1.0,
-                              child: IgnorePointer(
-                                ignoring:
-                                    player.isSlowed ||
-                                    player.isSpedUp ||
-                                    player.isSuperSlowed ||
-                                    player.isSuperSpedUp ||
-                                    player.isNightcore,
-                                child: SpeedSlider(
-                                  speed: player.speed,
-                                  onChanged: player.setSpeed,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Divider(height: 32),
-                            CustomEqualizerWidget(playerProvider: player),
-                            const SizedBox(height: 32),
-                            SafeArea(
-                              child: Center(
-                                child: TextButton.icon(
-                                  onPressed: () {
-                                    player.resetAllMfx();
-                                    _scrollToIndex(2);
-                                  },
-                                  icon: const Icon(Icons.refresh_rounded),
-                                  label: Text(context.l10n.mfxResetAll),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: theme.colorScheme.error,
+                                child: IntrinsicHeight(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      PresetCard(
+                                        title: context.l10n.mfxSuperSlowed,
+                                        subtitle: context.l10n.mfxSpeedSubtitle(
+                                          '0.70',
+                                        ),
+                                        icon: Icons.fast_rewind_rounded,
+                                        isSelected: player.isSuperSlowed,
+                                        onTap: () {
+                                          player.setSuperSlowed(true);
+                                          _scrollToIndex(0);
+                                        },
+                                      ),
+                                      PresetCard(
+                                        title: context.l10n.mfxSlowed,
+                                        subtitle: context.l10n.mfxSpeedSubtitle(
+                                          '0.85',
+                                        ),
+                                        icon: Icons.fast_rewind_rounded,
+                                        isSelected: player.isSlowed,
+                                        onTap: () {
+                                          player.setSlowed(true);
+                                          _scrollToIndex(1);
+                                        },
+                                      ),
+                                      PresetCard(
+                                        title: context.l10n.mfxNormal,
+                                        subtitle: context.l10n.mfxSpeedSubtitle(
+                                          '1.0',
+                                        ),
+                                        icon: Icons.play_arrow_rounded,
+                                        isSelected:
+                                            !player.isSuperSlowed &&
+                                            !player.isSlowed &&
+                                            !player.isSpedUp &&
+                                            !player.isSuperSpedUp &&
+                                            !player.isNightcore,
+                                        onTap: () {
+                                          player.setSuperSlowed(false);
+                                          player.setSlowed(false);
+                                          player.setSpedUp(false);
+                                          player.setSuperSpedUp(false);
+                                          player.setNightcore(false);
+                                          _scrollToIndex(2);
+                                        },
+                                      ),
+                                      PresetCard(
+                                        title: context.l10n.mfxSpedUp,
+                                        subtitle: context.l10n.mfxSpeedSubtitle(
+                                          '1.25',
+                                        ),
+                                        icon: Icons.fast_forward_rounded,
+                                        isSelected: player.isSpedUp,
+                                        onTap: () {
+                                          player.setSpedUp(true);
+                                          _scrollToIndex(3);
+                                        },
+                                      ),
+                                      PresetCard(
+                                        title: context.l10n.mfxNightcore,
+                                        subtitle: context.l10n.mfxSpeedSubtitle(
+                                          '1.30',
+                                        ),
+                                        icon: Icons.bolt_rounded,
+                                        isSelected: player.isNightcore,
+                                        onTap: () {
+                                          player.setNightcore(true);
+                                          _scrollToIndex(4);
+                                        },
+                                      ),
+                                      PresetCard(
+                                        title: context.l10n.mfxSuperSpedUp,
+                                        subtitle: context.l10n.mfxSpeedSubtitle(
+                                          '1.50',
+                                        ),
+                                        icon: Icons.fast_forward_rounded,
+                                        isSelected: player.isSuperSpedUp,
+                                        onTap: () {
+                                          player.setSuperSpedUp(true);
+                                          _scrollToIndex(5);
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 16),
+                              SwitchListTile(
+                                title: Text(context.l10n.mfxWarmth),
+                                subtitle: Text(context.l10n.mfxWarmthSubtitle),
+                                secondary: Icon(
+                                  Icons.graphic_eq_rounded,
+                                  color: player.isReverbEnabled
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurfaceVariant,
+                                ),
+                                value: player.isReverbEnabled,
+                                onChanged: player.setReverbEnabled,
+                              ),
+                              SwitchListTile(
+                                title: Text(context.l10n.mfxLoFi),
+                                subtitle: Text(context.l10n.mfxLoFiSubtitle),
+                                secondary: Icon(
+                                  Icons.radio_rounded,
+                                  color: player.isLofiEnabled
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurfaceVariant,
+                                ),
+                                value: player.isLofiEnabled,
+                                onChanged: player.setLofiEnabled,
+                              ),
+                              SwitchListTile(
+                                title: Text(context.l10n.mfxBassBoosted),
+                                subtitle: Text(
+                                  context.l10n.mfxBassBoostedSubtitle,
+                                ),
+                                secondary: Icon(
+                                  Icons.speaker_group_rounded,
+                                  color: player.isBassBoostEnabled
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurfaceVariant,
+                                ),
+                                value: player.isBassBoostEnabled,
+                                onChanged: player.setBassBoostEnabled,
+                              ),
+                              const Divider(height: 32),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Text(
+                                  context.l10n.customSpeed,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Opacity(
+                                opacity:
+                                    (player.isSlowed ||
+                                        player.isSpedUp ||
+                                        player.isSuperSlowed ||
+                                        player.isSuperSpedUp ||
+                                        player.isNightcore)
+                                    ? 0.5
+                                    : 1.0,
+                                child: IgnorePointer(
+                                  ignoring:
+                                      player.isSlowed ||
+                                      player.isSpedUp ||
+                                      player.isSuperSlowed ||
+                                      player.isSuperSpedUp ||
+                                      player.isNightcore,
+                                  child: SpeedSlider(
+                                    speed: player.speed,
+                                    onChanged: player.setSpeed,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Divider(height: 32),
+                              CustomEqualizerWidget(playerProvider: player),
+                              const SizedBox(height: 32),
+                              SafeArea(
+                                child: Center(
+                                  child: TextButton.icon(
+                                    onPressed: () {
+                                      player.resetAllMfx();
+                                      _scrollToIndex(2);
+                                    },
+                                    icon: const Icon(Icons.refresh_rounded),
+                                    label: Text(context.l10n.mfxResetAll),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: theme.colorScheme.error,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+            );
+          },
+        );
+      },
+    );
+  }
 }

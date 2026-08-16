@@ -39,8 +39,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
         onProgress: (received, total) {
           if (mounted) {
             setState(() {
-              _downloadProgress =
-                  total > 0 ? (received / total).clamp(0.0, 1.0) : 0.0;
+              _downloadProgress = total > 0
+                  ? (received / total).clamp(0.0, 1.0)
+                  : 0.0;
               var percentage = (_downloadProgress * 100).toInt();
               _statusText = 'Downloading update... $percentage%';
             });

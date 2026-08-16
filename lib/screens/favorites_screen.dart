@@ -110,12 +110,26 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         favAlbums.sort((a, b) {
           var cmp = 0;
           if (sortBy == 'duration') {
-            var durA = a.songs.fold<int>(0, (s, x) => s + x.duration.inMilliseconds);
-            var durB = b.songs.fold<int>(0, (s, x) => s + x.duration.inMilliseconds);
+            var durA = a.songs.fold<int>(
+              0,
+              (s, x) => s + x.duration.inMilliseconds,
+            );
+            var durB = b.songs.fold<int>(
+              0,
+              (s, x) => s + x.duration.inMilliseconds,
+            );
             cmp = durA.compareTo(durB);
           } else if (sortBy == 'date') {
-            var dateA = widget.playerProvider.favoriteAlbums['${a.nameLower}|||${a.artistLower}'] ?? 0;
-            var dateB = widget.playerProvider.favoriteAlbums['${b.nameLower}|||${b.artistLower}'] ?? 0;
+            var dateA =
+                widget
+                    .playerProvider
+                    .favoriteAlbums['${a.nameLower}|||${a.artistLower}'] ??
+                0;
+            var dateB =
+                widget
+                    .playerProvider
+                    .favoriteAlbums['${b.nameLower}|||${b.artistLower}'] ??
+                0;
             cmp = dateA.compareTo(dateB);
           } else {
             cmp = a.nameLower.compareTo(b.nameLower);
@@ -126,8 +140,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         favArtists.sort((a, b) {
           var cmp = 0;
           if (sortBy == 'duration') {
-            var durA = a.songs.fold<int>(0, (s, x) => s + x.duration.inMilliseconds);
-            var durB = b.songs.fold<int>(0, (s, x) => s + x.duration.inMilliseconds);
+            var durA = a.songs.fold<int>(
+              0,
+              (s, x) => s + x.duration.inMilliseconds,
+            );
+            var durB = b.songs.fold<int>(
+              0,
+              (s, x) => s + x.duration.inMilliseconds,
+            );
             cmp = durA.compareTo(durB);
           } else if (sortBy == 'date') {
             var dateA = widget.playerProvider.favoriteArtists[a.nameLower] ?? 0;
