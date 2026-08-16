@@ -51,10 +51,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: 🔍 Extract Flutter version
+        id: flutter-ver
+        run: |
+          VERSION=$(yq '.environment.flutter' pubspec.yaml | tr -d '^"'\''')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.7'
+          flutter-version: ${{ steps.flutter-ver.outputs.version }}
           channel: stable
           cache: true
 
