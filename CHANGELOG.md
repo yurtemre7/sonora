@@ -2,10 +2,12 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.18.1] - 2026-08-16
+## [1.18.1] - 2026-08-22
 ### Fixed
+* Queue reorder, queue position and queue items adapted
 * Overflow at playlist cover image
 ### Changed
+* Chore: Update packages
 * Chore: Update dependencies, sdk and analysis options
 * Chore: Format dart code
 * Chore: Use flutter 3.47.0
