@@ -848,6 +848,15 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
         var queue = widget.playerProvider.queue;
         var current = widget.playerProvider.currentSong;
         var currentIndex = widget.playerProvider.currentIndex;
+        var safeCurrentIndex =
+            (currentIndex >= 0 && currentIndex < queue.length)
+                ? currentIndex
+                : 0;
+        var displayOffset = safeCurrentIndex > 0 ? safeCurrentIndex - 1 : 0;
+        var displayQueue = queue.sublist(displayOffset);
+        var numDigits = queue.length.toString().length;
+        var numberWidth = (numDigits * 9.0 + 16.0).clamp(32.0, 52.0);
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -865,10 +874,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             ),
             Expanded(
               child: ReorderableListView.builder(
-                itemCount: queue.length,
+                itemCount: displayQueue.length,
                 buildDefaultDragHandles: false,
                 onReorderItem: (oldIndex, newIndex) {
-                  widget.playerProvider.reorderQueue(oldIndex, newIndex);
+                  widget.playerProvider.reorderQueue(
+                    oldIndex + displayOffset,
+                    newIndex + displayOffset,
+                  );
                 },
                 proxyDecorator: (child, index, animation) {
                   return AnimatedBuilder(
@@ -891,19 +903,24 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   );
                 },
                 itemBuilder: (context, index) {
-                  var song = queue[index];
+                  var song = displayQueue[index];
+                  var actualIndex = index + displayOffset;
                   var isCurrent =
                       current != null &&
                       song.id == current.id &&
-                      index == currentIndex;
-                  var isOld = index < currentIndex;
+                      actualIndex == currentIndex;
+                  var isOld = actualIndex < currentIndex;
 
                   return Column(
-                    key: ValueKey<String>('np_queue_${song.id}_$index'),
+                    key: ValueKey<String>(
+                      'np_queue_${song.id}_${identityHashCode(song)}',
+                    ),
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Dismissible(
-                        key: ValueKey<String>('np_dismiss_${song.id}_$index'),
+                        key: ValueKey<String>(
+                          'np_dismiss_${song.id}_${identityHashCode(song)}',
+                        ),
                         direction: DismissDirection.endToStart,
                         background: Container(
                           color: theme.colorScheme.errorContainer,
@@ -915,11 +932,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                           ),
                         ),
                         onDismissed: (_) {
-                          var idx = widget.playerProvider.queue.indexWhere(
-                            (s) => s.id == song.id,
-                          );
-                          if (idx >= 0) {
-                            widget.playerProvider.removeFromQueue(idx);
+                          var removeIndex = widget.playerProvider.queue
+                              .indexWhere((s) => s.id == song.id);
+                          if (removeIndex >= 0) {
+                            widget.playerProvider.removeFromQueue(removeIndex);
                           }
                         },
                         child: Container(
@@ -961,21 +977,34 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 26,
-                                  child: Text(
-                                    '${index + 1}',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: isCurrent
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.onSurfaceVariant
-                                                .withValues(
-                                                  alpha: isOld ? 0.35 : 0.7,
-                                                ),
-                                      fontWeight: isCurrent
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                                  width: numberWidth,
+                                  child: Center(
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        '${actualIndex + 1}',
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                          color: isCurrent
+                                              ? theme.colorScheme.primary
+                                              : theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant
+                                                    .withValues(
+                                                      alpha: isOld ? 0.35 : 0.7,
+                                                    ),
+                                          fontWeight: isCurrent
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          fontFeatures: const [
+                                            FontFeature.tabularFigures(),
+                                          ],
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
-                                    textAlign: TextAlign.center,
                                   ),
                                 ),
                                 const SizedBox(width: 2),
@@ -988,7 +1017,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                     onTap: () {
                                       if (!isCurrent) {
                                         widget.playerProvider.audioHandler
-                                            .skipToQueueItem(index);
+                                            .skipToQueueItem(actualIndex);
                                       }
                                     },
                                   ),
@@ -998,7 +1027,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                           ),
                         ),
                       ),
-                      if (index < queue.length - 1)
+                      if (index < displayQueue.length - 1)
                         Padding(
                           padding: const EdgeInsets.only(left: 20),
                           child: Divider(

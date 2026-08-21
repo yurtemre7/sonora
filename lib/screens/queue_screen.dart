@@ -63,6 +63,15 @@ class _QueueScreenState extends State<QueueScreen> {
           );
         }
 
+        var safeCurrentIndex =
+            (currentIndex >= 0 && currentIndex < queue.length)
+                ? currentIndex
+                : 0;
+        var displayOffset = safeCurrentIndex > 0 ? safeCurrentIndex - 1 : 0;
+        var displayQueue = queue.sublist(displayOffset);
+        var numDigits = queue.length.toString().length;
+        var numberWidth = (numDigits * 9.0 + 16.0).clamp(32.0, 52.0);
+
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -89,10 +98,13 @@ class _QueueScreenState extends State<QueueScreen> {
             controller: _scrollController,
             child: ReorderableListView.builder(
               scrollController: _scrollController,
-              itemCount: queue.length,
+              itemCount: displayQueue.length,
               buildDefaultDragHandles: false,
               onReorderItem: (oldIndex, newIndex) {
-                widget.playerProvider.reorderQueue(oldIndex, newIndex);
+                widget.playerProvider.reorderQueue(
+                  oldIndex + displayOffset,
+                  newIndex + displayOffset,
+                );
               },
               proxyDecorator: (child, index, animation) {
                 return AnimatedBuilder(
@@ -114,19 +126,24 @@ class _QueueScreenState extends State<QueueScreen> {
               },
               padding: const EdgeInsets.only(bottom: 24, top: 8),
               itemBuilder: (context, index) {
-                var song = queue[index];
+                var song = displayQueue[index];
+                var actualIndex = index + displayOffset;
                 var isCurrent =
                     current != null &&
                     song.id == current.id &&
-                    index == currentIndex;
-                var isOld = index < currentIndex;
+                    actualIndex == currentIndex;
+                var isOld = actualIndex < currentIndex;
 
                 return Column(
-                  key: ValueKey<String>('queue_${song.id}_$index'),
+                  key: ValueKey<String>(
+                    'queue_${song.id}_${identityHashCode(song)}',
+                  ),
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Dismissible(
-                      key: ValueKey<String>('dismiss_${song.id}_$index'),
+                      key: ValueKey<String>(
+                        'dismiss_${song.id}_${identityHashCode(song)}',
+                      ),
                       direction: DismissDirection.endToStart,
                       background: Container(
                         color: theme.colorScheme.errorContainer,
@@ -138,10 +155,10 @@ class _QueueScreenState extends State<QueueScreen> {
                         ),
                       ),
                       onDismissed: (_) {
-                        var currentIndex = widget.playerProvider.queue
+                        var removeIndex = widget.playerProvider.queue
                             .indexWhere((s) => s.id == song.id);
-                        if (currentIndex >= 0) {
-                          widget.playerProvider.removeFromQueue(currentIndex);
+                        if (removeIndex >= 0) {
+                          widget.playerProvider.removeFromQueue(removeIndex);
                         }
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -191,21 +208,31 @@ class _QueueScreenState extends State<QueueScreen> {
                                 ),
                               ),
                               SizedBox(
-                                width: 26,
-                                child: Text(
-                                  '${index + 1}',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: isCurrent
-                                        ? theme.colorScheme.primary
-                                        : theme.colorScheme.onSurfaceVariant
-                                              .withValues(
-                                                alpha: isOld ? 0.35 : 0.7,
-                                              ),
-                                    fontWeight: isCurrent
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
+                                width: numberWidth,
+                                child: Center(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      '${actualIndex + 1}',
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: isCurrent
+                                            ? theme.colorScheme.primary
+                                            : theme.colorScheme.onSurfaceVariant
+                                                  .withValues(
+                                                    alpha: isOld ? 0.35 : 0.7,
+                                                  ),
+                                        fontWeight: isCurrent
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
                               ),
                               const SizedBox(width: 2),
@@ -218,7 +245,7 @@ class _QueueScreenState extends State<QueueScreen> {
                                   onTap: () {
                                     if (!isCurrent) {
                                       widget.playerProvider.audioHandler
-                                          .skipToQueueItem(index);
+                                          .skipToQueueItem(actualIndex);
                                     }
                                   },
                                 ),
@@ -228,7 +255,7 @@ class _QueueScreenState extends State<QueueScreen> {
                         ),
                       ),
                     ),
-                    if (index < queue.length - 1)
+                    if (index < displayQueue.length - 1)
                       Padding(
                         padding: const EdgeInsets.only(left: 20),
                         child: Divider(

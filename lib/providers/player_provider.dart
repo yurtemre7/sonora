@@ -596,7 +596,6 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
     var song = queue.removeAt(oldIndex);
     queue.insert(newIndex, song);
-    await audioHandler.moveQueueItem(oldIndex, newIndex);
 
     // Keep currentIndex tracking the same song.
     if (oldIndex == currentIndex) {
@@ -608,6 +607,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     notifyListeners();
+
+    await audioHandler.moveQueueItem(oldIndex, newIndex);
   }
 
   /// Appends [song] to the end of the queue.
