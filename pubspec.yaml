@@ -8,7 +8,7 @@ environment:
   flutter: ^3.47.0
 
 dependencies:
-  animations: ^2.2.0
+  animations: ^3.0.0
   audio_service: ^0.18.19
   audio_service_win: ^0.0.3
   audio_session: ^0.2.4
@@ -24,7 +24,7 @@ dependencies:
   go_router: ^17.5.0
   google_fonts: ^8.2.1
   http: ^1.6.0
-  image: ^4.9.1
+  image: ^4.9.2
   intl: ^0.20.2
   just_audio: ^0.10.6
   just_audio_windows: ^0.2.3
