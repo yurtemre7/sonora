@@ -2,12 +2,20 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.18.1] - 2026-08-22
+## [1.18.2] - 2026-08-23
+### Fixed
+* Only use cachedWidth as it messed up the aspect ratio of the album/song cover image
+
+## [1.8.2] - 2026-08-22
 ### Fixed
 * Queue reorder, queue position and queue items adapted
-* Overflow at playlist cover image
 ### Changed
 * Chore: Update packages
+
+## [1.18.1] - 2026-08-16
+### Fixed
+* Overflow at playlist cover image
+### Changed
 * Chore: Update dependencies, sdk and analysis options
 * Chore: Format dart code
 * Chore: Use flutter 3.47.0
@@ -240,25 +248,6 @@ All notable changes to the Sonora music player project are documented in this fi
 * Add dedicated privacy and permissions setting screen
 ### Fixed
 * Internet permission, stats playtime calculation, and theme mode toggle
-
-## [1.8.2] - 2026-07-21
-* Add community and support section to settings
-* Redesign and enforce onboarding completion
-* Highlight update tile when update is pending
-* Add changelog viewer
-* Add automatic GitHub release checker
-* Support sidecar cover.jpg as album artwork fallback
-* Address user feedback on navigation bar, track sorting, playlist reordering, and local artist images
-* Default pause on duck to false
-* Add safe area
-* Update the launchUrl to not check the Url as this leads to an error
-* Add safe area to changelog screen
-* Playlist reordering UI flash
-* Disable automatic update check in debug mode
-* Chore: Add build number +1 back
-* Refactor: Introduce SettingsProvider for eager setting loads
-* Refactor: Split settings into sub-screens and add danger zone logic
-* Chore: Update flutter to 3.44.7
 
 ## [1.8.1] - 2026-07-21
 ### Fixed
