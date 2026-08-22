@@ -52,7 +52,6 @@ class AlbumArt extends StatelessWidget {
                     height: resolvedSize,
                     fit: BoxFit.cover,
                     cacheWidth: targetCacheDim,
-                    cacheHeight: targetCacheDim,
                     errorBuilder: (context, error, stackTrace) =>
                         _buildPlaceholder(theme, resolvedSize),
                   )
