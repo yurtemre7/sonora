@@ -111,8 +111,133 @@ class MainActivity : AudioServiceActivity() {
                     }
                     result.success(true)
                 }
+                "openFileFolder" -> {
+                    val filePath = call.argument<String>("filePath")
+                    if (filePath == null) {
+                        result.error("INVALID_PATH", "File path cannot be null", null)
+                        return@setMethodCallHandler
+                    }
+                    val opened = openFileFolder(filePath)
+                    result.success(opened)
+                }
                 else -> result.notImplemented()
             }
+        }
+    }
+
+    private fun openFileFolder(filePath: String): Boolean {
+        try {
+            val targetFile = File(filePath)
+            val folder = if (targetFile.isDirectory) targetFile else (targetFile.parentFile ?: targetFile)
+            val context = this
+
+            // Strategy 1: Storage Access Framework / DocumentsUI Document URI
+            val normPath = folder.absolutePath.replace('\\', '/')
+            val primaryPrefixes = listOf("/storage/emulated/0/", "/sdcard/", "/storage/emulated/0", "/sdcard")
+            var relPath = normPath
+            for (p in primaryPrefixes) {
+                if (normPath.startsWith(p, ignoreCase = true)) {
+                    relPath = normPath.substring(p.length).trimStart('/')
+                    break
+                }
+            }
+
+            if (relPath.isNotEmpty() || normPath == "/storage/emulated/0" || normPath == "/sdcard") {
+                val encodedRel = if (relPath.isEmpty()) "" else Uri.encode(relPath)
+                val docUri = Uri.parse("content://com.android.externalstorage.documents/document/primary%3A$encodedRel")
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                    setDataAndType(docUri, "vnd.android.document/directory")
+                    flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                }
+                try {
+                    context.startActivity(intent)
+                    return true
+                } catch (_: Exception) {}
+
+                val treeUri = Uri.parse("content://com.android.externalstorage.documents/tree/primary%3A$encodedRel")
+                val treeIntent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                    setDataAndType(treeUri, "vnd.android.document/directory")
+                    flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                }
+                try {
+                    context.startActivity(treeIntent)
+                    return true
+                } catch (_: Exception) {}
+            }
+
+            // Strategy 2: FileProvider with resource/folder MIME type
+            val folderUri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                try {
+                    androidx.core.content.FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.fileprovider",
+                        folder
+                    )
+                } catch (_: Exception) {
+                    Uri.fromFile(folder)
+                }
+            } else {
+                Uri.fromFile(folder)
+            }
+
+            val folderIntent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                setDataAndType(folderUri, "resource/folder")
+                flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }
+            try {
+                context.startActivity(folderIntent)
+                return true
+            } catch (_: Exception) {}
+
+            // Strategy 3: FileProvider with directory MIME type
+            val dirIntent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                setDataAndType(folderUri, "vnd.android.document/directory")
+                flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }
+            try {
+                context.startActivity(dirIntent)
+                return true
+            } catch (_: Exception) {}
+
+            // Strategy 4: FileProvider with */* MIME type
+            val genericIntent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                setDataAndType(folderUri, "*/*")
+                flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }
+            try {
+                context.startActivity(genericIntent)
+                return true
+            } catch (_: Exception) {}
+
+            // Strategy 5: Open the file itself in default file/media viewer
+            if (targetFile.exists() && targetFile.isFile) {
+                val fileUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    try {
+                        androidx.core.content.FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            targetFile
+                        )
+                    } catch (_: Exception) {
+                        Uri.fromFile(targetFile)
+                    }
+                } else {
+                    Uri.fromFile(targetFile)
+                }
+                val fileIntent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                    setDataAndType(fileUri, "*/*")
+                    flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                }
+                try {
+                    context.startActivity(fileIntent)
+                    return true
+                } catch (_: Exception) {}
+            }
+
+            return false
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
         }
     }
 

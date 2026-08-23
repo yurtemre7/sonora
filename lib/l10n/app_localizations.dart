@@ -1904,6 +1904,18 @@ abstract class AppLocalizations {
   /// **'File Path'**
   String get filePathLabel;
 
+  /// No description provided for @openFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Folder'**
+  String get openFolder;
+
+  /// No description provided for @openFolderError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open folder'**
+  String get openFolderError;
+
   /// No description provided for @formatLabel.
   ///
   /// In en, this message translates to:

@@ -301,6 +301,8 @@
   "yearLabel": "年",
   "durationLabel": "再生時間",
   "filePathLabel": "ファイルパス",
+  "openFolder": "フォルダを開く",
+  "openFolderError": "フォルダを開けませんでした",
   "formatLabel": "フォーマット",
   "bitrateLabel": "ビットレート",
   "sampleRateLabel": "サンプルレート",

@@ -24,6 +24,20 @@ class MusicScanner {
     'de.yurtemre.sonora/mediastore',
   );
 
+  /// Opens the native system file manager / parent folder for the given file path.
+  static Future<bool> openFileFolder(String filePath) async {
+    if (!Platform.isAndroid) return false;
+    try {
+      var result = await _mediastoreChannel.invokeMethod<bool>(
+        'openFileFolder',
+        {'filePath': filePath},
+      );
+      return result ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Cached local artist images path mapping
   Map<String, String> localArtistImages = {};
 

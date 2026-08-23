@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 
 void showSongInfoBottomSheet(BuildContext context, Song song) {
@@ -113,6 +114,46 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                                 song.filePath,
                                 theme,
                                 isPath: true,
+                                action: Platform.isAndroid
+                                    ? TextButton.icon(
+                                        onPressed: () async {
+                                          var success =
+                                              await MusicScanner.openFileFolder(
+                                                song.filePath,
+                                              );
+                                          if (!success && context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  context.l10n.openFolderError,
+                                                ),
+                                                behavior:
+                                                    SnackBarBehavior.floating,
+                                                duration: const Duration(
+                                                  seconds: 2,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        icon: const Icon(
+                                          Icons.folder_open_rounded,
+                                          size: 16,
+                                        ),
+                                        label: Text(context.l10n.openFolder),
+                                        style: TextButton.styleFrom(
+                                          visualDensity: VisualDensity.compact,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                      )
+                                    : null,
                               ),
                               if (song.fileSize != null)
                                 _buildInfoRow(
@@ -229,6 +270,7 @@ Widget _buildInfoRow(
   ThemeData theme, {
   bool isPath = false,
   bool isLast = false,
+  Widget? action,
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,6 +297,10 @@ Widget _buildInfoRow(
                 fontWeight: FontWeight.w500,
               ),
             ),
+      if (action != null) ...[
+        const SizedBox(height: 6),
+        action,
+      ],
       if (!isLast)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),

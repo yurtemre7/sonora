@@ -1012,6 +1012,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filePathLabel => 'File Path';
 
   @override
+  String get openFolder => 'Open Folder';
+
+  @override
+  String get openFolderError => 'Could not open folder';
+
+  @override
   String get formatLabel => 'Format';
 
   @override

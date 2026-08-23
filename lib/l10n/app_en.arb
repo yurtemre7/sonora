@@ -429,6 +429,8 @@
   "yearLabel": "Year",
   "durationLabel": "Duration",
   "filePathLabel": "File Path",
+  "openFolder": "Open Folder",
+  "openFolderError": "Could not open folder",
   "formatLabel": "Format",
   "bitrateLabel": "Bitrate",
   "sampleRateLabel": "Sample Rate",

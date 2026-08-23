@@ -966,6 +966,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get filePathLabel => 'ファイルパス';
 
   @override
+  String get openFolder => 'フォルダを開く';
+
+  @override
+  String get openFolderError => 'フォルダを開けませんでした';
+
+  @override
   String get formatLabel => 'フォーマット';
 
   @override
