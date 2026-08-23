@@ -2,7 +2,14 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
-## [1.18.2] - 2026-08-23
+## [1.18.4] - 2026-08-23
+### Added
+* Add open file folder action in song info sheet
+* Show duration change in the mfx settings
+### Fixed
+* Statistics screen with wrong data and information missing
+
+## [1.18.3] - 2026-08-23
 ### Fixed
 * Only use cachedWidth as it messed up the aspect ratio of the album/song cover image
 
@@ -74,35 +81,6 @@ All notable changes to the Sonora music player project are documented in this fi
 ## [1.16.0] - 2026-07-27
 ### Changed
 * Chore: Update packages
-
-## [1.15.3] - 2026-07-25
-* Revert top-down pre-gathering artist image scan changes
-
-## [1.15.2] - 2026-07-25
-* Fix TextEditingController assertion error during dialog exit transitions by binding controllers to StatefulWidget lifecycle
-
-## [1.15.1] - 2026-07-25
-* Fix TextEditingController assertion error during dialog exit transitions by binding controllers to StatefulWidget lifecycle
-
-## [1.15.0] - 2026-07-25
-* Decompose monolithic home screen into modular tab widgets (SongsTab, AlbumsTab, ArtistsTab, PlaylistsTab) with 100% preserved state management
-
-## [1.14.0] - 2026-07-25
-* Optimize buildArtistGroups with O(1) album pre-indexing map (100x speedup for large libraries)
-* Add GPU RAM downsampling for album artwork and local artist avatars
-* Add lightweight integer song ID queue persistence helpers
-* Add EqualizerService singleton to decouple reactive equalizer management and presets
-
-## [1.13.4] - 2026-07-25
-* Fix TextEditingController memory leaks across onboarding and dialogs
-* Cap Flutter imageCache limits (50 MB / 150 images) to prevent RAM inflation during heavy scrolling
-
-## [1.13.3] - 2026-07-25
-* Optimize native Kotlin local artist image resolution with artist search caching (reduces directory lookups by 97% on large libraries)
-
-## [1.13.2] - 2026-07-25
-* Move local artist cover image scanning (artist.jpg, artist.png, artist folder art) into native Kotlin MediaStore scan pass for instant 0ms artist image detection
-* Fix generate_changelog.py script to accurately track release tags and preserve changelogs
 
 ## [1.13.1] - 2026-07-25
 ### Fixed
@@ -538,23 +516,12 @@ All notable changes to the Sonora music player project are documented in this fi
 ### Added
 * Detect lyrics file existence during library sync to avoid UI thread I/O checks
 
-## [1.1.4] - 2026-07-10
-* Implement synchronized lrc lyrics overlay with auto-scrolling centering
-* Chore: Support unreleased commits section in generate_changelog.py
-* Chore: Add generate_changelog.py helper script and document usage in AGENTS.md
-
 ## [1.1.3] - 2026-07-10
 ### Added
 * Implement synchronized lrc lyrics overlay with auto-scrolling centering
 ### Changed
 * Chore: Support unreleased commits section in generate_changelog.py
 * Chore: Add generate_changelog.py helper script and document usage in AGENTS.md
-* Docs: Remove wavy progress bar mentions from CHANGELOG.md
-* Docs: Condense changelog entries for minimal and concise formatting
-* Chore: Clarify changelog brevity and code analysis thoroughness in AGENTS.md
-* Chore: Document minimal changes and conventional commits guidelines in AGENTS.md
-
-## [1.1.2] - 2026-07-10
 * Docs: Remove wavy progress bar mentions from CHANGELOG.md
 * Docs: Condense changelog entries for minimal and concise formatting
 * Chore: Clarify changelog brevity and code analysis thoroughness in AGENTS.md
