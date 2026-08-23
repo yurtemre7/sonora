@@ -65,8 +65,8 @@ class _QueueScreenState extends State<QueueScreen> {
 
         var safeCurrentIndex =
             (currentIndex >= 0 && currentIndex < queue.length)
-                ? currentIndex
-                : 0;
+            ? currentIndex
+            : 0;
         var displayOffset = safeCurrentIndex > 0 ? safeCurrentIndex - 1 : 0;
         var displayQueue = queue.sublist(displayOffset);
         var numDigits = queue.length.toString().length;
@@ -216,20 +216,25 @@ class _QueueScreenState extends State<QueueScreen> {
                                       '${actualIndex + 1}',
                                       maxLines: 1,
                                       softWrap: false,
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: isCurrent
-                                            ? theme.colorScheme.primary
-                                            : theme.colorScheme.onSurfaceVariant
-                                                  .withValues(
-                                                    alpha: isOld ? 0.35 : 0.7,
-                                                  ),
-                                        fontWeight: isCurrent
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                        fontFeatures: const [
-                                          FontFeature.tabularFigures(),
-                                        ],
-                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: isCurrent
+                                                ? theme.colorScheme.primary
+                                                : theme
+                                                      .colorScheme
+                                                      .onSurfaceVariant
+                                                      .withValues(
+                                                        alpha: isOld
+                                                            ? 0.35
+                                                            : 0.7,
+                                                      ),
+                                            fontWeight: isCurrent
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                            fontFeatures: const [
+                                              FontFeature.tabularFigures(),
+                                            ],
+                                          ),
                                       textAlign: TextAlign.center,
                                     ),
                                   ),

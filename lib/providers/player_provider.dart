@@ -688,9 +688,6 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
     _startBackgroundColorExtraction();
     _startLocalArtistImageDetection();
-
-    // Purge stale stats entries for songs that no longer exist in the library
-    statsService.syncWithLibrary(allSongs.map((s) => s.id).toSet());
   }
 
   void _refreshLibrarySnapshots() {

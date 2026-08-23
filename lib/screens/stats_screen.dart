@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
@@ -7,6 +8,7 @@ import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/stats_service.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -27,7 +29,9 @@ class _StatsScreenState extends State<StatsScreen> {
   @override
   void initState() {
     super.initState();
-    _statsService.ensureLoaded();
+    _statsService.ensureLoaded().then((_) {
+      if (mounted) setState(() {});
+    });
     widget.playerProvider.addListener(_onPlayerUpdate);
   }
 
@@ -474,11 +478,6 @@ class _StatsScreenState extends State<StatsScreen> {
     List<Song> songs,
   ) {
     var top = _statsService.topAlbums(5, songs);
-    var songMap = <String, List<Song>>{};
-    for (var song in songs) {
-      var key = '${song.album}|||${song.artist}';
-      songMap.putIfAbsent(key, () => []).add(song);
-    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -513,30 +512,13 @@ class _StatsScreenState extends State<StatsScreen> {
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   var entry = top[index];
-                  var key = '${entry.album}|||${entry.artist}';
-                  var albumSongs = songMap[key] ?? [];
-                  var artworkPath = albumSongs.isNotEmpty
-                      ? albumSongs.first.artworkPath
-                      : null;
-
                   return _AlbumCard(
                     album: entry.album,
                     artist: entry.artist,
                     count: entry.count,
-                    artworkPath: artworkPath,
+                    artworkPath: entry.artworkPath,
                     theme: theme,
-                    onTap: () {
-                      if (albumSongs.isNotEmpty) {
-                        var group = buildAlbumGroup(
-                          entry.album,
-                          entry.artist,
-                          songs,
-                        );
-                        if (group.songs.isNotEmpty) {
-                          openAlbum(context, group);
-                        }
-                      }
-                    },
+                    onTap: () => openAlbum(context, entry.group),
                   );
                 },
               ),
@@ -553,7 +535,11 @@ class _StatsScreenState extends State<StatsScreen> {
     ThemeData theme,
     List<Song> songs,
   ) {
-    var top = _statsService.topArtists(5, songs);
+    var top = _statsService.topArtists(
+      5,
+      songs,
+      cachedArtists: widget.playerProvider.cachedArtists,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -596,72 +582,69 @@ class _StatsScreenState extends State<StatsScreen> {
                     theme.colorScheme.outline,
                   ];
 
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerLow,
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => openArtist(context, entry.group),
                       borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 28,
-                          child: Text(
-                            '#${index + 1}',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: rankColors[index % rankColors.length],
-                              fontFamily: 'Outfit',
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 28,
+                              child: Text(
+                                '#${index + 1}',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: rankColors[index % rankColors.length],
+                                  fontFamily: 'Outfit',
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        CircleAvatar(
-                          backgroundColor: theme.colorScheme.primaryContainer,
-                          radius: 22,
-                          child: Icon(
-                            Icons.person_rounded,
-                            color: theme.colorScheme.onPrimaryContainer,
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                entry.artist,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                            const SizedBox(width: 12),
+                            ArtistAvatar(artist: entry.group, radius: 22),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    entry.artist,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    context.l10n.playsCount(entry.count),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                context.l10n.playsCount(entry.count),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.open_in_new_rounded,
+                                size: 18,
                               ),
-                            ],
-                          ),
+                              onPressed: () => openArtist(context, entry.group),
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                          onPressed: () {
-                            var group = buildArtistGroup(entry.artist, songs);
-                            if (group.songs.isNotEmpty) {
-                              openArtist(context, group);
-                            }
-                          },
-                        ),
-                      ],
+                      ),
                     ),
                   );
                 },
@@ -680,6 +663,8 @@ class _StatsScreenState extends State<StatsScreen> {
     List<Playlist> playlists,
   ) {
     var top = _statsService.topPlaylists(5, playlists);
+    var songs = widget.playerProvider.allSongs;
+    var songMap = {for (var s in songs) s.id: s};
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -714,6 +699,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   var entry = top[index];
+                  var playlist = entry.playlist;
                   var rankColors = [
                     const Color(0xFFFFD700),
                     const Color(0xFFC0C0C0),
@@ -722,69 +708,109 @@ class _StatsScreenState extends State<StatsScreen> {
                     theme.colorScheme.outline,
                   ];
 
-                  var songCount = entry.playlist.songIds.length;
+                  var songCount = playlist.songIds.length;
 
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerLow,
+                  // Resolve artwork: custom playlist cover or first track artwork
+                  String? playlistArt;
+                  if (playlist.coverImagePath != null &&
+                      File(playlist.coverImagePath!).existsSync()) {
+                    playlistArt = playlist.coverImagePath;
+                  } else {
+                    for (var id in playlist.songIds) {
+                      var s = songMap[id];
+                      if (s != null &&
+                          s.artworkPath != null &&
+                          File(s.artworkPath!).existsSync()) {
+                        playlistArt = s.artworkPath;
+                        break;
+                      }
+                    }
+                  }
+
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => openPlaylist(context, playlist),
                       borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 28,
-                          child: Text(
-                            '#${index + 1}',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: rankColors[index % rankColors.length],
-                              fontFamily: 'Outfit',
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 28,
+                              child: Text(
+                                '#${index + 1}',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: rankColors[index % rankColors.length],
+                                  fontFamily: 'Outfit',
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        CircleAvatar(
-                          backgroundColor: theme.colorScheme.secondaryContainer,
-                          radius: 22,
-                          child: Icon(
-                            Icons.playlist_play_rounded,
-                            color: theme.colorScheme.onSecondaryContainer,
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                entry.playlist.name,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                            const SizedBox(width: 12),
+                            playlistArt != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.file(
+                                      File(playlistArt),
+                                      width: 44,
+                                      height: 44,
+                                      fit: BoxFit.cover,
+                                      cacheWidth: 132,
+                                    ),
+                                  )
+                                : CircleAvatar(
+                                    backgroundColor:
+                                        theme.colorScheme.secondaryContainer,
+                                    radius: 22,
+                                    child: Icon(
+                                      Icons.playlist_play_rounded,
+                                      color: theme
+                                          .colorScheme
+                                          .onSecondaryContainer,
+                                      size: 22,
+                                    ),
+                                  ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    playlist.name,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${context.l10n.songCount(songCount)} · ${context.l10n.playsCount(entry.count)}',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${context.l10n.songCount(songCount)} · ${context.l10n.playsCount(entry.count)}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.open_in_new_rounded,
+                                size: 18,
                               ),
-                            ],
-                          ),
+                              onPressed: () => openPlaylist(context, playlist),
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                          onPressed: () =>
-                              openPlaylist(context, entry.playlist),
-                        ),
-                      ],
+                      ),
                     ),
                   );
                 },

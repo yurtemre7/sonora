@@ -32,7 +32,6 @@ class StatsService {
   var _dirty = false;
 
   var _loadGuard = false;
-  var _saveGuard = false;
 
   Future<void> ensureLoaded() async {
     if (_loadGuard) return;
@@ -61,10 +60,10 @@ class StatsService {
         '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
     _data.dailyListeningMs.update(dateKey, (v) => v + ms, ifAbsent: () => ms);
 
-    // Accumulate per-song listening time and check for a full listen
+    // Accumulate per-song listening time and check for full listen(s)
     var cumulative = (_data.songCumulativeListenMs[songId] ?? 0) + ms;
 
-    if (songDurationMs > 0 && cumulative >= songDurationMs) {
+    while (songDurationMs > 0 && cumulative >= songDurationMs) {
       // Full listen achieved – increment counts and carry over the remainder
       _data.songPlayCounts.update(songId, (v) => v + 1, ifAbsent: () => 1);
       _data.completeSongListens++;
@@ -128,39 +127,6 @@ class StatsService {
     await _save();
   }
 
-  /// Removes all entries referencing song IDs that no longer exist in the
-  /// library so that stale data never appears in the UI.
-  Future<void> syncWithLibrary(Set<int> validSongIds) async {
-    var removed = false;
-    _data.songPlayCounts.removeWhere((id, _) {
-      var shouldRemove = !validSongIds.contains(id);
-      if (shouldRemove) removed = true;
-      return shouldRemove;
-    });
-    _data.songCumulativeListenMs.removeWhere((id, _) {
-      var shouldRemove = !validSongIds.contains(id);
-      if (shouldRemove) removed = true;
-      return shouldRemove;
-    });
-    _data.songSkipCounts.removeWhere((id, _) {
-      var shouldRemove = !validSongIds.contains(id);
-      if (shouldRemove) removed = true;
-      return shouldRemove;
-    });
-    _data.songRestartCounts.removeWhere((id, _) {
-      var shouldRemove = !validSongIds.contains(id);
-      if (shouldRemove) removed = true;
-      return shouldRemove;
-    });
-    if (removed) {
-      if (!validSongIds.contains(_data.firstPlayedSongId)) {
-        _data.firstPlayedSongId = -1;
-        _data.firstPlayedDate = null;
-      }
-      await _save();
-    }
-  }
-
   Future<void> flush() async {
     _debounceTimer?.cancel();
     _debounceTimer = null;
@@ -215,7 +181,7 @@ class StatsService {
   int albumListenCount(List<Song> library) {
     var songMap = _buildSongMap(library);
     var albumGroups = buildAlbumGroups(library);
-    var listenedAlbums = <AlbumGroup>{};
+    var listenedAlbums = <String>{};
     for (var entry in _data.songPlayCounts.entries) {
       var song = songMap[entry.key];
       if (song != null) {
@@ -223,7 +189,7 @@ class StatsService {
             .where((a) => a.songs.any((s) => s.id == song.id))
             .firstOrNull;
         if (group != null) {
-          listenedAlbums.add(group);
+          listenedAlbums.add('${group.nameLower}|||${group.artistLower}');
         }
       }
     }
@@ -283,10 +249,16 @@ class StatsService {
     return result;
   }
 
-  List<({String album, String artist, int count})> topAlbums(
-    int limit,
-    List<Song> library,
-  ) {
+  List<
+    ({
+      String album,
+      String artist,
+      int count,
+      String? artworkPath,
+      AlbumGroup group,
+    })
+  >
+  topAlbums(int limit, List<Song> library) {
     var songMap = _buildSongMap(library);
     var albumGroups = buildAlbumGroups(library);
     var albumCounts = <AlbumGroup, int>{};
@@ -308,11 +280,29 @@ class StatsService {
     var sorted = albumCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     return sorted.take(limit).map((e) {
-      return (album: e.key.name, artist: e.key.artist, count: e.value);
+      String? artworkPath;
+      for (var s in e.key.songs) {
+        if (s.artworkPath != null && s.artworkPath!.isNotEmpty) {
+          artworkPath = s.artworkPath;
+          break;
+        }
+      }
+      return (
+        album: e.key.name,
+        artist: e.key.artist,
+        count: e.value,
+        artworkPath: artworkPath,
+        group: e.key,
+      );
     }).toList();
   }
 
-  List<({String artist, int count})> topArtists(int limit, List<Song> library) {
+  List<({String artist, int count, ArtistGroup group})> topArtists(
+    int limit,
+    List<Song> library, {
+    List<ArtistGroup>? cachedArtists,
+    Map<String, String>? localArtistImages,
+  }) {
     var songMap = _buildSongMap(library);
     var artistCounts = <String, ({String displayName, int count})>{};
     for (var entry in _data.songPlayCounts.entries) {
@@ -334,10 +324,22 @@ class StatsService {
     }
     var sorted = artistCounts.values.toList()
       ..sort((a, b) => b.count.compareTo(a.count));
-    return sorted
-        .take(limit)
-        .map((e) => (artist: e.displayName, count: e.count))
-        .toList();
+
+    var artistGroups =
+        cachedArtists ??
+        buildArtistGroups(
+          library,
+          buildAlbumGroups(library),
+          localArtistImages,
+        );
+    var groupMap = {for (var g in artistGroups) g.nameLower: g};
+
+    return sorted.take(limit).map((e) {
+      var group =
+          groupMap[e.displayName.toLowerCase()] ??
+          buildArtistGroup(e.displayName, library, localArtistImages);
+      return (artist: e.displayName, count: e.count, group: group);
+    }).toList();
   }
 
   List<({Playlist playlist, int count})> topPlaylists(
@@ -455,44 +457,50 @@ class StatsService {
     }
   }
 
+  var _isSaving = false;
+  var _hasPendingSave = false;
+
   Future<void> _save() async {
-    if (_saveGuard) return;
-    _saveGuard = true;
+    if (_isSaving) {
+      _hasPendingSave = true;
+      return;
+    }
+    _isSaving = true;
     try {
-      var appDir = await getApplicationDocumentsDirectory();
-      var json = <String, dynamic>{
-        'total_listening_time_ms': _data.totalListeningTimeMs,
-        'complete_song_listens': _data.completeSongListens,
-        'first_played_song_id': _data.firstPlayedSongId,
-        'first_played_date': _data.firstPlayedDate,
-        'song_play_counts': _data.songPlayCounts.map(
-          (k, v) => MapEntry(k.toString(), v),
-        ),
-        'song_cumulative_listen_ms': _data.songCumulativeListenMs.map(
-          (k, v) => MapEntry(k.toString(), v),
-        ),
-        'playlist_play_counts': _data.playlistPlayCounts,
-        'daily_listening_ms': _data.dailyListeningMs,
-        'weekly_play_counts': _data.weeklyPlayCounts.map(
-          (k, v) => MapEntry(k.toString(), v),
-        ),
-        'shuffle_session_starts': _data.shuffleSessionStarts,
-        'song_skip_counts': _data.songSkipCounts.map(
-          (k, v) => MapEntry(k.toString(), v),
-        ),
-        'song_restart_counts': _data.songRestartCounts.map(
-          (k, v) => MapEntry(k.toString(), v),
-        ),
-      };
+      do {
+        _hasPendingSave = false;
+        var appDir = await getApplicationDocumentsDirectory();
+        var json = <String, dynamic>{
+          'total_listening_time_ms': _data.totalListeningTimeMs,
+          'complete_song_listens': _data.completeSongListens,
+          'first_played_song_id': _data.firstPlayedSongId,
+          'first_played_date': _data.firstPlayedDate,
+          'song_play_counts': _data.songPlayCounts.map(
+            (k, v) => MapEntry(k.toString(), v),
+          ),
+          'song_cumulative_listen_ms': _data.songCumulativeListenMs.map(
+            (k, v) => MapEntry(k.toString(), v),
+          ),
+          'playlist_play_counts': _data.playlistPlayCounts,
+          'daily_listening_ms': _data.dailyListeningMs,
+          'weekly_play_counts': _data.weeklyPlayCounts.map(
+            (k, v) => MapEntry(k.toString(), v),
+          ),
+          'shuffle_session_starts': _data.shuffleSessionStarts,
+          'song_skip_counts': _data.songSkipCounts.map(
+            (k, v) => MapEntry(k.toString(), v),
+          ),
+          'song_restart_counts': _data.songRestartCounts.map(
+            (k, v) => MapEntry(k.toString(), v),
+          ),
+        };
 
-      var tempFile = File('${appDir.path}/listening_stats.json.tmp');
-      var file = File('${appDir.path}/listening_stats.json');
-      await tempFile.writeAsString(jsonEncode(json));
-      await tempFile.rename(file.path);
-
-      _dirty = false;
+        var file = File('${appDir.path}/listening_stats.json');
+        await file.writeAsString(jsonEncode(json), flush: true);
+        _dirty = false;
+      } while (_hasPendingSave);
     } catch (_) {}
-    _saveGuard = false;
+    _isSaving = false;
   }
 
   void _markDirty() {

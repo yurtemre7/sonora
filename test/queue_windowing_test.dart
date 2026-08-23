@@ -20,8 +20,9 @@ void main() {
     test('Queue at start (index 0 / item 1) starts window at offset 0', () {
       var queue = createMockQueue(200);
       var currentIndex = 0;
-      var safeCurrentIndex =
-          (currentIndex >= 0 && currentIndex < queue.length) ? currentIndex : 0;
+      var safeCurrentIndex = (currentIndex >= 0 && currentIndex < queue.length)
+          ? currentIndex
+          : 0;
       var displayOffset = safeCurrentIndex > 0 ? safeCurrentIndex - 1 : 0;
       var displayQueue = queue.sublist(displayOffset);
 
@@ -33,8 +34,9 @@ void main() {
     test('Queue at item 100/200 (index 99) windows at offset 98 (item 99)', () {
       var queue = createMockQueue(200);
       var currentIndex = 99; // 100th song
-      var safeCurrentIndex =
-          (currentIndex >= 0 && currentIndex < queue.length) ? currentIndex : 0;
+      var safeCurrentIndex = (currentIndex >= 0 && currentIndex < queue.length)
+          ? currentIndex
+          : 0;
       var displayOffset = safeCurrentIndex > 0 ? safeCurrentIndex - 1 : 0;
       var displayQueue = queue.sublist(displayOffset);
 
@@ -63,8 +65,9 @@ void main() {
     test('Skipping back from item 100 (index 99) to item 99 (index 98) shifts window by 1', () {
       var queue = createMockQueue(200);
       var currentIndex = 98; // Tapped item 99
-      var safeCurrentIndex =
-          (currentIndex >= 0 && currentIndex < queue.length) ? currentIndex : 0;
+      var safeCurrentIndex = (currentIndex >= 0 && currentIndex < queue.length)
+          ? currentIndex
+          : 0;
       var displayOffset = safeCurrentIndex > 0 ? safeCurrentIndex - 1 : 0;
       var displayQueue = queue.sublist(displayOffset);
 
