@@ -134,6 +134,32 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool get isCustomEqEnabled => _isCustomEqEnabled;
   List<double>? get customEqGains => _customEqGains;
 
+  double get effectiveSpeed {
+    if (_isSuperSlowed) return 0.70;
+    if (_isSlowed) return 0.85;
+    if (_isSuperSpedUp) return 1.50;
+    if (_isSpedUp) return 1.25;
+    if (_isNightcore) return 1.30;
+    return _speed;
+  }
+
+  Duration get effectiveDuration {
+    var song = currentSong;
+    if (song == null || song.duration.inMilliseconds <= 0) return Duration.zero;
+    var speed = effectiveSpeed;
+    if (speed <= 0 || speed == 1.0) return song.duration;
+    return Duration(
+      milliseconds: (song.duration.inMilliseconds / speed).round(),
+    );
+  }
+
+  Duration calculateEffectiveDuration(Duration original, double speedFactor) {
+    if (speedFactor <= 0 || original.inMilliseconds <= 0) return original;
+    return Duration(
+      milliseconds: (original.inMilliseconds / speedFactor).round(),
+    );
+  }
+
   bool get isMfxActive =>
       _isSlowed ||
       _isSuperSlowed ||

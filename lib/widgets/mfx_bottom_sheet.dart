@@ -83,6 +83,12 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
     }
   }
 
+  String _formatDuration(Duration d) {
+    var minutes = d.inMinutes;
+    var seconds = d.inSeconds.remainder(60);
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -166,6 +172,92 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                           child: ListView(
                             padding: const EdgeInsets.only(bottom: 24),
                             children: [
+                              if (player.currentSong != null &&
+                                  player.currentSong!.duration.inMilliseconds >
+                                      0)
+                                Container(
+                                  margin: const EdgeInsets.only(
+                                    left: 16,
+                                    right: 16,
+                                    bottom: 12,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primaryContainer
+                                        .withValues(alpha: 0.35),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: theme.colorScheme.primary
+                                          .withValues(alpha: 0.25),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.timelapse_rounded,
+                                        size: 18,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '${context.l10n.durationLabel}: ',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      Text(
+                                        player.effectiveSpeed != 1.0
+                                            ? '${_formatDuration(player.currentSong!.duration)} (orig.)'
+                                            : _formatDuration(
+                                                player.currentSong!.duration,
+                                              ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: player.effectiveSpeed != 1.0
+                                                  ? theme
+                                                      .colorScheme
+                                                      .onSurfaceVariant
+                                                  : theme.colorScheme.primary,
+                                              fontWeight:
+                                                  player.effectiveSpeed != 1.0
+                                                      ? FontWeight.normal
+                                                      : FontWeight.bold,
+                                              fontFeatures: const [
+                                                FontFeature.tabularFigures(),
+                                              ],
+                                            ),
+                                      ),
+                                      if (player.effectiveSpeed != 1.0) ...[
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          Icons.arrow_forward_rounded,
+                                          size: 14,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '${_formatDuration(player.effectiveDuration)} (${player.effectiveSpeed.toStringAsFixed(2).replaceAll(RegExp(r'0$'), '').replaceAll(RegExp(r'\.0$'), '')}x)',
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color:
+                                                    theme.colorScheme.primary,
+                                                fontWeight: FontWeight.bold,
+                                                fontFeatures: const [
+                                                  FontFeature.tabularFigures(),
+                                                ],
+                                              ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,

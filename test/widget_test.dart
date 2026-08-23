@@ -93,4 +93,23 @@ void main() {
     );
     expect(songRedundant.displayTitle, 'Beautiful Life');
   });
+
+  test('MFX speed effective duration calculations', () {
+    const orig1Min = Duration(minutes: 1); // 60s
+
+    Duration calc(Duration original, double speed) {
+      return Duration(milliseconds: (original.inMilliseconds / speed).round());
+    }
+
+    // 1.5x speed up -> 40s
+    expect(calc(orig1Min, 1.50).inSeconds, 40);
+    // 1.25x speed up -> 48s
+    expect(calc(orig1Min, 1.25).inSeconds, 48);
+    // 1.30x nightcore -> 46s
+    expect(calc(orig1Min, 1.30).inSeconds, 46);
+    // 0.85x slowed -> 70s (70588ms, 1:10)
+    expect(calc(orig1Min, 0.85).inSeconds, 70);
+    // 0.70x super slowed -> 85s (85714ms, 1:25)
+    expect(calc(orig1Min, 0.70).inSeconds, 85);
+  });
 }
