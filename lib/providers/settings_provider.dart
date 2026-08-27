@@ -3,18 +3,30 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
 
+enum ThemeColorSource {
+  materialYou,
+  albumArt,
+  custom,
+}
+
 class SettingsProvider extends ChangeNotifier {
   static final instance = SettingsProvider._internal();
   factory SettingsProvider() => instance;
   SettingsProvider._internal();
 
   var useDynamicTheme = true;
+  var useMaterialYou = false;
+  Color? dynamicWallpaperColor;
   var amoledDark = false;
   var dynamicThemeColor = const Color(0xFF7C4DFF);
+  var ambientGlowIntensity = 'vibrant'; // 'off' | 'subtle' | 'vibrant' | 'immersive'
+  var nowPlayingStyle = 'modern'; // 'modern' | 'vinyl' | 'minimalist'
   var showVisualizer = false;
   var immersiveMode = false;
   var preferLocalArtistImages = true;
   var sleepTimerDefaultMinutes = 5;
+  var sleepTimerFadeOutSeconds = 10; // 0 (Off), 10, 30, 60
+  var sleepTimerFinishSong = false;
   var defaultStartPage = 0;
 
   var songSortBy = 'title';
@@ -32,6 +44,8 @@ class SettingsProvider extends ChangeNotifier {
   var restoreLastPlayedSong = true;
 
   var pauseOnDuck = false;
+  var pauseOnDisconnect = true;
+  var resumeOnConnect = false;
   var filterTitleFeatures = false;
   var filterTitleArtist = false;
   var userName = 'User';
@@ -60,17 +74,26 @@ class SettingsProvider extends ChangeNotifier {
     appLocale = await prefs.getString('app_locale') ?? 'system';
 
     useDynamicTheme = await prefs.getBool('use_dynamic_theme') ?? true;
+    useMaterialYou = await prefs.getBool('use_material_you') ?? false;
     amoledDark = await prefs.getBool('amoled_dark') ?? false;
     var colorValue = await prefs.getInt('dynamic_theme_color');
     if (colorValue != null) {
       dynamicThemeColor = Color(colorValue);
     }
+    ambientGlowIntensity =
+        await prefs.getString('ambient_glow_intensity') ?? 'vibrant';
+    nowPlayingStyle =
+        await prefs.getString('now_playing_style') ?? 'modern';
     showVisualizer = await prefs.getBool('show_visualizer') ?? false;
     immersiveMode = await prefs.getBool('immersive_mode') ?? false;
     preferLocalArtistImages =
         await prefs.getBool('prefer_local_artist_images') ?? true;
     sleepTimerDefaultMinutes =
         await prefs.getInt('sleep_timer_default_minutes') ?? 5;
+    sleepTimerFadeOutSeconds =
+        await prefs.getInt('sleep_timer_fade_out_seconds') ?? 10;
+    sleepTimerFinishSong =
+        await prefs.getBool('sleep_timer_finish_song') ?? false;
     defaultStartPage = await prefs.getInt('default_start_page') ?? 0;
 
     songSortBy = await prefs.getString('song_sort_by') ?? 'title';
@@ -91,11 +114,18 @@ class SettingsProvider extends ChangeNotifier {
         await prefs.getBool('restore_last_played_song') ?? true;
 
     pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
+    pauseOnDisconnect =
+        await prefs.getBool('pause_on_disconnect') ?? true;
+    resumeOnConnect = await prefs.getBool('resume_on_connect') ?? false;
     filterTitleFeatures = await prefs.getBool('filter_title_features') ?? false;
     filterTitleArtist = await prefs.getBool('filter_title_artist') ?? false;
     userName = await prefs.getString('user_name') ?? 'User';
     useGreetingTitle = await prefs.getBool('use_greeting_title') ?? false;
     autoCheckUpdates = await prefs.getBool('auto_check_updates') ?? true;
+
+    if (useMaterialYou) {
+      dynamicWallpaperColor = await MusicScanner.getDynamicWallpaperColor();
+    }
 
     scanFolder = await scanner.getScanFolder();
     lastSyncTime = await scanner.getLastSyncTime();
@@ -103,6 +133,89 @@ class SettingsProvider extends ChangeNotifier {
 
     _isLoaded = true;
     notifyListeners();
+  }
+
+  Future<void> setPauseOnDisconnect(
+    bool value,
+    SonoraAudioHandler audioHandler,
+  ) async {
+    pauseOnDisconnect = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('pause_on_disconnect', value);
+    audioHandler.setPauseOnDisconnect(value);
+  }
+
+  Future<void> setResumeOnConnect(
+    bool value,
+    SonoraAudioHandler audioHandler,
+  ) async {
+    resumeOnConnect = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('resume_on_connect', value);
+    audioHandler.setResumeOnConnect(value);
+  }
+
+  Future<void> setSleepTimerFadeOutSeconds(int seconds) async {
+    sleepTimerFadeOutSeconds = seconds;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setInt('sleep_timer_fade_out_seconds', seconds);
+  }
+
+  Future<void> setSleepTimerFinishSong(bool value) async {
+    sleepTimerFinishSong = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('sleep_timer_finish_song', value);
+  }
+
+  ThemeColorSource get themeColorSource {
+    if (useMaterialYou) return ThemeColorSource.materialYou;
+    if (useDynamicTheme) return ThemeColorSource.albumArt;
+    return ThemeColorSource.custom;
+  }
+
+  Future<void> setThemeColorSource(ThemeColorSource source) async {
+    switch (source) {
+      case ThemeColorSource.materialYou:
+        await setUseMaterialYou(true);
+        await setDynamicTheme(false);
+        break;
+      case ThemeColorSource.albumArt:
+        await setUseMaterialYou(false);
+        await setDynamicTheme(true);
+        break;
+      case ThemeColorSource.custom:
+        await setUseMaterialYou(false);
+        await setDynamicTheme(false);
+        break;
+    }
+  }
+
+  Future<void> setUseMaterialYou(bool value) async {
+    useMaterialYou = value;
+    if (value && dynamicWallpaperColor == null) {
+      dynamicWallpaperColor = await MusicScanner.getDynamicWallpaperColor();
+    }
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('use_material_you', value);
+  }
+
+  Future<void> setAmbientGlowIntensity(String value) async {
+    ambientGlowIntensity = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setString('ambient_glow_intensity', value);
+  }
+
+  Future<void> setNowPlayingStyle(String value) async {
+    nowPlayingStyle = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setString('now_playing_style', value);
   }
 
   Future<void> setAutoCheckUpdates(bool value) async {

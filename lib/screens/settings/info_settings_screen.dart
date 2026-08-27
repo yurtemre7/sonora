@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/routing/app_routes.dart';
+import 'package:sonora/services/native_bridge.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/update_dialog.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class InfoSettingsScreen extends StatefulWidget {
   const InfoSettingsScreen({super.key, required this.onResetApp});
@@ -51,7 +50,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
   Future<void> _loadInfo() async {
     var version = '1.0.0';
     try {
-      var packageInfo = await PackageInfo.fromPlatform();
+      var packageInfo = await NativeBridge.getPackageInfo();
       version = packageInfo.version;
       if (packageInfo.buildNumber.isNotEmpty) {
         version += '+${packageInfo.buildNumber}';
@@ -232,12 +231,8 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                               FilledButton.icon(
                                 onPressed: () async {
                                   Navigator.pop(dialogContext);
-                                  var githubUrl = Uri.parse(
+                                  await NativeBridge.openUrl(
                                     'https://github.com/yurtemre7/sonora/releases',
-                                  );
-                                  await launchUrl(
-                                    githubUrl,
-                                    mode: LaunchMode.externalApplication,
                                   );
                                 },
                                 icon: const Icon(Icons.open_in_new_rounded),
@@ -348,8 +343,9 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
               subtitle: Text(context.l10n.sourceCodeSubtitle),
               trailing: const Icon(Icons.open_in_new_rounded),
               onTap: () async {
-                var url = Uri.parse('https://github.com/yurtemre7/sonora');
-                await launchUrl(url);
+                await NativeBridge.openUrl(
+                  'https://github.com/yurtemre7/sonora',
+                );
               },
             ),
             ListTile(
@@ -358,8 +354,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
               subtitle: Text(context.l10n.developerProfileSubtitle),
               trailing: const Icon(Icons.open_in_new_rounded),
               onTap: () async {
-                var url = Uri.parse('https://github.com/yurtemre7');
-                await launchUrl(url);
+                await NativeBridge.openUrl('https://github.com/yurtemre7');
               },
             ),
             ListTile(
@@ -368,8 +363,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
               subtitle: Text(context.l10n.telegramContactSubtitle),
               trailing: const Icon(Icons.open_in_new_rounded),
               onTap: () async {
-                var url = Uri.parse('https://t.me/emredev');
-                await launchUrl(url);
+                await NativeBridge.openUrl('https://t.me/emredev');
               },
             ),
 

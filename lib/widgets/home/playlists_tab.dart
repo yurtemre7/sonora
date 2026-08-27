@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
+import 'package:sonora/services/native_bridge.dart';
 import 'package:sonora/utils/image_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
@@ -228,11 +228,9 @@ class PlaylistsTab extends StatelessWidget {
                       playlist,
                     );
                     if (file != null) {
-                      await SharePlus.instance.share(
-                        ShareParams(
-                          files: [XFile(file.path)],
-                          text: exportedMsg,
-                        ),
+                      await NativeBridge.shareFiles(
+                        [file.path],
+                        text: exportedMsg,
                       );
                     } else {
                       if (!context.mounted) return;

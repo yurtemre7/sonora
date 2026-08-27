@@ -6,59 +6,84 @@ class ThemeColorSelector extends StatelessWidget {
   final List<Color> colors;
   final Color selectedColor;
   final ValueChanged<Color> onColorSelected;
+  final bool enabled;
+  final String? disabledTooltip;
 
   const ThemeColorSelector({
     super.key,
     required this.colors,
     required this.selectedColor,
     required this.onColorSelected,
+    this.enabled = true,
+    this.disabledTooltip,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 80,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        itemCount: colors.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 16),
-        itemBuilder: (context, index) {
-          var color = colors[index];
-          var isSelected = color == selectedColor;
+    Widget list = AnimatedOpacity(
+      opacity: enabled ? 1.0 : 0.38,
+      duration: const Duration(milliseconds: 200),
+      child: SizedBox(
+        height: 80,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          itemCount: colors.length,
+          separatorBuilder: (context, index) => const SizedBox(width: 16),
+          itemBuilder: (context, index) {
+            var color = colors[index];
+            var isSelected = color == selectedColor;
 
-          return GestureDetector(
-            onTap: () => onColorSelected(color),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: isSelected
-                        ? Border.all(
-                            color: Theme.of(context).colorScheme.primary,
-                            width: 3,
-                          )
-                        : Border.all(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                          ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: CustomPaint(
-                      painter: ThemePieChartPainter(baseColor: color),
+            return GestureDetector(
+              onTap: enabled ? () => onColorSelected(color) : null,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: isSelected && enabled
+                          ? Border.all(
+                              color: Theme.of(context).colorScheme.primary,
+                              width: 3,
+                            )
+                          : Border.all(
+                              color: isSelected
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .outline
+                                      .withValues(alpha: 0.5)
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .outlineVariant,
+                            ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: CustomPaint(
+                        painter: ThemePieChartPainter(baseColor: color),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
+
+    if (!enabled && disabledTooltip != null) {
+      return Tooltip(
+        message: disabledTooltip!,
+        triggerMode: TooltipTriggerMode.tap,
+        child: AbsorbPointer(child: list),
+      );
+    }
+
+    return list;
   }
 }
 

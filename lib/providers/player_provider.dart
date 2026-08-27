@@ -644,6 +644,15 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  /// Appends multiple [songs] to the end of the queue.
+  Future<void> addSongsToQueue(List<Song> songs) async {
+    if (songs.isEmpty) return;
+    queue.addAll(songs);
+    _originalQueue.addAll(songs);
+    await audioHandler.addQueueItems(songs.map(_songToMediaItem).toList());
+    notifyListeners();
+  }
+
   Future<void> _loadAndPlay({
     required Song song,
     required List<Song> songList,
@@ -685,6 +694,22 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       queue.insert(insertIndex, song);
     }
     await audioHandler.insertQueueItemAt(insertIndex, _songToMediaItem(song));
+    notifyListeners();
+  }
+
+  /// Inserts multiple [songs] immediately after the currently playing song.
+  Future<void> playNextSongs(List<Song> songs) async {
+    if (songs.isEmpty) return;
+    var insertIndex = currentIndex + 1;
+    if (insertIndex >= queue.length) {
+      queue.addAll(songs);
+    } else {
+      queue.insertAll(insertIndex, songs);
+    }
+    await audioHandler.insertQueueItemsAt(
+      insertIndex,
+      songs.map(_songToMediaItem).toList(),
+    );
     notifyListeners();
   }
 
@@ -791,6 +816,68 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     allSongs = List<Song>.from(updatedSongs);
     _refreshLibrarySnapshots();
 
+    notifyListeners();
+  }
+
+  /// Bulk updates favorite status for [songIds].
+  Future<void> setFavorites(List<int> songIds, bool isFavorite) async {
+    if (songIds.isEmpty) return;
+    var scanner = MusicScanner();
+    var updatedSongs = await scanner.setFavoriteSongs(songIds, isFavorite);
+    allSongs = List<Song>.from(updatedSongs);
+
+    var idSet = songIds.toSet();
+    var updatedMap = {
+      for (var s in updatedSongs)
+        if (idSet.contains(s.id)) s.id: s,
+    };
+
+    for (var i = 0; i < queue.length; i++) {
+      var updated = updatedMap[queue[i].id];
+      if (updated != null) {
+        queue[i] = updated;
+      }
+    }
+
+    for (var i = 0; i < _originalQueue.length; i++) {
+      var updated = updatedMap[_originalQueue[i].id];
+      if (updated != null) {
+        _originalQueue[i] = updated;
+      }
+    }
+
+    playlists = await scanner.getPlaylists();
+    _refreshLibrarySnapshots();
+    notifyListeners();
+  }
+
+  /// Adds multiple [songs] to a playlist.
+  Future<void> addSongsToPlaylist(
+    String playlistId,
+    List<Song> songs,
+  ) async {
+    if (songs.isEmpty) return;
+    var scanner = MusicScanner();
+    await scanner.addSongsToPlaylist(
+      playlistId,
+      songs.map((s) => s.id).toList(),
+    );
+    playlists = await scanner.getPlaylists();
+    notifyListeners();
+  }
+
+  /// Removes multiple [songs] from a playlist.
+  Future<void> removeSongsFromPlaylist(
+    String playlistId,
+    List<Song> songs,
+  ) async {
+    if (songs.isEmpty) return;
+    var scanner = MusicScanner();
+    await scanner.removeSongsFromPlaylist(
+      playlistId,
+      songs.map((s) => s.id).toList(),
+    );
+    playlists = await scanner.getPlaylists();
     notifyListeners();
   }
 
@@ -1362,12 +1449,23 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     );
   }
 
-  void startSleepTimer(Duration duration) {
+  var sleepTimerFinishSongActive = false;
+  StreamSubscription? _finishSongSubscription;
+
+  void startSleepTimer(
+    Duration duration, {
+    bool? finishSong,
+    int? fadeOutSecs,
+  }) {
     stopSleepTimer();
 
     sleepTimerOriginalDuration = duration;
     sleepTimerDuration = duration;
     _isFadingOut = false;
+    sleepTimerFinishSongActive =
+        finishSong ?? SettingsProvider.instance.sleepTimerFinishSong;
+    var fadeDurationSecs =
+        fadeOutSecs ?? SettingsProvider.instance.sleepTimerFadeOutSeconds;
 
     _updateMediaNotificationControls();
     SleepTimerNotificationService().updateTimerNotification(duration);
@@ -1385,29 +1483,31 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         timer.cancel();
         _sleepTimer = null;
 
-        await audioHandler.stop();
-        await audioHandler.player.setVolume(_volume);
-
-        sleepTimerDuration = null;
-        sleepTimerOriginalDuration = null;
-        _isFadingOut = false;
-
-        queue = [];
-        _originalQueue = [];
-        currentIndex = -1;
-
-        _updateMediaNotificationControls();
-        SleepTimerNotificationService().cancelNotification();
-        notifyListeners();
+        if (sleepTimerFinishSongActive && audioHandler.player.playing) {
+          _finishSongSubscription?.cancel();
+          _finishSongSubscription = audioHandler.player.playerStateStream.listen(
+            (state) async {
+              if (state.processingState == ProcessingState.completed ||
+                  !state.playing) {
+                _finishSongSubscription?.cancel();
+                _finishSongSubscription = null;
+                await _finalizeSleepTimerStop();
+              }
+            },
+          );
+          notifyListeners();
+        } else {
+          await _finalizeSleepTimerStop();
+        }
       } else {
         sleepTimerDuration = remaining;
 
-        if (remaining.inSeconds <= 10) {
+        if (fadeDurationSecs > 0 && remaining.inSeconds <= fadeDurationSecs) {
           if (!_isFadingOut) {
             _isFadingOut = true;
             _originalVolumeBeforeFade = audioHandler.player.volume;
           }
-          var fraction = remaining.inSeconds / 10.0;
+          var fraction = remaining.inSeconds / fadeDurationSecs.toDouble();
           await audioHandler.player.setVolume(
             _originalVolumeBeforeFade * fraction,
           );
@@ -1421,11 +1521,34 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  Future<void> _finalizeSleepTimerStop() async {
+    _finishSongSubscription?.cancel();
+    _finishSongSubscription = null;
+    await audioHandler.stop();
+    await audioHandler.player.setVolume(_volume);
+
+    sleepTimerDuration = null;
+    sleepTimerOriginalDuration = null;
+    _isFadingOut = false;
+    sleepTimerFinishSongActive = false;
+
+    queue = [];
+    _originalQueue = [];
+    currentIndex = -1;
+
+    _updateMediaNotificationControls();
+    SleepTimerNotificationService().cancelNotification();
+    notifyListeners();
+  }
+
   void stopSleepTimer() {
     _sleepTimer?.cancel();
     _sleepTimer = null;
+    _finishSongSubscription?.cancel();
+    _finishSongSubscription = null;
     sleepTimerDuration = null;
     sleepTimerOriginalDuration = null;
+    sleepTimerFinishSongActive = false;
     if (_isFadingOut) {
       audioHandler.player.setVolume(_originalVolumeBeforeFade);
       _isFadingOut = false;

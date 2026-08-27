@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonora/services/native_bridge.dart';
 
 class UpdateInfo {
   final String version;
@@ -190,7 +190,7 @@ class UpdateService {
   /// Compares the given GitHub tag (e.g., 'v1.7.0') against the local app version
   /// (e.g., '1.6.2+1'). Ignores build numbers.
   static Future<bool> _isVersionNewer(String remoteTag) async {
-    var packageInfo = await PackageInfo.fromPlatform();
+    var packageInfo = await NativeBridge.getPackageInfo();
 
     // e.g., '1.7.0+2' -> '1.7.0'
     var localVerString = packageInfo.version.split('+')[0].trim();

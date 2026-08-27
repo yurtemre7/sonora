@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AmbientGlow extends StatefulWidget {
-  const AmbientGlow({super.key, required this.isPlaying, this.color});
+  const AmbientGlow({
+    super.key,
+    required this.isPlaying,
+    this.color,
+    this.intensity = 'vibrant',
+  });
 
   final bool isPlaying;
   final Color? color;
+  final String intensity; // 'off' | 'subtle' | 'vibrant' | 'immersive'
 
   @override
   State<AmbientGlow> createState() => _AmbientGlowState();
@@ -40,7 +46,7 @@ class _AmbientGlowState extends State<AmbientGlow>
       ),
     ]).animate(_controller);
 
-    if (widget.isPlaying) {
+    if (widget.isPlaying && widget.intensity != 'off') {
       _controller.repeat();
     }
   }
@@ -48,8 +54,9 @@ class _AmbientGlowState extends State<AmbientGlow>
   @override
   void didUpdateWidget(covariant AmbientGlow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isPlaying != oldWidget.isPlaying) {
-      if (widget.isPlaying) {
+    if (widget.isPlaying != oldWidget.isPlaying ||
+        widget.intensity != oldWidget.intensity) {
+      if (widget.isPlaying && widget.intensity != 'off') {
         _controller.repeat();
       } else {
         _controller.stop();
@@ -65,8 +72,35 @@ class _AmbientGlowState extends State<AmbientGlow>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.intensity == 'off') {
+      return const SizedBox.shrink();
+    }
+
     var theme = Theme.of(context);
     var glowColor = widget.color ?? theme.colorScheme.primary;
+
+    double size;
+    double alpha1;
+    double alpha2;
+
+    switch (widget.intensity) {
+      case 'subtle':
+        size = 260;
+        alpha1 = 0.08;
+        alpha2 = 0.03;
+        break;
+      case 'immersive':
+        size = 400;
+        alpha1 = 0.22;
+        alpha2 = 0.10;
+        break;
+      case 'vibrant':
+      default:
+        size = 320;
+        alpha1 = 0.14;
+        alpha2 = 0.06;
+        break;
+    }
 
     return AnimatedBuilder(
       animation: _scaleAnimation,
@@ -74,14 +108,14 @@ class _AmbientGlowState extends State<AmbientGlow>
         return Transform.scale(
           scale: _scaleAnimation.value,
           child: Container(
-            width: 320,
-            height: 320,
+            width: size,
+            height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  glowColor.withValues(alpha: 0.12),
-                  glowColor.withValues(alpha: 0.05),
+                  glowColor.withValues(alpha: alpha1),
+                  glowColor.withValues(alpha: alpha2),
                   Colors.transparent,
                 ],
                 stops: const [0.0, 0.6, 1.0],

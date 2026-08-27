@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
@@ -18,96 +19,6 @@ class AppearanceSettingsScreen extends StatelessWidget {
   final PlayerProvider playerProvider;
   final SettingsProvider settingsProvider;
 
-  String _themeModeName(BuildContext context, ThemeMode mode) {
-    return switch (mode) {
-      ThemeMode.system => context.l10n.systemDefault,
-      ThemeMode.light => context.l10n.light,
-      ThemeMode.dark => context.l10n.dark,
-    };
-  }
-
-  IconData _themeModeIcon(ThemeMode mode) {
-    return switch (mode) {
-      ThemeMode.system => Icons.brightness_auto_rounded,
-      ThemeMode.light => Icons.light_mode_rounded,
-      ThemeMode.dark => Icons.dark_mode_rounded,
-    };
-  }
-
-  void _showThemeModeSheet(BuildContext context) {
-    var theme = Theme.of(context);
-
-    showModalBottomSheet(
-      context: context,
-      clipBehavior: Clip.antiAlias,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      useRootNavigator: true,
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Material(
-            color: Colors.transparent,
-            child: ListenableBuilder(
-              listenable: themeProvider,
-              builder: (ctx, _) {
-                var currentMode = themeProvider.themeMode;
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-                      child: Text(
-                        ctx.l10n.chooseTheme,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    RadioGroup<ThemeMode>(
-                      groupValue: currentMode,
-                      onChanged: (value) {
-                        if (value == null) return;
-                        themeProvider.setThemeMode(value);
-                        Navigator.pop(sheetContext);
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          RadioListTile<ThemeMode>(
-                            value: ThemeMode.system,
-                            title: Text(ctx.l10n.systemDefault),
-                            subtitle: Text(ctx.l10n.systemSubtitle),
-                            secondary: const Icon(
-                              Icons.brightness_auto_rounded,
-                            ),
-                          ),
-                          RadioListTile<ThemeMode>(
-                            value: ThemeMode.light,
-                            title: Text(ctx.l10n.light),
-                            subtitle: Text(ctx.l10n.lightSubtitle),
-                            secondary: const Icon(Icons.light_mode_rounded),
-                          ),
-                          RadioListTile<ThemeMode>(
-                            value: ThemeMode.dark,
-                            title: Text(ctx.l10n.dark),
-                            subtitle: Text(ctx.l10n.darkSubtitle),
-                            secondary: const Icon(Icons.dark_mode_rounded),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -122,49 +33,274 @@ class AppearanceSettingsScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           children: [
-            const SizedBox(height: 8),
-            ListenableBuilder(
-              listenable: themeProvider,
-              builder: (context, _) {
-                var mode = themeProvider.themeMode;
-                return ListTile(
-                  leading: Icon(_themeModeIcon(mode)),
-                  title: Text(context.l10n.themeMode),
-                  subtitle: Text(_themeModeName(context, mode)),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => _showThemeModeSheet(context),
-                );
-              },
+            // ── Theme Mode (Unified Segmented Button) ─────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 6.0,
+              ),
+              child: Text(
+                context.l10n.themeMode,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 6.0,
+              ),
+              child: ListenableBuilder(
+                listenable: themeProvider,
+                builder: (context, _) {
+                  return SegmentedButton<ThemeMode>(
+                    segments: [
+                      ButtonSegment(
+                        value: ThemeMode.system,
+                        icon: const Icon(Icons.brightness_auto_rounded),
+                        label: Text(context.l10n.systemDefault),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.light,
+                        icon: const Icon(Icons.light_mode_rounded),
+                        label: Text(context.l10n.light),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.dark,
+                        icon: const Icon(Icons.dark_mode_rounded),
+                        label: Text(context.l10n.dark),
+                      ),
+                    ],
+                    selected: {themeProvider.themeMode},
+                    onSelectionChanged: (newSelection) {
+                      HapticFeedback.selectionClick();
+                      themeProvider.setThemeMode(newSelection.first);
+                    },
+                  );
+                },
+              ),
+            ),
+
+            const Divider(height: 28),
+
+            // ── Color Source & Accent (Unified Segmented Button) ──────────
             ListenableBuilder(
               listenable: Listenable.merge([playerProvider, settingsProvider]),
               builder: (context, _) {
                 var uniqueColors = playerProvider.getUniqueThemeColors();
+                var currentSource = settingsProvider.themeColorSource;
+                var wallpaperColor = settingsProvider.dynamicWallpaperColor;
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20.0,
-                        vertical: 8.0,
+                        vertical: 6.0,
                       ),
                       child: Text(
-                        context.l10n.defaultAppColor,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                        context.l10n.themeColorsHeader,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    ThemeColorSelector(
-                      colors: uniqueColors,
-                      selectedColor: playerProvider.defaultThemeColor,
-                      onColorSelected: (color) {
-                        playerProvider.setDefaultThemeColor(color);
-                      },
+
+                    // Unified 3-way Segmented Button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 6.0,
+                      ),
+                      child: SegmentedButton<ThemeColorSource>(
+                        segments: [
+                          ButtonSegment(
+                            value: ThemeColorSource.materialYou,
+                            icon: const Icon(Icons.palette_outlined),
+                            label: Text(context.l10n.colorSourceMaterialYou),
+                          ),
+                          ButtonSegment(
+                            value: ThemeColorSource.albumArt,
+                            icon: const Icon(Icons.album_rounded),
+                            label: Text(context.l10n.colorSourceAlbumArt),
+                          ),
+                          ButtonSegment(
+                            value: ThemeColorSource.custom,
+                            icon: const Icon(Icons.colorize_rounded),
+                            label: Text(context.l10n.colorSourceCustom),
+                          ),
+                        ],
+                        selected: {currentSource},
+                        onSelectionChanged: (newSelection) {
+                          HapticFeedback.selectionClick();
+                          settingsProvider.setThemeColorSource(
+                            newSelection.first,
+                          );
+                        },
+                      ),
                     ),
-                    const SizedBox(height: 16),
+
+                    const SizedBox(height: 8),
+
+                    // Mode description card & palette context
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14.0),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: theme.colorScheme.outlineVariant.withValues(
+                              alpha: 0.4,
+                            ),
+                          ),
+                        ),
+                        child: switch (currentSource) {
+                          ThemeColorSource.materialYou => Row(
+                            children: [
+                              if (wallpaperColor != null) ...[
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: wallpaperColor,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: theme.colorScheme.outlineVariant,
+                                      width: 2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: wallpaperColor.withValues(
+                                          alpha: 0.4,
+                                        ),
+                                        blurRadius: 6,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                              ],
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (wallpaperColor != null)
+                                      Text(
+                                        context.l10n.wallpaperColorActive,
+                                        style: theme.textTheme.labelMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: theme.colorScheme.primary,
+                                            ),
+                                      ),
+                                    Text(
+                                      context.l10n.colorSourceMaterialYouDesc,
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          ThemeColorSource.albumArt => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.colorSourceAlbumArtDesc,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                context.l10n.fallbackColorHeader,
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              ThemeColorSelector(
+                                colors: uniqueColors,
+                                selectedColor: playerProvider.defaultThemeColor,
+                                onColorSelected: (color) {
+                                  playerProvider.setDefaultThemeColor(color);
+                                },
+                              ),
+                            ],
+                          ),
+                          ThemeColorSource.custom => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.colorSourceCustomDesc,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                context.l10n.customColorHeader,
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              ThemeColorSelector(
+                                colors: uniqueColors,
+                                selectedColor: playerProvider.defaultThemeColor,
+                                onColorSelected: (color) {
+                                  playerProvider.setDefaultThemeColor(color);
+                                },
+                              ),
+                            ],
+                          ),
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            const Divider(height: 28),
+
+            // ── Display & Contrast ──────────────────────────────────────
+            ListenableBuilder(
+              listenable: settingsProvider,
+              builder: (context, _) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0,
+                        vertical: 6.0,
+                      ),
+                      child: Text(
+                        context.l10n.displayAndContrast,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                     SwitchListTile(
                       secondary: const Icon(Icons.dark_mode_outlined),
                       title: Text(context.l10n.amoledDark),
@@ -172,12 +308,99 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       value: settingsProvider.amoledDark,
                       onChanged: (val) => settingsProvider.setAmoledDark(val),
                     ),
-                    SwitchListTile(
-                      secondary: const Icon(Icons.color_lens_outlined),
-                      title: Text(context.l10n.dynamicTheme),
-                      subtitle: Text(context.l10n.dynamicThemeSubtitle),
-                      value: settingsProvider.useDynamicTheme,
-                      onChanged: (val) => settingsProvider.setDynamicTheme(val),
+                  ],
+                );
+              },
+            ),
+
+            const Divider(height: 28),
+
+            // ── Player Screen Aesthetics ────────────────────────────────
+            ListenableBuilder(
+              listenable: settingsProvider,
+              builder: (context, _) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0,
+                        vertical: 6.0,
+                      ),
+                      child: Text(
+                        context.l10n.playerScreenAesthetics,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.auto_awesome_rounded),
+                      title: Text(context.l10n.ambientGlow),
+                      subtitle: Text(context.l10n.ambientGlowSubtitle),
+                      trailing: DropdownButton<String>(
+                        value: ['off', 'subtle', 'vibrant', 'immersive']
+                                .contains(settingsProvider.ambientGlowIntensity)
+                            ? settingsProvider.ambientGlowIntensity
+                            : 'vibrant',
+                        underline: const SizedBox(),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'off',
+                            child: Text(context.l10n.glowOff),
+                          ),
+                          DropdownMenuItem(
+                            value: 'subtle',
+                            child: Text(context.l10n.glowSubtle),
+                          ),
+                          DropdownMenuItem(
+                            value: 'vibrant',
+                            child: Text(context.l10n.glowVibrant),
+                          ),
+                          DropdownMenuItem(
+                            value: 'immersive',
+                            child: Text(context.l10n.glowImmersive),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            settingsProvider.setAmbientGlowIntensity(val);
+                          }
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.art_track_rounded),
+                      title: Text(context.l10n.nowPlayingStyle),
+                      subtitle: Text(context.l10n.nowPlayingStyleSubtitle),
+                      trailing: DropdownButton<String>(
+                        value: ['modern', 'vinyl', 'minimalist'].contains(
+                          settingsProvider.nowPlayingStyle,
+                        )
+                            ? settingsProvider.nowPlayingStyle
+                            : 'modern',
+                        underline: const SizedBox(),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'modern',
+                            child: Text(context.l10n.styleModern),
+                          ),
+                          DropdownMenuItem(
+                            value: 'vinyl',
+                            child: Text(context.l10n.styleVinyl),
+                          ),
+                          DropdownMenuItem(
+                            value: 'minimalist',
+                            child: Text(context.l10n.styleMinimalist),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            settingsProvider.setNowPlayingStyle(val);
+                          }
+                        },
+                      ),
                     ),
                     SwitchListTile(
                       secondary: const Icon(Icons.account_box_outlined),
@@ -197,16 +420,30 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       onChanged: (val) =>
                           settingsProvider.setShowVisualizer(val),
                     ),
-                    const Divider(),
+                  ],
+                );
+              },
+            ),
+
+            const Divider(height: 28),
+
+            // ── Personalization ─────────────────────────────────────────
+            ListenableBuilder(
+              listenable: settingsProvider,
+              builder: (context, _) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20.0,
-                        vertical: 8.0,
+                        vertical: 6.0,
                       ),
                       child: Text(
                         context.l10n.personalization,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -240,6 +477,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                 );
               },
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),

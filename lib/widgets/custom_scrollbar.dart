@@ -1,11 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomScrollbar extends StatefulWidget {
   final Widget child;
+  final String Function(double scrollPercentage)? sectionGetter;
 
-  const CustomScrollbar({super.key, required this.child});
+  const CustomScrollbar({
+    super.key,
+    required this.child,
+    this.sectionGetter,
+  });
 
   @override
   State<CustomScrollbar> createState() => _CustomScrollbarState();
@@ -19,6 +25,7 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
   var _isDragging = false;
   double? _dragThumbOffset;
   Timer? _fadeTimer;
+  String? _currentSection;
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification.metrics.axis != Axis.vertical) return false;
@@ -46,6 +53,15 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
     return false;
   }
 
+  void _updateSection(double percentage) {
+    if (widget.sectionGetter == null) return;
+    var newSection = widget.sectionGetter!(percentage.clamp(0.0, 1.0));
+    if (newSection != _currentSection) {
+      HapticFeedback.selectionClick();
+      _currentSection = newSection;
+    }
+  }
+
   @override
   void dispose() {
     _fadeTimer?.cancel();
@@ -54,6 +70,7 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
 
   @override
   Widget build(BuildContext context) {
+    var theme = Theme.of(context);
     double contentHeight = _maxScrollExtent + _viewportDimension;
     double thumbHeight =
         (_viewportDimension / contentHeight * _viewportDimension) * 0.75;
@@ -76,18 +93,76 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
         : (scrollPercentage * maxThumbOffset);
     if (thumbOffset.isNaN || thumbOffset.isInfinite) thumbOffset = 0;
 
+    var showBubble = _isDragging &&
+        widget.sectionGetter != null &&
+        _currentSection != null &&
+        _currentSection!.isNotEmpty;
+
+    var bubbleTop = (thumbOffset + (thumbHeight / 2) - 24)
+        .clamp(12.0, (_viewportDimension - 56.0).clamp(12.0, double.infinity));
+
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: Stack(
         children: [
           widget.child,
-          if (_maxScrollExtent > 0 && thumbHeight < _viewportDimension)
+          if (_maxScrollExtent > 0 && thumbHeight < _viewportDimension) ...[
+            // Floating section letter bubble
+            Positioned(
+              top: bubbleTop,
+              right: 28,
+              child: IgnorePointer(
+                child: AnimatedScale(
+                  scale: showBubble ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOutBack,
+                  child: AnimatedOpacity(
+                    opacity: showBubble ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 120),
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        minWidth: 48,
+                        minHeight: 48,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        _currentSection ?? '',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Fast scroll thumb
             Positioned(
               top: thumbOffset,
               right: 4,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onVerticalDragDown: (details) {
+                  var percentage = maxThumbOffset > 0
+                      ? thumbOffset / maxThumbOffset
+                      : 0.0;
+                  _updateSection(percentage);
                   setState(() {
                     _isDragging = true;
                     _dragThumbOffset = thumbOffset;
@@ -97,6 +172,7 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
                   setState(() {
                     _isDragging = false;
                     _dragThumbOffset = null;
+                    _currentSection = null;
                   });
                 },
                 onVerticalDragUpdate: (details) {
@@ -109,6 +185,8 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
                       ? newThumbOffset / maxThumbOffset
                       : 0;
                   double newScrollOffset = newPercentage * _maxScrollExtent;
+
+                  _updateSection(newPercentage);
 
                   setState(() {
                     _isScrolling = true;
@@ -129,6 +207,7 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
                   setState(() {
                     _isDragging = false;
                     _dragThumbOffset = null;
+                    _currentSection = null;
                   });
                   _fadeTimer = Timer(const Duration(milliseconds: 1500), () {
                     if (mounted) setState(() => _isScrolling = false);
@@ -153,8 +232,7 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
                       width: _isDragging ? 12 : 8,
                       height: thumbHeight,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary
-                            .withValues(alpha: 0.6),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -162,6 +240,7 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
                 ),
               ),
             ),
+          ],
         ],
       ),
     );

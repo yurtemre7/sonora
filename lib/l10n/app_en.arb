@@ -90,7 +90,7 @@
   "disableShuffle": "Disable shuffle",
   "displayedAs": "Displayed As:",
   "download": "Download",
-  "dynamicTheme": "Dynamic Theme (Material You)",
+  "dynamicTheme": "Dynamic Theme (Album Art)",
   "dynamicThemeSubtitle": "Automatically theme the app using active album art",
   "editDescription": "Edit description",
   "enableShuffle": "Enable shuffle",
@@ -551,5 +551,116 @@
   },
   "collapse": "Collapse",
   "minimize": "Minimize",
-  "debugCacheInfo": "Debug Cache Info"
+  "debugCacheInfo": "Debug Cache Info",
+  "pauseOnDisconnect": "Pause on Disconnect",
+  "pauseOnDisconnectSubtitle": "Pause playback when headphones or Bluetooth disconnect",
+  "resumeOnConnect": "Resume on Connect",
+  "resumeOnConnectSubtitle": "Automatically resume playback when reconnecting audio device",
+  "sleepTimerFadeOut": "Sleep Timer Fade Out",
+  "sleepTimerFadeOutSubtitle": "Gradually reduce volume before timer ends",
+  "finishCurrentSong": "Finish current song before sleeping",
+  "finishCurrentSongSubtitle": "Wait for currently playing song to finish before stopping",
+  "useMaterialYou": "Material You Dynamic Colors",
+  "useMaterialYouSubtitle": "Extract theme colors from your system wallpaper (Android 12+)",
+  "ambientGlow": "Ambient Glow",
+  "ambientGlowSubtitle": "Glow intensity on the now playing screen",
+  "glowOff": "Off",
+  "glowSubtle": "Subtle",
+  "glowVibrant": "Vibrant",
+  "glowImmersive": "Immersive",
+  "nowPlayingStyle": "Now Playing Style",
+  "nowPlayingStyleSubtitle": "Choose the visual design of the player screen",
+  "styleModern": "Modern Glow",
+  "styleVinyl": "Vinyl Turntable",
+  "styleMinimalist": "Minimalist",
+  "secondsAbbr": "{seconds}s",
+  "@secondsAbbr": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "selectedCount": "{count} selected",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAll": "Select All",
+  "deselectAll": "Deselect All",
+  "batchAddedToQueue": "Added {count} songs to queue",
+  "@batchAddedToQueue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "batchAddedToPlayNext": "Added {count} songs to play next",
+  "@batchAddedToPlayNext": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "batchAddedToPlaylist": "Added {count} songs to {playlist}",
+  "@batchAddedToPlaylist": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "playlist": {
+        "type": "String"
+      }
+    }
+  },
+  "batchFavorited": "Added {count} songs to favorites",
+  "@batchFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "batchUnfavorited": "Removed {count} songs from favorites",
+  "@batchUnfavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "batchRemovedFromPlaylist": "Removed {count} songs from {playlist}",
+  "@batchRemovedFromPlaylist": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "playlist": {
+        "type": "String"
+      }
+    }
+  },
+  "share": "Share",
+  "overriddenByMaterialYou": "Overridden by Material You wallpaper colors",
+  "dynamicThemeOverriddenTooltip": "Album art theming is inactive while Material You wallpaper colors are enabled",
+  "defaultColorOverriddenTooltip": "Custom color selection is inactive while Material You wallpaper colors are enabled",
+  "defaultColorFallbackSubtitle": "Fallback color when no song is playing or artwork color is neutral",
+  "defaultColorPrimarySubtitle": "Primary app theme accent color",
+  "themeColorsHeader": "Theme Colors & Accent",
+  "displayAndContrast": "Display & Contrast",
+  "playerScreenAesthetics": "Player Screen Aesthetics",
+  "wallpaperColorActive": "Wallpaper Palette Active",
+  "colorSourceMaterialYou": "Material You",
+  "colorSourceAlbumArt": "Album Art",
+  "colorSourceCustom": "Custom",
+  "colorSourceMaterialYouDesc": "Theme colors are extracted from your system wallpaper (Android 12+)",
+  "colorSourceAlbumArtDesc": "Theme colors dynamically adapt to the currently playing song's artwork",
+  "colorSourceCustomDesc": "Theme colors use your chosen static accent color",
+  "fallbackColorHeader": "Fallback Color (when no song is playing)",
+  "customColorHeader": "Choose Accent Color"
 }

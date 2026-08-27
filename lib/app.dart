@@ -667,6 +667,14 @@ class _SonoraAppState extends State<SonoraApp> {
             return ValueListenableBuilder<Color>(
               valueListenable: _playerProvider.themeColorNotifier,
               builder: (context, activeSeedColor, _) {
+                var seedColor = switch (_settingsProvider.themeColorSource) {
+                  ThemeColorSource.materialYou =>
+                    _settingsProvider.dynamicWallpaperColor ??
+                        _playerProvider.defaultThemeColor,
+                  ThemeColorSource.albumArt => activeSeedColor,
+                  ThemeColorSource.custom => _playerProvider.defaultThemeColor,
+                };
+
                 return AnnotatedRegion<SystemUiOverlayStyle>(
                   value: const SystemUiOverlayStyle(
                     systemNavigationBarColor: Colors.transparent,
@@ -681,12 +689,12 @@ class _SonoraAppState extends State<SonoraApp> {
                     supportedLocales: AppLocalizations.supportedLocales,
                     theme: AppTheme.getTheme(
                       Brightness.light,
-                      seedColor: activeSeedColor,
+                      seedColor: seedColor,
                       amoledDark: _settingsProvider.amoledDark,
                     ),
                     darkTheme: AppTheme.getTheme(
                       Brightness.dark,
-                      seedColor: activeSeedColor,
+                      seedColor: seedColor,
                       amoledDark: _settingsProvider.amoledDark,
                     ),
                     themeMode: _themeProvider.themeMode,

@@ -66,10 +66,35 @@ class PlaybackSettingsScreen extends StatelessWidget {
                         );
                       },
                     ),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.headset_off_rounded),
+                      title: Text(context.l10n.pauseOnDisconnect),
+                      subtitle: Text(context.l10n.pauseOnDisconnectSubtitle),
+                      value: settingsProvider.pauseOnDisconnect,
+                      onChanged: (val) {
+                        settingsProvider.setPauseOnDisconnect(
+                          val,
+                          playerProvider.audioHandler,
+                        );
+                      },
+                    ),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.headset_rounded),
+                      title: Text(context.l10n.resumeOnConnect),
+                      subtitle: Text(context.l10n.resumeOnConnectSubtitle),
+                      value: settingsProvider.resumeOnConnect,
+                      onChanged: (val) {
+                        settingsProvider.setResumeOnConnect(
+                          val,
+                          playerProvider.audioHandler,
+                        );
+                      },
+                    ),
                   ],
                 );
               },
             ),
+            const Divider(),
             ListenableBuilder(
               listenable: settingsProvider,
               builder: (context, _) {
@@ -101,6 +126,45 @@ class PlaybackSettingsScreen extends StatelessWidget {
                           }
                         },
                       ),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.volume_down_rounded),
+                      title: Text(context.l10n.sleepTimerFadeOut),
+                      subtitle: Text(context.l10n.sleepTimerFadeOutSubtitle),
+                      trailing: DropdownButton<int>(
+                        value: [0, 10, 30, 60].contains(
+                          settingsProvider.sleepTimerFadeOutSeconds,
+                        )
+                            ? settingsProvider.sleepTimerFadeOutSeconds
+                            : 10,
+                        underline: const SizedBox(),
+                        items: [0, 10, 30, 60]
+                            .map(
+                              (sec) => DropdownMenuItem<int>(
+                                value: sec,
+                                child: Text(
+                                  sec == 0
+                                      ? context.l10n.glowOff
+                                      : context.l10n.secondsAbbr(sec),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            settingsProvider.setSleepTimerFadeOutSeconds(val);
+                          }
+                        },
+                      ),
+                    ),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.music_note_rounded),
+                      title: Text(context.l10n.finishCurrentSong),
+                      subtitle: Text(context.l10n.finishCurrentSongSubtitle),
+                      value: settingsProvider.sleepTimerFinishSong,
+                      onChanged: (val) {
+                        settingsProvider.setSleepTimerFinishSong(val);
+                      },
                     ),
                     ListTile(
                       leading: const Icon(Icons.home_outlined),

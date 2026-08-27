@@ -26,6 +26,7 @@ class SleepTimerBottomSheet extends StatefulWidget {
 
 class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
   late double _selectedMinutes;
+  late bool _finishCurrentSong;
 
   static const _presetMinutes = [5, 10, 15, 20, 30, 45, 60];
 
@@ -35,6 +36,7 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
     var defaultMin = SettingsProvider.instance.sleepTimerDefaultMinutes
         .toDouble();
     _selectedMinutes = defaultMin.clamp(1.0, 60.0);
+    _finishCurrentSong = SettingsProvider.instance.sleepTimerFinishSong;
   }
 
   String _formatDuration(Duration d) {
@@ -295,7 +297,27 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                           }).toList(),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
+
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        secondary: const Icon(Icons.music_note_rounded),
+                        title: Text(context.l10n.finishCurrentSong),
+                        subtitle: Text(
+                          context.l10n.finishCurrentSongSubtitle,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        value: _finishCurrentSong,
+                        onChanged: (val) {
+                          setState(() {
+                            _finishCurrentSong = val;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
 
                       // Start Timer Button
                       SizedBox(
@@ -306,7 +328,10 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                             var duration = Duration(
                               minutes: _selectedMinutes.round(),
                             );
-                            widget.playerProvider.startSleepTimer(duration);
+                            widget.playerProvider.startSleepTimer(
+                              duration,
+                              finishSong: _finishCurrentSong,
+                            );
                             Navigator.pop(context);
                           },
                           icon: const Icon(Icons.play_arrow_rounded),

@@ -24,16 +24,12 @@ dependencies:
   go_router: ^17.5.0
   google_fonts: ^8.2.1
   http: ^1.6.0
-  image: ^4.9.2
   intl: ^0.20.2
   just_audio: ^0.10.6
   just_audio_windows: ^0.2.3
-  package_info_plus: ^10.2.1
   path_provider: ^2.1.5
   permission_handler: ^13.0.1
-  share_plus: ^13.3.0
   shared_preferences: ^2.5.5
-  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_launcher_icons: "^0.14.4"

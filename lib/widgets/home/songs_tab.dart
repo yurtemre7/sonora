@@ -15,6 +15,9 @@ class SongsTab extends StatelessWidget {
     required this.onConfigureFolder,
     required this.onUnfocusSearch,
     required this.syncPromptBanner,
+    this.selectedSongIds = const {},
+    this.onToggleSelect,
+    this.onLongPressSong,
   });
 
   final List<Song> allSongs;
@@ -25,6 +28,9 @@ class SongsTab extends StatelessWidget {
   final VoidCallback onConfigureFolder;
   final VoidCallback onUnfocusSearch;
   final Widget syncPromptBanner;
+  final Set<int> selectedSongIds;
+  final ValueChanged<Song>? onToggleSelect;
+  final ValueChanged<Song>? onLongPressSong;
 
   @override
   Widget build(BuildContext context) {
@@ -120,11 +126,17 @@ class SongsTab extends StatelessWidget {
                         var song = filteredSongs[index];
                         var isCurrent =
                             currentSong != null && currentSong.id == song.id;
+                        var isSelecting = selectedSongIds.isNotEmpty;
+                        var isSelected = selectedSongIds.contains(song.id);
                         return SongTile(
                           song: song,
                           playerProvider: playerProvider,
                           isCurrent: isCurrent,
                           showDivider: index < filteredSongs.length - 1,
+                          isSelecting: isSelecting,
+                          isSelected: isSelected,
+                          onSelect: () => onToggleSelect?.call(song),
+                          onLongPress: () => onLongPressSong?.call(song),
                           onTap: () {
                             onUnfocusSearch();
                             playerProvider.playSong(song, filteredSongs);

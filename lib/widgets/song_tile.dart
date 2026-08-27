@@ -19,6 +19,9 @@ class SongTile extends StatelessWidget {
     this.isCurrent = false,
     this.showHighlightBackground = true,
     this.showDivider = false,
+    this.isSelecting = false,
+    this.isSelected = false,
+    this.onSelect,
   });
 
   final Song song;
@@ -34,22 +37,30 @@ class SongTile extends StatelessWidget {
   final bool isCurrent;
   final bool showHighlightBackground;
   final bool showDivider;
+  final bool isSelecting;
+  final bool isSelected;
+  final VoidCallback? onSelect;
 
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+
+    var isHighlighted = isSelected || (isCurrent && showHighlightBackground && !isSelecting);
+    var backgroundColor = isSelected
+        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.35)
+        : (isCurrent && showHighlightBackground && !isSelecting
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
+            : Colors.transparent);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           decoration: BoxDecoration(
-            color: isCurrent && showHighlightBackground
-                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
-                : Colors.transparent,
+            color: backgroundColor,
             border: Border(
               left: BorderSide(
-                color: isCurrent && showHighlightBackground
+                color: isHighlighted
                     ? theme.colorScheme.primary
                     : Colors.transparent,
                 width: 3.5,
@@ -57,17 +68,43 @@ class SongTile extends StatelessWidget {
             ),
           ),
           child: InkWell(
-            onTap: onTap,
-            onLongPress: onLongPress,
+            onTap: isSelecting ? (onSelect ?? onTap) : onTap,
+            onLongPress: isSelecting ? (onSelect ?? onTap) : onLongPress,
             borderRadius: BorderRadius.circular(12),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 children: [
-                  AlbumArt(
-                    artworkPath: song.artworkPath,
-                    size: 48,
-                    borderRadius: 10,
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      AlbumArt(
+                        artworkPath: song.artworkPath,
+                        size: 48,
+                        borderRadius: 10,
+                      ),
+                      if (isSelecting)
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? theme.colorScheme.primary.withValues(alpha: 0.85)
+                                : Colors.black.withValues(alpha: 0.45),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            isSelected
+                                ? Icons.check_circle_rounded
+                                : Icons.radio_button_unchecked_rounded,
+                            color: isSelected
+                                ? theme.colorScheme.onPrimary
+                                : Colors.white.withValues(alpha: 0.85),
+                            size: 24,
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -79,7 +116,9 @@ class SongTile extends StatelessWidget {
                           song.displayTitle,
                           style: theme.textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: isCurrent ? theme.colorScheme.primary : null,
+                            color: (isCurrent && !isSelecting)
+                                ? theme.colorScheme.primary
+                                : null,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -88,7 +127,7 @@ class SongTile extends StatelessWidget {
                         Text(
                           song.artist,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isCurrent
+                            color: (isCurrent && !isSelecting)
                                 ? theme.colorScheme.primary.withValues(
                                     alpha: 0.7,
                                   )
@@ -104,15 +143,16 @@ class SongTile extends StatelessWidget {
                   Text(
                     song.durationFormatted,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isCurrent
+                      color: (isCurrent && !isSelecting)
                           ? theme.colorScheme.primary.withValues(alpha: 0.7)
                           : theme.colorScheme.onSurfaceVariant,
-                      fontWeight: isCurrent
+                      fontWeight: (isCurrent && !isSelecting)
                           ? FontWeight.w600
                           : FontWeight.normal,
                     ),
                   ),
-                  if (!hideMenu &&
+                  if (!isSelecting &&
+                      !hideMenu &&
                       (playerProvider != null ||
                           onRemoveFromPlaylist != null)) ...[
                     const SizedBox(width: 4),

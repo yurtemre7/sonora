@@ -4,6 +4,8 @@ All notable changes to the Sonora music player project are documented in this fi
 
 ## [1.18.4] - 2026-08-23
 ### Added
+* Add unit and widget tests for lyrics parsing, models, format utils, dialogs, sliders, and M3U import/export
+* Add multi-select batch actions for songs (play next, add to queue, add to playlist, favorite, and share)
 * Add open file folder action in song info sheet
 * Show duration change in the mfx settings
 ### Fixed

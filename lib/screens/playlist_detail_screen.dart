@@ -3,18 +3,20 @@ import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
+import 'package:sonora/services/native_bridge.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/utils/image_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/edit_playlist_description_dialog.dart';
+import 'package:sonora/widgets/multi_select_action_bar.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -54,6 +56,37 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
   late List<Key> _itemKeys;
   final _scrollController = ScrollController();
   late Playlist _playlist;
+  final Set<int> _selectedSongIds = {};
+
+  void _toggleSongSelection(Song song) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      if (_selectedSongIds.contains(song.id)) {
+        _selectedSongIds.remove(song.id);
+      } else {
+        _selectedSongIds.add(song.id);
+      }
+    });
+  }
+
+  void _onLongPressSong(Song song) {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _selectedSongIds.add(song.id);
+    });
+  }
+
+  void _selectAllSongs(List<Song> songs) {
+    setState(() {
+      _selectedSongIds.addAll(songs.map((s) => s.id));
+    });
+  }
+
+  void _clearSongSelection() {
+    setState(() {
+      _selectedSongIds.clear();
+    });
+  }
 
   @override
   void initState() {
@@ -146,27 +179,37 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
 
         var firstSong = _playlistSongs.isNotEmpty ? _playlistSongs.first : null;
         var creatorLabel = _playlist.description ?? l10n.yourOwnPlaylist;
+        var selectedSongsList = _playlistSongs
+            .where((s) => _selectedSongIds.contains(s.id))
+            .toList();
 
-        return Scaffold(
-          body: Stack(
-            children: [
-              if (_playlist.coverImagePath != null ||
-                  firstSong?.artworkPath != null)
-                Positioned.fill(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: ResizeImage(
-                            FileImage(
-                              File(
-                                _playlist.coverImagePath ??
-                                    firstSong!.artworkPath!,
+        return PopScope(
+          canPop: _selectedSongIds.isEmpty,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) {
+              _clearSongSelection();
+            }
+          },
+          child: Scaffold(
+            body: Stack(
+              children: [
+                if (_playlist.coverImagePath != null ||
+                    firstSong?.artworkPath != null)
+                  Positioned.fill(
+                    child: ImageFiltered(
+                      imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: ResizeImage(
+                              FileImage(
+                                File(
+                                  _playlist.coverImagePath ??
+                                      firstSong!.artworkPath!,
+                                ),
                               ),
+                              width: 120,
                             ),
-                            width: 120,
-                          ),
                           fit: BoxFit.cover,
                           opacity: 0.15,
                         ),
@@ -221,11 +264,9 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                               var file = await widget.playerProvider
                                   .exportPlaylistToM3u(_playlist);
                               if (file != null) {
-                                await SharePlus.instance.share(
-                                  ShareParams(
-                                    files: [XFile(file.path)],
-                                    text: exportedMsg,
-                                  ),
+                                await NativeBridge.shareFiles(
+                                  [file.path],
+                                  text: exportedMsg,
                                 );
                               } else {
                                 if (!context.mounted) return;
@@ -558,6 +599,9 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                           var isCurrent =
                               widget.playerProvider.currentSong?.id == song.id;
 
+                          var isSelecting = _selectedSongIds.isNotEmpty;
+                          var isSelected = _selectedSongIds.contains(song.id);
+
                           return ReorderableDelayedDragStartListener(
                             key: _itemKeys[index],
                             index: index,
@@ -565,7 +609,9 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                               key: ValueKey(
                                 'dismiss_${_itemKeys[index].hashCode}',
                               ),
-                              direction: DismissDirection.endToStart,
+                              direction: isSelecting
+                                  ? DismissDirection.none
+                                  : DismissDirection.endToStart,
                               background: Container(
                                 alignment: Alignment.centerRight,
                                 padding: const EdgeInsets.symmetric(
@@ -597,6 +643,10 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                 playerProvider: widget.playerProvider,
                                 isCurrent: isCurrent,
                                 showDivider: index < _playlistSongs.length - 1,
+                                isSelecting: isSelecting,
+                                isSelected: isSelected,
+                                onSelect: () => _toggleSongSelection(song),
+                                onLongPress: () => _onLongPressSong(song),
                                 onTap: () {
                                   widget.playerProvider.playSong(
                                     song,
@@ -627,10 +677,29 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                     ),
                 ],
               ),
+              if (_selectedSongIds.isNotEmpty)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: MultiSelectActionBar(
+                    selectedSongs: selectedSongsList,
+                    allAvailableSongs: _playlistSongs,
+                    playerProvider: widget.playerProvider,
+                    playlistId: _playlist.id,
+                    playlistName: _playlist.name,
+                    onClearSelection: _clearSongSelection,
+                    onSelectAll: () => _selectAllSongs(_playlistSongs),
+                    bottomPadding: widget.playerProvider.currentSong != null
+                        ? 80.0
+                        : 16.0,
+                  ),
+                ),
             ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 }

@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
@@ -11,6 +13,7 @@ import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
+import 'package:sonora/widgets/multi_select_action_bar.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -36,6 +39,37 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   Timer? _autoScrollTimer;
   var _isAutoScrolling = true;
   var _scrollPosition = 0.0;
+  final Set<int> _selectedSongIds = {};
+
+  void _toggleSongSelection(Song song) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      if (_selectedSongIds.contains(song.id)) {
+        _selectedSongIds.remove(song.id);
+      } else {
+        _selectedSongIds.add(song.id);
+      }
+    });
+  }
+
+  void _onLongPressSong(Song song) {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _selectedSongIds.add(song.id);
+    });
+  }
+
+  void _selectAllSongs(List<Song> songs) {
+    setState(() {
+      _selectedSongIds.addAll(songs.map((s) => s.id));
+    });
+  }
+
+  void _clearSongSelection() {
+    setState(() {
+      _selectedSongIds.clear();
+    });
+  }
 
   @override
   void initState() {
@@ -159,261 +193,361 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           return sortAsc ? cmp : -cmp;
         });
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(context.l10n.favorites),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.sort_rounded),
-                onPressed: () => _showSortBottomSheet(context),
-              ),
-            ],
-          ),
-          body: CustomScrollView(
-            slivers: [
-              if (favArtists.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      top: 16,
-                      bottom: 8,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          context.l10n.artists,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${favArtists.length}',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+        var selectedSongsList = favSongs
+            .where((s) => _selectedSongIds.contains(s.id))
+            .toList();
+
+        return PopScope(
+          canPop: _selectedSongIds.isEmpty,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) {
+              _clearSongSelection();
+            }
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(context.l10n.favorites),
+              centerTitle: true,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.sort_rounded),
+                  onPressed: () => _showSortBottomSheet(context),
                 ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: favArtists.length,
-                      itemBuilder: (context, index) {
-                        var artist = favArtists[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ArtistDetailScreen(
-                                    artist: artist,
-                                    playerProvider: widget.playerProvider,
+              ],
+            ),
+            body: Stack(
+              children: [
+                CustomScrollView(
+                  slivers: [
+                    if (favArtists.isNotEmpty) ...[
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            top: 16,
+                            bottom: 8,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                context.l10n.artists,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                context.l10n.artistCount(favArtists.length),
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: 140,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            itemCount: favArtists.length,
+                            itemBuilder: (context, index) {
+                              var artist = favArtists[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ArtistDetailScreen(
+                                          artist: artist,
+                                          playerProvider: widget.playerProvider,
+                                          allSongs: widget.allSongs,
+                                          allAlbums: widget.allAlbums,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: 100,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 4,
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        ArtistAvatar(
+                                          artist: artist,
+                                          radius: 34,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          artist.name,
+                                          style: theme.textTheme.labelMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        Text(
+                                          context.l10n.songCount(
+                                            artist.songs.length,
+                                          ),
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                                fontSize: 11,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
                             },
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ArtistAvatar(artist: artist, radius: 36),
-                                const SizedBox(height: 8),
-                                SizedBox(
-                                  width: 72,
-                                  child: Text(
-                                    artist.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.bodySmall,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
+                        ),
+                      ),
+                    ],
 
-              if (favAlbums.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      top: 16,
-                      bottom: 8,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          context.l10n.albums,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                    if (favAlbums.isNotEmpty) ...[
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            top: 16,
+                            bottom: 8,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                context.l10n.albums,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                context.l10n.albumCount(favAlbums.length),
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${favAlbums.length}',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Listener(
-                    onPointerDown: (_) => _isAutoScrolling = false,
-                    onPointerUp: (_) => _isAutoScrolling = true,
-                    child: SizedBox(
-                      height: 160,
-                      child: ListView.builder(
-                        controller: _albumScrollController,
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: favAlbums.length,
-                        itemBuilder: (context, index) {
-                          var album = favAlbums[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 16),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => AlbumDetailScreen(
-                                      album: album,
-                                      playerProvider: widget.playerProvider,
+                      ),
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: 180,
+                          child: NotificationListener<UserScrollNotification>(
+                            onNotification: (notification) {
+                              if (notification.direction !=
+                                  ScrollDirection.idle) {
+                                if (_isAutoScrolling) {
+                                  setState(() => _isAutoScrolling = false);
+                                  _autoScrollTimer?.cancel();
+                                }
+                              }
+                              return false;
+                            },
+                            child: ListView.builder(
+                              controller: _albumScrollController,
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              itemCount: favAlbums.length,
+                              itemBuilder: (context, index) {
+                                var album = favAlbums[index];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(16),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => AlbumDetailScreen(
+                                            album: album,
+                                            playerProvider:
+                                                widget.playerProvider,
+                                            allSongs: widget.allSongs,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      width: 120,
+                                      padding: const EdgeInsets.all(8),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          AlbumArt(
+                                            artworkPath: album.songs.first.artworkPath,
+                                            size: 104,
+                                            borderRadius: 12,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            album.name,
+                                            style: theme.textTheme.labelMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            album.artist,
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                                  fontSize: 11,
+                                                ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );
                               },
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  AlbumArt(
-                                    artworkPath: album.songs.first.artworkPath,
-                                    size: 120,
-                                    borderRadius: 12,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  SizedBox(
-                                    width: 120,
-                                    child: Text(
-                                      album.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
-                          );
-                        },
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-              ],
+                    ],
 
-              if (favSongs.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      top: 16,
-                      bottom: 8,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          context.l10n.songs,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                    if (favSongs.isNotEmpty) ...[
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            top: 16,
+                            bottom: 8,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                context.l10n.songs,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${context.l10n.songCount(favSongs.length)} • ${formatTotalDuration(favSongs)}',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${context.l10n.songCount(favSongs.length)} • ${formatTotalDuration(favSongs)}',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          var song = favSongs[index];
+                          var isCurrent =
+                              widget.playerProvider.currentSong?.id == song.id;
+                          var isSelecting = _selectedSongIds.isNotEmpty;
+                          var isSelected = _selectedSongIds.contains(song.id);
+                          return SongTile(
+                            song: song,
+                            playerProvider: widget.playerProvider,
+                            isCurrent: isCurrent,
+                            showDivider: index < favSongs.length - 1,
+                            isSelecting: isSelecting,
+                            isSelected: isSelected,
+                            onSelect: () => _toggleSongSelection(song),
+                            onLongPress: () => _onLongPressSong(song),
+                            onTap: () =>
+                                widget.playerProvider.playSong(song, favSongs),
+                          );
+                        }, childCount: favSongs.length),
+                      ),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: 100),
+                      ),
+                    ],
+
+                    if (favArtists.isEmpty &&
+                        favAlbums.isEmpty &&
+                        favSongs.isEmpty)
+                      SliverFillRemaining(
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.favorite_border_rounded,
+                                size: 64,
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.5),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                context.l10n.noFavoritesYet,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                  ],
                 ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    var song = favSongs[index];
-                    var isCurrent =
-                        widget.playerProvider.currentSong?.id == song.id;
-                    return SongTile(
-                      song: song,
+                if (_selectedSongIds.isNotEmpty)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: MultiSelectActionBar(
+                      selectedSongs: selectedSongsList,
+                      allAvailableSongs: favSongs,
                       playerProvider: widget.playerProvider,
-                      isCurrent: isCurrent,
-                      showDivider: index < favSongs.length - 1,
-                      onTap: () =>
-                          widget.playerProvider.playSong(song, favSongs),
-                    );
-                  }, childCount: favSongs.length),
-                ),
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 100),
-                ), // padding at bottom
-              ],
-
-              if (favArtists.isEmpty && favAlbums.isEmpty && favSongs.isEmpty)
-                SliverFillRemaining(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.favorite_border_rounded,
-                          size: 64,
-                          color: theme.colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          context.l10n.noFavoritesYet,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+                      onClearSelection: _clearSongSelection,
+                      onSelectAll: () => _selectAllSongs(favSongs),
+                      bottomPadding:
+                          widget.playerProvider.currentSong != null
+                              ? 80.0
+                              : 16.0,
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         );
       },

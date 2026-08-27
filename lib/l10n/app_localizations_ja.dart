@@ -217,10 +217,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get download => 'ダウンロード';
 
   @override
-  String get dynamicTheme => 'ダイナミックテーマ（Material You）';
+  String get dynamicTheme => 'ダイナミックテーマ（アルバムアート）';
 
   @override
-  String get dynamicThemeSubtitle => '現在のアルバムアートに合わせてアプリのテーマを自動調整します';
+  String get dynamicThemeSubtitle => '再生中のアルバムアートに合わせてアプリのテーマを自動調整します';
 
   @override
   String get editDescription => '説明を編集';
@@ -1159,4 +1159,171 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get debugCacheInfo => 'デバッグキャッシュ情報';
+
+  @override
+  String get pauseOnDisconnect => '切断時に一時停止';
+
+  @override
+  String get pauseOnDisconnectSubtitle => 'ヘッドフォンやBluetoothが切断されたときに再生を一時停止します';
+
+  @override
+  String get resumeOnConnect => '再接続時に再開';
+
+  @override
+  String get resumeOnConnectSubtitle => 'オーディオ機器の再接続時に自動的に再生を再開します';
+
+  @override
+  String get sleepTimerFadeOut => 'スリープタイマーのフェードアウト';
+
+  @override
+  String get sleepTimerFadeOutSubtitle => 'タイマー終了前に徐々に音量を下げます';
+
+  @override
+  String get finishCurrentSong => 'スリープ前に現在の曲を最後まで再生';
+
+  @override
+  String get finishCurrentSongSubtitle => '停止する前に再生中の曲が終わるのを待ちます';
+
+  @override
+  String get useMaterialYou => 'Material You ダイナミックカラー';
+
+  @override
+  String get useMaterialYouSubtitle => 'システム壁紙からテーマカラーを抽出します（Android 12以降）';
+
+  @override
+  String get ambientGlow => 'アンビエントグロー';
+
+  @override
+  String get ambientGlowSubtitle => '再生中画面のグローの強さ';
+
+  @override
+  String get glowOff => 'オフ';
+
+  @override
+  String get glowSubtle => '控えめ';
+
+  @override
+  String get glowVibrant => '鮮やか';
+
+  @override
+  String get glowImmersive => '没入感';
+
+  @override
+  String get nowPlayingStyle => '再生中画面のスタイル';
+
+  @override
+  String get nowPlayingStyleSubtitle => 'プレーヤー画面のデザインを選択します';
+
+  @override
+  String get styleModern => 'モダングロー';
+
+  @override
+  String get styleVinyl => 'レコード盤';
+
+  @override
+  String get styleMinimalist => 'ミニマリスト';
+
+  @override
+  String secondsAbbr(int seconds) {
+    return '$seconds秒';
+  }
+
+  @override
+  String selectedCount(int count) {
+    return '$count曲 選択中';
+  }
+
+  @override
+  String get selectAll => 'すべて選択';
+
+  @override
+  String get deselectAll => '選択を解除';
+
+  @override
+  String batchAddedToQueue(int count) {
+    return '$count曲をキューに追加しました';
+  }
+
+  @override
+  String batchAddedToPlayNext(int count) {
+    return '$count曲を次に再生に追加しました';
+  }
+
+  @override
+  String batchAddedToPlaylist(int count, String playlist) {
+    return '$count曲を「$playlist」に追加しました';
+  }
+
+  @override
+  String batchFavorited(int count) {
+    return '$count曲をお気に入りに追加しました';
+  }
+
+  @override
+  String batchUnfavorited(int count) {
+    return '$count曲をお気に入りから削除しました';
+  }
+
+  @override
+  String batchRemovedFromPlaylist(int count, String playlist) {
+    return '$count曲を「$playlist」から削除しました';
+  }
+
+  @override
+  String get share => '共有';
+
+  @override
+  String get overriddenByMaterialYou => 'Material You（壁紙カラー）により無効化されています';
+
+  @override
+  String get dynamicThemeOverriddenTooltip =>
+      'Material You壁紙カラーが有効な間、アルバムアートテーマは無効になります';
+
+  @override
+  String get defaultColorOverriddenTooltip =>
+      'Material You壁紙カラーが有効な間、アクセントカラーの選択は無効になります';
+
+  @override
+  String get defaultColorFallbackSubtitle =>
+      '曲が再生されていない場合やアルバム色がニュートラルの時に使用されます';
+
+  @override
+  String get defaultColorPrimarySubtitle => 'アプリのメインテーマカラー';
+
+  @override
+  String get themeColorsHeader => 'テーマカラーとアクセント';
+
+  @override
+  String get displayAndContrast => 'ディスプレイとコントラスト';
+
+  @override
+  String get playerScreenAesthetics => '再生画面の表示設定';
+
+  @override
+  String get wallpaperColorActive => '壁紙パレット適用中';
+
+  @override
+  String get colorSourceMaterialYou => 'Material You';
+
+  @override
+  String get colorSourceAlbumArt => 'アルバム';
+
+  @override
+  String get colorSourceCustom => 'カスタム';
+
+  @override
+  String get colorSourceMaterialYouDesc =>
+      'システムの壁紙からテーマカラーを抽出します（Android 12以降）';
+
+  @override
+  String get colorSourceAlbumArtDesc => '再生中のアルバムアートに合わせてテーマカラーを自動調整します';
+
+  @override
+  String get colorSourceCustomDesc => '選択したアクセントカラーを常に使用します';
+
+  @override
+  String get fallbackColorHeader => '待機時のフォールバックカラー';
+
+  @override
+  String get customColorHeader => 'アクセントカラーの選択';
 }

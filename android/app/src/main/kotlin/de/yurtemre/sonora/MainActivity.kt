@@ -88,6 +88,105 @@ class MainActivity : AudioServiceActivity() {
                         result.error("INSTALL_ERROR", e.message, null)
                     }
                 }
+                "openUrl" -> {
+                    val url = call.argument<String>("url")
+                    if (url.isNullOrBlank()) {
+                        result.success(false)
+                        return@setMethodCallHandler
+                    }
+                    try {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                        startActivity(intent)
+                        result.success(true)
+                    } catch (_: Exception) {
+                        result.success(false)
+                    }
+                }
+                "getPackageInfo" -> {
+                    try {
+                        val pInfo = packageManager.getPackageInfo(packageName, 0)
+                        val versionName = pInfo.versionName ?: "1.0.0"
+                        val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            pInfo.longVersionCode
+                        } else {
+                            @Suppress("DEPRECATION")
+                            pInfo.versionCode.toLong()
+                        }
+                        result.success(mapOf(
+                            "appName" to "Sonora",
+                            "packageName" to packageName,
+                            "version" to versionName,
+                            "buildNumber" to versionCode.toString()
+                        ))
+                    } catch (e: Exception) {
+                        result.error("PACKAGE_INFO_ERROR", e.message, null)
+                    }
+                }
+                "shareFiles" -> {
+                    val filePaths = call.argument<List<String>>("filePaths")
+                    val text = call.argument<String>("text")
+                    val title = call.argument<String>("title") ?: "Share"
+
+                    if (filePaths.isNullOrEmpty()) {
+                        result.success(false)
+                        return@setMethodCallHandler
+                    }
+
+                    try {
+                        val context = applicationContext
+                        val uris = ArrayList<Uri>()
+                        for (path in filePaths) {
+                            val file = File(path)
+                            if (file.exists()) {
+                                val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                    androidx.core.content.FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.fileprovider",
+                                        file
+                                    )
+                                } else {
+                                    Uri.fromFile(file)
+                                }
+                                uris.add(uri)
+                            }
+                        }
+
+                        if (uris.isEmpty()) {
+                            result.success(false)
+                            return@setMethodCallHandler
+                        }
+
+                        val intent = if (uris.size == 1) {
+                            android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                type = "*/*"
+                                putExtra(android.content.Intent.EXTRA_STREAM, uris[0])
+                                if (!text.isNullOrBlank()) {
+                                    putExtra(android.content.Intent.EXTRA_TEXT, text)
+                                }
+                                flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            }
+                        } else {
+                            android.content.Intent(android.content.Intent.ACTION_SEND_MULTIPLE).apply {
+                                type = "*/*"
+                                putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, uris)
+                                if (!text.isNullOrBlank()) {
+                                    putExtra(android.content.Intent.EXTRA_TEXT, text)
+                                }
+                                flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            }
+                        }
+
+                        val chooser = android.content.Intent.createChooser(intent, title).apply {
+                            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                        startActivity(chooser)
+                        result.success(true)
+                    } catch (_: Exception) {
+                        result.success(false)
+                    }
+                }
                 else -> result.notImplemented()
             }
         }
@@ -119,6 +218,67 @@ class MainActivity : AudioServiceActivity() {
                     }
                     val opened = openFileFolder(filePath)
                     result.success(opened)
+                }
+                "getDynamicWallpaperColor" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        try {
+                            val color = getColor(android.R.color.system_accent1_600)
+                            result.success(color)
+                        } catch (e: Exception) {
+                            result.success(null)
+                        }
+                    } else {
+                        result.success(null)
+                    }
+                }
+                "cropAndResizeImage" -> {
+                    val sourcePath = call.argument<String>("sourcePath")
+                    val targetPath = call.argument<String>("targetPath")
+                    val targetSize = call.argument<Int>("targetSize") ?: 512
+                    val quality = call.argument<Int>("quality") ?: 85
+
+                    if (sourcePath == null || targetPath == null) {
+                        result.success(false)
+                        return@setMethodCallHandler
+                    }
+
+                    Thread {
+                        try {
+                            val srcFile = File(sourcePath)
+                            if (!srcFile.exists()) {
+                                runOnUiThread { result.success(false) }
+                                return@Thread
+                            }
+                            val bitmap = android.graphics.BitmapFactory.decodeFile(sourcePath)
+                            if (bitmap == null) {
+                                runOnUiThread { result.success(false) }
+                                return@Thread
+                            }
+
+                            val width = bitmap.width
+                            val height = bitmap.height
+                            val cropSize = if (width < height) width else height
+                            val offsetX = (width - cropSize) / 2
+                            val offsetY = (height - cropSize) / 2
+
+                            val cropped = android.graphics.Bitmap.createBitmap(bitmap, offsetX, offsetY, cropSize, cropSize)
+                            val scaled = if (cropSize > targetSize) {
+                                android.graphics.Bitmap.createScaledBitmap(cropped, targetSize, targetSize, true)
+                            } else {
+                                cropped
+                            }
+
+                            val outFile = File(targetPath)
+                            outFile.parentFile?.mkdirs()
+                            FileOutputStream(outFile).use { out ->
+                                scaled.compress(android.graphics.Bitmap.CompressFormat.JPEG, quality, out)
+                            }
+
+                            runOnUiThread { result.success(true) }
+                        } catch (_: Exception) {
+                            runOnUiThread { result.success(false) }
+                        }
+                    }.start()
                 }
                 else -> result.notImplemented()
             }

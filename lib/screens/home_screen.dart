@@ -4,12 +4,14 @@ import 'package:animations/animations.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/screens/favorites_screen.dart';
+import 'package:sonora/services/library_search_index.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
@@ -18,6 +20,7 @@ import 'package:sonora/widgets/home/albums_tab.dart';
 import 'package:sonora/widgets/home/artists_tab.dart';
 import 'package:sonora/widgets/home/playlists_tab.dart';
 import 'package:sonora/widgets/home/songs_tab.dart';
+import 'package:sonora/widgets/multi_select_action_bar.dart';
 import 'package:sonora/widgets/update_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -79,6 +82,8 @@ class _HomeScreenState extends State<HomeScreen>
   var _artistSortAscending = true;
   var _playlistSortBy = 'name';
   var _playlistSortAscending = true;
+  final _searchIndex = LibrarySearchIndex();
+  final Set<int> _selectedSongIds = {};
 
   @override
   void initState() {
@@ -97,6 +102,9 @@ class _HomeScreenState extends State<HomeScreen>
       initialIndex: SettingsProvider.instance.defaultStartPage,
     );
     _tabController.addListener(() {
+      if (_selectedSongIds.isNotEmpty) {
+        _clearSongSelection();
+      }
       if (mounted) setState(() {});
     });
 
@@ -104,9 +112,61 @@ class _HomeScreenState extends State<HomeScreen>
       if (mounted) setState(() {});
     });
 
+    _rebuildSearchIndex();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkUpdateAutomatically();
     });
+  }
+
+  void _toggleSongSelection(Song song) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      if (_selectedSongIds.contains(song.id)) {
+        _selectedSongIds.remove(song.id);
+      } else {
+        _selectedSongIds.add(song.id);
+      }
+    });
+  }
+
+  void _onLongPressSong(Song song) {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _selectedSongIds.add(song.id);
+    });
+  }
+
+  void _selectAllSongs(List<Song> songs) {
+    setState(() {
+      _selectedSongIds.addAll(songs.map((s) => s.id));
+    });
+  }
+
+  void _clearSongSelection() {
+    setState(() {
+      _selectedSongIds.clear();
+    });
+  }
+
+  @override
+  void didUpdateWidget(HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.songs != oldWidget.songs ||
+        widget.playerProvider.cachedAlbums !=
+            oldWidget.playerProvider.cachedAlbums ||
+        widget.playerProvider.cachedArtists !=
+            oldWidget.playerProvider.cachedArtists) {
+      _rebuildSearchIndex();
+    }
+  }
+
+  void _rebuildSearchIndex() {
+    _searchIndex.buildIndex(
+      songs: widget.songs,
+      albums: _getAlbums(),
+      artists: _getArtists(),
+    );
   }
 
   Future<void> _checkUpdateAutomatically() async {
@@ -138,93 +198,86 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   List<Song> _getFilteredSongs() {
-    // Pre-compute the query lowercase once — not once per element in where().
-    var query = _searchQuery.isEmpty ? '' : _searchQuery.toLowerCase();
-
-    var filtered = query.isEmpty
-        ? widget.songs
-        : widget.songs.where((song) {
-            return song.titleLower.contains(query) ||
-                song.artistLower.contains(query) ||
-                song.albumLower.contains(query);
-          }).toList();
-
-    filtered.sort((a, b) {
-      int comparison;
-      if (_songSortBy == 'artist') {
-        comparison = a.artistLower.compareTo(b.artistLower);
-        if (comparison == 0) {
-          comparison = a.titleLower.compareTo(b.titleLower);
-        }
-      } else if (_songSortBy == 'duration') {
-        comparison = a.duration.compareTo(b.duration);
-        if (comparison == 0) {
-          comparison = a.titleLower.compareTo(b.titleLower);
-        }
-      } else if (_songSortBy == 'recent') {
-        var aTime = a.lastModifiedMs ?? 0;
-        var bTime = b.lastModifiedMs ?? 0;
-        comparison = bTime.compareTo(aTime);
-        if (comparison == 0) {
-          comparison = a.titleLower.compareTo(b.titleLower);
-        }
-      } else {
-        comparison = a.titleLower.compareTo(b.titleLower);
-      }
-
-      if (comparison == 0) {
-        comparison = a.id.compareTo(b.id);
-      }
-      return _songSortAscending ? comparison : -comparison;
-    });
-
-    return filtered;
+    return _searchIndex.searchSongs(
+      _searchQuery,
+      sortBy: _songSortBy,
+      ascending: _songSortAscending,
+    );
   }
 
   List<AlbumGroup> _getFilteredAlbums() {
-    var albums = _getAlbums();
-    if (_searchQuery.isNotEmpty) {
-      var query = _searchQuery.toLowerCase();
-      albums = albums
-          .where(
-            (a) => a.nameLower.contains(query) || a.artistLower.contains(query),
-          )
-          .toList();
-    }
-    albums.sort((a, b) {
-      int cmp;
-      if (_albumSortBy == 'artist') {
-        cmp = a.artistLower.compareTo(b.artistLower);
-      } else if (_albumSortBy == 'tracks') {
-        cmp = a.songs.length.compareTo(b.songs.length);
-      } else if (_albumSortBy == 'recent') {
-        cmp = a.latestModifiedMs.compareTo(b.latestModifiedMs);
-      } else {
-        cmp = a.nameLower.compareTo(b.nameLower);
-      }
-      return _albumSortAscending ? cmp : -cmp;
-    });
-    return albums;
+    return _searchIndex.searchAlbums(
+      _searchQuery,
+      allAlbums: _getAlbums(),
+      sortBy: _albumSortBy,
+      ascending: _albumSortAscending,
+    );
   }
 
   List<ArtistGroup> _getFilteredArtists() {
-    var artists = _getArtists();
-    if (_searchQuery.isNotEmpty) {
-      var query = _searchQuery.toLowerCase();
-      artists = artists.where((a) => a.nameLower.contains(query)).toList();
+    return _searchIndex.searchArtists(
+      _searchQuery,
+      allArtists: _getArtists(),
+      sortBy: _artistSortBy,
+      ascending: _artistSortAscending,
+    );
+  }
+
+  String _getScrollSection(
+    double percentage, {
+    required List<Song> filteredSongs,
+    required List<AlbumGroup> filteredAlbums,
+    required List<ArtistGroup> filteredArtists,
+    required List<Playlist> filteredPlaylists,
+  }) {
+    switch (_tabController.index) {
+      case 0:
+        if (filteredSongs.isEmpty) return '';
+        var idx = (percentage * (filteredSongs.length - 1))
+            .round()
+            .clamp(0, filteredSongs.length - 1);
+        var song = filteredSongs[idx];
+        if (_songSortBy == 'artist') {
+          return _extractSectionLetter(song.artist);
+        } else if (_songSortBy == 'duration') {
+          return '${song.duration.inMinutes}m';
+        }
+        return _extractSectionLetter(song.title);
+      case 1:
+        if (filteredAlbums.isEmpty) return '';
+        var idx = (percentage * (filteredAlbums.length - 1))
+            .round()
+            .clamp(0, filteredAlbums.length - 1);
+        var album = filteredAlbums[idx];
+        if (_albumSortBy == 'artist') {
+          return _extractSectionLetter(album.artist);
+        }
+        return _extractSectionLetter(album.name);
+      case 2:
+        if (filteredArtists.isEmpty) return '';
+        var idx = (percentage * (filteredArtists.length - 1))
+            .round()
+            .clamp(0, filteredArtists.length - 1);
+        return _extractSectionLetter(filteredArtists[idx].name);
+      case 3:
+        if (filteredPlaylists.isEmpty) return '';
+        var idx = (percentage * (filteredPlaylists.length - 1))
+            .round()
+            .clamp(0, filteredPlaylists.length - 1);
+        return _extractSectionLetter(filteredPlaylists[idx].name);
+      default:
+        return '';
     }
-    artists.sort((a, b) {
-      int cmp;
-      if (_artistSortBy == 'albums') {
-        cmp = a.albums.length.compareTo(b.albums.length);
-      } else if (_artistSortBy == 'songs') {
-        cmp = a.songs.length.compareTo(b.songs.length);
-      } else {
-        cmp = a.nameLower.compareTo(b.nameLower);
-      }
-      return _artistSortAscending ? cmp : -cmp;
-    });
-    return artists;
+  }
+
+  String _extractSectionLetter(String text) {
+    var trimmed = text.trim();
+    if (trimmed.isEmpty) return '#';
+    var firstChar = trimmed[0].toUpperCase();
+    if (RegExp(r'[A-Z]').hasMatch(firstChar)) {
+      return firstChar;
+    }
+    return '#';
   }
 
   List<Playlist> _getFilteredPlaylists() {
@@ -764,259 +817,318 @@ class _HomeScreenState extends State<HomeScreen>
     return ListenableBuilder(
       listenable: widget.playerProvider,
       builder: (context, _) {
-        // Compute all filtered lists once per rebuild so both the header
-        // (count label + shuffle) and the tab body share the same result.
         var filteredSongs = _getFilteredSongs();
         var filteredAlbums = _getFilteredAlbums();
         var filteredArtists = _getFilteredArtists();
         var filteredPlaylists = _getFilteredPlaylists();
 
-        return Scaffold(
-          extendBody: true,
-          body: NestedScrollView(
-            controller: _scrollController,
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                SliverAppBar(
-                  floating: true,
-                  pinned: true,
-                  backgroundColor: theme.colorScheme.surface,
-                  elevation: 0,
-                  scrolledUnderElevation: 0,
-                  centerTitle: false,
-                  title: ListenableBuilder(
-                    listenable: SettingsProvider.instance,
-                    builder: (context, _) {
-                      if (SettingsProvider.instance.useGreetingTitle) {
-                        var hour = DateTime.now().hour;
-                        String greeting;
-                        var userName = SettingsProvider.instance.userName;
-                        if (hour < 12) {
-                          greeting = context.l10n.goodMorning(userName);
-                        } else if (hour < 17) {
-                          greeting = context.l10n.goodAfternoon(userName);
-                        } else {
-                          greeting = context.l10n.goodEvening(userName);
-                        }
-                        return Text(
-                          greeting,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                            color: theme.colorScheme.primary,
-                          ),
-                        );
-                      }
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            context.l10n.appTitle,
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: -0.5,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            Icons.headphones,
-                            color: theme.colorScheme.primary,
-                            size: 22,
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.favorite_rounded),
-                      onPressed: () {
-                        _searchFocusNode.unfocus();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => FavoritesScreen(
-                              playerProvider: widget.playerProvider,
-                              allSongs: widget.playerProvider.allSongs,
-                              allAlbums: widget.playerProvider.cachedAlbums,
-                              allArtists: widget.playerProvider.cachedArtists,
-                            ),
-                          ),
-                        );
-                      },
-                      tooltip: context.l10n.favorites,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.settings_rounded),
-                      onPressed: () {
-                        _searchFocusNode.unfocus();
-                        widget.onOpenSettings();
-                      },
-                      tooltip: context.l10n.settings,
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  bottom: PreferredSize(
-                    preferredSize: Size.fromHeight(widget.isSyncing ? 52 : 50),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (widget.isSyncing)
-                          const LinearProgressIndicator(minHeight: 2),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          child: Container(
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHigh,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: theme.colorScheme.outlineVariant
-                                    .withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: TabBar(
-                              onTap: (index) {
-                                if (!_tabController.indexIsChanging) {
-                                  _scrollController.animateTo(
-                                    0,
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeOutCubic,
-                                  );
-                                }
-                              },
-                              controller: _tabController,
-                              dividerColor: Colors.transparent,
-                              indicatorSize: TabBarIndicatorSize.tab,
-                              splashBorderRadius: BorderRadius.circular(18),
-                              indicator: BoxDecoration(
-                                color: theme.colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              labelPadding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                              ),
-                              labelColor: theme.colorScheme.onPrimaryContainer,
-                              labelStyle: theme.textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                              unselectedLabelColor:
-                                  theme.colorScheme.onSurfaceVariant,
-                              unselectedLabelStyle: theme.textTheme.labelMedium
-                                  ?.copyWith(fontSize: 13),
-                              tabs: [
-                                Tab(
-                                  child: Text(
-                                    context.l10n.songs,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+        var selectedSongsList = filteredSongs
+            .where((s) => _selectedSongIds.contains(s.id))
+            .toList();
+
+        return PopScope(
+          canPop: _selectedSongIds.isEmpty,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) {
+              _clearSongSelection();
+            }
+          },
+          child: Scaffold(
+            extendBody: true,
+            body: Stack(
+              children: [
+                NestedScrollView(
+                  controller: _scrollController,
+                  headerSliverBuilder: (context, innerBoxIsScrolled) {
+                    return [
+                      SliverAppBar(
+                        floating: true,
+                        pinned: true,
+                        backgroundColor: theme.colorScheme.surface,
+                        elevation: 0,
+                        scrolledUnderElevation: 0,
+                        centerTitle: false,
+                        title: ListenableBuilder(
+                          listenable: SettingsProvider.instance,
+                          builder: (context, _) {
+                            if (SettingsProvider.instance.useGreetingTitle) {
+                              var hour = DateTime.now().hour;
+                              String greeting;
+                              var userName = SettingsProvider.instance.userName;
+                              if (hour < 12) {
+                                greeting = context.l10n.goodMorning(userName);
+                              } else if (hour < 17) {
+                                greeting = context.l10n.goodAfternoon(userName);
+                              } else {
+                                greeting = context.l10n.goodEvening(userName);
+                              }
+                              return Text(
+                                greeting,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: -0.5,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              );
+                            }
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  context.l10n.appTitle,
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: -0.5,
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
-                                Tab(
-                                  child: Text(
-                                    context.l10n.albums,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                Tab(
-                                  child: Text(
-                                    context.l10n.artists,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                Tab(
-                                  child: Text(
-                                    context.l10n.playlists,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                const SizedBox(width: 6),
+                                Icon(
+                                  Icons.headphones,
+                                  color: theme.colorScheme.primary,
+                                  size: 22,
                                 ),
                               ],
+                            );
+                          },
+                        ),
+                        actions: [
+                          IconButton(
+                            icon: const Icon(Icons.favorite_rounded),
+                            onPressed: () {
+                              _searchFocusNode.unfocus();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FavoritesScreen(
+                                    playerProvider: widget.playerProvider,
+                                    allSongs: widget.playerProvider.allSongs,
+                                    allAlbums:
+                                        widget.playerProvider.cachedAlbums,
+                                    allArtists:
+                                        widget.playerProvider.cachedArtists,
+                                  ),
+                                ),
+                              );
+                            },
+                            tooltip: context.l10n.favorites,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.settings_rounded),
+                            onPressed: () {
+                              _searchFocusNode.unfocus();
+                              widget.onOpenSettings();
+                            },
+                            tooltip: context.l10n.settings,
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        bottom: PreferredSize(
+                          preferredSize: Size.fromHeight(
+                            widget.isSyncing ? 52 : 50,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (widget.isSyncing)
+                                const LinearProgressIndicator(minHeight: 2),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 6,
+                                ),
+                                child: Container(
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        theme.colorScheme.surfaceContainerHigh,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: theme.colorScheme.outlineVariant
+                                          .withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                  child: TabBar(
+                                    onTap: (index) {
+                                      _searchFocusNode.unfocus();
+                                      if (!_tabController.indexIsChanging) {
+                                        _scrollController.animateTo(
+                                          0,
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
+                                          curve: Curves.easeOutCubic,
+                                        );
+                                      }
+                                    },
+                                    controller: _tabController,
+                                    dividerColor: Colors.transparent,
+                                    indicatorSize: TabBarIndicatorSize.tab,
+                                    splashBorderRadius: BorderRadius.circular(
+                                      18,
+                                    ),
+                                    indicator: BoxDecoration(
+                                      color: theme.colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    labelPadding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
+                                    labelColor:
+                                        theme.colorScheme.onPrimaryContainer,
+                                    labelStyle: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                    unselectedLabelColor:
+                                        theme.colorScheme.onSurfaceVariant,
+                                    unselectedLabelStyle: theme
+                                        .textTheme
+                                        .labelMedium
+                                        ?.copyWith(fontSize: 13),
+                                    tabs: [
+                                      Tab(
+                                        child: Text(
+                                          context.l10n.songs,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Tab(
+                                        child: Text(
+                                          context.l10n.albums,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Tab(
+                                        child: Text(
+                                          context.l10n.artists,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Tab(
+                                        child: Text(
+                                          context.l10n.playlists,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ];
+                  },
+                  body: Column(
+                    children: [
+                      _buildSearchAndFilterHeader(
+                        theme,
+                        filteredSongs: filteredSongs,
+                        filteredAlbums: filteredAlbums,
+                        filteredArtists: filteredArtists,
+                        filteredPlaylists: filteredPlaylists,
+                      ),
+                      Expanded(
+                        child: CustomScrollbar(
+                          sectionGetter: (percentage) => _getScrollSection(
+                            percentage,
+                            filteredSongs: filteredSongs,
+                            filteredAlbums: filteredAlbums,
+                            filteredArtists: filteredArtists,
+                            filteredPlaylists: filteredPlaylists,
+                          ),
+                          child: PageTransitionSwitcher(
+                            reverse:
+                                _tabController.index <
+                                _tabController.previousIndex,
+                            transitionBuilder:
+                                (child, animation, secondaryAnimation) {
+                                  return SharedAxisTransition(
+                                    fillColor: Colors.transparent,
+                                    animation: animation,
+                                    secondaryAnimation: secondaryAnimation,
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                    child: child,
+                                  );
+                                },
+                            child: Builder(
+                              key: ValueKey(_tabController.index),
+                              builder: (context) {
+                                switch (_tabController.index) {
+                                  case 1:
+                                    return AlbumsTab(
+                                      allSongs: widget.songs,
+                                      filteredAlbums: filteredAlbums,
+                                      onUnfocusSearch: _searchFocusNode.unfocus,
+                                    );
+                                  case 2:
+                                    return ArtistsTab(
+                                      allSongs: widget.songs,
+                                      filteredArtists: filteredArtists,
+                                      onUnfocusSearch: _searchFocusNode.unfocus,
+                                    );
+                                  case 3:
+                                    return PlaylistsTab(
+                                      allSongs: widget.songs,
+                                      filteredPlaylists: filteredPlaylists,
+                                      playerProvider: widget.playerProvider,
+                                      onUnfocusSearch: _searchFocusNode.unfocus,
+                                      onCreatePlaylistDialog:
+                                          _showCreatePlaylistDialog,
+                                      onDeletePlaylist: widget.onDeletePlaylist,
+                                      onRenamePlaylist: widget.onRenamePlaylist,
+                                    );
+                                  default:
+                                    return SongsTab(
+                                      allSongs: widget.songs,
+                                      filteredSongs: filteredSongs,
+                                      playerProvider: widget.playerProvider,
+                                      scanFolder: widget.scanFolder,
+                                      showSyncPrompt: widget.showSyncPrompt,
+                                      onConfigureFolder:
+                                          widget.onConfigureFolder,
+                                      onUnfocusSearch: _searchFocusNode.unfocus,
+                                      syncPromptBanner: _buildSyncPromptBanner(
+                                        theme,
+                                      ),
+                                      selectedSongIds: _selectedSongIds,
+                                      onToggleSelect: _toggleSongSelection,
+                                      onLongPressSong: _onLongPressSong,
+                                    );
+                                }
+                              },
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ];
-            },
-            body: Column(
-              children: [
-                _buildSearchAndFilterHeader(
-                  theme,
-                  filteredSongs: filteredSongs,
-                  filteredAlbums: filteredAlbums,
-                  filteredArtists: filteredArtists,
-                  filteredPlaylists: filteredPlaylists,
-                ),
-                Expanded(
-                  child: CustomScrollbar(
-                    child: PageTransitionSwitcher(
-                      reverse:
-                          _tabController.index < _tabController.previousIndex,
-                      transitionBuilder:
-                          (child, animation, secondaryAnimation) {
-                            return SharedAxisTransition(
-                              fillColor: Colors.transparent,
-                              animation: animation,
-                              secondaryAnimation: secondaryAnimation,
-                              transitionType:
-                                  SharedAxisTransitionType.horizontal,
-                              child: child,
-                            );
-                          },
-                      child: Builder(
-                        key: ValueKey(_tabController.index),
-                        builder: (context) {
-                          switch (_tabController.index) {
-                            case 1:
-                              return AlbumsTab(
-                                allSongs: widget.songs,
-                                filteredAlbums: filteredAlbums,
-                                onUnfocusSearch: _searchFocusNode.unfocus,
-                              );
-                            case 2:
-                              return ArtistsTab(
-                                allSongs: widget.songs,
-                                filteredArtists: filteredArtists,
-                                onUnfocusSearch: _searchFocusNode.unfocus,
-                              );
-                            case 3:
-                              return PlaylistsTab(
-                                allSongs: widget.songs,
-                                filteredPlaylists: filteredPlaylists,
-                                playerProvider: widget.playerProvider,
-                                onUnfocusSearch: _searchFocusNode.unfocus,
-                                onCreatePlaylistDialog:
-                                    _showCreatePlaylistDialog,
-                                onDeletePlaylist: widget.onDeletePlaylist,
-                                onRenamePlaylist: widget.onRenamePlaylist,
-                              );
-                            default:
-                              return SongsTab(
-                                allSongs: widget.songs,
-                                filteredSongs: filteredSongs,
-                                playerProvider: widget.playerProvider,
-                                scanFolder: widget.scanFolder,
-                                showSyncPrompt: widget.showSyncPrompt,
-                                onConfigureFolder: widget.onConfigureFolder,
-                                onUnfocusSearch: _searchFocusNode.unfocus,
-                                syncPromptBanner: _buildSyncPromptBanner(theme),
-                              );
-                          }
-                        },
                       ),
-                    ),
+                    ],
                   ),
                 ),
+                if (_selectedSongIds.isNotEmpty)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: MultiSelectActionBar(
+                      selectedSongs: selectedSongsList,
+                      allAvailableSongs: filteredSongs,
+                      playerProvider: widget.playerProvider,
+                      onClearSelection: _clearSongSelection,
+                      onSelectAll: () => _selectAllSongs(filteredSongs),
+                      bottomPadding:
+                          widget.playerProvider.currentSong != null
+                              ? 80.0
+                              : 16.0,
+                    ),
+                  ),
               ],
             ),
           ),

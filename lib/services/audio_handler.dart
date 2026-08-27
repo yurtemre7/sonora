@@ -61,6 +61,18 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     _init();
   }
 
+  var pauseOnDisconnect = true;
+  var resumeOnConnect = false;
+  var _wasPlayingBeforeDisconnect = false;
+
+  void setPauseOnDisconnect(bool value) {
+    pauseOnDisconnect = value;
+  }
+
+  void setResumeOnConnect(bool value) {
+    resumeOnConnect = value;
+  }
+
   Future<void> setPauseOnDuck(bool pauseOnDuck) async {
     var session = await AudioSession.instance;
     await session.configure(
@@ -75,11 +87,39 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     var session = await AudioSession.instance;
     var prefs = SharedPreferencesAsync();
     var pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
+    pauseOnDisconnect = await prefs.getBool('pause_on_disconnect') ?? true;
+    resumeOnConnect = await prefs.getBool('resume_on_connect') ?? false;
+
     await session.configure(
       AudioSessionConfiguration.music().copyWith(
         androidWillPauseWhenDucked: pauseOnDuck,
       ),
     );
+
+    // Auto-pause when audio becomes noisy (e.g. headphones unplugged / BT disconnected)
+    session.becomingNoisyEventStream.listen((_) {
+      if (pauseOnDisconnect && player.playing) {
+        _wasPlayingBeforeDisconnect = true;
+        pause();
+      }
+    });
+
+    // Auto-resume when audio device reconnects if enabled
+    session.devicesStream.listen((devices) {
+      if (resumeOnConnect && _wasPlayingBeforeDisconnect && !player.playing) {
+        var hasAudioDevice = devices.any(
+          (d) =>
+              // ignore: experimental_member_use
+              d.type != AudioDeviceType.builtInSpeaker &&
+              // ignore: experimental_member_use
+              d.type != AudioDeviceType.builtInEarpiece,
+        );
+        if (hasAudioDevice) {
+          _wasPlayingBeforeDisconnect = false;
+          play();
+        }
+      }
+    });
 
     // Broadcast playback state changes from just_audio to audio_service.
     player.playbackEventStream.listen(_broadcastPlaybackState);
@@ -466,28 +506,56 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     }
   }
 
-  /// Inserts [item] at [globalIndex] in the logical queue.
-  Future<void> insertQueueItemAt(int globalIndex, MediaItem item) async {
+  /// Appends multiple [items] to the logical queue.
+  @override
+  Future<void> addQueueItems(List<MediaItem> items) async {
+    if (items.isEmpty) return;
+    var wasAtEnd = _windowEnd == _rawPlaylist.length;
+    _rawPlaylist.addAll(items);
+
+    if (wasAtEnd) {
+      _isModifyingSources = true;
+      try {
+        var sources = items
+            .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
+            .toList();
+        await player.addAudioSources(sources);
+        _windowEnd += items.length;
+        queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
+      } finally {
+        _isModifyingSources = false;
+      }
+    }
+  }
+
+  /// Inserts multiple [items] starting at [globalIndex] in the logical queue.
+  Future<void> insertQueueItemsAt(int globalIndex, List<MediaItem> items) async {
+    if (items.isEmpty) return;
     if (globalIndex < 0 || globalIndex > _rawPlaylist.length) return;
-    _rawPlaylist.insert(globalIndex, item);
+    _rawPlaylist.insertAll(globalIndex, items);
 
     if (globalIndex >= _windowStart && globalIndex <= _windowEnd) {
       var localIndex = globalIndex - _windowStart;
       _isModifyingSources = true;
       try {
-        await player.insertAudioSource(
-          localIndex,
-          AudioSource.uri(Uri.parse(item.id), tag: item),
-        );
-        _windowEnd++;
+        var sources = items
+            .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
+            .toList();
+        await player.insertAudioSources(localIndex, sources);
+        _windowEnd += items.length;
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
       } finally {
         _isModifyingSources = false;
       }
     } else if (globalIndex < _windowStart) {
-      _windowStart++;
-      _windowEnd++;
+      _windowStart += items.length;
+      _windowEnd += items.length;
     }
+  }
+
+  /// Inserts [item] at [globalIndex] in the logical queue.
+  Future<void> insertQueueItemAt(int globalIndex, MediaItem item) async {
+    await insertQueueItemsAt(globalIndex, [item]);
   }
 
   // ---------------------------------------------------------------------------

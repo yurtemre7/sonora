@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sonora/services/native_bridge.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/l10n_extension.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class UpdateDialog extends StatefulWidget {
   const UpdateDialog({super.key, required this.updateInfo});
@@ -59,8 +59,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
       if (!installed && mounted) {
         // Fallback to opening URL in browser if direct native installation launch fails
-        var url = Uri.parse(_selectedUrl);
-        await launchUrl(url, mode: LaunchMode.externalApplication);
+        await NativeBridge.openUrl(_selectedUrl);
       }
 
       if (mounted) {
@@ -231,8 +230,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
             icon: const Icon(Icons.open_in_browser_rounded),
             tooltip: 'Open link in browser',
             onPressed: () async {
-              var url = Uri.parse(_selectedUrl);
-              await launchUrl(url, mode: LaunchMode.externalApplication);
+              await NativeBridge.openUrl(_selectedUrl);
               if (context.mounted) {
                 Navigator.of(context).pop();
               }

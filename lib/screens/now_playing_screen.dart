@@ -17,6 +17,7 @@ import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/ambient_glow.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
+import 'package:sonora/widgets/animated_vinyl.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/audio_visualizer.dart';
 import 'package:sonora/widgets/marquee_text.dart';
@@ -305,27 +306,45 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 AmbientGlow(
                   isPlaying: widget.playerProvider.audioHandler.player.playing,
                   color: theme.colorScheme.primary,
+                  intensity: SettingsProvider.instance.ambientGlowIntensity,
                 ),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOut,
-                  width: SettingsProvider.instance.immersiveMode
-                      ? constraints.maxWidth
-                      : min(MediaQuery.sizeOf(context).width * 0.80, 300.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Stack(
-                      children: [
+                if (SettingsProvider.instance.nowPlayingStyle == 'vinyl' &&
+                    !_showLyrics)
+                  AnimatedVinyl(
+                    artworkPath: song.artworkPath,
+                    isPlaying:
+                        widget.playerProvider.audioHandler.player.playing,
+                    size: SettingsProvider.instance.immersiveMode
+                        ? min(constraints.maxWidth, constraints.maxHeight)
+                        : min(MediaQuery.sizeOf(context).width * 0.75, 270.0),
+                  )
+                else
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                    width: SettingsProvider.instance.nowPlayingStyle ==
+                            'minimalist'
+                        ? min(MediaQuery.sizeOf(context).width * 0.55, 200.0)
+                        : (SettingsProvider.instance.immersiveMode
+                            ? constraints.maxWidth
+                            : min(
+                                MediaQuery.sizeOf(context).width * 0.80,
+                                300.0,
+                              )),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.4),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Stack(
+                        children: [
                         Positioned.fill(
                           child: PageTransitionSwitcher(
                             reverse: _reverse,

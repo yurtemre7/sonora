@@ -232,7 +232,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get download => 'Download';
 
   @override
-  String get dynamicTheme => 'Dynamic Theme (Material You)';
+  String get dynamicTheme => 'Dynamic Theme (Album Art)';
 
   @override
   String get dynamicThemeSubtitle =>
@@ -1221,4 +1221,180 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get debugCacheInfo => 'Debug Cache Info';
+
+  @override
+  String get pauseOnDisconnect => 'Pause on Disconnect';
+
+  @override
+  String get pauseOnDisconnectSubtitle =>
+      'Pause playback when headphones or Bluetooth disconnect';
+
+  @override
+  String get resumeOnConnect => 'Resume on Connect';
+
+  @override
+  String get resumeOnConnectSubtitle =>
+      'Automatically resume playback when reconnecting audio device';
+
+  @override
+  String get sleepTimerFadeOut => 'Sleep Timer Fade Out';
+
+  @override
+  String get sleepTimerFadeOutSubtitle =>
+      'Gradually reduce volume before timer ends';
+
+  @override
+  String get finishCurrentSong => 'Finish current song before sleeping';
+
+  @override
+  String get finishCurrentSongSubtitle =>
+      'Wait for currently playing song to finish before stopping';
+
+  @override
+  String get useMaterialYou => 'Material You Dynamic Colors';
+
+  @override
+  String get useMaterialYouSubtitle =>
+      'Extract theme colors from your system wallpaper (Android 12+)';
+
+  @override
+  String get ambientGlow => 'Ambient Glow';
+
+  @override
+  String get ambientGlowSubtitle => 'Glow intensity on the now playing screen';
+
+  @override
+  String get glowOff => 'Off';
+
+  @override
+  String get glowSubtle => 'Subtle';
+
+  @override
+  String get glowVibrant => 'Vibrant';
+
+  @override
+  String get glowImmersive => 'Immersive';
+
+  @override
+  String get nowPlayingStyle => 'Now Playing Style';
+
+  @override
+  String get nowPlayingStyleSubtitle =>
+      'Choose the visual design of the player screen';
+
+  @override
+  String get styleModern => 'Modern Glow';
+
+  @override
+  String get styleVinyl => 'Vinyl Turntable';
+
+  @override
+  String get styleMinimalist => 'Minimalist';
+
+  @override
+  String secondsAbbr(int seconds) {
+    return '${seconds}s';
+  }
+
+  @override
+  String selectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get selectAll => 'Select All';
+
+  @override
+  String get deselectAll => 'Deselect All';
+
+  @override
+  String batchAddedToQueue(int count) {
+    return 'Added $count songs to queue';
+  }
+
+  @override
+  String batchAddedToPlayNext(int count) {
+    return 'Added $count songs to play next';
+  }
+
+  @override
+  String batchAddedToPlaylist(int count, String playlist) {
+    return 'Added $count songs to $playlist';
+  }
+
+  @override
+  String batchFavorited(int count) {
+    return 'Added $count songs to favorites';
+  }
+
+  @override
+  String batchUnfavorited(int count) {
+    return 'Removed $count songs from favorites';
+  }
+
+  @override
+  String batchRemovedFromPlaylist(int count, String playlist) {
+    return 'Removed $count songs from $playlist';
+  }
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get overriddenByMaterialYou =>
+      'Overridden by Material You wallpaper colors';
+
+  @override
+  String get dynamicThemeOverriddenTooltip =>
+      'Album art theming is inactive while Material You wallpaper colors are enabled';
+
+  @override
+  String get defaultColorOverriddenTooltip =>
+      'Custom color selection is inactive while Material You wallpaper colors are enabled';
+
+  @override
+  String get defaultColorFallbackSubtitle =>
+      'Fallback color when no song is playing or artwork color is neutral';
+
+  @override
+  String get defaultColorPrimarySubtitle => 'Primary app theme accent color';
+
+  @override
+  String get themeColorsHeader => 'Theme Colors & Accent';
+
+  @override
+  String get displayAndContrast => 'Display & Contrast';
+
+  @override
+  String get playerScreenAesthetics => 'Player Screen Aesthetics';
+
+  @override
+  String get wallpaperColorActive => 'Wallpaper Palette Active';
+
+  @override
+  String get colorSourceMaterialYou => 'Material You';
+
+  @override
+  String get colorSourceAlbumArt => 'Album Art';
+
+  @override
+  String get colorSourceCustom => 'Custom';
+
+  @override
+  String get colorSourceMaterialYouDesc =>
+      'Theme colors are extracted from your system wallpaper (Android 12+)';
+
+  @override
+  String get colorSourceAlbumArtDesc =>
+      'Theme colors dynamically adapt to the currently playing song\'s artwork';
+
+  @override
+  String get colorSourceCustomDesc =>
+      'Theme colors use your chosen static accent color';
+
+  @override
+  String get fallbackColorHeader => 'Fallback Color (when no song is playing)';
+
+  @override
+  String get customColorHeader => 'Choose Accent Color';
 }

@@ -497,7 +497,7 @@ abstract class AppLocalizations {
   /// No description provided for @dynamicTheme.
   ///
   /// In en, this message translates to:
-  /// **'Dynamic Theme (Material You)'**
+  /// **'Dynamic Theme (Album Art)'**
   String get dynamicTheme;
 
   /// No description provided for @dynamicThemeSubtitle.
@@ -2251,6 +2251,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Debug Cache Info'**
   String get debugCacheInfo;
+
+  /// No description provided for @pauseOnDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause on Disconnect'**
+  String get pauseOnDisconnect;
+
+  /// No description provided for @pauseOnDisconnectSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause playback when headphones or Bluetooth disconnect'**
+  String get pauseOnDisconnectSubtitle;
+
+  /// No description provided for @resumeOnConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume on Connect'**
+  String get resumeOnConnect;
+
+  /// No description provided for @resumeOnConnectSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically resume playback when reconnecting audio device'**
+  String get resumeOnConnectSubtitle;
+
+  /// No description provided for @sleepTimerFadeOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep Timer Fade Out'**
+  String get sleepTimerFadeOut;
+
+  /// No description provided for @sleepTimerFadeOutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gradually reduce volume before timer ends'**
+  String get sleepTimerFadeOutSubtitle;
+
+  /// No description provided for @finishCurrentSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish current song before sleeping'**
+  String get finishCurrentSong;
+
+  /// No description provided for @finishCurrentSongSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for currently playing song to finish before stopping'**
+  String get finishCurrentSongSubtitle;
+
+  /// No description provided for @useMaterialYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Material You Dynamic Colors'**
+  String get useMaterialYou;
+
+  /// No description provided for @useMaterialYouSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract theme colors from your system wallpaper (Android 12+)'**
+  String get useMaterialYouSubtitle;
+
+  /// No description provided for @ambientGlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Ambient Glow'**
+  String get ambientGlow;
+
+  /// No description provided for @ambientGlowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Glow intensity on the now playing screen'**
+  String get ambientGlowSubtitle;
+
+  /// No description provided for @glowOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get glowOff;
+
+  /// No description provided for @glowSubtle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtle'**
+  String get glowSubtle;
+
+  /// No description provided for @glowVibrant.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrant'**
+  String get glowVibrant;
+
+  /// No description provided for @glowImmersive.
+  ///
+  /// In en, this message translates to:
+  /// **'Immersive'**
+  String get glowImmersive;
+
+  /// No description provided for @nowPlayingStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Now Playing Style'**
+  String get nowPlayingStyle;
+
+  /// No description provided for @nowPlayingStyleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the visual design of the player screen'**
+  String get nowPlayingStyleSubtitle;
+
+  /// No description provided for @styleModern.
+  ///
+  /// In en, this message translates to:
+  /// **'Modern Glow'**
+  String get styleModern;
+
+  /// No description provided for @styleVinyl.
+  ///
+  /// In en, this message translates to:
+  /// **'Vinyl Turntable'**
+  String get styleVinyl;
+
+  /// No description provided for @styleMinimalist.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimalist'**
+  String get styleMinimalist;
+
+  /// No description provided for @secondsAbbr.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String secondsAbbr(int seconds);
+
+  /// No description provided for @selectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String selectedCount(int count);
+
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAll;
+
+  /// No description provided for @deselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect All'**
+  String get deselectAll;
+
+  /// No description provided for @batchAddedToQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} songs to queue'**
+  String batchAddedToQueue(int count);
+
+  /// No description provided for @batchAddedToPlayNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} songs to play next'**
+  String batchAddedToPlayNext(int count);
+
+  /// No description provided for @batchAddedToPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} songs to {playlist}'**
+  String batchAddedToPlaylist(int count, String playlist);
+
+  /// No description provided for @batchFavorited.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} songs to favorites'**
+  String batchFavorited(int count);
+
+  /// No description provided for @batchUnfavorited.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {count} songs from favorites'**
+  String batchUnfavorited(int count);
+
+  /// No description provided for @batchRemovedFromPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {count} songs from {playlist}'**
+  String batchRemovedFromPlaylist(int count, String playlist);
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @overriddenByMaterialYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Overridden by Material You wallpaper colors'**
+  String get overriddenByMaterialYou;
+
+  /// No description provided for @dynamicThemeOverriddenTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Album art theming is inactive while Material You wallpaper colors are enabled'**
+  String get dynamicThemeOverriddenTooltip;
+
+  /// No description provided for @defaultColorOverriddenTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom color selection is inactive while Material You wallpaper colors are enabled'**
+  String get defaultColorOverriddenTooltip;
+
+  /// No description provided for @defaultColorFallbackSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fallback color when no song is playing or artwork color is neutral'**
+  String get defaultColorFallbackSubtitle;
+
+  /// No description provided for @defaultColorPrimarySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary app theme accent color'**
+  String get defaultColorPrimarySubtitle;
+
+  /// No description provided for @themeColorsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Colors & Accent'**
+  String get themeColorsHeader;
+
+  /// No description provided for @displayAndContrast.
+  ///
+  /// In en, this message translates to:
+  /// **'Display & Contrast'**
+  String get displayAndContrast;
+
+  /// No description provided for @playerScreenAesthetics.
+  ///
+  /// In en, this message translates to:
+  /// **'Player Screen Aesthetics'**
+  String get playerScreenAesthetics;
+
+  /// No description provided for @wallpaperColorActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallpaper Palette Active'**
+  String get wallpaperColorActive;
+
+  /// No description provided for @colorSourceMaterialYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Material You'**
+  String get colorSourceMaterialYou;
+
+  /// No description provided for @colorSourceAlbumArt.
+  ///
+  /// In en, this message translates to:
+  /// **'Album Art'**
+  String get colorSourceAlbumArt;
+
+  /// No description provided for @colorSourceCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get colorSourceCustom;
+
+  /// No description provided for @colorSourceMaterialYouDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme colors are extracted from your system wallpaper (Android 12+)'**
+  String get colorSourceMaterialYouDesc;
+
+  /// No description provided for @colorSourceAlbumArtDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme colors dynamically adapt to the currently playing song\'s artwork'**
+  String get colorSourceAlbumArtDesc;
+
+  /// No description provided for @colorSourceCustomDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme colors use your chosen static accent color'**
+  String get colorSourceCustomDesc;
+
+  /// No description provided for @fallbackColorHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Fallback Color (when no song is playing)'**
+  String get fallbackColorHeader;
+
+  /// No description provided for @customColorHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Accent Color'**
+  String get customColorHeader;
 }
 
 class _AppLocalizationsDelegate

@@ -9,12 +9,16 @@ import 'package:sonora/utils/l10n_extension.dart';
 class PlaylistSelectorBottomSheet extends StatefulWidget {
   const PlaylistSelectorBottomSheet({
     super.key,
-    required this.song,
+    this.song,
+    this.songs,
     required this.playerProvider,
-  });
+  }) : assert(song != null || songs != null, 'Either song or songs must be provided');
 
-  final Song song;
+  final Song? song;
+  final List<Song>? songs;
   final PlayerProvider playerProvider;
+
+  List<Song> get targetSongs => songs ?? (song != null ? [song!] : const []);
 
   static Future<void> show(
     BuildContext context,
@@ -28,6 +32,23 @@ class PlaylistSelectorBottomSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (context) => PlaylistSelectorBottomSheet(
         song: song,
+        playerProvider: playerProvider,
+      ),
+    );
+  }
+
+  static Future<void> showForMultiple(
+    BuildContext context,
+    List<Song> songs,
+    PlayerProvider playerProvider,
+  ) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PlaylistSelectorBottomSheet(
+        songs: songs,
         playerProvider: playerProvider,
       ),
     );
@@ -146,9 +167,12 @@ class _PlaylistSelectorBottomSheetState
                               itemCount: playlists.length,
                               itemBuilder: (_, index) {
                                 var playlist = playlists[index];
-                                var isAlreadyIn = playlist.songIds.contains(
-                                  widget.song.id,
-                                );
+                                var targetSongs = widget.targetSongs;
+                                var isSingle = targetSongs.length == 1;
+                                var isAlreadyIn = isSingle &&
+                                    playlist.songIds.contains(
+                                      targetSongs.first.id,
+                                    );
                                 return Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -246,34 +270,63 @@ class _PlaylistSelectorBottomSheetState
                                           onTap: () async {
                                             var messenger =
                                                 ScaffoldMessenger.of(context);
-                                            if (isAlreadyIn) {
-                                              await widget.playerProvider
-                                                  .removeSongFromPlaylist(
-                                                    playlist.id,
-                                                    widget.song.id,
-                                                  );
-                                              messenger.showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    'Removed "${widget.song.displayTitle}" from ${playlist.name}.',
+                                            var l10n = context.l10n;
+                                            if (isSingle) {
+                                              var singleSong =
+                                                  targetSongs.first;
+                                              if (isAlreadyIn) {
+                                                await widget.playerProvider
+                                                    .removeSongFromPlaylist(
+                                                      playlist.id,
+                                                      singleSong.id,
+                                                    );
+                                                messenger.showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      'Removed "${singleSong.displayTitle}" from ${playlist.name}.',
+                                                    ),
+                                                    behavior:
+                                                        SnackBarBehavior.floating,
+                                                    duration: const Duration(
+                                                      seconds: 2,
+                                                    ),
                                                   ),
-                                                  behavior:
-                                                      SnackBarBehavior.floating,
-                                                  duration: const Duration(
-                                                    seconds: 2,
+                                                );
+                                              } else {
+                                                await widget.playerProvider
+                                                    .addSongToPlaylist(
+                                                      playlist.id,
+                                                      singleSong.id,
+                                                    );
+                                                messenger.showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      'Added "${singleSong.displayTitle}" to ${playlist.name}.',
+                                                    ),
+                                                    behavior:
+                                                        SnackBarBehavior.floating,
+                                                    duration: const Duration(
+                                                      seconds: 2,
+                                                    ),
                                                   ),
-                                                ),
-                                              );
+                                                );
+                                              }
                                             } else {
                                               await widget.playerProvider
-                                                  .addSongToPlaylist(
+                                                  .addSongsToPlaylist(
                                                     playlist.id,
-                                                    widget.song.id,
+                                                    targetSongs,
                                                   );
+                                              if (context.mounted) {
+                                                Navigator.pop(context);
+                                              }
                                               messenger.showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                    'Added "${widget.song.displayTitle}" to ${playlist.name}.',
+                                                    l10n.batchAddedToPlaylist(
+                                                      targetSongs.length,
+                                                      playlist.name,
+                                                    ),
                                                   ),
                                                   behavior:
                                                       SnackBarBehavior.floating,
@@ -319,13 +372,15 @@ class _PlaylistSelectorBottomSheetState
 
   void _showCreatePlaylistDialog() {
     _playlistNameController.clear();
+    var l10n = context.l10n;
+    var messenger = ScaffoldMessenger.of(context);
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.createPlaylist),
+        title: Text(l10n.createPlaylist),
         content: TextField(
           controller: _playlistNameController,
-          decoration: InputDecoration(hintText: context.l10n.playlistName),
+          decoration: InputDecoration(hintText: l10n.playlistName),
           autofocus: true,
           textCapitalization: TextCapitalization.sentences,
         ),
@@ -333,19 +388,45 @@ class _PlaylistSelectorBottomSheetState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(context.l10n.cancel),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () async {
               var name = _playlistNameController.text.trim();
               if (name.isNotEmpty) {
                 await widget.playerProvider.createPlaylist(name);
+                if (widget.targetSongs.isNotEmpty) {
+                  var created = widget.playerProvider.playlists
+                      .where((p) => p.name == name)
+                      .lastOrNull;
+                  if (created != null) {
+                    await widget.playerProvider.addSongsToPlaylist(
+                      created.id,
+                      widget.targetSongs,
+                    );
+                  }
+                }
                 if (mounted && dialogContext.mounted) {
                   Navigator.pop(dialogContext);
                 }
+                if (widget.targetSongs.length > 1 && mounted) {
+                  Navigator.pop(context);
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        l10n.batchAddedToPlaylist(
+                          widget.targetSongs.length,
+                          name,
+                        ),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
               }
             },
-            child: Text(context.l10n.create),
+            child: Text(l10n.create),
           ),
         ],
       ),

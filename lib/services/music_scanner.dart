@@ -38,6 +38,20 @@ class MusicScanner {
     }
   }
 
+  /// Retrieves the native Android 12+ Monet dynamic wallpaper accent color.
+  static Future<Color?> getDynamicWallpaperColor() async {
+    if (!Platform.isAndroid) return null;
+    try {
+      var result = await _mediastoreChannel.invokeMethod<int>(
+        'getDynamicWallpaperColor',
+      );
+      if (result != null) {
+        return Color(result);
+      }
+    } catch (_) {}
+    return null;
+  }
+
   /// Cached local artist images path mapping
   Map<String, String> localArtistImages = {};
 
@@ -1447,6 +1461,36 @@ class MusicScanner {
     }
   }
 
+  /// Sets favorite status for multiple songs atomically.
+  Future<List<Song>> setFavoriteSongs(
+    List<int> songIds,
+    bool isFavorite,
+  ) async {
+    try {
+      var songs = await _readImportedSongsMetadata();
+      var idSet = songIds.toSet();
+      var now = isFavorite ? DateTime.now().millisecondsSinceEpoch : null;
+      var modified = false;
+
+      for (var i = 0; i < songs.length; i++) {
+        if (idSet.contains(songs[i].id)) {
+          songs[i] = songs[i].copyWith(
+            isFavorite: isFavorite,
+            favoriteDateMs: now,
+          );
+          modified = true;
+        }
+      }
+
+      if (modified) {
+        await _writeImportedSongsMetadata(songs);
+      }
+      return songs;
+    } catch (_) {
+      return [];
+    }
+  }
+
   /// Creates a new empty playlist.
   Future<void> createPlaylist(String name) async {
     var playlists = await getPlaylists();
@@ -1468,11 +1512,22 @@ class MusicScanner {
 
   /// Adds a song to a playlist if not already present.
   Future<void> addSongToPlaylist(String playlistId, int songId) async {
+    await addSongsToPlaylist(playlistId, [songId]);
+  }
+
+  /// Adds multiple songs to a playlist if not already present.
+  Future<void> addSongsToPlaylist(
+    String playlistId,
+    List<int> songIds,
+  ) async {
+    if (songIds.isEmpty) return;
     var playlists = await getPlaylists();
     for (var i = 0; i < playlists.length; i++) {
       if (playlists[i].id == playlistId) {
-        if (!playlists[i].songIds.contains(songId)) {
-          playlists[i].songIds.add(songId);
+        var existingSet = playlists[i].songIds.toSet();
+        var toAdd = songIds.where((id) => !existingSet.contains(id)).toList();
+        if (toAdd.isNotEmpty) {
+          playlists[i].songIds.addAll(toAdd);
           await savePlaylists(playlists);
         }
         break;
@@ -1482,10 +1537,20 @@ class MusicScanner {
 
   /// Removes a song from a playlist.
   Future<void> removeSongFromPlaylist(String playlistId, int songId) async {
+    await removeSongsFromPlaylist(playlistId, [songId]);
+  }
+
+  /// Removes multiple songs from a playlist.
+  Future<void> removeSongsFromPlaylist(
+    String playlistId,
+    List<int> songIds,
+  ) async {
+    if (songIds.isEmpty) return;
     var playlists = await getPlaylists();
+    var idSet = songIds.toSet();
     for (var i = 0; i < playlists.length; i++) {
       if (playlists[i].id == playlistId) {
-        playlists[i].songIds.remove(songId);
+        playlists[i].songIds.removeWhere(idSet.contains);
         await savePlaylists(playlists);
         break;
       }
