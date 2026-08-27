@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.19.1] - 2026-08-27
+### Changed
+* Chore: Update packages
+
 ## [1.19.0] - 2026-08-27
 ### Added
 * Improve app colors, music tile multi select actions
