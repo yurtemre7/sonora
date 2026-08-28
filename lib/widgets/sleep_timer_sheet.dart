@@ -126,14 +126,18 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                         child: Column(
                           children: [
                             Text(
-                              'Music stops in',
+                              widget.playerProvider.isFinishingCurrentSong
+                                  ? context.l10n.finishCurrentSong
+                                  : 'Music stops in',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              _formatDuration(activeTimerDuration),
+                              widget.playerProvider.isFinishingCurrentSong
+                                  ? 'Finishing song...'
+                                  : _formatDuration(activeTimerDuration),
                               style: theme.textTheme.displaySmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: theme.colorScheme.primary,

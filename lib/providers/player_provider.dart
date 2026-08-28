@@ -1450,7 +1450,15 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   var sleepTimerFinishSongActive = false;
-  StreamSubscription? _finishSongSubscription;
+  var _isFinishingCurrentSong = false;
+  bool get isFinishingCurrentSong => _isFinishingCurrentSong;
+  @visibleForTesting
+  set isFinishingCurrentSong(bool value) {
+    _isFinishingCurrentSong = value;
+    notifyListeners();
+  }
+  int? _finishSongTargetSongId;
+  Timer? _finishSongTimer;
 
   void startSleepTimer(
     Duration duration, {
@@ -1462,6 +1470,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     sleepTimerOriginalDuration = duration;
     sleepTimerDuration = duration;
     _isFadingOut = false;
+    _isFinishingCurrentSong = false;
+    _finishSongTargetSongId = null;
+    _originalVolumeBeforeFade = audioHandler.player.volume;
     sleepTimerFinishSongActive =
         finishSong ?? SettingsProvider.instance.sleepTimerFinishSong;
     var fadeDurationSecs =
@@ -1483,33 +1494,27 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         timer.cancel();
         _sleepTimer = null;
 
-        if (sleepTimerFinishSongActive && audioHandler.player.playing) {
-          _finishSongSubscription?.cancel();
-          _finishSongSubscription = audioHandler.player.playerStateStream.listen(
-            (state) async {
-              if (state.processingState == ProcessingState.completed ||
-                  !state.playing) {
-                _finishSongSubscription?.cancel();
-                _finishSongSubscription = null;
-                await _finalizeSleepTimerStop();
-              }
-            },
-          );
-          notifyListeners();
+        if (sleepTimerFinishSongActive &&
+            audioHandler.player.playing &&
+            currentSong != null) {
+          _startFinishingActiveSong(fadeDurationSecs);
         } else {
           await _finalizeSleepTimerStop();
         }
       } else {
         sleepTimerDuration = remaining;
 
-        if (fadeDurationSecs > 0 && remaining.inSeconds <= fadeDurationSecs) {
+        // When finishSong is NOT active, fade out occurs during the countdown
+        if (!sleepTimerFinishSongActive &&
+            fadeDurationSecs > 0 &&
+            remaining.inSeconds <= fadeDurationSecs) {
           if (!_isFadingOut) {
             _isFadingOut = true;
             _originalVolumeBeforeFade = audioHandler.player.volume;
           }
           var fraction = remaining.inSeconds / fadeDurationSecs.toDouble();
           await audioHandler.player.setVolume(
-            _originalVolumeBeforeFade * fraction,
+            (_originalVolumeBeforeFade * fraction).clamp(0.0, 1.0),
           );
         }
 
@@ -1521,20 +1526,93 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  void _startFinishingActiveSong(int fadeDurationSecs) {
+    _finishSongTimer?.cancel();
+    _isFinishingCurrentSong = true;
+    _finishSongTargetSongId = currentSong?.id;
+    _originalVolumeBeforeFade = _volume;
+
+    // Reset volume to normal volume in case it was attenuated
+    audioHandler.player.setVolume(_originalVolumeBeforeFade);
+    _isFadingOut = false;
+
+    SleepTimerNotificationService().updateTimerNotification(
+      Duration.zero,
+      customBody: 'Finishing active song...',
+    );
+
+    _finishSongTimer = Timer.periodic(
+      const Duration(milliseconds: 250),
+      (timer) async {
+        if (!_isFinishingCurrentSong || sleepTimerDuration == null) {
+          timer.cancel();
+          return;
+        }
+
+        // If playback stopped or user paused
+        if (!audioHandler.player.playing) {
+          timer.cancel();
+          await _finalizeSleepTimerStop();
+          return;
+        }
+
+        var song = currentSong;
+        // If song changed or ended, pause immediately so next track does not play
+        if (song == null ||
+            (_finishSongTargetSongId != null &&
+                song.id != _finishSongTargetSongId)) {
+          timer.cancel();
+          await audioHandler.pause();
+          await _finalizeSleepTimerStop();
+          return;
+        }
+
+        var songDuration = audioHandler.player.duration ?? song.duration;
+        var pos = audioHandler.player.position;
+        var remainingInSong = songDuration - pos;
+
+        // Song reached its finish boundary
+        if (remainingInSong <= const Duration(milliseconds: 250) ||
+            pos >= songDuration) {
+          timer.cancel();
+          await audioHandler.pause();
+          await _finalizeSleepTimerStop();
+          return;
+        }
+
+        // Apply fade-out in the final fadeDurationSecs of the current song
+        if (fadeDurationSecs > 0 &&
+            remainingInSong.inSeconds <= fadeDurationSecs) {
+          if (!_isFadingOut) {
+            _isFadingOut = true;
+          }
+          var fraction = remainingInSong.inMilliseconds /
+              (fadeDurationSecs * 1000).toDouble();
+          await audioHandler.player.setVolume(
+            (_originalVolumeBeforeFade * fraction).clamp(0.0, 1.0),
+          );
+        }
+      },
+    );
+
+    notifyListeners();
+  }
+
   Future<void> _finalizeSleepTimerStop() async {
-    _finishSongSubscription?.cancel();
-    _finishSongSubscription = null;
-    await audioHandler.stop();
+    _finishSongTimer?.cancel();
+    _finishSongTimer = null;
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+
+    await audioHandler.pause();
     await audioHandler.player.setVolume(_volume);
 
     sleepTimerDuration = null;
     sleepTimerOriginalDuration = null;
     _isFadingOut = false;
+    _isFinishingCurrentSong = false;
+    _finishSongTargetSongId = null;
     sleepTimerFinishSongActive = false;
-
-    queue = [];
-    _originalQueue = [];
-    currentIndex = -1;
 
     _updateMediaNotificationControls();
     SleepTimerNotificationService().cancelNotification();
@@ -1544,10 +1622,12 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   void stopSleepTimer() {
     _sleepTimer?.cancel();
     _sleepTimer = null;
-    _finishSongSubscription?.cancel();
-    _finishSongSubscription = null;
+    _finishSongTimer?.cancel();
+    _finishSongTimer = null;
     sleepTimerDuration = null;
     sleepTimerOriginalDuration = null;
+    _isFinishingCurrentSong = false;
+    _finishSongTargetSongId = null;
     sleepTimerFinishSongActive = false;
     if (_isFadingOut) {
       audioHandler.player.setVolume(_originalVolumeBeforeFade);
@@ -1563,19 +1643,20 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       startSleepTimer(extension);
       return;
     }
-    sleepTimerDuration = sleepTimerDuration! + extension;
-    sleepTimerOriginalDuration =
-        (sleepTimerOriginalDuration ?? Duration.zero) + extension;
+    _finishSongTimer?.cancel();
+    _finishSongTimer = null;
+    _isFinishingCurrentSong = false;
+    _finishSongTargetSongId = null;
+
     if (_isFadingOut) {
       _isFadingOut = false;
       audioHandler.player.setVolume(_originalVolumeBeforeFade);
     }
-    _updateMediaNotificationControls();
-    if (sleepTimerDuration != null) {
-      SleepTimerNotificationService().updateTimerNotification(
-        sleepTimerDuration!,
-      );
-    }
-    notifyListeners();
+
+    var newDuration = (sleepTimerDuration ?? Duration.zero) + extension;
+    startSleepTimer(
+      newDuration,
+      finishSong: sleepTimerFinishSongActive,
+    );
   }
 }

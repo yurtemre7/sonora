@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -26,24 +27,33 @@ class SleepTimerNotificationService {
   Future<void> initialize() async {
     if (_initialized) return;
 
-    const androidInitializationSettings = AndroidInitializationSettings(
-      '@drawable/ic_launcher_monochrome',
-    );
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      _initialized = true;
+      return;
+    }
 
-    const initializationSettings = InitializationSettings(
-      android: androidInitializationSettings,
-    );
+    try {
+      const androidInitializationSettings = AndroidInitializationSettings(
+        '@drawable/ic_launcher_monochrome',
+      );
 
-    await _notificationsPlugin.initialize(
-      settings: initializationSettings,
-      onDidReceiveNotificationResponse: (response) {
-        if (response.actionId != null) {
-          handleAction(response.actionId!);
-        }
-      },
-    );
+      const initializationSettings = InitializationSettings(
+        android: androidInitializationSettings,
+      );
 
-    _initialized = true;
+      await _notificationsPlugin.initialize(
+        settings: initializationSettings,
+        onDidReceiveNotificationResponse: (response) {
+          if (response.actionId != null) {
+            handleAction(response.actionId!);
+          }
+        },
+      );
+
+      _initialized = true;
+    } catch (e) {
+      debugPrint('SleepTimerNotificationService initialize: $e');
+    }
   }
 
   static void handleAction(String actionId) {
@@ -54,59 +64,68 @@ class SleepTimerNotificationService {
     }
   }
 
-  Future<void> updateTimerNotification(Duration remaining) async {
-    if (!_initialized) await initialize();
+  Future<void> updateTimerNotification(
+    Duration remaining, {
+    String? customBody,
+  }) async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) return;
 
-    var minutes = remaining.inMinutes;
-    var seconds = remaining.inSeconds.remainder(60);
-    var hours = remaining.inHours;
+    try {
+      if (!_initialized) await initialize();
+      if (!_initialized) return;
 
-    String formatted;
-    if (hours > 0) {
-      var remainingMin = minutes.remainder(60);
-      formatted =
-          '${hours.toString().padLeft(2, '0')}:${remainingMin.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    } else {
-      formatted =
-          '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
+      var minutes = remaining.inMinutes;
+      var seconds = remaining.inSeconds.remainder(60);
+      var hours = remaining.inHours;
 
-    var androidDetails = const AndroidNotificationDetails(
-      _channelId,
-      _channelName,
-      channelDescription: _channelDescription,
-      importance: Importance.low,
-      priority: Priority.low,
-      ongoing: true,
-      autoCancel: false,
-      onlyAlertOnce: true,
-      showWhen: false,
-      icon: '@drawable/ic_launcher_monochrome',
-      actions: [
-        AndroidNotificationAction(
-          'add_1_min',
-          'Add 1 min',
-          showsUserInterface: true,
-        ),
-        AndroidNotificationAction(
-          'end_timer',
-          'End timer',
-          showsUserInterface: true,
-        ),
-      ],
-    );
+      String formatted;
+      if (hours > 0) {
+        var remainingMin = minutes.remainder(60);
+        formatted =
+            '${hours.toString().padLeft(2, '0')}:${remainingMin.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      } else {
+        formatted =
+            '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      }
 
-    var notificationDetails = NotificationDetails(android: androidDetails);
+      var androidDetails = const AndroidNotificationDetails(
+        _channelId,
+        _channelName,
+        channelDescription: _channelDescription,
+        importance: Importance.low,
+        priority: Priority.low,
+        ongoing: true,
+        autoCancel: false,
+        onlyAlertOnce: true,
+        showWhen: false,
+        icon: '@drawable/ic_launcher_monochrome',
+        actions: [
+          AndroidNotificationAction(
+            'add_1_min',
+            'Add 1 min',
+            showsUserInterface: true,
+          ),
+          AndroidNotificationAction(
+            'end_timer',
+            'End timer',
+            showsUserInterface: true,
+          ),
+        ],
+      );
 
-    await _notificationsPlugin.show(
-      id: _notificationId,
-      title: 'Sleep Timer',
-      body: '$formatted remaining',
-      notificationDetails: notificationDetails,
-    );
+      var notificationDetails = NotificationDetails(android: androidDetails);
+
+      await _notificationsPlugin.show(
+        id: _notificationId,
+        title: 'Sleep Timer',
+        body: customBody ?? '$formatted remaining',
+        notificationDetails: notificationDetails,
+      );
+    } catch (_) {}
   }
 
   Future<void> cancelNotification() async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) return;
     try {
       await _notificationsPlugin.cancel(id: _notificationId);
     } catch (_) {}
