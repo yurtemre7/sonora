@@ -2,6 +2,12 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.19.2] - 2026-08-28
+### Fixed
+* Sleep timer not working issue
+### Changed
+* Chore: Update readme files
+
 ## [1.19.1] - 2026-08-27
 ### Changed
 * Chore: Update packages
