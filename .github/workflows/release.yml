@@ -23,7 +23,7 @@ jobs:
       tag: ${{ steps.ver.outputs.tag }}
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
@@ -47,52 +47,36 @@ jobs:
     needs: version
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
-      - name: 🔍 Extract Flutter version from .fvmrc
-        id: flutter-ver
-        run: |
-          VERSION=$(jq -r '.flutter' .fvmrc)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "📌 Pinned Flutter version in .fvmrc: $VERSION"
-
-      - name: 🐦 Setup Flutter
+      - name: 🐦 Setup Flutter (from .fvmrc)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ steps.flutter-ver.outputs.version }}
+          flutter-version-file: .fvmrc
           channel: stable
           cache: true
 
       - name: ☕ Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6.0.0
         with:
           distribution: temurin
           java-version: '21'
 
-      - name: 🗄️ Cache Gradle & Android SDK components
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: android-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: android-gradle-
+      - name: 🐘 Build with Gradle
+        uses: gradle/actions@v6.3.0
 
-      - name: 🔑 Decode keystore
+      - name: 🔑 Configure Signing Keystore
         run: |
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
             echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
-          fi
-
-      - name: 📝 Write key.properties
-        run: |
-          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "storeFile=keystore.jks" > android/app/key.properties
-            echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> android/app/key.properties
-            echo "keyAlias=upload" >> android/app/key.properties
-            echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/app/key.properties
+            cat <<EOF > android/app/key.properties
+          storeFile=keystore.jks
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          keyAlias=upload
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
           fi
 
       - name: 📦 Get dependencies
@@ -108,7 +92,7 @@ jobs:
           mv build/app/outputs/flutter-apk/app-x86_64-release.apk sonora-x86_64.apk
 
       - name: 📤 Upload APK artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: sonora-android-apk
           path: sonora-*.apk
@@ -125,23 +109,27 @@ jobs:
       contents: write
     steps:
       - name: 📥 Checkout (for CHANGELOG.md)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: 📥 Download APK artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v7.0.1
         with:
           name: sonora-android-apk
           path: dist/
 
       - name: 📝 Extract release notes for version
         run: |
-          awk '/^## \[${{ needs.version.outputs.version_name }}\]/{found=1; next} found && /^## \[/{exit} found{print}' CHANGELOG.md > release_notes.md
+          VERSION="${{ needs.version.outputs.version_name }}"
+          awk '/^## \['"${VERSION}"'\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md > release_notes.md
+          if [ ! -s release_notes.md ] || [ -z "$(grep -v '^[[:space:]]*$' release_notes.md)" ]; then
+            echo "Release ${{ needs.version.outputs.tag }}" > release_notes.md
+          fi
           cat release_notes.md
 
       - name: 🏷️ Create Release & Upload Assets
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v3.0.2
         with:
           tag_name: ${{ needs.version.outputs.tag }}
           name: "Sonora ${{ needs.version.outputs.tag }}"
@@ -149,6 +137,4 @@ jobs:
           prerelease: false
           body_path: release_notes.md
           generate_release_notes: true
-          files: |
-            dist/sonora-*.apk
-            dist/*/sonora-*.apk
+          files: dist/sonora-*.apk
