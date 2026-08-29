@@ -51,11 +51,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🔍 Extract Flutter version
+      - name: 🔍 Extract Flutter version from .fvmrc
         id: flutter-ver
         run: |
-          VERSION=$(yq '.environment.flutter' pubspec.yaml | tr -d '^"'\''')
+          VERSION=$(jq -r '.flutter' .fvmrc)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📌 Pinned Flutter version in .fvmrc: $VERSION"
 
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
