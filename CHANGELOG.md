@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.19.5] - 2026-08-29
+### Changed
+* Chore: Update flutter to 3.47.2 and use in release.yml build apk step
+
 ## [1.19.4] - 2026-08-29
 ### Fixed
 * Playlist cover and reorder #21
