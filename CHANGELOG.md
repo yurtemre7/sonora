@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.19.4] - 2026-08-29
+### Fixed
+* Playlist cover and reorder #21
+
 ## [1.19.3] - 2026-08-29
 ### Fixed
 * Re-apply wallpaper color extraction
