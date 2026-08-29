@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/utils/l10n_extension.dart';
+import 'package:sonora/widgets/album_art.dart';
 
 class PlaylistSelectorBottomSheet extends StatefulWidget {
   const PlaylistSelectorBottomSheet({
@@ -173,6 +174,16 @@ class _PlaylistSelectorBottomSheetState
                                     playlist.songIds.contains(
                                       targetSongs.first.id,
                                     );
+                                Song? firstSong;
+                                for (var id in playlist.songIds) {
+                                  var s = widget.playerProvider.allSongs
+                                      .where((s) => s.id == id)
+                                      .firstOrNull;
+                                  if (s != null) {
+                                    firstSong = s;
+                                    break;
+                                  }
+                                }
                                 return Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -197,8 +208,7 @@ class _PlaylistSelectorBottomSheetState
                                               : theme
                                                     .colorScheme
                                                     .surfaceContainerLow,
-                                          leading:
-                                              playlist.coverImagePath != null
+                                          leading: playlist.coverImagePath != null
                                               ? Container(
                                                   width: 40,
                                                   height: 40,
@@ -221,14 +231,21 @@ class _PlaylistSelectorBottomSheetState
                                                     ),
                                                   ),
                                                 )
-                                              : Icon(
-                                                  Icons.playlist_add_rounded,
-                                                  color: isAlreadyIn
-                                                      ? theme
-                                                            .colorScheme
-                                                            .primary
-                                                      : null,
-                                                ),
+                                              : firstSong != null
+                                                  ? AlbumArt(
+                                                      artworkPath:
+                                                          firstSong.artworkPath,
+                                                      size: 40,
+                                                      borderRadius: 8,
+                                                    )
+                                                  : Icon(
+                                                      Icons.playlist_add_rounded,
+                                                      color: isAlreadyIn
+                                                          ? theme
+                                                                .colorScheme
+                                                                .primary
+                                                          : null,
+                                                    ),
                                           title: Text(
                                             playlist.name,
                                             style: theme.textTheme.bodyLarge

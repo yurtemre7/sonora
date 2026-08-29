@@ -33,4 +33,26 @@ class Playlist {
       description: json['description'] as String?,
     );
   }
+
+  Playlist copyWith({
+    String? id,
+    String? name,
+    List<int>? songIds,
+    String? coverImagePath,
+    bool clearCoverImage = false,
+    String? description,
+    bool clearDescription = false,
+  }) {
+    return Playlist(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      songIds: songIds ?? this.songIds,
+      coverImagePath: clearCoverImage
+          ? null
+          : (coverImagePath ?? this.coverImagePath),
+      description: clearDescription
+          ? null
+          : (description ?? this.description),
+    );
+  }
 }

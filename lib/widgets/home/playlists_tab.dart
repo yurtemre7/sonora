@@ -10,6 +10,7 @@ import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/native_bridge.dart';
 import 'package:sonora/utils/image_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
+import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/edit_playlist_description_dialog.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
@@ -95,6 +96,8 @@ class PlaylistsTab extends StatelessWidget {
       );
     }
 
+    var songMap = {for (var s in allSongs) s.id: s};
+
     return ListView.builder(
       key: const PageStorageKey<String>('playlists_list'),
       primary: true,
@@ -103,9 +106,15 @@ class PlaylistsTab extends StatelessWidget {
       itemCount: filteredPlaylists.length,
       itemBuilder: (context, index) {
         var playlist = filteredPlaylists[index];
-        var songCount = allSongs
-            .where((s) => playlist.songIds.contains(s.id))
-            .length;
+        var songCount = 0;
+        Song? firstSong;
+        for (var id in playlist.songIds) {
+          var s = songMap[id];
+          if (s != null) {
+            songCount++;
+            firstSong ??= s;
+          }
+        }
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -126,25 +135,31 @@ class PlaylistsTab extends StatelessWidget {
                         ),
                       ),
                     )
-                  : Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        gradient: LinearGradient(
-                          colors: [
-                            theme.colorScheme.primaryContainer,
-                            theme.colorScheme.secondaryContainer,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                  : firstSong != null
+                      ? AlbumArt(
+                          artworkPath: firstSong.artworkPath,
+                          size: 48,
+                          borderRadius: 8,
+                        )
+                      : Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            gradient: LinearGradient(
+                              colors: [
+                                theme.colorScheme.primaryContainer,
+                                theme.colorScheme.secondaryContainer,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.music_note_rounded,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
                         ),
-                      ),
-                      child: Icon(
-                        Icons.music_note_rounded,
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                    ),
               title: Text(playlist.name),
               subtitle: Text(context.l10n.songCount(songCount)),
               trailing: PopupMenuButton<int>(

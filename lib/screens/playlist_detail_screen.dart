@@ -602,28 +602,73 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                           var isSelecting = _selectedSongIds.isNotEmpty;
                           var isSelected = _selectedSongIds.contains(song.id);
 
-                          return ReorderableDelayedDragStartListener(
+                          return Dismissible(
                             key: _itemKeys[index],
-                            index: index,
-                            child: Dismissible(
-                              key: ValueKey(
-                                'dismiss_${_itemKeys[index].hashCode}',
+                            direction: isSelecting
+                                ? DismissDirection.none
+                                : DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20.0,
                               ),
-                              direction: isSelecting
-                                  ? DismissDirection.none
-                                  : DismissDirection.endToStart,
-                              background: Container(
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20.0,
-                                ),
-                                color: theme.colorScheme.errorContainer,
-                                child: Icon(
-                                  Icons.delete_outline_rounded,
-                                  color: theme.colorScheme.onErrorContainer,
-                                ),
+                              color: theme.colorScheme.errorContainer,
+                              child: Icon(
+                                Icons.delete_outline_rounded,
+                                color: theme.colorScheme.onErrorContainer,
                               ),
-                              onDismissed: (direction) async {
+                            ),
+                            onDismissed: (direction) async {
+                              await widget.onRemoveSong(
+                                _playlist.id,
+                                song.id,
+                              );
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Removed "${song.displayTitle}" from playlist.',
+                                  ),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            },
+                            child: SongTile(
+                              song: song,
+                              playerProvider: widget.playerProvider,
+                              isCurrent: isCurrent,
+                              showDivider: index < _playlistSongs.length - 1,
+                              isSelecting: isSelecting,
+                              isSelected: isSelected,
+                              leadingDragHandle: isSelecting
+                                  ? null
+                                  : ReorderableDragStartListener(
+                                      index: index,
+                                      child: Container(
+                                        width: 36,
+                                        height: 48,
+                                        alignment: Alignment.center,
+                                        color: Colors.transparent,
+                                        child: Icon(
+                                          Icons.drag_handle_rounded,
+                                          color: theme
+                                              .colorScheme
+                                              .onSurfaceVariant
+                                              .withValues(alpha: 0.5),
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                              onSelect: () => _toggleSongSelection(song),
+                              onLongPress: () => _onLongPressSong(song),
+                              onTap: () {
+                                widget.playerProvider.playSong(
+                                  song,
+                                  _playlistSongs,
+                                  playlistId: widget.playlist.id,
+                                );
+                              },
+                              onRemoveFromPlaylist: () async {
                                 await widget.onRemoveSong(
                                   _playlist.id,
                                   song.id,
@@ -638,38 +683,6 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                                   ),
                                 );
                               },
-                              child: SongTile(
-                                song: song,
-                                playerProvider: widget.playerProvider,
-                                isCurrent: isCurrent,
-                                showDivider: index < _playlistSongs.length - 1,
-                                isSelecting: isSelecting,
-                                isSelected: isSelected,
-                                onSelect: () => _toggleSongSelection(song),
-                                onLongPress: () => _onLongPressSong(song),
-                                onTap: () {
-                                  widget.playerProvider.playSong(
-                                    song,
-                                    _playlistSongs,
-                                    playlistId: widget.playlist.id,
-                                  );
-                                },
-                                onRemoveFromPlaylist: () async {
-                                  await widget.onRemoveSong(
-                                    _playlist.id,
-                                    song.id,
-                                  );
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Removed "${song.displayTitle}" from playlist.',
-                                      ),
-                                      behavior: SnackBarBehavior.floating,
-                                    ),
-                                  );
-                                },
-                              ),
                             ),
                           );
                         },

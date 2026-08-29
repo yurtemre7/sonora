@@ -1601,14 +1601,25 @@ class MusicScanner {
     var playlists = await getPlaylists();
     for (var i = 0; i < playlists.length; i++) {
       if (playlists[i].id == playlistId) {
-        var oldPlaylist = playlists[i];
-        playlists[i] = Playlist(
-          id: oldPlaylist.id,
-          name: oldPlaylist.name,
-          songIds: oldPlaylist.songIds,
-          coverImagePath: oldPlaylist.coverImagePath,
+        playlists[i] = playlists[i].copyWith(
           description: description,
+          clearDescription: description == null,
         );
+        await savePlaylists(playlists);
+        break;
+      }
+    }
+  }
+
+  /// Reorders songs within an existing playlist.
+  Future<void> reorderPlaylistSongs(
+    String playlistId,
+    List<int> reorderedIds,
+  ) async {
+    var playlists = await getPlaylists();
+    for (var i = 0; i < playlists.length; i++) {
+      if (playlists[i].id == playlistId) {
+        playlists[i] = playlists[i].copyWith(songIds: reorderedIds);
         await savePlaylists(playlists);
         break;
       }

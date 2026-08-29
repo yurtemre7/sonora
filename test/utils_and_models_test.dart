@@ -188,6 +188,23 @@ void main() {
       expect(reconstructed.songIds, equals(playlist.songIds));
       expect(reconstructed.coverImagePath, equals(playlist.coverImagePath));
       expect(reconstructed.description, equals(playlist.description));
+
+      var modified = playlist.copyWith(
+        name: 'Modern Rock',
+        songIds: [40, 30, 20, 10],
+      );
+      expect(modified.id, equals(playlist.id));
+      expect(modified.name, equals('Modern Rock'));
+      expect(modified.songIds, equals([40, 30, 20, 10]));
+      expect(modified.coverImagePath, equals(playlist.coverImagePath));
+      expect(modified.description, equals(playlist.description));
+
+      var cleared = playlist.copyWith(
+        clearCoverImage: true,
+        clearDescription: true,
+      );
+      expect(cleared.coverImagePath, isNull);
+      expect(cleared.description, isNull);
     });
   });
 

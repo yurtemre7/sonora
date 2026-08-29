@@ -1000,11 +1000,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     var list = await scanner.getPlaylists();
     for (var i = 0; i < list.length; i++) {
       if (list[i].id == id) {
-        list[i] = Playlist(
-          id: list[i].id,
-          name: newName,
-          songIds: list[i].songIds,
-        );
+        list[i] = list[i].copyWith(name: newName);
         break;
       }
     }
@@ -1072,20 +1068,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     List<int> reorderedIds,
   ) async {
     var scanner = MusicScanner();
-    var list = await scanner.getPlaylists();
-    for (var i = 0; i < list.length; i++) {
-      if (list[i].id == playlistId) {
-        list[i] = Playlist(
-          id: list[i].id,
-          name: list[i].name,
-          songIds: reorderedIds,
-        );
-        break;
-      }
-    }
-    await scanner.savePlaylists(list);
-    playlists = list;
-    notifyListeners();
+    await scanner.reorderPlaylistSongs(playlistId, reorderedIds);
+    await loadPlaylists();
   }
 
   // ── Phase 3: Dynamic Theme, Visualizer & Sleep Timer Actions ────────────────

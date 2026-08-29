@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 import 'package:sonora/l10n/app_localizations.dart';
 import 'package:sonora/models/playlist.dart';
+import 'package:sonora/models/song.dart';
+import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/providers/settings_provider.dart';
+import 'package:sonora/screens/playlist_detail_screen.dart';
+import 'package:sonora/services/audio_handler.dart';
+import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/edit_playlist_description_dialog.dart';
+import 'package:sonora/widgets/home/playlists_tab.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
 import 'package:sonora/widgets/speed_slider.dart';
 
@@ -23,6 +32,12 @@ Widget testApp(Widget child) {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+  });
   group('ConfirmDeleteDialog Tests', () {
     testWidgets('Returns true when destructive action is confirmed', (tester) async {
       bool? result;
@@ -253,6 +268,123 @@ void main() {
       await tester.pump();
 
       expect(changedSpeed, equals(1.0));
+    });
+  });
+
+  group('PlaylistsTab & PlaylistDetailScreen Tests', () {
+    testWidgets('PlaylistsTab renders first song artwork as default cover when coverImagePath is null', (tester) async {
+      var audioHandler = SonoraAudioHandler();
+      var settingsProvider = SettingsProvider();
+      var playerProvider = PlayerProvider(
+        audioHandler: audioHandler,
+        settingsProvider: settingsProvider,
+      );
+
+      var songA = Song(
+        id: 101,
+        title: 'Song One',
+        artist: 'Artist A',
+        album: 'Album A',
+        duration: const Duration(minutes: 3),
+        filePath: '/music/song1.mp3',
+        artworkPath: '/covers/song1.jpg',
+      );
+
+      var songB = Song(
+        id: 102,
+        title: 'Song Two',
+        artist: 'Artist B',
+        album: 'Album B',
+        duration: const Duration(minutes: 4),
+        filePath: '/music/song2.mp3',
+      );
+
+      var playlistWithSongs = Playlist(
+        id: 'pl_1',
+        name: 'My Roadtrip Mix',
+        songIds: [101, 102],
+      );
+
+      playerProvider.updatePlaylists([playlistWithSongs]);
+
+      await tester.pumpWidget(
+        testApp(
+          PlaylistsTab(
+            allSongs: [songA, songB],
+            filteredPlaylists: [playlistWithSongs],
+            playerProvider: playerProvider,
+            onUnfocusSearch: () {},
+            onCreatePlaylistDialog: () {},
+            onDeletePlaylist: (_) async {},
+            onRenamePlaylist: (_, _) async {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('My Roadtrip Mix'), findsOneWidget);
+      expect(find.text('2 songs'), findsOneWidget);
+      // Verify AlbumArt resolved with songA's artworkPath
+      var albumArt = tester.widget<AlbumArt>(find.byType(AlbumArt));
+      expect(albumArt.artworkPath, equals('/covers/song1.jpg'));
+    });
+
+    testWidgets('PlaylistDetailScreen shows drag handle and enables track reordering', (tester) async {
+      var audioHandler = SonoraAudioHandler();
+      var settingsProvider = SettingsProvider();
+      var playerProvider = PlayerProvider(
+        audioHandler: audioHandler,
+        settingsProvider: settingsProvider,
+      );
+
+      var song1 = Song(
+        id: 1,
+        title: 'First Track',
+        artist: 'Artist 1',
+        album: 'Album 1',
+        duration: const Duration(minutes: 3),
+        filePath: '/music/1.mp3',
+      );
+      var song2 = Song(
+        id: 2,
+        title: 'Second Track',
+        artist: 'Artist 2',
+        album: 'Album 2',
+        duration: const Duration(minutes: 4),
+        filePath: '/music/2.mp3',
+      );
+
+      var playlist = Playlist(
+        id: 'pl_reorder',
+        name: 'Reorder Test',
+        songIds: [1, 2],
+      );
+
+      playerProvider.updatePlaylists([playlist]);
+
+      await tester.pumpWidget(
+        testApp(
+          PlaylistDetailScreen(
+            playlist: playlist,
+            songs: [song1, song2],
+            playerProvider: playerProvider,
+            onRemoveSong: (_, _) async {},
+            onReorderSongs: (_, _) async {},
+            playlists: [playlist],
+            onAddSongToPlaylist: (_, _) async {},
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Reorder Test'), findsOneWidget);
+      expect(find.text('First Track'), findsOneWidget);
+      expect(find.text('Second Track'), findsOneWidget);
+
+      // Verify drag handle icons exist for each track
+      expect(find.byIcon(Icons.drag_handle_rounded), findsNWidgets(2));
+      expect(find.byType(ReorderableDragStartListener), findsNWidgets(2));
     });
   });
 }

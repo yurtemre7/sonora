@@ -640,11 +640,7 @@ class _SonoraAppState extends State<SonoraApp> {
     var playlists = List<Playlist>.from(_playerProvider.playlists);
     for (var i = 0; i < playlists.length; i++) {
       if (playlists[i].id == playlistId) {
-        playlists[i] = Playlist(
-          id: playlists[i].id,
-          name: playlists[i].name,
-          songIds: reorderedIds,
-        );
+        playlists[i] = playlists[i].copyWith(songIds: reorderedIds);
         break;
       }
     }

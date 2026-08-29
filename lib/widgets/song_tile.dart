@@ -22,6 +22,7 @@ class SongTile extends StatelessWidget {
     this.isSelecting = false,
     this.isSelected = false,
     this.onSelect,
+    this.leadingDragHandle,
   });
 
   final Song song;
@@ -40,6 +41,7 @@ class SongTile extends StatelessWidget {
   final bool isSelecting;
   final bool isSelected;
   final VoidCallback? onSelect;
+  final Widget? leadingDragHandle;
 
   @override
   Widget build(BuildContext context) {
@@ -52,60 +54,50 @@ class SongTile extends StatelessWidget {
             ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
             : Colors.transparent);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            border: Border(
-              left: BorderSide(
-                color: isHighlighted
-                    ? theme.colorScheme.primary
-                    : Colors.transparent,
-                width: 3.5,
-              ),
-            ),
-          ),
-          child: InkWell(
-            onTap: isSelecting ? (onSelect ?? onTap) : onTap,
-            onLongPress: isSelecting ? (onSelect ?? onTap) : onLongPress,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      AlbumArt(
-                        artworkPath: song.artworkPath,
-                        size: 48,
-                        borderRadius: 10,
-                      ),
-                      if (isSelecting)
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? theme.colorScheme.primary.withValues(alpha: 0.85)
-                                : Colors.black.withValues(alpha: 0.45),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            isSelected
-                                ? Icons.check_circle_rounded
-                                : Icons.radio_button_unchecked_rounded,
-                            color: isSelected
-                                ? theme.colorScheme.onPrimary
-                                : Colors.white.withValues(alpha: 0.85),
-                            size: 24,
-                          ),
-                        ),
-                    ],
+    var tileContent = InkWell(
+      onTap: isSelecting ? (onSelect ?? onTap) : onTap,
+      onLongPress: isSelecting ? (onSelect ?? onTap) : onLongPress,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: (leadingDragHandle != null && !isSelecting) ? 0 : 12,
+          right: 12,
+          top: 8,
+          bottom: 8,
+        ),
+        child: Row(
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                AlbumArt(
+                  artworkPath: song.artworkPath,
+                  size: 48,
+                  borderRadius: 10,
+                ),
+                if (isSelecting)
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? theme.colorScheme.primary.withValues(alpha: 0.85)
+                          : Colors.black.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      isSelected
+                          ? Icons.check_circle_rounded
+                          : Icons.radio_button_unchecked_rounded,
+                      color: isSelected
+                          ? theme.colorScheme.onPrimary
+                          : Colors.white.withValues(alpha: 0.85),
+                      size: 24,
+                    ),
                   ),
+              ],
+            ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -297,11 +289,37 @@ class SongTile extends StatelessWidget {
                 ],
               ),
             ),
+          );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            border: Border(
+              left: BorderSide(
+                color: isHighlighted
+                    ? theme.colorScheme.primary
+                    : Colors.transparent,
+                width: 3.5,
+              ),
+            ),
           ),
+          child: (leadingDragHandle != null && !isSelecting)
+              ? Row(
+                  children: [
+                    leadingDragHandle!,
+                    Expanded(child: tileContent),
+                  ],
+                )
+              : tileContent,
         ),
         if (showDivider)
           Padding(
-            padding: const EdgeInsets.only(left: 72),
+            padding: EdgeInsets.only(
+              left: (leadingDragHandle != null && !isSelecting) ? 104 : 72,
+            ),
             child: Divider(
               height: 1,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
