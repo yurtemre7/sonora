@@ -19,7 +19,6 @@ class SettingsProvider extends ChangeNotifier {
   Color? dynamicWallpaperColor;
   var amoledDark = false;
   var dynamicThemeColor = const Color(0xFF7C4DFF);
-  var ambientGlowIntensity = 'vibrant'; // 'off' | 'subtle' | 'vibrant' | 'immersive'
   var nowPlayingStyle = 'modern'; // 'modern' | 'vinyl' | 'minimalist'
   var showVisualizer = false;
   var immersiveMode = false;
@@ -80,8 +79,6 @@ class SettingsProvider extends ChangeNotifier {
     if (colorValue != null) {
       dynamicThemeColor = Color(colorValue);
     }
-    ambientGlowIntensity =
-        await prefs.getString('ambient_glow_intensity') ?? 'vibrant';
     nowPlayingStyle =
         await prefs.getString('now_playing_style') ?? 'modern';
     showVisualizer = await prefs.getBool('show_visualizer') ?? false;
@@ -216,13 +213,6 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     var prefs = SharedPreferencesAsync();
     await prefs.setBool('use_material_you', value);
-  }
-
-  Future<void> setAmbientGlowIntensity(String value) async {
-    ambientGlowIntensity = value;
-    notifyListeners();
-    var prefs = SharedPreferencesAsync();
-    await prefs.setString('ambient_glow_intensity', value);
   }
 
   Future<void> setNowPlayingStyle(String value) async {

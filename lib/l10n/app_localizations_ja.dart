@@ -1191,22 +1191,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get useMaterialYouSubtitle => 'システム壁紙からテーマカラーを抽出します（Android 12以降）';
 
   @override
-  String get ambientGlow => 'アンビエントグロー';
-
-  @override
-  String get ambientGlowSubtitle => '再生中画面のグローの強さ';
-
-  @override
-  String get glowOff => 'オフ';
-
-  @override
-  String get glowSubtle => '控えめ';
-
-  @override
-  String get glowVibrant => '鮮やか';
-
-  @override
-  String get glowImmersive => '没入感';
+  String get off => 'オフ';
 
   @override
   String get nowPlayingStyle => '再生中画面のスタイル';
@@ -1215,7 +1200,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get nowPlayingStyleSubtitle => 'プレーヤー画面のデザインを選択します';
 
   @override
-  String get styleModern => 'モダングロー';
+  String get styleModern => 'モダン';
 
   @override
   String get styleVinyl => 'レコード盤';

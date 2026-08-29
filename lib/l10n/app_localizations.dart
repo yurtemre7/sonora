@@ -2312,41 +2312,11 @@ abstract class AppLocalizations {
   /// **'Extract theme colors from your system wallpaper (Android 12+)'**
   String get useMaterialYouSubtitle;
 
-  /// No description provided for @ambientGlow.
-  ///
-  /// In en, this message translates to:
-  /// **'Ambient Glow'**
-  String get ambientGlow;
-
-  /// No description provided for @ambientGlowSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Glow intensity on the now playing screen'**
-  String get ambientGlowSubtitle;
-
-  /// No description provided for @glowOff.
+  /// No description provided for @off.
   ///
   /// In en, this message translates to:
   /// **'Off'**
-  String get glowOff;
-
-  /// No description provided for @glowSubtle.
-  ///
-  /// In en, this message translates to:
-  /// **'Subtle'**
-  String get glowSubtle;
-
-  /// No description provided for @glowVibrant.
-  ///
-  /// In en, this message translates to:
-  /// **'Vibrant'**
-  String get glowVibrant;
-
-  /// No description provided for @glowImmersive.
-  ///
-  /// In en, this message translates to:
-  /// **'Immersive'**
-  String get glowImmersive;
+  String get off;
 
   /// No description provided for @nowPlayingStyle.
   ///
@@ -2363,7 +2333,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleModern.
   ///
   /// In en, this message translates to:
-  /// **'Modern Glow'**
+  /// **'Modern'**
   String get styleModern;
 
   /// No description provided for @styleVinyl.

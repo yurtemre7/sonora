@@ -1258,22 +1258,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Extract theme colors from your system wallpaper (Android 12+)';
 
   @override
-  String get ambientGlow => 'Ambient Glow';
-
-  @override
-  String get ambientGlowSubtitle => 'Glow intensity on the now playing screen';
-
-  @override
-  String get glowOff => 'Off';
-
-  @override
-  String get glowSubtle => 'Subtle';
-
-  @override
-  String get glowVibrant => 'Vibrant';
-
-  @override
-  String get glowImmersive => 'Immersive';
+  String get off => 'Off';
 
   @override
   String get nowPlayingStyle => 'Now Playing Style';
@@ -1283,7 +1268,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose the visual design of the player screen';
 
   @override
-  String get styleModern => 'Modern Glow';
+  String get styleModern => 'Modern';
 
   @override
   String get styleVinyl => 'Vinyl Turntable';

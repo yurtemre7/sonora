@@ -336,41 +336,6 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       ),
                     ),
                     ListTile(
-                      leading: const Icon(Icons.auto_awesome_rounded),
-                      title: Text(context.l10n.ambientGlow),
-                      subtitle: Text(context.l10n.ambientGlowSubtitle),
-                      trailing: DropdownButton<String>(
-                        value: ['off', 'subtle', 'vibrant', 'immersive']
-                                .contains(settingsProvider.ambientGlowIntensity)
-                            ? settingsProvider.ambientGlowIntensity
-                            : 'vibrant',
-                        underline: const SizedBox(),
-                        items: [
-                          DropdownMenuItem(
-                            value: 'off',
-                            child: Text(context.l10n.glowOff),
-                          ),
-                          DropdownMenuItem(
-                            value: 'subtle',
-                            child: Text(context.l10n.glowSubtle),
-                          ),
-                          DropdownMenuItem(
-                            value: 'vibrant',
-                            child: Text(context.l10n.glowVibrant),
-                          ),
-                          DropdownMenuItem(
-                            value: 'immersive',
-                            child: Text(context.l10n.glowImmersive),
-                          ),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) {
-                            settingsProvider.setAmbientGlowIntensity(val);
-                          }
-                        },
-                      ),
-                    ),
-                    ListTile(
                       leading: const Icon(Icons.art_track_rounded),
                       title: Text(context.l10n.nowPlayingStyle),
                       subtitle: Text(context.l10n.nowPlayingStyleSubtitle),

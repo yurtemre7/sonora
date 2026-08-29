@@ -144,7 +144,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
                                 value: sec,
                                 child: Text(
                                   sec == 0
-                                      ? context.l10n.glowOff
+                                      ? context.l10n.off
                                       : context.l10n.secondsAbbr(sec),
                                 ),
                               ),

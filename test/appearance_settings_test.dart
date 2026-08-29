@@ -166,7 +166,8 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Verify Section Headers
       expect(find.text('Theme Mode'), findsOneWidget);
@@ -183,7 +184,8 @@ void main() {
 
       // Tap Dark theme mode
       await tester.tap(find.text('Dark'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
       expect(themeProvider.themeMode, equals(ThemeMode.dark));
 
       // Verify ThemeColorSource SegmentedButton
@@ -198,7 +200,8 @@ void main() {
 
       // Switch to Material You
       await tester.tap(find.text('Material You'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       expect(settingsProvider.themeColorSource, equals(ThemeColorSource.materialYou));
       expect(settingsProvider.useMaterialYou, isTrue);
@@ -209,7 +212,8 @@ void main() {
 
       // Switch to Custom Accent Color
       await tester.tap(find.text('Custom'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       expect(settingsProvider.themeColorSource, equals(ThemeColorSource.custom));
       expect(settingsProvider.useMaterialYou, isFalse);

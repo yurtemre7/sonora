@@ -57,11 +57,11 @@ Sonora is a privacy-first local music player built with Flutter. It features a M
 - **Material 3 Expressive Design**: Outfit and Inter typography, circular controls, blurred background artwork, and custom-styled sliders.
 - **Global Mini Player**: Persistent bottom bar with live progress strip. Tap to expand, swipe up/down to open/dismiss, and swipe left/right to skip tracks.
 - **Now Playing Sheet**: Full-screen modal with blurred artwork background, transport controls, and tabbed content: Lyrics, Up Next, and Related.
-- **Multiple Player Layout Styles**: Modern glow, vinyl record style, or minimalist layout.
+- **Multiple Player Layout Styles**: Modern, vinyl record style, or minimalist layout.
 - **Unified Color Source & Theming**: 1-tap SegmentedButton controls for Theme Mode (System, Light, Dark) and Color Source (Material You system wallpaper extraction on Android 12+, Dynamic Album Art theming, or Custom Accent Color).
 - **AMOLED Pure Black Mode**: Pitch-black backgrounds for OLED displays.
 - **Lyrics Display**: Synchronized `.lrc` files with auto-scroll, active-line highlight, and tap-to-seek. Plain `.txt` files display as scrollable text.
-- **Audio Visualizer & Ambient Glow**: Optional animated wave bars and pulsating ambient glow behind album artwork.
+- **Audio Visualizer**: Optional animated wave bars at the bottom of the player screen.
 
 ### Statistics
 

@@ -15,7 +15,6 @@ import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/services/lyrics_service.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
-import 'package:sonora/widgets/ambient_glow.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
 import 'package:sonora/widgets/animated_vinyl.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
@@ -303,11 +302,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             child: Stack(
               alignment: Alignment.center,
               children: [
-                AmbientGlow(
-                  isPlaying: widget.playerProvider.audioHandler.player.playing,
-                  color: theme.colorScheme.primary,
-                  intensity: SettingsProvider.instance.ambientGlowIntensity,
-                ),
                 if (SettingsProvider.instance.nowPlayingStyle == 'vinyl' &&
                     !_showLyrics)
                   AnimatedVinyl(

@@ -22,7 +22,6 @@ void main() {
       expect(settings.useMaterialYou, isFalse);
       expect(settings.themeColorSource, equals(ThemeColorSource.albumArt));
       expect(settings.amoledDark, isFalse);
-      expect(settings.ambientGlowIntensity, equals('vibrant'));
       expect(settings.nowPlayingStyle, equals('modern'));
       expect(settings.showVisualizer, isFalse);
       expect(settings.immersiveMode, isFalse);
@@ -93,7 +92,6 @@ void main() {
     test('All preference setters persist across restart', () async {
       var settings1 = SettingsProvider();
       await settings1.setAmoledDark(true);
-      await settings1.setAmbientGlowIntensity('immersive');
       await settings1.setNowPlayingStyle('vinyl');
       await settings1.setShowVisualizer(true);
       await settings1.setImmersiveMode(true);
@@ -116,7 +114,6 @@ void main() {
       await settings2.loadSettings();
 
       expect(settings2.amoledDark, isTrue);
-      expect(settings2.ambientGlowIntensity, equals('immersive'));
       expect(settings2.nowPlayingStyle, equals('vinyl'));
       expect(settings2.showVisualizer, isTrue);
       expect(settings2.immersiveMode, isTrue);

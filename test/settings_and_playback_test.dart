@@ -21,7 +21,6 @@ void main() {
       expect(settings.sleepTimerFadeOutSeconds, 10);
       expect(settings.sleepTimerFinishSong, isFalse);
       expect(settings.useMaterialYou, isFalse);
-      expect(settings.ambientGlowIntensity, 'vibrant');
       expect(settings.nowPlayingStyle, 'modern');
     });
 
@@ -41,12 +40,6 @@ void main() {
       var settings = SettingsProvider();
       await settings.setUseMaterialYou(true);
       expect(settings.useMaterialYou, isTrue);
-    });
-
-    test('updates ambientGlowIntensity', () async {
-      var settings = SettingsProvider();
-      await settings.setAmbientGlowIntensity('immersive');
-      expect(settings.ambientGlowIntensity, 'immersive');
     });
 
     test('updates nowPlayingStyle', () async {
