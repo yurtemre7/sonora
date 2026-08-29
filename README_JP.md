@@ -1,5 +1,7 @@
 # Sonora
 
+[![🚀 Flutter Release Build](https://github.com/yurtemre7/sonora/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/yurtemre7/sonora/actions/workflows/release.yml)
+
 *🌐 他の言語で読む: [English](README.md)*
 
 Sonora は Flutter で構築された、プライバシーを最優先にしたローカル音楽プレイヤーです。Material 3 Expressive デザインを採用し、アルバムアートおよび Material You（壁紙カラー）から動的にテーマカラーを生成します。ディレクトリベースのライブラリ同期、マルチバンドイコライザー & サウンドエフェクト（MFX）、複数曲の一括操作（マルチセレクト）、シームレスなバックグラウンド再生を実現しており、ファイルのコピーやアップロードは一切行いません。主な対象プラットフォームは Android で、Windows ビルドにも対応しています。

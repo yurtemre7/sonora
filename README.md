@@ -1,5 +1,7 @@
 # Sonora
 
+[![🚀 Flutter Release Build](https://github.com/yurtemre7/sonora/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/yurtemre7/sonora/actions/workflows/release.yml)
+
 *🌐 Read this in: [日本語](README_JP.md)*
 
 Sonora is a privacy-first local music player built with Flutter. It features a Material 3 Expressive design with dynamic album-art and Material You wallpaper theming, directory-based library sync, multi-band equalizer & sound effects (MFX), multi-select batch actions, and seamless background playback — all without ever copying or uploading your files. Android is the primary target, with Windows builds also supported.
