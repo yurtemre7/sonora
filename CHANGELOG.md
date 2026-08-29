@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.19.7] - 2026-08-29
+### Changed
+* Chore: Add workflow status badge
+
 ## [1.19.6] - 2026-08-29
 ### Changed
 * Chore: Update release.yml for improved CI/CD pipeline
