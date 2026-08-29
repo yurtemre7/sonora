@@ -40,7 +40,10 @@ class MusicScanner {
 
   /// Retrieves the native Android 12+ Monet dynamic wallpaper accent color.
   static Future<Color?> getDynamicWallpaperColor() async {
-    if (!Platform.isAndroid) return null;
+    if (!Platform.isAndroid &&
+        !Platform.environment.containsKey('FLUTTER_TEST')) {
+      return null;
+    }
     try {
       var result = await _mediastoreChannel.invokeMethod<int>(
         'getDynamicWallpaperColor',

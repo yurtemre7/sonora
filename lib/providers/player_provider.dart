@@ -950,7 +950,11 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
+    if (state == AppLifecycleState.resumed) {
+      if (settingsProvider.useMaterialYou) {
+        settingsProvider.refreshDynamicWallpaperColor();
+      }
+    } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.detached) {
       statsService.flush();

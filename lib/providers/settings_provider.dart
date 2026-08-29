@@ -178,25 +178,39 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   Future<void> setThemeColorSource(ThemeColorSource source) async {
+    var prefs = SharedPreferencesAsync();
     switch (source) {
       case ThemeColorSource.materialYou:
+        useDynamicTheme = false;
+        await prefs.setBool('use_dynamic_theme', false);
         await setUseMaterialYou(true);
-        await setDynamicTheme(false);
         break;
       case ThemeColorSource.albumArt:
-        await setUseMaterialYou(false);
+        useMaterialYou = false;
+        await prefs.setBool('use_material_you', false);
         await setDynamicTheme(true);
         break;
       case ThemeColorSource.custom:
-        await setUseMaterialYou(false);
-        await setDynamicTheme(false);
+        useMaterialYou = false;
+        useDynamicTheme = false;
+        notifyListeners();
+        await prefs.setBool('use_material_you', false);
+        await prefs.setBool('use_dynamic_theme', false);
         break;
+    }
+  }
+
+  Future<void> refreshDynamicWallpaperColor() async {
+    var newColor = await MusicScanner.getDynamicWallpaperColor();
+    if (newColor != dynamicWallpaperColor) {
+      dynamicWallpaperColor = newColor;
+      notifyListeners();
     }
   }
 
   Future<void> setUseMaterialYou(bool value) async {
     useMaterialYou = value;
-    if (value && dynamicWallpaperColor == null) {
+    if (value) {
       dynamicWallpaperColor = await MusicScanner.getDynamicWallpaperColor();
     }
     notifyListeners();

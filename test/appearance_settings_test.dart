@@ -139,6 +139,11 @@ void main() {
             const MethodChannel('com.ryanheise.just_audio.events'),
             (MethodCall methodCall) async => null,
           );
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            const MethodChannel('de.yurtemre.sonora/mediastore'),
+            (MethodCall methodCall) async => null,
+          );
 
       var audioHandler = SonoraAudioHandler();
       var themeProvider = ThemeProvider();
@@ -211,6 +216,46 @@ void main() {
       expect(settingsProvider.useDynamicTheme, isFalse);
       expect(find.text('Choose Accent Color'), findsOneWidget);
       expect(find.byType(ThemeColorSelector), findsOneWidget);
+    });
+
+    test('Re-applying Material You or resuming app re-extracts wallpaper color', () async {
+      var currentMockColor = const Color(0xFF112233).toARGB32();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            const MethodChannel('de.yurtemre.sonora/mediastore'),
+            (MethodCall methodCall) async {
+              if (methodCall.method == 'getDynamicWallpaperColor') {
+                return currentMockColor;
+              }
+              return null;
+            },
+          );
+
+      var audioHandler = SonoraAudioHandler();
+      var settingsProvider = SettingsProvider();
+      var playerProvider = PlayerProvider(
+        audioHandler: audioHandler,
+        settingsProvider: settingsProvider,
+      );
+
+      // Initial Material You enable
+      await settingsProvider.setUseMaterialYou(true);
+      expect(settingsProvider.dynamicWallpaperColor, equals(const Color(0xFF112233)));
+
+      // User changes Android system wallpaper to a new green color
+      currentMockColor = const Color(0xFF448822).toARGB32();
+
+      // 1. Re-applying the setting re-fetches the new color
+      await settingsProvider.setUseMaterialYou(true);
+      expect(settingsProvider.dynamicWallpaperColor, equals(const Color(0xFF448822)));
+
+      // User changes Android system wallpaper again to a blue color
+      currentMockColor = const Color(0xFF2255AA).toARGB32();
+
+      // 2. App resume lifecycle event triggers automatic refresh
+      playerProvider.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(settingsProvider.dynamicWallpaperColor, equals(const Color(0xFF2255AA)));
     });
   });
 }
