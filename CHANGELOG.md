@@ -2,6 +2,13 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.19.8] - 2026-09-05
+### Added
+* Add play count and add history view + improve sorting view
+### Changed
+* Unify Favorites screen routing with GoRouter shell navigation and persistent mini-player
+* Chore: Update dependencies
+
 ## [1.19.7] - 2026-08-29
 ### Changed
 * Chore: Add workflow status badge
