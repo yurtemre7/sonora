@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/models/song_activity.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
@@ -71,6 +72,10 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   Timer? _statsTimer;
   String? _playlistContext;
   final statsService = StatsService();
+  int? _activitySongId;
+  var _activitySessionMs = 0;
+  var _activityRecordedForSession = false;
+  Duration? _lastActivityPosition;
 
   /// Decouples dynamic theme color changes from general playback state
   /// notifications. Only fires when the seed color actually changes.
@@ -464,6 +469,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     queue = [];
     _originalQueue = [];
     currentIndex = -1;
+    _resetActivitySession();
     await _clearLastPlayedState();
     notifyListeners();
   }
@@ -660,6 +666,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     required bool shuffled,
   }) async {
     var requestToken = ++_playRequestToken;
+    _resetActivitySession(song.id);
 
     queue = List<Song>.from(songList);
     _originalQueue = List<Song>.from(originalQueue);
@@ -903,6 +910,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         (s) => Uri.file(s.filePath).toString() == item.id,
       );
       if (index >= 0) {
+        if (_activitySongId != queue[index].id) {
+          _resetActivitySession(queue[index].id);
+        }
         if (_lastExtractedSongId != queue[index].id) {
           _extractThemeColorForSong(queue[index]);
           // Re-apply MFX when a new track loads to ensure AndroidEqualizer and speed persist securely across tracks
@@ -930,6 +940,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         _statsTimer ??= Timer.periodic(const Duration(seconds: 1), (_) {
           var song = currentSong;
           if (song != null && song.duration.inMilliseconds > 0) {
+            _trackSongActivity(song);
             statsService.addListeningTime(
               1000,
               song.id,
@@ -946,6 +957,37 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _processingSub = audioHandler.player.processingStateStream.listen((state) {
       notifyListeners();
     });
+  }
+
+  void _resetActivitySession([int? songId]) {
+    _activitySongId = songId;
+    _activitySessionMs = 0;
+    _activityRecordedForSession = false;
+    _lastActivityPosition = null;
+  }
+
+  void _trackSongActivity(Song song) {
+    if (_activitySongId != song.id) {
+      _resetActivitySession(song.id);
+    }
+
+    var position = audioHandler.player.position;
+    var previousPosition = _lastActivityPosition;
+    var nearTrackEnd =
+        previousPosition != null &&
+        song.duration - previousPosition <= const Duration(seconds: 2);
+    if (nearTrackEnd && position < const Duration(seconds: 2)) {
+      _resetActivitySession(song.id);
+    }
+    _lastActivityPosition = position;
+
+    _activitySessionMs += 1000;
+    var thresholdMs = qualifyingRecentPlayThreshold(song.duration)
+        .inMilliseconds;
+    if (!_activityRecordedForSession && _activitySessionMs >= thresholdMs) {
+      _activityRecordedForSession = true;
+      statsService.recordSongPlayed(song.id);
+    }
   }
 
   @override
@@ -1445,6 +1487,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isFinishingCurrentSong = value;
     notifyListeners();
   }
+
   int? _finishSongTargetSongId;
   Timer? _finishSongTimer;
 

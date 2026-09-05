@@ -9,6 +9,7 @@ class AppRoutes {
   static const playlist = '/playlist';
   static const changelog = '/changelog';
   static const stats = '/stats';
+  static const recentlyPlayed = '/recently-played';
   static const settingsAppearance = '/settings/appearance';
   static const settingsPlayback = '/settings/playback';
   static const settingsFormatting = '/settings/formatting';

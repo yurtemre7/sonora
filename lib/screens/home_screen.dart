@@ -8,8 +8,10 @@ import 'package:flutter/services.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/models/song_activity.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
+import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/screens/favorites_screen.dart';
 import 'package:sonora/services/library_search_index.dart';
 import 'package:sonora/services/update_service.dart';
@@ -85,11 +87,21 @@ class _HomeScreenState extends State<HomeScreen>
   final _searchIndex = LibrarySearchIndex();
   final Set<int> _selectedSongIds = {};
 
+  SongActivityView get _currentSongActivityView {
+    if (_songSortBy == 'plays') {
+      return _songSortAscending
+          ? SongActivityView.leastPlayed
+          : SongActivityView.mostPlayed;
+    }
+    return SongActivityView.all;
+  }
+
   @override
   void initState() {
     super.initState();
     _songSortBy = SettingsProvider.instance.songSortBy;
     _songSortAscending = SettingsProvider.instance.songSortAscending;
+    SettingsProvider.instance.songActivityView = _currentSongActivityView;
     _albumSortBy = SettingsProvider.instance.albumSortBy;
     _albumSortAscending = SettingsProvider.instance.albumSortAscending;
     _artistSortBy = SettingsProvider.instance.artistSortBy;
@@ -111,12 +123,17 @@ class _HomeScreenState extends State<HomeScreen>
     _searchFocusNode.addListener(() {
       if (mounted) setState(() {});
     });
+    widget.playerProvider.statsService.addListener(_onStatsChanged);
 
     _rebuildSearchIndex();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkUpdateAutomatically();
     });
+  }
+
+  void _onStatsChanged() {
+    if (mounted) setState(() {});
   }
 
   void _toggleSongSelection(Song song) {
@@ -198,11 +215,18 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   List<Song> _getFilteredSongs() {
-    return _searchIndex.searchSongs(
+    var matches = _searchIndex.searchSongs(
       _searchQuery,
-      sortBy: _songSortBy,
-      ascending: _songSortAscending,
+      sortBy: _songSortBy == 'plays' ? 'title' : _songSortBy,
+      ascending: _songSortBy == 'plays' ? true : _songSortAscending,
     );
+    if (_songSortBy == 'plays') {
+      return widget.playerProvider.statsService.applyActivityView(
+        matches,
+        _currentSongActivityView,
+      );
+    }
+    return matches;
   }
 
   List<AlbumGroup> _getFilteredAlbums() {
@@ -233,21 +257,26 @@ class _HomeScreenState extends State<HomeScreen>
     switch (_tabController.index) {
       case 0:
         if (filteredSongs.isEmpty) return '';
-        var idx = (percentage * (filteredSongs.length - 1))
-            .round()
-            .clamp(0, filteredSongs.length - 1);
+        var idx = (percentage * (filteredSongs.length - 1)).round().clamp(
+          0,
+          filteredSongs.length - 1,
+        );
         var song = filteredSongs[idx];
         if (_songSortBy == 'artist') {
           return _extractSectionLetter(song.artist);
         } else if (_songSortBy == 'duration') {
           return '${song.duration.inMinutes}m';
+        } else if (_songSortBy == 'plays') {
+          var count = widget.playerProvider.statsService.songPlayCount(song.id);
+          return '$count';
         }
         return _extractSectionLetter(song.title);
       case 1:
         if (filteredAlbums.isEmpty) return '';
-        var idx = (percentage * (filteredAlbums.length - 1))
-            .round()
-            .clamp(0, filteredAlbums.length - 1);
+        var idx = (percentage * (filteredAlbums.length - 1)).round().clamp(
+          0,
+          filteredAlbums.length - 1,
+        );
         var album = filteredAlbums[idx];
         if (_albumSortBy == 'artist') {
           return _extractSectionLetter(album.artist);
@@ -255,15 +284,17 @@ class _HomeScreenState extends State<HomeScreen>
         return _extractSectionLetter(album.name);
       case 2:
         if (filteredArtists.isEmpty) return '';
-        var idx = (percentage * (filteredArtists.length - 1))
-            .round()
-            .clamp(0, filteredArtists.length - 1);
+        var idx = (percentage * (filteredArtists.length - 1)).round().clamp(
+          0,
+          filteredArtists.length - 1,
+        );
         return _extractSectionLetter(filteredArtists[idx].name);
       case 3:
         if (filteredPlaylists.isEmpty) return '';
-        var idx = (percentage * (filteredPlaylists.length - 1))
-            .round()
-            .clamp(0, filteredPlaylists.length - 1);
+        var idx = (percentage * (filteredPlaylists.length - 1)).round().clamp(
+          0,
+          filteredPlaylists.length - 1,
+        );
         return _extractSectionLetter(filteredPlaylists[idx].name);
       default:
         return '';
@@ -312,158 +343,284 @@ class _HomeScreenState extends State<HomeScreen>
     var theme = Theme.of(context);
 
     String title;
-    String subtitle;
-    List<(String, String)> options;
-
     switch (tabIndex) {
       case 1:
         title = context.l10n.sortAlbumsBy;
-        subtitle = context.l10n.sortSubtitle;
-        options = [
-          (context.l10n.sortByAlbumName, 'name'),
-          (context.l10n.sortByArtist, 'artist'),
-          (context.l10n.sortByTrackCount, 'tracks'),
-          (context.l10n.sortByRecentlyAdded, 'recent'),
-        ];
       case 2:
         title = context.l10n.sortArtistsBy;
-        subtitle = context.l10n.sortSubtitle;
-        options = [
-          (context.l10n.sortByArtistName, 'name'),
-          (context.l10n.sortByAlbumCount, 'albums'),
-          (context.l10n.sortBySongCount, 'songs'),
-        ];
       case 3:
         title = context.l10n.sortPlaylistsBy;
-        subtitle = context.l10n.sortSubtitle;
-        options = [
-          (context.l10n.sortByPlaylistName, 'name'),
-          (context.l10n.sortBySongCount, 'songs'),
-        ];
       default:
         title = context.l10n.sortSongsBy;
-        subtitle = context.l10n.sortSubtitle;
-        options = [
-          (context.l10n.sortByTitle, 'title'),
-          (context.l10n.sortByArtist, 'artist'),
-          (context.l10n.sortByDuration, 'duration'),
-          (context.l10n.sortByRecentlyAdded, 'recent'),
-        ];
     }
 
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
-      builder: (context) {
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+      ),
+      builder: (sheetContext) {
         return StatefulBuilder(
-          builder: (context, setSheetState) {
-            return Container(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      RadioGroup<String>(
-                        groupValue: _sortByForTab(tabIndex),
-                        onChanged: (val) {
-                          setState(() => _setSortByForTab(tabIndex, val!));
-                          setSheetState(() {});
-                          if (tabIndex == 0) {
-                            SettingsProvider.instance.saveSortSettings(
-                              songSortBy: _sortByForTab(tabIndex),
-                              songSortAscending: _sortAscendingForTab(tabIndex),
-                            );
-                          } else if (tabIndex == 1) {
-                            SettingsProvider.instance.saveSortSettings(
-                              albumSortBy: _sortByForTab(tabIndex),
-                              albumSortAscending: _sortAscendingForTab(
-                                tabIndex,
-                              ),
-                            );
-                          } else if (tabIndex == 2) {
-                            SettingsProvider.instance.saveSortSettings(
-                              artistSortBy: _sortByForTab(tabIndex),
-                              artistSortAscending: _sortAscendingForTab(
-                                tabIndex,
-                              ),
-                            );
-                          } else if (tabIndex == 3) {
-                            SettingsProvider.instance.saveSortSettings(
-                              playlistSortBy: _sortByForTab(tabIndex),
-                              playlistSortAscending: _sortAscendingForTab(
-                                tabIndex,
-                              ),
-                            );
-                          }
-                          Navigator.pop(context);
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: options.map((opt) {
-                            return RadioListTile<String>(
-                              title: Text(opt.$1),
-                              value: opt.$2,
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const Divider(),
-                      SwitchListTile(
-                        title: Text(context.l10n.sortAscending),
-                        value: _sortAscendingForTab(tabIndex),
-                        onChanged: (val) {
-                          setState(
-                            () => _setSortAscendingForTab(tabIndex, val),
-                          );
-                          setSheetState(() {});
-                          if (tabIndex == 0) {
-                            SettingsProvider.instance.saveSortSettings(
-                              songSortBy: _sortByForTab(tabIndex),
-                              songSortAscending: _sortAscendingForTab(tabIndex),
-                            );
-                          } else if (tabIndex == 1) {
-                            SettingsProvider.instance.saveSortSettings(
-                              albumSortBy: _sortByForTab(tabIndex),
-                              albumSortAscending: _sortAscendingForTab(
-                                tabIndex,
-                              ),
-                            );
-                          } else if (tabIndex == 2) {
-                            SettingsProvider.instance.saveSortSettings(
-                              artistSortBy: _sortByForTab(tabIndex),
-                              artistSortAscending: _sortAscendingForTab(
-                                tabIndex,
-                              ),
-                            );
-                          } else if (tabIndex == 3) {
-                            SettingsProvider.instance.saveSortSettings(
-                              playlistSortBy: _sortByForTab(tabIndex),
-                              playlistSortAscending: _sortAscendingForTab(
-                                tabIndex,
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ],
+          builder: (sheetContext, setSheetState) {
+            var currentGroupValue = _sortByForTab(tabIndex);
+
+            List<(String, String, IconData)> options;
+            switch (tabIndex) {
+              case 1:
+                options = [
+                  (context.l10n.sortByAlbumName, 'name', Icons.album_rounded),
+                  (context.l10n.sortByArtist, 'artist', Icons.person_rounded),
+                  (
+                    context.l10n.sortByTrackCount,
+                    'tracks',
+                    Icons.format_list_numbered_rounded,
                   ),
+                  (
+                    context.l10n.sortByRecentlyAdded,
+                    'recent',
+                    Icons.calendar_today_rounded,
+                  ),
+                ];
+              case 2:
+                options = [
+                  (
+                    context.l10n.sortByArtistName,
+                    'name',
+                    Icons.person_rounded,
+                  ),
+                  (
+                    context.l10n.sortByAlbumCount,
+                    'albums',
+                    Icons.album_rounded,
+                  ),
+                  (
+                    context.l10n.sortBySongCount,
+                    'songs',
+                    Icons.music_note_rounded,
+                  ),
+                ];
+              case 3:
+                options = [
+                  (
+                    context.l10n.sortByPlaylistName,
+                    'name',
+                    Icons.playlist_play_rounded,
+                  ),
+                  (
+                    context.l10n.sortBySongCount,
+                    'songs',
+                    Icons.music_note_rounded,
+                  ),
+                ];
+              default:
+                var isPlaysSelected = currentGroupValue == 'plays';
+                var playsLabel = isPlaysSelected && _songSortAscending
+                    ? context.l10n.leastPlayed
+                    : context.l10n.mostPlayed;
+                var playsIcon = isPlaysSelected && _songSortAscending
+                    ? Icons.trending_down_rounded
+                    : Icons.trending_up_rounded;
+
+                options = [
+                  (
+                    context.l10n.sortByTitle,
+                    'title',
+                    Icons.sort_by_alpha_rounded,
+                  ),
+                  (context.l10n.sortByArtist, 'artist', Icons.person_rounded),
+                  (
+                    context.l10n.sortByDuration,
+                    'duration',
+                    Icons.schedule_rounded,
+                  ),
+                  (
+                    context.l10n.sortByRecentlyAdded,
+                    'recent',
+                    Icons.calendar_today_rounded,
+                  ),
+                  (playsLabel, 'plays', playsIcon),
+                ];
+            }
+
+            return SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer
+                                .withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.sort_rounded,
+                            size: 20,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant
+                              .withValues(alpha: 0.2),
+                        ),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (var i = 0; i < options.length; i++) ...[
+                            if (i > 0)
+                              Divider(
+                                height: 1,
+                                thickness: 1,
+                                indent: 52,
+                                endIndent: 16,
+                                color: theme.colorScheme.outlineVariant
+                                    .withValues(alpha: 0.2),
+                              ),
+                            _SortOptionTile(
+                              icon: options[i].$3,
+                              label: options[i].$1,
+                              isSelected: currentGroupValue == options[i].$2,
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                var val = options[i].$2;
+                                if (tabIndex == 0) {
+                                  if (val == 'plays') {
+                                    if (_songSortBy != 'plays') {
+                                      _songSortAscending = false;
+                                    }
+                                    _songSortBy = 'plays';
+                                  } else {
+                                    if (_songSortBy == 'plays') {
+                                      _songSortAscending = true;
+                                    }
+                                    _songSortBy = val;
+                                  }
+                                } else {
+                                  _setSortByForTab(tabIndex, val);
+                                }
+                                _saveSortSettingsForTab(tabIndex);
+                                setSheetState(() {});
+                                setState(() {});
+                              },
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 8),
+                      child: Text(
+                        context.l10n.sort,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<bool>(
+                        segments: (tabIndex == 0 &&
+                                currentGroupValue == 'plays')
+                            ? [
+                                ButtonSegment<bool>(
+                                  value: false,
+                                  icon: const Icon(
+                                    Icons.trending_up_rounded,
+                                    size: 18,
+                                  ),
+                                  label: Text(
+                                    context.l10n.mostPlayed,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                ButtonSegment<bool>(
+                                  value: true,
+                                  icon: const Icon(
+                                    Icons.trending_down_rounded,
+                                    size: 18,
+                                  ),
+                                  label: Text(
+                                    context.l10n.leastPlayed,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ]
+                            : [
+                                ButtonSegment<bool>(
+                                  value: true,
+                                  icon: const Icon(
+                                    Icons.arrow_upward_rounded,
+                                    size: 18,
+                                  ),
+                                  label: Text(
+                                    context.l10n.sortAscending,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                ButtonSegment<bool>(
+                                  value: false,
+                                  icon: const Icon(
+                                    Icons.arrow_downward_rounded,
+                                    size: 18,
+                                  ),
+                                  label: Text(
+                                    context.l10n.sortDescending,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                        selected: {_sortAscendingForTab(tabIndex)},
+                        onSelectionChanged: (newSelection) {
+                          HapticFeedback.selectionClick();
+                          var asc = newSelection.first;
+                          _setSortAscendingForTab(tabIndex, asc);
+                          _saveSortSettingsForTab(tabIndex);
+                          setSheetState(() {});
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -528,6 +685,31 @@ class _HomeScreenState extends State<HomeScreen>
         break;
       default:
         _songSortAscending = val;
+    }
+  }
+
+  void _saveSortSettingsForTab(int tabIndex) {
+    if (tabIndex == 0) {
+      SettingsProvider.instance.songActivityView = _currentSongActivityView;
+      SettingsProvider.instance.saveSortSettings(
+        songSortBy: _songSortBy,
+        songSortAscending: _songSortAscending,
+      );
+    } else if (tabIndex == 1) {
+      SettingsProvider.instance.saveSortSettings(
+        albumSortBy: _albumSortBy,
+        albumSortAscending: _albumSortAscending,
+      );
+    } else if (tabIndex == 2) {
+      SettingsProvider.instance.saveSortSettings(
+        artistSortBy: _artistSortBy,
+        artistSortAscending: _artistSortAscending,
+      );
+    } else if (tabIndex == 3) {
+      SettingsProvider.instance.saveSortSettings(
+        playlistSortBy: _playlistSortBy,
+        playlistSortAscending: _playlistSortAscending,
+      );
     }
   }
 
@@ -694,6 +876,12 @@ class _HomeScreenState extends State<HomeScreen>
                   icon: const Icon(Icons.sort_rounded),
                   onPressed: onSort,
                   tooltip: context.l10n.sort,
+                  style: (tabIndex == 0 && _songSortBy == 'plays')
+                      ? IconButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                        )
+                      : null,
                 ),
               ],
             ],
@@ -713,6 +901,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   void dispose() {
+    widget.playerProvider.statsService.removeListener(_onStatsChanged);
     _tabController.dispose();
     _scrollController.dispose();
     _searchController.dispose();
@@ -893,6 +1082,14 @@ class _HomeScreenState extends State<HomeScreen>
                           },
                         ),
                         actions: [
+                          IconButton(
+                            icon: const Icon(Icons.history_rounded),
+                            onPressed: () {
+                              _searchFocusNode.unfocus();
+                              openRecentlyPlayed(context);
+                            },
+                            tooltip: context.l10n.recentlyPlayed,
+                          ),
                           IconButton(
                             icon: const Icon(Icons.favorite_rounded),
                             onPressed: () {
@@ -1099,6 +1296,7 @@ class _HomeScreenState extends State<HomeScreen>
                                       syncPromptBanner: _buildSyncPromptBanner(
                                         theme,
                                       ),
+                                      activityView: _currentSongActivityView,
                                       selectedSongIds: _selectedSongIds,
                                       onToggleSelect: _toggleSongSelection,
                                       onLongPressSong: _onLongPressSong,
@@ -1123,10 +1321,9 @@ class _HomeScreenState extends State<HomeScreen>
                       playerProvider: widget.playerProvider,
                       onClearSelection: _clearSongSelection,
                       onSelectAll: () => _selectAllSongs(filteredSongs),
-                      bottomPadding:
-                          widget.playerProvider.currentSong != null
-                              ? 80.0
-                              : 16.0,
+                      bottomPadding: widget.playerProvider.currentSong != null
+                          ? 80.0
+                          : 16.0,
                     ),
                   ),
               ],
@@ -1194,3 +1391,66 @@ class _CreatePlaylistDialogContentState
     );
   }
 }
+
+class _SortOptionTile extends StatelessWidget {
+  const _SortOptionTile({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+    return Material(
+      color: isSelected
+          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.35)
+          : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  label,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected
+                        ? theme.colorScheme.onSurface
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                  ),
+                ),
+              ),
+              if (isSelected)
+                Icon(
+                  Icons.check_rounded,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                )
+              else
+                const SizedBox(width: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+

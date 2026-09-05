@@ -1311,4 +1311,39 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get customColorHeader => 'アクセントカラーの選択';
+
+  @override
+  String get activityView => '再生活動';
+
+  @override
+  String get allSongs => 'すべての曲';
+
+  @override
+  String get recentlyPlayed => '最近再生した曲';
+
+  @override
+  String get recentlyPlayedActivitySubtitle => '最近聴いた曲を表示します';
+
+  @override
+  String get mostPlayed => '再生回数の多い順';
+
+  @override
+  String get leastPlayed => '再生回数の少ない順';
+
+  @override
+  String get today => '今日';
+
+  @override
+  String get thisWeek => '今週';
+
+  @override
+  String get noRecentlyPlayedSongs => '最近再生した曲はありません';
+
+  @override
+  String get noRecentlyPlayedSongsSubtitle => '曲をしばらく聴くと、ここに表示されます。';
+
+  @override
+  String listensCount(int count) {
+    return '$count 回再生';
+  }
 }

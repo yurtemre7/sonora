@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sonora/l10n/app_localizations.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/models/song_activity.dart';
 import 'package:sonora/services/stats_service.dart';
 
 void main() {
@@ -44,6 +47,24 @@ void main() {
   });
 
   group('StatsService Tests', () {
+    test(
+      'recent-play qualification threshold is bounded for short and long songs',
+      () {
+        expect(
+          qualifyingRecentPlayThreshold(const Duration(seconds: 5)),
+          const Duration(seconds: 5),
+        );
+        expect(
+          qualifyingRecentPlayThreshold(const Duration(seconds: 20)),
+          const Duration(seconds: 10),
+        );
+        expect(
+          qualifyingRecentPlayThreshold(const Duration(minutes: 5)),
+          const Duration(seconds: 30),
+        );
+      },
+    );
+
     test('addListeningTime accumulates and records full play upon reaching duration', () {
       expect(stats.completeSongListens, 0);
       expect(stats.totalListeningTimeMs, 0);
@@ -148,6 +169,164 @@ void main() {
 
         expect(stats.albumListenCount(sampleSongs), 3);
         expect(stats.artistListenCount(sampleSongs), 2); // Eminem and Rihanna
+      },
+    );
+
+    test('recentSongs returns unique active songs in latest-first order', () {
+      stats.recordSongPlayed(1, at: DateTime(2025, 1, 1, 12));
+      stats.recordSongPlayed(2, at: DateTime(2025, 1, 2, 12));
+      stats.recordSongPlayed(1, at: DateTime(2025, 1, 3, 12));
+      stats.recordSongPlayed(99, at: DateTime(2025, 1, 4, 12));
+
+      var recent = stats.recentSongs(sampleSongs);
+
+      expect(recent.map((entry) => entry.song.id), [1, 2]);
+      expect(recent.first.lastPlayedAt, DateTime(2025, 1, 3, 12));
+      expect(stats.songLastPlayedAt(99), DateTime(2025, 1, 4, 12));
+    });
+
+    test('recent activity excludes songs without a qualifying play', () {
+      stats.recordSongPlayed(2, at: DateTime(2025, 1, 2));
+
+      var songs = stats.applyActivityView(
+        sampleSongs,
+        SongActivityView.recentlyPlayed,
+      );
+
+      expect(songs.map((song) => song.id), [2]);
+    });
+
+    test('most played orders by completed listens descending', () {
+      stats.addListeningTime(300000, 1, 300000);
+      stats.addListeningTime(240000 * 3, 2, 240000);
+
+      var songs = stats.applyActivityView(
+        sampleSongs,
+        SongActivityView.mostPlayed,
+      );
+
+      expect(songs.map((song) => song.id), [2, 1, 3]);
+      expect(stats.songPlayCount(2), 3);
+    });
+
+    test('least played puts never-played songs first', () {
+      stats.addListeningTime(300000 * 2, 1, 300000);
+      stats.addListeningTime(240000, 2, 240000);
+
+      var songs = stats.applyActivityView(
+        sampleSongs,
+        SongActivityView.leastPlayed,
+      );
+
+      expect(songs.map((song) => song.id), [3, 2, 1]);
+    });
+
+    test('activity ordering uses deterministic title and ID tie breakers', () {
+      var tiedSongs = [
+        Song(
+          id: 2,
+          title: 'Same',
+          artist: 'Artist',
+          album: 'Album',
+          duration: const Duration(minutes: 1),
+          filePath: '/music/2.mp3',
+        ),
+        Song(
+          id: 1,
+          title: 'Same',
+          artist: 'Artist',
+          album: 'Album',
+          duration: const Duration(minutes: 1),
+          filePath: '/music/1.mp3',
+        ),
+      ];
+
+      var songs = stats.applyActivityView(
+        tiedSongs,
+        SongActivityView.leastPlayed,
+      );
+
+      expect(songs.map((song) => song.id), [1, 2]);
+    });
+
+    test('reset clears recently played timestamps', () async {
+      stats.recordSongPlayed(1, at: DateTime(2025));
+
+      await stats.reset();
+
+      expect(stats.songLastPlayedAt(1), isNull);
+      expect(stats.recentSongs(sampleSongs), isEmpty);
+    });
+
+    testWidgets(
+      'formatRelativePlayDate handles today, future skew, yesterday, this week, and DST transitions',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Builder(
+              builder: (context) {
+                var now = DateTime(2025, 6, 15, 14, 30);
+                // Same day
+                expect(
+                  formatRelativePlayDate(
+                    context,
+                    DateTime(2025, 6, 15, 9),
+                    now: now,
+                  ),
+                  'Today',
+                );
+                // Clock skew / slightly in future
+                expect(
+                  formatRelativePlayDate(
+                    context,
+                    DateTime(2025, 6, 15, 15),
+                    now: now,
+                  ),
+                  'Today',
+                );
+                // Yesterday
+                expect(
+                  formatRelativePlayDate(
+                    context,
+                    DateTime(2025, 6, 14, 20),
+                    now: now,
+                  ),
+                  'Yesterday',
+                );
+                // 3 days ago (This Week)
+                expect(
+                  formatRelativePlayDate(
+                    context,
+                    DateTime(2025, 6, 12, 10),
+                    now: now,
+                  ),
+                  'This Week',
+                );
+                // 30 days ago (Month Year)
+                expect(
+                  formatRelativePlayDate(
+                    context,
+                    DateTime(2025, 5, 1, 10),
+                    now: now,
+                  ),
+                  'May 2025',
+                );
+
+                // DST edge case: 23 hours apart across spring forward transition
+                var springNow = DateTime(2025, 3, 31, 1);
+                var springPlayed = DateTime(2025, 3, 30, 2);
+                expect(
+                  formatRelativePlayDate(context, springPlayed, now: springNow),
+                  'Yesterday',
+                );
+
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
       },
     );
   });

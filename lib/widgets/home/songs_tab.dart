@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/models/song_activity.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/song_tile.dart';
@@ -15,6 +16,7 @@ class SongsTab extends StatelessWidget {
     required this.onConfigureFolder,
     required this.onUnfocusSearch,
     required this.syncPromptBanner,
+    required this.activityView,
     this.selectedSongIds = const {},
     this.onToggleSelect,
     this.onLongPressSong,
@@ -28,6 +30,7 @@ class SongsTab extends StatelessWidget {
   final VoidCallback onConfigureFolder;
   final VoidCallback onUnfocusSearch;
   final Widget syncPromptBanner;
+  final SongActivityView activityView;
   final Set<int> selectedSongIds;
   final ValueChanged<Song>? onToggleSelect;
   final ValueChanged<Song>? onLongPressSong;
@@ -105,10 +108,42 @@ class SongsTab extends StatelessWidget {
         Expanded(
           child: filteredSongs.isEmpty
               ? Center(
-                  child: Text(
-                    context.l10n.noMatchingSongsFound,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          activityView == SongActivityView.recentlyPlayed
+                              ? Icons.history_rounded
+                              : Icons.search_off_rounded,
+                          size: 48,
+                          color: theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          activityView == SongActivityView.recentlyPlayed
+                              ? context.l10n.noRecentlyPlayedSongs
+                              : context.l10n.noMatchingSongsFound,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (activityView ==
+                            SongActivityView.recentlyPlayed) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            context.l10n.noRecentlyPlayedSongsSubtitle,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 )
@@ -137,6 +172,7 @@ class SongsTab extends StatelessWidget {
                           isSelected: isSelected,
                           onSelect: () => onToggleSelect?.call(song),
                           onLongPress: () => onLongPressSong?.call(song),
+                          metadataLabel: _resolveMetadataLabel(context, song),
                           onTap: () {
                             onUnfocusSearch();
                             playerProvider.playSong(song, filteredSongs);
@@ -149,5 +185,21 @@ class SongsTab extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String? _resolveMetadataLabel(BuildContext context, Song song) {
+    switch (activityView) {
+      case SongActivityView.mostPlayed:
+      case SongActivityView.leastPlayed:
+        return context.l10n.listensCount(
+          playerProvider.statsService.songPlayCount(song.id),
+        );
+      case SongActivityView.recentlyPlayed:
+        var playedAt = playerProvider.statsService.songLastPlayedAt(song.id);
+        if (playedAt == null) return null;
+        return formatRelativePlayDate(context, playedAt);
+      case SongActivityView.all:
+        return null;
+    }
   }
 }

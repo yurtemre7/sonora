@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+import 'package:sonora/models/song_activity.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
 
@@ -36,6 +37,7 @@ void main() {
       expect(settings.useGreetingTitle, isFalse);
       expect(settings.autoCheckUpdates, isTrue);
       expect(settings.appLocale, equals('system'));
+      expect(settings.songActivityView, SongActivityView.all);
     });
 
     test('ThemeColorSource.materialYou persists and reloads accurately', () async {
@@ -108,6 +110,7 @@ void main() {
       await settings1.setUseGreetingTitle(true);
       await settings1.setAutoCheckUpdates(false);
       await settings1.setAppLocale('de');
+      await settings1.setSongActivityView(SongActivityView.leastPlayed);
 
       // Reload into new instance
       var settings2 = SettingsProvider();
@@ -131,6 +134,7 @@ void main() {
       expect(settings2.autoCheckUpdates, isFalse);
       expect(settings2.appLocale, equals('de'));
       expect(settings2.currentLocale, equals(const Locale('de')));
+      expect(settings2.songActivityView, SongActivityView.leastPlayed);
     });
   });
 

@@ -62,3 +62,6 @@ android/fastlane/
 
 # FVM Version Cache
 .fvm/
+
+# Delta config
+.delta/

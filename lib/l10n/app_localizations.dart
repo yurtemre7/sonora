@@ -2515,6 +2515,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose Accent Color'**
   String get customColorHeader;
+
+  /// No description provided for @activityView.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening Activity'**
+  String get activityView;
+
+  /// No description provided for @allSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'All Songs'**
+  String get allSongs;
+
+  /// No description provided for @recentlyPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Played'**
+  String get recentlyPlayed;
+
+  /// No description provided for @recentlyPlayedActivitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Songs you listened to recently'**
+  String get recentlyPlayedActivitySubtitle;
+
+  /// No description provided for @mostPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Played'**
+  String get mostPlayed;
+
+  /// No description provided for @leastPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Least Played'**
+  String get leastPlayed;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get thisWeek;
+
+  /// No description provided for @noRecentlyPlayedSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'No recently played songs'**
+  String get noRecentlyPlayedSongs;
+
+  /// No description provided for @noRecentlyPlayedSongsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen to a song for a little while and it will appear here.'**
+  String get noRecentlyPlayedSongsSubtitle;
+
+  /// No description provided for @listensCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Never played} =1{1 listen} other{{count} listens}}'**
+  String listensCount(int count);
 }
 
 class _AppLocalizationsDelegate

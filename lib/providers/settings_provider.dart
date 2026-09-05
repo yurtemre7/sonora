@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonora/models/song_activity.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
 
@@ -38,6 +39,7 @@ class SettingsProvider extends ChangeNotifier {
   var playlistSortAscending = true;
   var favoritesSortBy = 'date';
   var favoritesSortAscending = false;
+  var songActivityView = SongActivityView.all;
 
   var keepPlayingOnClose = false;
   var restoreLastPlayedSong = true;
@@ -105,6 +107,9 @@ class SettingsProvider extends ChangeNotifier {
     favoritesSortBy = await prefs.getString('favorites_sort_by') ?? 'date';
     favoritesSortAscending =
         await prefs.getBool('favorites_sort_ascending') ?? false;
+    songActivityView = SongActivityView.fromStorage(
+      await prefs.getString('song_activity_view'),
+    );
 
     keepPlayingOnClose = await prefs.getBool('keep_playing_on_close') ?? false;
     restoreLastPlayedSong =
@@ -152,6 +157,13 @@ class SettingsProvider extends ChangeNotifier {
     var prefs = SharedPreferencesAsync();
     await prefs.setBool('resume_on_connect', value);
     audioHandler.setResumeOnConnect(value);
+  }
+
+  Future<void> setSongActivityView(SongActivityView value) async {
+    songActivityView = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setString('song_activity_view', value.name);
   }
 
   Future<void> setSleepTimerFadeOutSeconds(int seconds) async {
@@ -358,6 +370,16 @@ class SettingsProvider extends ChangeNotifier {
     if (songSortAscending != null) {
       this.songSortAscending = songSortAscending;
       await prefs.setBool('song_sort_ascending', songSortAscending);
+    }
+    if (songSortBy != null || songSortAscending != null) {
+      if (this.songSortBy == 'plays') {
+        songActivityView = this.songSortAscending
+            ? SongActivityView.leastPlayed
+            : SongActivityView.mostPlayed;
+      } else {
+        songActivityView = SongActivityView.all;
+      }
+      await prefs.setString('song_activity_view', songActivityView.name);
     }
     if (albumSortBy != null) {
       this.albumSortBy = albumSortBy;

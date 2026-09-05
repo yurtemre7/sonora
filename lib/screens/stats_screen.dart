@@ -307,6 +307,27 @@ class _StatsScreenState extends State<StatsScreen> {
 
           const SizedBox(height: 20),
 
+          Card(
+            margin: EdgeInsets.zero,
+            elevation: 0,
+            color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
+            child: ListTile(
+              leading: Icon(
+                Icons.history_rounded,
+                color: theme.colorScheme.onSecondaryContainer,
+              ),
+              title: Text(
+                context.l10n.recentlyPlayed,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(context.l10n.recentlyPlayedActivitySubtitle),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => openRecentlyPlayed(context),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
           // Fun facts section
           Text(
             context.l10n.funFacts,

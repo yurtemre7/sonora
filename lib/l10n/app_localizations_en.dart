@@ -1382,4 +1382,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customColorHeader => 'Choose Accent Color';
+
+  @override
+  String get activityView => 'Listening Activity';
+
+  @override
+  String get allSongs => 'All Songs';
+
+  @override
+  String get recentlyPlayed => 'Recently Played';
+
+  @override
+  String get recentlyPlayedActivitySubtitle => 'Songs you listened to recently';
+
+  @override
+  String get mostPlayed => 'Most Played';
+
+  @override
+  String get leastPlayed => 'Least Played';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get thisWeek => 'This Week';
+
+  @override
+  String get noRecentlyPlayedSongs => 'No recently played songs';
+
+  @override
+  String get noRecentlyPlayedSongsSubtitle =>
+      'Listen to a song for a little while and it will appear here.';
+
+  @override
+  String listensCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count listens',
+      one: '1 listen',
+      zero: 'Never played',
+    );
+    return '$_temp0';
+  }
 }

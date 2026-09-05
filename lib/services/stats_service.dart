@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/models/song_activity.dart';
 
 class _StatsData {
   var totalListeningTimeMs = 0;
@@ -20,9 +22,10 @@ class _StatsData {
   var shuffleSessionStarts = 0;
   final songSkipCounts = <int, int>{};
   final songRestartCounts = <int, int>{};
+  final songLastPlayedAtMs = <int, int>{};
 }
 
-class StatsService {
+class StatsService extends ChangeNotifier {
   StatsService._();
   static final _instance = StatsService._();
   factory StatsService() => _instance;
@@ -37,6 +40,7 @@ class StatsService {
     if (_loadGuard) return;
     _loadGuard = true;
     await _load();
+    notifyListeners();
   }
 
   /// Records [ms] of listening time attributed to the given [songId].
@@ -53,6 +57,7 @@ class StatsService {
     String? playlistId,
   }) {
     if (ms <= 0) return;
+    var completedListen = false;
     _data.totalListeningTimeMs += ms;
 
     var now = DateTime.now();
@@ -67,6 +72,7 @@ class StatsService {
       // Full listen achieved – increment counts and carry over the remainder
       _data.songPlayCounts.update(songId, (v) => v + 1, ifAbsent: () => 1);
       _data.completeSongListens++;
+      completedListen = true;
 
       var weekday = now.weekday % 7;
       _data.weeklyPlayCounts.update(weekday, (v) => v + 1, ifAbsent: () => 1);
@@ -90,6 +96,7 @@ class StatsService {
     _data.songCumulativeListenMs[songId] = cumulative;
 
     _markDirty();
+    if (completedListen) notifyListeners();
   }
 
   void recordShuffleSessionStart() {
@@ -105,6 +112,17 @@ class StatsService {
   void recordSongRestart(int songId) {
     _data.songRestartCounts.update(songId, (v) => v + 1, ifAbsent: () => 1);
     _markDirty();
+  }
+
+  /// Records a meaningful playback session for Recent activity.
+  ///
+  /// This is intentionally separate from completed-listen counts: a song can
+  /// become recent before enough listening time has accrued for a full listen.
+  void recordSongPlayed(int songId, {DateTime? at}) {
+    var timestamp = (at ?? DateTime.now()).millisecondsSinceEpoch;
+    _data.songLastPlayedAtMs[songId] = timestamp;
+    _markDirty();
+    notifyListeners();
   }
 
   /// Resets all statistics to zero and persists immediately.
@@ -123,8 +141,10 @@ class StatsService {
     _data.shuffleSessionStarts = 0;
     _data.songSkipCounts.clear();
     _data.songRestartCounts.clear();
+    _data.songLastPlayedAtMs.clear();
     _dirty = true;
     await _save();
+    notifyListeners();
   }
 
   Future<void> flush() async {
@@ -173,6 +193,89 @@ class StatsService {
   int songRestartCount(int id) => _data.songRestartCounts[id] ?? 0;
 
   int songCumulativeListenMs(int id) => _data.songCumulativeListenMs[id] ?? 0;
+
+  int songPlayCount(int id) => _data.songPlayCounts[id] ?? 0;
+
+  DateTime? songLastPlayedAt(int id) {
+    var timestamp = _data.songLastPlayedAtMs[id];
+    return timestamp == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(timestamp);
+  }
+
+  List<({Song song, DateTime lastPlayedAt, int listenCount})> recentSongs(
+    List<Song> library, {
+    int? limit,
+  }) {
+    if (_data.songLastPlayedAtMs.isEmpty || library.isEmpty) return const [];
+    var result =
+        library
+            .where((song) => _data.songLastPlayedAtMs.containsKey(song.id))
+            .map(
+              (song) => (
+                song: song,
+                lastPlayedAt: DateTime.fromMillisecondsSinceEpoch(
+                  _data.songLastPlayedAtMs[song.id]!,
+                ),
+                listenCount: _data.songPlayCounts[song.id] ?? 0,
+              ),
+            )
+            .toList()
+          ..sort((a, b) {
+            var comparison = b.lastPlayedAt.compareTo(a.lastPlayedAt);
+            return comparison != 0 ? comparison : _compareSongs(a.song, b.song);
+          });
+    if (limit != null && result.length > limit) {
+      return result.take(limit).toList();
+    }
+    return result;
+  }
+
+  List<Song> applyActivityView(List<Song> songs, SongActivityView view) {
+    if (view == SongActivityView.all || songs.isEmpty) return songs;
+
+    var result = view == SongActivityView.recentlyPlayed
+        ? songs
+              .where((song) => _data.songLastPlayedAtMs.containsKey(song.id))
+              .toList()
+        : List<Song>.from(songs);
+
+    switch (view) {
+      case SongActivityView.mostPlayed:
+        result.sort((a, b) {
+          var countA = _data.songPlayCounts[a.id] ?? 0;
+          var countB = _data.songPlayCounts[b.id] ?? 0;
+          var comparison = countB.compareTo(countA);
+          return comparison != 0 ? comparison : _compareSongs(a, b);
+        });
+      case SongActivityView.leastPlayed:
+        result.sort((a, b) {
+          var countA = _data.songPlayCounts[a.id] ?? 0;
+          var countB = _data.songPlayCounts[b.id] ?? 0;
+          var comparison = countA.compareTo(countB);
+          return comparison != 0 ? comparison : _compareSongs(a, b);
+        });
+      case SongActivityView.recentlyPlayed:
+        result.sort((a, b) {
+          var timeA = _data.songLastPlayedAtMs[a.id] ?? 0;
+          var timeB = _data.songLastPlayedAtMs[b.id] ?? 0;
+          var comparison = timeB.compareTo(timeA);
+          return comparison != 0 ? comparison : _compareSongs(a, b);
+        });
+      case SongActivityView.all:
+        break;
+    }
+    return result;
+  }
+
+  int _compareSongs(Song a, Song b) {
+    var comparison = a.titleLower.compareTo(b.titleLower);
+    if (comparison == 0) {
+      comparison = a.artistLower.compareTo(b.artistLower);
+    }
+    if (comparison == 0) comparison = a.id.compareTo(b.id);
+    return comparison;
+  }
 
   Map<int, Song> _buildSongMap(List<Song> library) => {
     for (var s in library) s.id: s,
@@ -441,6 +544,18 @@ class StatsService {
           _data.songRestartCounts[int.parse(e.key)] = e.value as int;
         }
       }
+
+      var lastPlayed = json['song_last_played_at_ms'];
+      if (lastPlayed is Map<String, dynamic>) {
+        _data.songLastPlayedAtMs.clear();
+        for (var entry in lastPlayed.entries) {
+          var songId = int.tryParse(entry.key);
+          var timestamp = entry.value;
+          if (songId != null && timestamp is int && timestamp > 0) {
+            _data.songLastPlayedAtMs[songId] = timestamp;
+          }
+        }
+      }
     } catch (_) {
       _data.totalListeningTimeMs = 0;
       _data.completeSongListens = 0;
@@ -454,6 +569,7 @@ class StatsService {
       _data.shuffleSessionStarts = 0;
       _data.songSkipCounts.clear();
       _data.songRestartCounts.clear();
+      _data.songLastPlayedAtMs.clear();
     }
   }
 
@@ -491,6 +607,9 @@ class StatsService {
             (k, v) => MapEntry(k.toString(), v),
           ),
           'song_restart_counts': _data.songRestartCounts.map(
+            (k, v) => MapEntry(k.toString(), v),
+          ),
+          'song_last_played_at_ms': _data.songLastPlayedAtMs.map(
             (k, v) => MapEntry(k.toString(), v),
           ),
         };

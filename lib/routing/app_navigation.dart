@@ -47,6 +47,11 @@ void openStats(BuildContext context) {
   context.push(AppRoutes.stats);
 }
 
+void openRecentlyPlayed(BuildContext context) {
+  Logger.ikou(AppRoutes.recentlyPlayed);
+  context.push(AppRoutes.recentlyPlayed);
+}
+
 /// Pops the top-most route on the current navigator.
 ///
 /// If a modal (e.g. the Now Playing sheet) is covering the current page,

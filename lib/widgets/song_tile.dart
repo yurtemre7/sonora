@@ -23,6 +23,7 @@ class SongTile extends StatelessWidget {
     this.isSelected = false,
     this.onSelect,
     this.leadingDragHandle,
+    this.metadataLabel,
   });
 
   final Song song;
@@ -42,6 +43,7 @@ class SongTile extends StatelessWidget {
   final bool isSelected;
   final VoidCallback? onSelect;
   final Widget? leadingDragHandle;
+  final String? metadataLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +119,9 @@ class SongTile extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          song.artist,
+                          metadataLabel == null
+                              ? song.artist
+                              : '${song.artist} • $metadataLabel',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: (isCurrent && !isSelecting)
                                 ? theme.colorScheme.primary.withValues(

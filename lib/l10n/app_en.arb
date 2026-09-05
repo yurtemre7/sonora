@@ -657,5 +657,23 @@
   "colorSourceAlbumArtDesc": "Theme colors dynamically adapt to the currently playing song's artwork",
   "colorSourceCustomDesc": "Theme colors use your chosen static accent color",
   "fallbackColorHeader": "Fallback Color (when no song is playing)",
-  "customColorHeader": "Choose Accent Color"
+  "customColorHeader": "Choose Accent Color",
+  "activityView": "Listening Activity",
+  "allSongs": "All Songs",
+  "recentlyPlayed": "Recently Played",
+  "recentlyPlayedActivitySubtitle": "Songs you listened to recently",
+  "mostPlayed": "Most Played",
+  "leastPlayed": "Least Played",
+  "today": "Today",
+  "thisWeek": "This Week",
+  "noRecentlyPlayedSongs": "No recently played songs",
+  "noRecentlyPlayedSongsSubtitle": "Listen to a song for a little while and it will appear here.",
+  "listensCount": "{count, plural, =0{Never played} =1{1 listen} other{{count} listens}}",
+  "@listensCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
