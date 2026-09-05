@@ -10,6 +10,7 @@ class AppRoutes {
   static const changelog = '/changelog';
   static const stats = '/stats';
   static const recentlyPlayed = '/recently-played';
+  static const favorites = '/favorites';
   static const settingsAppearance = '/settings/appearance';
   static const settingsPlayback = '/settings/playback';
   static const settingsFormatting = '/settings/formatting';

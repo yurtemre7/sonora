@@ -7,8 +7,7 @@ import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
-import 'package:sonora/screens/album_detail_screen.dart';
-import 'package:sonora/screens/artist_detail_screen.dart';
+import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
@@ -208,6 +207,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             appBar: AppBar(
               title: Text(context.l10n.favorites),
               centerTitle: true,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                onPressed: () => closeRoute(context),
+              ),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.sort_rounded),
@@ -264,19 +268,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                 ),
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(16),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => ArtistDetailScreen(
-                                          artist: artist,
-                                          playerProvider: widget.playerProvider,
-                                          allSongs: widget.allSongs,
-                                          allAlbums: widget.allAlbums,
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                  onTap: () => openArtist(context, artist),
                                   child: Container(
                                     width: 100,
                                     padding: const EdgeInsets.symmetric(
@@ -387,19 +379,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                   ),
                                   child: InkWell(
                                     borderRadius: BorderRadius.circular(16),
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => AlbumDetailScreen(
-                                            album: album,
-                                            playerProvider:
-                                                widget.playerProvider,
-                                            allSongs: widget.allSongs,
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                    onTap: () => openAlbum(context, album),
                                     child: Container(
                                       width: 120,
                                       padding: const EdgeInsets.all(8),

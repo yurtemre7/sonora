@@ -10,6 +10,7 @@ import 'package:sonora/routing/app_routes.dart';
 import 'package:sonora/screens/album_detail_screen.dart';
 import 'package:sonora/screens/artist_detail_screen.dart';
 import 'package:sonora/screens/changelog_screen.dart';
+import 'package:sonora/screens/favorites_screen.dart';
 import 'package:sonora/screens/now_playing_screen.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
 import 'package:sonora/screens/recently_played_screen.dart';
@@ -263,6 +264,15 @@ class SonoraAppRouter {
             path: AppRoutes.recentlyPlayed,
             builder: (context, state) =>
                 RecentlyPlayedScreen(playerProvider: playerProvider),
+          ),
+          GoRoute(
+            path: AppRoutes.favorites,
+            builder: (context, state) => FavoritesScreen(
+              playerProvider: playerProvider,
+              allSongs: playerProvider.allSongs,
+              allAlbums: playerProvider.cachedAlbums,
+              allArtists: playerProvider.cachedArtists,
+            ),
           ),
           GoRoute(
             path: AppRoutes.playlist,
