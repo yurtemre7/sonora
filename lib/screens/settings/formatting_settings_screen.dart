@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/utils/l10n_extension.dart';

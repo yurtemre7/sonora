@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/routing/app_routes.dart';
 import 'package:sonora/services/native_bridge.dart';

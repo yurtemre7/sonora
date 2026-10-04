@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/utils/l10n_extension.dart';

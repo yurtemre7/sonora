@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/custom_equalizer_widget.dart';

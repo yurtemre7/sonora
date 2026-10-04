@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sonora/services/permission_service.dart';
 import 'package:sonora/utils/l10n_extension.dart';
@@ -69,12 +69,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await _checkInitialPermissions();
 
     if (result && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.permissionsGrantedSuccess),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
       // Automatically advance to the next step
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sonora/l10n/app_localizations_en.dart';
 import 'package:sonora/l10n/app_localizations_ja.dart';
 import 'package:sonora/providers/player_provider.dart';

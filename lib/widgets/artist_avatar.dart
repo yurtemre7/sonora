@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/widgets/album_art.dart';
 

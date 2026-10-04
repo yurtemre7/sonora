@@ -1,7 +1,6 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:material_ui/material_ui.dart';
 import 'package:sonora/app.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/sleep_timer_notification_service.dart';

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 
@@ -105,7 +105,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
           : SafeArea(
               child: Markdown(
                 data: _changelogContent ?? 'No changelog available.',
-                styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                styleSheet: MarkdownStyleSheet(
                   p: theme.textTheme.bodyMedium,
                   h1: theme.textTheme.headlineMedium?.copyWith(
                     color: theme.colorScheme.primary,

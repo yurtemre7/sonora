@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/song_activity.dart';
 import 'package:sonora/services/audio_handler.dart';
