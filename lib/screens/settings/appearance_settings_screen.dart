@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
