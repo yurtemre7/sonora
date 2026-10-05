@@ -62,7 +62,7 @@ class HomeScreen extends StatefulWidget {
   final bool isSyncing;
   final bool showSyncPrompt;
   final Future<void> Function() onResyncNow;
-  final VoidCallback onPostponeSync;
+  final Future<void> Function() onPostponeSync;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -85,6 +85,8 @@ class _HomeScreenState extends State<HomeScreen>
   var _playlistSortAscending = true;
   final _searchIndex = LibrarySearchIndex();
   final Set<int> _selectedSongIds = {};
+  late bool _showSyncPrompt;
+  var _isSyncing = false;
 
   SongActivityView get _currentSongActivityView {
     if (_songSortBy == 'plays') {
@@ -98,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
+    _showSyncPrompt = widget.showSyncPrompt;
     _songSortBy = SettingsProvider.instance.songSortBy;
     _songSortAscending = SettingsProvider.instance.songSortAscending;
     SettingsProvider.instance.songActivityView = _currentSongActivityView;
@@ -168,6 +171,9 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void didUpdateWidget(HomeScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.showSyncPrompt != oldWidget.showSyncPrompt) {
+      _showSyncPrompt = widget.showSyncPrompt;
+    }
     if (widget.songs != oldWidget.songs ||
         widget.playerProvider.cachedAlbums !=
             oldWidget.playerProvider.cachedAlbums ||
@@ -916,6 +922,45 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  Future<void> _handlePostponeSync() async {
+    setState(() {
+      _showSyncPrompt = false;
+    });
+    await widget.onPostponeSync();
+  }
+
+  Future<void> _handleResyncNow() async {
+    setState(() {
+      _showSyncPrompt = false;
+      _isSyncing = true;
+    });
+    try {
+      await widget.onResyncNow();
+      if (!mounted) return;
+      var durationText = SettingsProvider.instance.lastSyncDuration != null
+          ? ' in ${SettingsProvider.instance.lastSyncDuration}ms'
+          : '';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.syncedXSongs(
+              widget.playerProvider.allSongs.length,
+              durationText,
+            ),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSyncing = false;
+        });
+      }
+    }
+  }
+
   Widget _buildSyncPromptBanner(ThemeData theme) {
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -972,7 +1017,7 @@ class _HomeScreenState extends State<HomeScreen>
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: widget.onPostponeSync,
+                  onPressed: _isSyncing ? null : _handlePostponeSync,
                   child: Text(
                     'Remind Next Month',
                     style: theme.textTheme.labelLarge?.copyWith(
@@ -982,7 +1027,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 const SizedBox(width: 8),
                 FilledButton.tonal(
-                  onPressed: widget.onResyncNow,
+                  onPressed: _isSyncing ? null : _handleResyncNow,
                   style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1109,12 +1154,12 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                         bottom: PreferredSize(
                           preferredSize: Size.fromHeight(
-                            widget.isSyncing ? 52 : 50,
+                            (_isSyncing || widget.isSyncing) ? 52 : 50,
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (widget.isSyncing)
+                              if (_isSyncing || widget.isSyncing)
                                 const LinearProgressIndicator(minHeight: 2),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -1276,7 +1321,7 @@ class _HomeScreenState extends State<HomeScreen>
                                       filteredSongs: filteredSongs,
                                       playerProvider: widget.playerProvider,
                                       scanFolder: widget.scanFolder,
-                                      showSyncPrompt: widget.showSyncPrompt,
+                                      showSyncPrompt: _showSyncPrompt,
                                       onConfigureFolder:
                                           widget.onConfigureFolder,
                                       onUnfocusSearch: _searchFocusNode.unfocus,
