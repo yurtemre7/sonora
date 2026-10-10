@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -25,6 +26,8 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
 
   // For the 3-second hold gesture
   late AnimationController _dangerZoneController;
+  int? _dangerZonePointer;
+  Offset? _dangerZonePointerOrigin;
 
   @override
   void initState() {
@@ -72,6 +75,38 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
     );
     if (confirmed != true || !mounted) return;
     widget.onResetApp();
+  }
+
+  void _onDangerZonePointerDown(PointerDownEvent event) {
+    if (_dangerZonePointer != null) return;
+    _dangerZonePointer = event.pointer;
+    _dangerZonePointerOrigin = event.position;
+    HapticFeedback.lightImpact();
+    _dangerZoneController.forward(from: 0);
+  }
+
+  void _onDangerZonePointerMove(PointerMoveEvent event) {
+    if (event.pointer != _dangerZonePointer ||
+        _dangerZonePointerOrigin == null) {
+      return;
+    }
+    if ((event.position - _dangerZonePointerOrigin!).distance > kTouchSlop) {
+      _cancelDangerZoneHold();
+    }
+  }
+
+  void _onDangerZonePointerEnd(PointerEvent event) {
+    if (event.pointer == _dangerZonePointer) {
+      _cancelDangerZoneHold();
+    }
+  }
+
+  void _cancelDangerZoneHold() {
+    _dangerZonePointer = null;
+    _dangerZonePointerOrigin = null;
+    if (!_dangerZoneController.isCompleted) {
+      _dangerZoneController.reverse();
+    }
   }
 
   String _getFlutterInfo() {
@@ -388,17 +423,12 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                 horizontal: 16.0,
                 vertical: 8.0,
               ),
-              child: GestureDetector(
-                onLongPressDown: (_) {
-                  HapticFeedback.lightImpact();
-                  _dangerZoneController.forward();
-                },
-                onLongPressUp: () {
-                  _dangerZoneController.reverse();
-                },
-                onLongPressCancel: () {
-                  _dangerZoneController.reverse();
-                },
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: _onDangerZonePointerDown,
+                onPointerMove: _onDangerZonePointerMove,
+                onPointerUp: _onDangerZonePointerEnd,
+                onPointerCancel: _onDangerZonePointerEnd,
                 child: AnimatedBuilder(
                   animation: _dangerZoneController,
                   builder: (context, child) {
