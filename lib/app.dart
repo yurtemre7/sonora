@@ -680,8 +680,10 @@ class _SonoraAppState extends State<SonoraApp> {
                     scaffoldMessengerKey: _scaffoldMessengerKey,
                     title: 'Sonora',
                     locale: _settingsProvider.currentLocale,
-                    localizationsDelegates:
-                        AppLocalizations.localizationsDelegates,
+                    localizationsDelegates: const [
+                      ...AppLocalizations.localizationsDelegates,
+                      ...GlobalMaterialLocalizations.delegates,
+                    ],
                     supportedLocales: AppLocalizations.supportedLocales,
                     theme: AppTheme.getTheme(
                       Brightness.light,
