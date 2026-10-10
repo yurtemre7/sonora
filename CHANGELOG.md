@@ -2,29 +2,36 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.21.0] - 2026-10-10
+### Added
+* Add scroll to current track in queue and haptic playback toggles
+* Add in-app dev indicator badge for debug builds
+* Add copy path, share file, and tap-to-copy in song info sheet
+### Fixed
+* Improve open folder intent compatibility across android file managers
+* Resolve UnsupportedOperationException when opening song folder
+* Include material_ui localization delegates for multi-language support
+### Changed
+* Chore: Format files
+* Perf: Pre-warm image cache on library scan and sync completion
+* Chore: Add .dev suffix to debug applicationId
+* Perf: Add background image cache pre-flight service
+
 ## [1.20.0] - 2026-10-10
 ### Added
 * Improve scan
 * Add player close button
 * Add pause/play audio transition
-* Add background image cache pre-flight service
-* Add copy path, share file, and tap-to-copy in song info sheet
-* Add in-app dev indicator badge for debug builds
-* Add scroll to current track in queue and haptic playback toggles
 ### Fixed
-* Improve open folder intent compatibility across Android file managers
-* Fix missing material_ui localization delegates when switching app language
 * Reset application button now feels more like 3 seconds hold
 * Music discovery fixed
 * Synching reminder button stuck
 ### Changed
 * Chore: Bump image cache to 150 MB or 250 images
 * Perf: Improve performance of sync
-* Perf: Pre-warm image cache on library scan and sync completion
 * Chore: Updated packages
 * Chore: Migrate to material_ui
 * Chore: Update dependencies
-* Chore: Add .dev applicationId suffix for debug builds
 * Chore: Update flutter to 3.47.6
 
 ## [1.19.8] - 2026-09-05
