@@ -462,6 +462,7 @@ class MainActivity : AudioServiceActivity() {
         val searchedArtists = mutableSetOf<String>()
         val folderFilesMap = mutableMapOf<String, Set<String>>()
         val missingAlbumIds = mutableListOf<Long>()
+        val albumSongIndexes = mutableMapOf<Long, MutableList<Int>>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
         val projection = mutableListOf(
@@ -605,7 +606,9 @@ class MainActivity : AudioServiceActivity() {
                         "album_id" to albumId,
                         "has_lyrics" to hasLyrics
                     )
+                    val songIndex = songsList.size
                     songsList.add(songMap)
+                    albumSongIndexes.getOrPut(albumId) { mutableListOf() }.add(songIndex)
                 }
                 cursorLoopMs = System.currentTimeMillis() - loopStart
             }
@@ -639,10 +642,9 @@ class MainActivity : AudioServiceActivity() {
                 if (artFile.exists() && artFile.length() > 0) {
                     val artPath = artFile.absolutePath
                     albumArtFileMap[aId] = artPath
-                    for (i in songsList.indices) {
-                        val s = songsList[i]
-                        if ((s["album_id"] as? Long) == aId) {
-                            songsList[i] = s.toMutableMap().also { it["artwork_path"] = artPath }
+                    for (songIndex in albumSongIndexes[aId].orEmpty()) {
+                        songsList[songIndex] = songsList[songIndex].toMutableMap().also {
+                            it["artwork_path"] = artPath
                         }
                     }
                 }
@@ -776,4 +778,3 @@ class MainActivity : AudioServiceActivity() {
         return false
     }
 }
-

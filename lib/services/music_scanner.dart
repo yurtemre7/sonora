@@ -408,6 +408,7 @@ class MusicScanner {
       }
 
       var prefs = SharedPreferencesAsync();
+      var mediaStoreReturnedEmpty = false;
 
       if (Platform.isAndroid) {
         var scanResult = await _scanViaMediaStore(
@@ -480,6 +481,7 @@ class MusicScanner {
 
             return msSongs;
           }
+          mediaStoreReturnedEmpty = true;
         }
       }
 
@@ -491,7 +493,10 @@ class MusicScanner {
         return verified;
       }
 
-      return await syncLibraryLegacy(maxWorkers: maxWorkers);
+      return await syncLibraryLegacy(
+        maxWorkers: maxWorkers,
+        skipMediaStore: mediaStoreReturnedEmpty,
+      );
     } catch (_) {
       swTotal.stop();
       return await _readImportedSongsMetadata();
@@ -522,7 +527,10 @@ class MusicScanner {
   }
 
   /// Legacy sequential syncLibrary method for benchmark comparisons.
-  Future<List<Song>> syncLibraryLegacy({int maxWorkers = 4}) async {
+  Future<List<Song>> syncLibraryLegacy({
+    int maxWorkers = 4,
+    bool skipMediaStore = false,
+  }) async {
     var sw = Stopwatch()..start();
     try {
       var folderPath = await getScanFolder();
@@ -551,7 +559,7 @@ class MusicScanner {
       var metadataVersion = await prefs.getInt('metadata_version') ?? 0;
 
       // Try instant native Android MediaStore scan first
-      if (Platform.isAndroid) {
+      if (Platform.isAndroid && !skipMediaStore) {
         var msResult = await _scanViaMediaStore(folderPath, cachedSongs);
         var msSongs = msResult?['songs'] as List<Song>?;
         if (msSongs != null && msSongs.isNotEmpty) {
