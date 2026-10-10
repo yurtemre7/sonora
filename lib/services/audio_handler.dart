@@ -192,6 +192,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
           MediaAction.skipToPrevious,
           MediaAction.skipToNext,
         },
+        androidCompactActionIndices: const [0, 1, 2],
         processingState: _mapProcessingState(player.processingState),
         playing: playing,
         updatePosition: player.position,
@@ -592,7 +593,8 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     if (player.playing && _transportFadeRestoreVolume == null) return;
 
     if (!player.playing) {
-      _transportFadeRestoreVolume ??= player.volume;
+      _transportFadeRestoreVolume ??=
+          (player.volume > 0.05 ? player.volume : 1.0);
       await player.setVolume(0);
       if (token != _transportFadeToken) return;
       _startPlayer();
@@ -615,13 +617,13 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     _transportWantsPlayback = false;
     var restoreVolume = _transportFadeRestoreVolume;
     if (!player.playing) {
-      if (restoreVolume != null) {
+      if (restoreVolume != null && restoreVolume > 0.05) {
         await _restoreTransportVolume(token, restoreVolume);
       }
       return;
     }
 
-    restoreVolume ??= player.volume;
+    restoreVolume ??= (player.volume > 0.05 ? player.volume : 1.0);
     _transportFadeRestoreVolume = restoreVolume;
     if (!immediate) {
       await _fadeTransportVolume(fadeOut: true, token: token);
@@ -639,7 +641,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   }
 
   Future<void> _restoreTransportVolume(int token, double fallback) async {
-    await player.setVolume(_transportFadeRestoreVolume ?? fallback);
+    var target = _transportFadeRestoreVolume ?? fallback;
+    if (target <= 0.05) target = 1.0;
+    await player.setVolume(target);
     if (token != _transportFadeToken) {
       await _resumeIfRequested();
       return;
@@ -673,7 +677,12 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     for (var step = 1; step <= steps; step++) {
       await Future<void>.delayed(_transportFadeDuration ~/ steps);
       if (token != _transportFadeToken) return;
-      var target = fadeOut ? 0.0 : _transportFadeRestoreVolume ?? player.volume;
+      var restore = _transportFadeRestoreVolume;
+      var target = fadeOut
+          ? 0.0
+          : (restore != null && restore > 0.05
+              ? restore
+              : (player.volume > 0.05 ? player.volume : 1.0));
       var remainingSteps = steps - step + 1;
       var nextVolume =
           player.volume + (target - player.volume) / remainingSteps;

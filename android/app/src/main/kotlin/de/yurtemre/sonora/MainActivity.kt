@@ -16,6 +16,15 @@ import java.io.File
 import java.io.FileOutputStream
 
 class MainActivity : AudioServiceActivity() {
+    companion object {
+        // Prevent R8 / ProGuard from tree-shaking resources referenced dynamically via reflection in AudioService
+        @JvmStatic
+        private val KEEP_RESOURCES = intArrayOf(
+            R.drawable.ic_close,
+            R.drawable.ic_launcher_monochrome,
+        )
+    }
+
     private val VOLUME_CHANNEL = "de.yurtemre.sonora/volume"
     private val MEDIASTORE_CHANNEL = "de.yurtemre.sonora/mediastore"
 
