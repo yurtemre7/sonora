@@ -291,41 +291,7 @@ class MainActivity : AudioServiceActivity() {
             val folder = if (targetFile.isDirectory) targetFile else (targetFile.parentFile ?: targetFile)
             val context = this
 
-            // Strategy 1: Storage Access Framework / DocumentsUI Document URI
-            val normPath = folder.absolutePath.replace('\\', '/')
-            val primaryPrefixes = listOf("/storage/emulated/0/", "/sdcard/", "/storage/emulated/0", "/sdcard")
-            var relPath = normPath
-            for (p in primaryPrefixes) {
-                if (normPath.startsWith(p, ignoreCase = true)) {
-                    relPath = normPath.substring(p.length).trimStart('/')
-                    break
-                }
-            }
-
-            if (relPath.isNotEmpty() || normPath == "/storage/emulated/0" || normPath == "/sdcard") {
-                val encodedRel = if (relPath.isEmpty()) "" else Uri.encode(relPath)
-                val docUri = Uri.parse("content://com.android.externalstorage.documents/document/primary%3A$encodedRel")
-                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                    setDataAndType(docUri, "vnd.android.document/directory")
-                    flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
-                }
-                try {
-                    context.startActivity(intent)
-                    return true
-                } catch (_: Exception) {}
-
-                val treeUri = Uri.parse("content://com.android.externalstorage.documents/tree/primary%3A$encodedRel")
-                val treeIntent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                    setDataAndType(treeUri, "vnd.android.document/directory")
-                    flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
-                }
-                try {
-                    context.startActivity(treeIntent)
-                    return true
-                } catch (_: Exception) {}
-            }
-
-            // Strategy 2: FileProvider with resource/folder MIME type
+            // Strategy 1: Dedicated third-party file managers via FileProvider resource/folder
             val folderUri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 try {
                     androidx.core.content.FileProvider.getUriForFile(
@@ -344,32 +310,68 @@ class MainActivity : AudioServiceActivity() {
                 setDataAndType(folderUri, "resource/folder")
                 flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
             }
-            try {
-                context.startActivity(folderIntent)
-                return true
-            } catch (_: Exception) {}
+            if (folderIntent.resolveActivity(context.packageManager) != null) {
+                try {
+                    context.startActivity(folderIntent)
+                    return true
+                } catch (_: Exception) {}
+            }
 
-            // Strategy 3: FileProvider with directory MIME type
+            // Strategy 2: System Storage Access Framework (SAF) folder picker/browser via ACTION_OPEN_DOCUMENT_TREE
+            // This is the officially supported Android API to navigate directly to a folder without crashing DocumentsUI.
+            val normPath = folder.absolutePath.replace('\\', '/')
+            val primaryPrefixes = listOf("/storage/emulated/0/", "/sdcard/", "/storage/emulated/0", "/sdcard")
+            var relPath = normPath
+            for (p in primaryPrefixes) {
+                if (normPath.startsWith(p, ignoreCase = true)) {
+                    relPath = normPath.substring(p.length).trimStart('/')
+                    break
+                }
+            }
+
+            val treeIntent = android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                        android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        android.content.Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val initialUri = if (relPath.isEmpty()) {
+                        Uri.parse("content://com.android.externalstorage.documents/tree/primary%3A")
+                    } else {
+                        android.provider.DocumentsContract.buildDocumentUri(
+                            "com.android.externalstorage.documents",
+                            "primary:$relPath"
+                        )
+                    }
+                    putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, initialUri)
+                }
+            }
+            if (treeIntent.resolveActivity(context.packageManager) != null) {
+                try {
+                    context.startActivity(treeIntent)
+                    return true
+                } catch (_: Exception) {}
+            }
+
+            // Strategy 3: Third-party file managers registered for vnd.android.document/directory
+            // Explicitly filter out DocumentsUI which throws UnsupportedOperationException on ACTION_VIEW
             val dirIntent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
                 setDataAndType(folderUri, "vnd.android.document/directory")
                 flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
             }
-            try {
-                context.startActivity(dirIntent)
-                return true
-            } catch (_: Exception) {}
-
-            // Strategy 4: FileProvider with */* MIME type
-            val genericIntent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                setDataAndType(folderUri, "*/*")
-                flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            val resolveList = context.packageManager.queryIntentActivities(dirIntent, 0)
+            val nonDocumentsUi = resolveList.firstOrNull {
+                val pkg = it.activityInfo.packageName.lowercase()
+                !pkg.contains("documentsui")
             }
-            try {
-                context.startActivity(genericIntent)
-                return true
-            } catch (_: Exception) {}
+            if (nonDocumentsUi != null) {
+                dirIntent.setClassName(nonDocumentsUi.activityInfo.packageName, nonDocumentsUi.activityInfo.name)
+                try {
+                    context.startActivity(dirIntent)
+                    return true
+                } catch (_: Exception) {}
+            }
 
-            // Strategy 5: Open the file itself in default file/media viewer
+            // Strategy 4: Fallback to opening target song file with chooser
             if (targetFile.exists() && targetFile.isFile) {
                 val fileUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     try {
@@ -384,12 +386,16 @@ class MainActivity : AudioServiceActivity() {
                 } else {
                     Uri.fromFile(targetFile)
                 }
+                val mimeType = context.contentResolver.getType(fileUri) ?: "*/*"
                 val fileIntent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                    setDataAndType(fileUri, "*/*")
+                    setDataAndType(fileUri, mimeType)
                     flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
                 }
+                val chooser = android.content.Intent.createChooser(fileIntent, null).apply {
+                    flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+                }
                 try {
-                    context.startActivity(fileIntent)
+                    context.startActivity(chooser)
                     return true
                 } catch (_: Exception) {}
             }
