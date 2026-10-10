@@ -59,11 +59,7 @@ class LibrarySearchIndex {
     }
   }
 
-  void _indexText(
-    String text,
-    int songIndex,
-    Map<String, Set<int>> tokenMap,
-  ) {
+  void _indexText(String text, int songIndex, Map<String, Set<int>> tokenMap) {
     if (text.isEmpty) return;
 
     // Split on whitespace and non-alphanumeric separators
@@ -183,10 +179,7 @@ class LibrarySearchIndex {
   }
 
   /// Returns cached pre-sorted songs.
-  List<Song> getSortedSongs({
-    required String sortBy,
-    required bool ascending,
-  }) {
+  List<Song> getSortedSongs({required String sortBy, required bool ascending}) {
     var key = '${sortBy}_$ascending';
     var cached = _preSortedSongs[key];
     if (cached != null) return cached;
@@ -266,8 +259,9 @@ class LibrarySearchIndex {
     });
 
     if (trimmed.isEmpty) {
-      _preSortedAlbums['${sortBy}_$ascending'] =
-          List<AlbumGroup>.unmodifiable(sorted);
+      _preSortedAlbums['${sortBy}_$ascending'] = List<AlbumGroup>.unmodifiable(
+        sorted,
+      );
     }
 
     return sorted;
@@ -284,9 +278,7 @@ class LibrarySearchIndex {
     var artists = allArtists;
 
     if (trimmed.isNotEmpty) {
-      artists = allArtists
-          .where((a) => a.nameLower.contains(trimmed))
-          .toList();
+      artists = allArtists.where((a) => a.nameLower.contains(trimmed)).toList();
     } else {
       var key = '${sortBy}_$ascending';
       var cached = _preSortedArtists[key];

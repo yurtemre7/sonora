@@ -166,46 +166,49 @@ void main() {
   });
 
   group('Playlist Model Serialization Tests', () {
-    test('toJson and fromJson preserve all fields including optional metadata', () {
-      var playlist = Playlist(
-        id: 'pl_rock_99',
-        name: 'Classic Rock Anthems',
-        songIds: [10, 20, 30, 40],
-        coverImagePath: '/covers/rock.jpg',
-        description: 'Best guitar riffs of the 80s',
-      );
+    test(
+      'toJson and fromJson preserve all fields including optional metadata',
+      () {
+        var playlist = Playlist(
+          id: 'pl_rock_99',
+          name: 'Classic Rock Anthems',
+          songIds: [10, 20, 30, 40],
+          coverImagePath: '/covers/rock.jpg',
+          description: 'Best guitar riffs of the 80s',
+        );
 
-      var jsonMap = playlist.toJson();
-      expect(jsonMap['id'], equals('pl_rock_99'));
-      expect(jsonMap['name'], equals('Classic Rock Anthems'));
-      expect(jsonMap['song_ids'], equals([10, 20, 30, 40]));
-      expect(jsonMap['cover_image_path'], equals('/covers/rock.jpg'));
-      expect(jsonMap['description'], equals('Best guitar riffs of the 80s'));
+        var jsonMap = playlist.toJson();
+        expect(jsonMap['id'], equals('pl_rock_99'));
+        expect(jsonMap['name'], equals('Classic Rock Anthems'));
+        expect(jsonMap['song_ids'], equals([10, 20, 30, 40]));
+        expect(jsonMap['cover_image_path'], equals('/covers/rock.jpg'));
+        expect(jsonMap['description'], equals('Best guitar riffs of the 80s'));
 
-      var reconstructed = Playlist.fromJson(jsonMap);
-      expect(reconstructed.id, equals(playlist.id));
-      expect(reconstructed.name, equals(playlist.name));
-      expect(reconstructed.songIds, equals(playlist.songIds));
-      expect(reconstructed.coverImagePath, equals(playlist.coverImagePath));
-      expect(reconstructed.description, equals(playlist.description));
+        var reconstructed = Playlist.fromJson(jsonMap);
+        expect(reconstructed.id, equals(playlist.id));
+        expect(reconstructed.name, equals(playlist.name));
+        expect(reconstructed.songIds, equals(playlist.songIds));
+        expect(reconstructed.coverImagePath, equals(playlist.coverImagePath));
+        expect(reconstructed.description, equals(playlist.description));
 
-      var modified = playlist.copyWith(
-        name: 'Modern Rock',
-        songIds: [40, 30, 20, 10],
-      );
-      expect(modified.id, equals(playlist.id));
-      expect(modified.name, equals('Modern Rock'));
-      expect(modified.songIds, equals([40, 30, 20, 10]));
-      expect(modified.coverImagePath, equals(playlist.coverImagePath));
-      expect(modified.description, equals(playlist.description));
+        var modified = playlist.copyWith(
+          name: 'Modern Rock',
+          songIds: [40, 30, 20, 10],
+        );
+        expect(modified.id, equals(playlist.id));
+        expect(modified.name, equals('Modern Rock'));
+        expect(modified.songIds, equals([40, 30, 20, 10]));
+        expect(modified.coverImagePath, equals(playlist.coverImagePath));
+        expect(modified.description, equals(playlist.description));
 
-      var cleared = playlist.copyWith(
-        clearCoverImage: true,
-        clearDescription: true,
-      );
-      expect(cleared.coverImagePath, isNull);
-      expect(cleared.description, isNull);
-    });
+        var cleared = playlist.copyWith(
+          clearCoverImage: true,
+          clearDescription: true,
+        );
+        expect(cleared.coverImagePath, isNull);
+        expect(cleared.description, isNull);
+      },
+    );
   });
 
   group('Grouping Models (AlbumGroup & ArtistGroup) Tests', () {
@@ -229,11 +232,7 @@ void main() {
         ),
       ];
 
-      var album = AlbumGroup(
-        name: 'Album 1',
-        artist: 'Band',
-        songs: songs,
-      );
+      var album = AlbumGroup(name: 'Album 1', artist: 'Band', songs: songs);
 
       expect(album.songs.length, equals(2));
       expect(album.name, equals('Album 1'));

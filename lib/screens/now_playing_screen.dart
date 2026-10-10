@@ -323,15 +323,16 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 400),
                     curve: Curves.easeInOut,
-                    width: SettingsProvider.instance.nowPlayingStyle ==
+                    width:
+                        SettingsProvider.instance.nowPlayingStyle ==
                             'minimalist'
                         ? min(MediaQuery.sizeOf(context).width * 0.55, 200.0)
                         : (SettingsProvider.instance.immersiveMode
-                            ? constraints.maxWidth
-                            : min(
-                                MediaQuery.sizeOf(context).width * 0.80,
-                                300.0,
-                              )),
+                              ? constraints.maxWidth
+                              : min(
+                                  MediaQuery.sizeOf(context).width * 0.80,
+                                  300.0,
+                                )),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
@@ -346,50 +347,50 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                       aspectRatio: 1,
                       child: Stack(
                         children: [
-                        Positioned.fill(
-                          child: PageTransitionSwitcher(
-                            reverse: _reverse,
-                            transitionBuilder:
-                                (child, animation, secondaryAnimation) {
-                                  return SharedAxisTransition(
-                                    fillColor: Colors.transparent,
-                                    animation: animation,
-                                    secondaryAnimation: secondaryAnimation,
-                                    transitionType:
-                                        SharedAxisTransitionType.horizontal,
-                                    child: child,
-                                  );
-                                },
-                            child: AlbumArt(
-                              key: ValueKey(song.id),
-                              artworkPath: song.artworkPath,
-                              size: double.infinity,
-                              borderRadius: 28,
+                          Positioned.fill(
+                            child: PageTransitionSwitcher(
+                              reverse: _reverse,
+                              transitionBuilder:
+                                  (child, animation, secondaryAnimation) {
+                                    return SharedAxisTransition(
+                                      fillColor: Colors.transparent,
+                                      animation: animation,
+                                      secondaryAnimation: secondaryAnimation,
+                                      transitionType:
+                                          SharedAxisTransitionType.horizontal,
+                                      child: child,
+                                    );
+                                  },
+                              child: AlbumArt(
+                                key: ValueKey(song.id),
+                                artworkPath: song.artworkPath,
+                                size: double.infinity,
+                                borderRadius: 28,
+                              ),
                             ),
                           ),
-                        ),
-                        if (_showLyrics)
-                          Positioned.fill(
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(
-                                sigmaX: 18.0,
-                                sigmaY: 18.0,
-                              ),
-                              child: Container(
-                                color: theme.brightness == Brightness.dark
-                                    ? Colors.black.withValues(alpha: 0.75)
-                                    : Colors.white.withValues(alpha: 0.80),
-                                child: SongLyricsOverlay(
-                                  song: song,
-                                  playerProvider: widget.playerProvider,
+                          if (_showLyrics)
+                            Positioned.fill(
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(
+                                  sigmaX: 18.0,
+                                  sigmaY: 18.0,
+                                ),
+                                child: Container(
+                                  color: theme.brightness == Brightness.dark
+                                      ? Colors.black.withValues(alpha: 0.75)
+                                      : Colors.white.withValues(alpha: 0.80),
+                                  child: SongLyricsOverlay(
+                                    song: song,
+                                    playerProvider: widget.playerProvider,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -887,7 +888,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                   Expanded(
                     child: Text(
                       currentIndex >= 0
-                          ? context.l10n.queueNOfM(currentIndex + 1, queue.length)
+                          ? context.l10n.queueNOfM(
+                              currentIndex + 1,
+                              queue.length,
+                            )
                           : context.l10n.queue,
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,

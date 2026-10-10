@@ -57,35 +57,39 @@ void main() {
       expect(emptyResult, isFalse);
     });
 
-    test('shareFiles invokes shareFiles method on channel with list of paths', () async {
-      List<dynamic>? sharedPaths;
-      String? sharedText;
+    test(
+      'shareFiles invokes shareFiles method on channel with list of paths',
+      () async {
+        List<dynamic>? sharedPaths;
+        String? sharedText;
 
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(
-            const MethodChannel('de.yurtemre.sonora/volume'),
-            (MethodCall methodCall) async {
-              if (methodCall.method == 'shareFiles') {
-                sharedPaths = methodCall.arguments['filePaths'] as List<dynamic>?;
-                sharedText = methodCall.arguments['text'] as String?;
-                return true;
-              }
-              return null;
-            },
-          );
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(
+              const MethodChannel('de.yurtemre.sonora/volume'),
+              (MethodCall methodCall) async {
+                if (methodCall.method == 'shareFiles') {
+                  sharedPaths =
+                      methodCall.arguments['filePaths'] as List<dynamic>?;
+                  sharedText = methodCall.arguments['text'] as String?;
+                  return true;
+                }
+                return null;
+              },
+            );
 
-      var success = await NativeBridge.shareFiles(
-        ['/path/song1.mp3', '/path/song2.flac'],
-        text: 'Listen to these songs',
-      );
+        var success = await NativeBridge.shareFiles([
+          '/path/song1.mp3',
+          '/path/song2.flac',
+        ], text: 'Listen to these songs');
 
-      expect(success, isTrue);
-      expect(sharedPaths, equals(['/path/song1.mp3', '/path/song2.flac']));
-      expect(sharedText, equals('Listen to these songs'));
+        expect(success, isTrue);
+        expect(sharedPaths, equals(['/path/song1.mp3', '/path/song2.flac']));
+        expect(sharedText, equals('Listen to these songs'));
 
-      var emptySuccess = await NativeBridge.shareFiles([]);
-      expect(emptySuccess, isFalse);
-    });
+        var emptySuccess = await NativeBridge.shareFiles([]);
+        expect(emptySuccess, isFalse);
+      },
+    );
 
     test('AppPackageInfo.isDevBuild checks flags and package name', () {
       const devInfo = AppPackageInfo(
@@ -100,11 +104,7 @@ void main() {
 
     testWidgets('DevBadge renders DEV label', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: DevBadge(),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: DevBadge())),
       );
       expect(find.text('DEV'), findsOneWidget);
     });

@@ -40,22 +40,31 @@ void main() {
       expect(settings.songActivityView, SongActivityView.all);
     });
 
-    test('ThemeColorSource.materialYou persists and reloads accurately', () async {
-      var settings1 = SettingsProvider();
-      await settings1.setThemeColorSource(ThemeColorSource.materialYou);
+    test(
+      'ThemeColorSource.materialYou persists and reloads accurately',
+      () async {
+        var settings1 = SettingsProvider();
+        await settings1.setThemeColorSource(ThemeColorSource.materialYou);
 
-      expect(settings1.useMaterialYou, isTrue);
-      expect(settings1.useDynamicTheme, isFalse);
-      expect(settings1.themeColorSource, equals(ThemeColorSource.materialYou));
+        expect(settings1.useMaterialYou, isTrue);
+        expect(settings1.useDynamicTheme, isFalse);
+        expect(
+          settings1.themeColorSource,
+          equals(ThemeColorSource.materialYou),
+        );
 
-      // Simulate app restart
-      var settings2 = SettingsProvider();
-      await settings2.loadSettings();
+        // Simulate app restart
+        var settings2 = SettingsProvider();
+        await settings2.loadSettings();
 
-      expect(settings2.useMaterialYou, isTrue);
-      expect(settings2.useDynamicTheme, isFalse);
-      expect(settings2.themeColorSource, equals(ThemeColorSource.materialYou));
-    });
+        expect(settings2.useMaterialYou, isTrue);
+        expect(settings2.useDynamicTheme, isFalse);
+        expect(
+          settings2.themeColorSource,
+          equals(ThemeColorSource.materialYou),
+        );
+      },
+    );
 
     test('ThemeColorSource.albumArt persists and reloads accurately', () async {
       var settings1 = SettingsProvider();
@@ -139,24 +148,27 @@ void main() {
   });
 
   group('ThemeProvider Persistence Tests', () {
-    test('ThemeProvider loads and persists light, dark, and system modes', () async {
-      var themeProvider = ThemeProvider();
-      expect(themeProvider.themeMode, equals(ThemeMode.system));
+    test(
+      'ThemeProvider loads and persists light, dark, and system modes',
+      () async {
+        var themeProvider = ThemeProvider();
+        expect(themeProvider.themeMode, equals(ThemeMode.system));
 
-      await themeProvider.setThemeMode(ThemeMode.dark);
-      expect(themeProvider.themeMode, equals(ThemeMode.dark));
+        await themeProvider.setThemeMode(ThemeMode.dark);
+        expect(themeProvider.themeMode, equals(ThemeMode.dark));
 
-      // Reload
-      var reloadedTheme = ThemeProvider();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      expect(reloadedTheme.themeMode, equals(ThemeMode.dark));
+        // Reload
+        var reloadedTheme = ThemeProvider();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(reloadedTheme.themeMode, equals(ThemeMode.dark));
 
-      await reloadedTheme.setThemeMode(ThemeMode.light);
-      expect(reloadedTheme.themeMode, equals(ThemeMode.light));
+        await reloadedTheme.setThemeMode(ThemeMode.light);
+        expect(reloadedTheme.themeMode, equals(ThemeMode.light));
 
-      var reloadedLight = ThemeProvider();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      expect(reloadedLight.themeMode, equals(ThemeMode.light));
-    });
+        var reloadedLight = ThemeProvider();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(reloadedLight.themeMode, equals(ThemeMode.light));
+      },
+    );
   });
 }

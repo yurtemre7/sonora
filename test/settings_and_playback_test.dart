@@ -58,9 +58,8 @@ void main() {
               sectionGetter: (percent) => percent < 0.5 ? 'A' : 'B',
               child: ListView.builder(
                 itemCount: 100,
-                itemBuilder: (context, index) => ListTile(
-                  title: Text('Item $index'),
-                ),
+                itemBuilder: (context, index) =>
+                    ListTile(title: Text('Item $index')),
               ),
             ),
           ),

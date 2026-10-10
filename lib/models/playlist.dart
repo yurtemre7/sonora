@@ -50,9 +50,7 @@ class Playlist {
       coverImagePath: clearCoverImage
           ? null
           : (coverImagePath ?? this.coverImagePath),
-      description: clearDescription
-          ? null
-          : (description ?? this.description),
+      description: clearDescription ? null : (description ?? this.description),
     );
   }
 }

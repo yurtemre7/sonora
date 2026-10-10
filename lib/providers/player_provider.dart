@@ -770,7 +770,10 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     ImagePreflightService.instance.preflightSongs(allSongs);
     ImagePreflightService.instance.preflightAlbums(cachedAlbums);
     if (queue.isNotEmpty && currentIndex >= 0) {
-      ImagePreflightService.instance.preflightQueueUpcoming(queue, currentIndex);
+      ImagePreflightService.instance.preflightQueueUpcoming(
+        queue,
+        currentIndex,
+      );
     }
   }
 
@@ -888,10 +891,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   /// Adds multiple [songs] to a playlist.
-  Future<void> addSongsToPlaylist(
-    String playlistId,
-    List<Song> songs,
-  ) async {
+  Future<void> addSongsToPlaylist(String playlistId, List<Song> songs) async {
     if (songs.isEmpty) return;
     var scanner = MusicScanner();
     await scanner.addSongsToPlaylist(
@@ -1601,59 +1601,59 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       customBody: 'Finishing active song...',
     );
 
-    _finishSongTimer = Timer.periodic(
-      const Duration(milliseconds: 250),
-      (timer) async {
-        if (!_isFinishingCurrentSong || sleepTimerDuration == null) {
-          timer.cancel();
-          return;
-        }
+    _finishSongTimer = Timer.periodic(const Duration(milliseconds: 250), (
+      timer,
+    ) async {
+      if (!_isFinishingCurrentSong || sleepTimerDuration == null) {
+        timer.cancel();
+        return;
+      }
 
-        // If playback stopped or user paused
-        if (!audioHandler.player.playing) {
-          timer.cancel();
-          await _finalizeSleepTimerStop();
-          return;
-        }
+      // If playback stopped or user paused
+      if (!audioHandler.player.playing) {
+        timer.cancel();
+        await _finalizeSleepTimerStop();
+        return;
+      }
 
-        var song = currentSong;
-        // If song changed or ended, pause immediately so next track does not play
-        if (song == null ||
-            (_finishSongTargetSongId != null &&
-                song.id != _finishSongTargetSongId)) {
-          timer.cancel();
-          await audioHandler.pause();
-          await _finalizeSleepTimerStop();
-          return;
-        }
+      var song = currentSong;
+      // If song changed or ended, pause immediately so next track does not play
+      if (song == null ||
+          (_finishSongTargetSongId != null &&
+              song.id != _finishSongTargetSongId)) {
+        timer.cancel();
+        await audioHandler.pause();
+        await _finalizeSleepTimerStop();
+        return;
+      }
 
-        var songDuration = audioHandler.player.duration ?? song.duration;
-        var pos = audioHandler.player.position;
-        var remainingInSong = songDuration - pos;
+      var songDuration = audioHandler.player.duration ?? song.duration;
+      var pos = audioHandler.player.position;
+      var remainingInSong = songDuration - pos;
 
-        // Song reached its finish boundary
-        if (remainingInSong <= const Duration(milliseconds: 250) ||
-            pos >= songDuration) {
-          timer.cancel();
-          await audioHandler.pause();
-          await _finalizeSleepTimerStop();
-          return;
-        }
+      // Song reached its finish boundary
+      if (remainingInSong <= const Duration(milliseconds: 250) ||
+          pos >= songDuration) {
+        timer.cancel();
+        await audioHandler.pause();
+        await _finalizeSleepTimerStop();
+        return;
+      }
 
-        // Apply fade-out in the final fadeDurationSecs of the current song
-        if (fadeDurationSecs > 0 &&
-            remainingInSong.inSeconds <= fadeDurationSecs) {
-          if (!_isFadingOut) {
-            _isFadingOut = true;
-          }
-          var fraction = remainingInSong.inMilliseconds /
-              (fadeDurationSecs * 1000).toDouble();
-          await audioHandler.player.setVolume(
-            (_originalVolumeBeforeFade * fraction).clamp(0.0, 1.0),
-          );
+      // Apply fade-out in the final fadeDurationSecs of the current song
+      if (fadeDurationSecs > 0 &&
+          remainingInSong.inSeconds <= fadeDurationSecs) {
+        if (!_isFadingOut) {
+          _isFadingOut = true;
         }
-      },
-    );
+        var fraction =
+            remainingInSong.inMilliseconds /
+            (fadeDurationSecs * 1000).toDouble();
+        await audioHandler.player.setVolume(
+          (_originalVolumeBeforeFade * fraction).clamp(0.0, 1.0),
+        );
+      }
+    });
 
     notifyListeners();
   }
@@ -1714,9 +1714,6 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     var newDuration = (sleepTimerDuration ?? Duration.zero) + extension;
-    startSleepTimer(
-      newDuration,
-      finishSong: sleepTimerFinishSongActive,
-    );
+    startSleepTimer(newDuration, finishSong: sleepTimerFinishSongActive);
   }
 }

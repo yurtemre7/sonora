@@ -51,13 +51,11 @@ class ThemeColorSelector extends StatelessWidget {
                             )
                           : Border.all(
                               color: isSelected
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .outline
-                                      .withValues(alpha: 0.5)
+                                  ? Theme.of(context).colorScheme.outline
+                                        .withValues(alpha: 0.5)
                                   : Theme.of(context)
-                                      .colorScheme
-                                      .outlineVariant,
+                                        .colorScheme
+                                        .outlineVariant,
                             ),
                     ),
                     child: Padding(

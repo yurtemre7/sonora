@@ -75,7 +75,10 @@ void main() {
         fadeOutSecs: 0,
       );
 
-      expect(playerProvider.sleepTimerDuration, equals(const Duration(seconds: 1)));
+      expect(
+        playerProvider.sleepTimerDuration,
+        equals(const Duration(seconds: 1)),
+      );
       expect(playerProvider.sleepTimerFinishSongActive, isFalse);
 
       // Wait for timer completion
@@ -89,59 +92,68 @@ void main() {
       playerProvider.stopSleepTimer();
     });
 
-    test('Sleep timer with finishSong does not fade early during countdown', () async {
-      var audioHandler = SonoraAudioHandler();
-      var settingsProvider = SettingsProvider();
-      var playerProvider = PlayerProvider(
-        audioHandler: audioHandler,
-        settingsProvider: settingsProvider,
-      );
-      await playerProvider.loadSettings();
+    test(
+      'Sleep timer with finishSong does not fade early during countdown',
+      () async {
+        var audioHandler = SonoraAudioHandler();
+        var settingsProvider = SettingsProvider();
+        var playerProvider = PlayerProvider(
+          audioHandler: audioHandler,
+          settingsProvider: settingsProvider,
+        );
+        await playerProvider.loadSettings();
 
-      var song = createDummySong(
-        id: 1,
-        title: 'Song 1',
-        duration: const Duration(seconds: 60),
-      );
-      playerProvider.queue = [song];
-      playerProvider.currentIndex = 0;
+        var song = createDummySong(
+          id: 1,
+          title: 'Song 1',
+          duration: const Duration(seconds: 60),
+        );
+        playerProvider.queue = [song];
+        playerProvider.currentIndex = 0;
 
-      playerProvider.startSleepTimer(
-        const Duration(seconds: 2),
-        finishSong: true,
-        fadeOutSecs: 10,
-      );
+        playerProvider.startSleepTimer(
+          const Duration(seconds: 2),
+          finishSong: true,
+          fadeOutSecs: 10,
+        );
 
-      expect(playerProvider.sleepTimerFinishSongActive, isTrue);
+        expect(playerProvider.sleepTimerFinishSongActive, isTrue);
 
-      // 1 second into countdown: volume remains 1.0 (no early fade-out)
-      await Future<void>.delayed(const Duration(seconds: 1));
-      expect(audioHandler.player.volume, equals(1.0));
+        // 1 second into countdown: volume remains 1.0 (no early fade-out)
+        await Future<void>.delayed(const Duration(seconds: 1));
+        expect(audioHandler.player.volume, equals(1.0));
 
-      playerProvider.stopSleepTimer();
-    });
+        playerProvider.stopSleepTimer();
+      },
+    );
 
-    test('Extend and stop sleep timer resets volume and timer duration', () async {
-      var audioHandler = SonoraAudioHandler();
-      var settingsProvider = SettingsProvider();
-      var playerProvider = PlayerProvider(
-        audioHandler: audioHandler,
-        settingsProvider: settingsProvider,
-      );
-      await playerProvider.loadSettings();
+    test(
+      'Extend and stop sleep timer resets volume and timer duration',
+      () async {
+        var audioHandler = SonoraAudioHandler();
+        var settingsProvider = SettingsProvider();
+        var playerProvider = PlayerProvider(
+          audioHandler: audioHandler,
+          settingsProvider: settingsProvider,
+        );
+        await playerProvider.loadSettings();
 
-      playerProvider.startSleepTimer(
-        const Duration(minutes: 5),
-        finishSong: false,
-      );
-      expect(playerProvider.sleepTimerDuration, equals(const Duration(minutes: 5)));
+        playerProvider.startSleepTimer(
+          const Duration(minutes: 5),
+          finishSong: false,
+        );
+        expect(
+          playerProvider.sleepTimerDuration,
+          equals(const Duration(minutes: 5)),
+        );
 
-      playerProvider.extendSleepTimer(const Duration(minutes: 2));
-      expect(playerProvider.sleepTimerDuration?.inMinutes, equals(7));
+        playerProvider.extendSleepTimer(const Duration(minutes: 2));
+        expect(playerProvider.sleepTimerDuration?.inMinutes, equals(7));
 
-      playerProvider.stopSleepTimer();
-      expect(playerProvider.sleepTimerDuration, isNull);
-    });
+        playerProvider.stopSleepTimer();
+        expect(playerProvider.sleepTimerDuration, isNull);
+      },
+    );
 
     test('Finishing song flag is properly set and cleared on stop', () async {
       var audioHandler = SonoraAudioHandler();

@@ -49,7 +49,12 @@ class PlaylistImageUtils {
       height: cropSize.toDouble(),
     );
     var outSize = cropSize > targetSize ? targetSize : cropSize;
-    var dstRect = ui.Rect.fromLTWH(0, 0, outSize.toDouble(), outSize.toDouble());
+    var dstRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      outSize.toDouble(),
+      outSize.toDouble(),
+    );
 
     canvas.drawImageRect(
       image,

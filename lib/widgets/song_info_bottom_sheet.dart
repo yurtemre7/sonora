@@ -173,9 +173,8 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                                           ClipboardData(text: song.filePath),
                                         );
                                         HapticFeedback.lightImpact();
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).hideCurrentSnackBar();
+                                        ScaffoldMessenger.of(context)
+                                            .hideCurrentSnackBar();
                                         ScaffoldMessenger.of(
                                           context,
                                         ).showSnackBar(
@@ -183,8 +182,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                                             content: Text(
                                               '${context.l10n.filePathLabel}: ${context.l10n.copiedToClipboard}',
                                             ),
-                                            behavior:
-                                                SnackBarBehavior.floating,
+                                            behavior: SnackBarBehavior.floating,
                                             duration: const Duration(
                                               seconds: 2,
                                             ),
@@ -209,10 +207,9 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                                     if (Platform.isAndroid)
                                       TextButton.icon(
                                         onPressed: () async {
-                                          await NativeBridge.shareFiles(
-                                            [song.filePath],
-                                            title: song.title,
-                                          );
+                                          await NativeBridge.shareFiles([
+                                            song.filePath,
+                                          ], title: song.title);
                                         },
                                         icon: const Icon(
                                           Icons.share_rounded,
@@ -418,10 +415,7 @@ Widget _buildInfoRow(
             ),
           ),
         ),
-      if (action != null) ...[
-        const SizedBox(height: 6),
-        action,
-      ],
+      if (action != null) ...[const SizedBox(height: 6), action],
       if (!isLast)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),

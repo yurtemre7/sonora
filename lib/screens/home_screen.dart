@@ -405,11 +405,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ];
               case 2:
                 options = [
-                  (
-                    context.l10n.sortByArtistName,
-                    'name',
-                    Icons.person_rounded,
-                  ),
+                  (context.l10n.sortByArtistName, 'name', Icons.person_rounded),
                   (
                     context.l10n.sortByAlbumCount,
                     'albums',
@@ -506,8 +502,9 @@ class _HomeScreenState extends State<HomeScreen>
                             .withValues(alpha: 0.35),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: theme.colorScheme.outlineVariant
-                              .withValues(alpha: 0.2),
+                          color: theme.colorScheme.outlineVariant.withValues(
+                            alpha: 0.2,
+                          ),
                         ),
                       ),
                       clipBehavior: Clip.antiAlias,
@@ -570,8 +567,8 @@ class _HomeScreenState extends State<HomeScreen>
                     SizedBox(
                       width: double.infinity,
                       child: SegmentedButton<bool>(
-                        segments: (tabIndex == 0 &&
-                                currentGroupValue == 'plays')
+                        segments:
+                            (tabIndex == 0 && currentGroupValue == 'plays')
                             ? [
                                 ButtonSegment<bool>(
                                   value: false,
@@ -1483,8 +1480,9 @@ class _SortOptionTile extends StatelessWidget {
                 child: Text(
                   label,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                     color: isSelected
                         ? theme.colorScheme.onSurface
                         : theme.colorScheme.onSurface.withValues(alpha: 0.85),
@@ -1506,4 +1504,3 @@ class _SortOptionTile extends StatelessWidget {
     );
   }
 }
-

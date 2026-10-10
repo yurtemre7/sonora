@@ -49,12 +49,13 @@ class SongTile extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
 
-    var isHighlighted = isSelected || (isCurrent && showHighlightBackground && !isSelecting);
+    var isHighlighted =
+        isSelected || (isCurrent && showHighlightBackground && !isSelecting);
     var backgroundColor = isSelected
         ? theme.colorScheme.primaryContainer.withValues(alpha: 0.35)
         : (isCurrent && showHighlightBackground && !isSelecting
-            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
-            : Colors.transparent);
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
+              : Colors.transparent);
 
     var tileContent = InkWell(
       onTap: isSelecting ? (onSelect ?? onTap) : onTap,
@@ -100,200 +101,184 @@ class SongTile extends StatelessWidget {
                   ),
               ],
             ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          song.displayTitle,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: (isCurrent && !isSelecting)
-                                ? theme.colorScheme.primary
-                                : null,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          metadataLabel == null
-                              ? song.artist
-                              : '${song.artist} • $metadataLabel',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: (isCurrent && !isSelecting)
-                                ? theme.colorScheme.primary.withValues(
-                                    alpha: 0.7,
-                                  )
-                                : theme.colorScheme.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text(
-                    song.durationFormatted,
+                    song.displayTitle,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: (isCurrent && !isSelecting)
+                          ? theme.colorScheme.primary
+                          : null,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    metadataLabel == null
+                        ? song.artist
+                        : '${song.artist} • $metadataLabel',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: (isCurrent && !isSelecting)
                           ? theme.colorScheme.primary.withValues(alpha: 0.7)
                           : theme.colorScheme.onSurfaceVariant,
-                      fontWeight: (isCurrent && !isSelecting)
-                          ? FontWeight.w600
-                          : FontWeight.normal,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  if (!isSelecting &&
-                      !hideMenu &&
-                      (playerProvider != null ||
-                          onRemoveFromPlaylist != null)) ...[
-                    const SizedBox(width: 4),
-                    PopupMenuButton<int>(
-                      icon: Icon(
-                        Icons.more_vert_rounded,
-                        size: 20,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 160),
-                      onSelected: (value) {
-                        if (playerProvider != null) {
-                          if (value == 1) {
-                            playerProvider!.playNext(song);
-                          }
-                          if (value == 2) {
-                            playerProvider!.addToQueue(song);
-                          }
-                          if (value == 4) {
-                            PlaylistSelectorBottomSheet.show(
-                              context,
-                              song,
-                              playerProvider!,
-                            );
-                          }
-                          if (value == 5) {
-                            showSongInfoBottomSheet(context, song);
-                          }
-                          if (value == 6) {
-                            playerProvider!.toggleFavorite(song.id);
-                          }
-                        }
-                        if (value == 7 && onRemoveFromPlaylist != null) {
-                          onRemoveFromPlaylist!();
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        if (playerProvider != null)
-                          PopupMenuItem(
-                            value: 1,
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.playlist_play_rounded,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(context.l10n.playNext),
-                              ],
-                            ),
-                          ),
-                        if (playerProvider != null)
-                          PopupMenuItem(
-                            value: 2,
-                            child: Row(
-                              children: [
-                                const Icon(Icons.queue_music_rounded, size: 20),
-                                const SizedBox(width: 8),
-                                Text(context.l10n.addToQueue),
-                              ],
-                            ),
-                          ),
-                        if (playerProvider != null)
-                          PopupMenuItem(
-                            value: 4,
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.playlist_add_rounded,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(context.l10n.addToPlaylist),
-                              ],
-                            ),
-                          ),
-                        if (onRemoveFromPlaylist != null)
-                          PopupMenuItem(
-                            value: 7,
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.playlist_remove_rounded,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(context.l10n.removeFromPlaylist),
-                              ],
-                            ),
-                          ),
-                        if (playerProvider != null)
-                          PopupMenuItem(
-                            value: 5,
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.info_outline_rounded,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(context.l10n.songInfo),
-                              ],
-                            ),
-                          ),
-                        if (playerProvider != null)
-                          // Look up the live isFavorite state from the
-                          // provider so this menu item is always fresh
-                          // at the moment the menu opens.
-                          PopupMenuItem(
-                            value: 6,
-                            child: Builder(
-                              builder: (context) {
-                                var liveSong = playerProvider?.allSongs
-                                    .where((s) => s.id == song.id)
-                                    .firstOrNull;
-                                var isFav =
-                                    liveSong?.isFavorite ?? song.isFavorite;
-                                return Row(
-                                  children: [
-                                    Icon(
-                                      isFav
-                                          ? Icons.favorite_rounded
-                                          : Icons.favorite_border_rounded,
-                                      size: 20,
-                                      color: isFav ? Colors.red : null,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      isFav
-                                          ? context.l10n.favoriteRemove
-                                          : context.l10n.favoriteSong,
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
                 ],
               ),
             ),
-          );
+            const SizedBox(width: 8),
+            Text(
+              song.durationFormatted,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: (isCurrent && !isSelecting)
+                    ? theme.colorScheme.primary.withValues(alpha: 0.7)
+                    : theme.colorScheme.onSurfaceVariant,
+                fontWeight: (isCurrent && !isSelecting)
+                    ? FontWeight.w600
+                    : FontWeight.normal,
+              ),
+            ),
+            if (!isSelecting &&
+                !hideMenu &&
+                (playerProvider != null || onRemoveFromPlaylist != null)) ...[
+              const SizedBox(width: 4),
+              PopupMenuButton<int>(
+                icon: Icon(
+                  Icons.more_vert_rounded,
+                  size: 20,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 160),
+                onSelected: (value) {
+                  if (playerProvider != null) {
+                    if (value == 1) {
+                      playerProvider!.playNext(song);
+                    }
+                    if (value == 2) {
+                      playerProvider!.addToQueue(song);
+                    }
+                    if (value == 4) {
+                      PlaylistSelectorBottomSheet.show(
+                        context,
+                        song,
+                        playerProvider!,
+                      );
+                    }
+                    if (value == 5) {
+                      showSongInfoBottomSheet(context, song);
+                    }
+                    if (value == 6) {
+                      playerProvider!.toggleFavorite(song.id);
+                    }
+                  }
+                  if (value == 7 && onRemoveFromPlaylist != null) {
+                    onRemoveFromPlaylist!();
+                  }
+                },
+                itemBuilder: (context) => [
+                  if (playerProvider != null)
+                    PopupMenuItem(
+                      value: 1,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.playlist_play_rounded, size: 20),
+                          const SizedBox(width: 8),
+                          Text(context.l10n.playNext),
+                        ],
+                      ),
+                    ),
+                  if (playerProvider != null)
+                    PopupMenuItem(
+                      value: 2,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.queue_music_rounded, size: 20),
+                          const SizedBox(width: 8),
+                          Text(context.l10n.addToQueue),
+                        ],
+                      ),
+                    ),
+                  if (playerProvider != null)
+                    PopupMenuItem(
+                      value: 4,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.playlist_add_rounded, size: 20),
+                          const SizedBox(width: 8),
+                          Text(context.l10n.addToPlaylist),
+                        ],
+                      ),
+                    ),
+                  if (onRemoveFromPlaylist != null)
+                    PopupMenuItem(
+                      value: 7,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.playlist_remove_rounded, size: 20),
+                          const SizedBox(width: 8),
+                          Text(context.l10n.removeFromPlaylist),
+                        ],
+                      ),
+                    ),
+                  if (playerProvider != null)
+                    PopupMenuItem(
+                      value: 5,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline_rounded, size: 20),
+                          const SizedBox(width: 8),
+                          Text(context.l10n.songInfo),
+                        ],
+                      ),
+                    ),
+                  if (playerProvider != null)
+                    // Look up the live isFavorite state from the
+                    // provider so this menu item is always fresh
+                    // at the moment the menu opens.
+                    PopupMenuItem(
+                      value: 6,
+                      child: Builder(
+                        builder: (context) {
+                          var liveSong = playerProvider?.allSongs
+                              .where((s) => s.id == song.id)
+                              .firstOrNull;
+                          var isFav = liveSong?.isFavorite ?? song.isFavorite;
+                          return Row(
+                            children: [
+                              Icon(
+                                isFav
+                                    ? Icons.favorite_rounded
+                                    : Icons.favorite_border_rounded,
+                                size: 20,
+                                color: isFav ? Colors.red : null,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                isFav
+                                    ? context.l10n.favoriteRemove
+                                    : context.l10n.favoriteSong,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,

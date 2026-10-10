@@ -40,57 +40,44 @@ void main() {
     testWidgets('Renders volume_off icon when volume is 0', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: VolumeSlider(
-              volume: 0.0,
-              onChanged: (_) {},
-            ),
-          ),
+          home: Scaffold(body: VolumeSlider(volume: 0.0, onChanged: (_) {})),
         ),
       );
 
       expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
     });
 
-    testWidgets('Renders volume_mute icon when volume is low (< 1/3)', (tester) async {
+    testWidgets('Renders volume_mute icon when volume is low (< 1/3)', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: VolumeSlider(
-              volume: 0.2,
-              onChanged: (_) {},
-            ),
-          ),
+          home: Scaffold(body: VolumeSlider(volume: 0.2, onChanged: (_) {})),
         ),
       );
 
       expect(find.byIcon(Icons.volume_mute_rounded), findsOneWidget);
     });
 
-    testWidgets('Renders volume_down icon when volume is medium (1/3 <= v < 2/3)', (tester) async {
+    testWidgets(
+      'Renders volume_down icon when volume is medium (1/3 <= v < 2/3)',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: VolumeSlider(volume: 0.5, onChanged: (_) {})),
+          ),
+        );
+
+        expect(find.byIcon(Icons.volume_down_rounded), findsOneWidget);
+      },
+    );
+
+    testWidgets('Renders volume_up icon when volume is high (>= 2/3)', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: VolumeSlider(
-              volume: 0.5,
-              onChanged: (_) {},
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byIcon(Icons.volume_down_rounded), findsOneWidget);
-    });
-
-    testWidgets('Renders volume_up icon when volume is high (>= 2/3)', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: VolumeSlider(
-              volume: 0.85,
-              onChanged: (_) {},
-            ),
-          ),
+          home: Scaffold(body: VolumeSlider(volume: 0.85, onChanged: (_) {})),
         ),
       );
 

@@ -388,7 +388,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           AlbumArt(
-                                            artworkPath: album.songs.first.artworkPath,
+                                            artworkPath:
+                                                album.songs.first.artworkPath,
                                             size: 104,
                                             borderRadius: 12,
                                           ),
@@ -477,9 +478,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           );
                         }, childCount: favSongs.length),
                       ),
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: 100),
-                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 100)),
                     ],
 
                     if (favArtists.isEmpty &&
@@ -520,10 +519,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       playerProvider: widget.playerProvider,
                       onClearSelection: _clearSongSelection,
                       onSelectAll: () => _selectAllSongs(favSongs),
-                      bottomPadding:
-                          widget.playerProvider.currentSong != null
-                              ? 80.0
-                              : 16.0,
+                      bottomPadding: widget.playerProvider.currentSong != null
+                          ? 80.0
+                          : 16.0,
                     ),
                   ),
               ],

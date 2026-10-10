@@ -549,7 +549,10 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   }
 
   /// Inserts multiple [items] starting at [globalIndex] in the logical queue.
-  Future<void> insertQueueItemsAt(int globalIndex, List<MediaItem> items) async {
+  Future<void> insertQueueItemsAt(
+    int globalIndex,
+    List<MediaItem> items,
+  ) async {
     if (items.isEmpty) return;
     if (globalIndex < 0 || globalIndex > _rawPlaylist.length) return;
     _rawPlaylist.insertAll(globalIndex, items);

@@ -136,30 +136,30 @@ class PlaylistsTab extends StatelessWidget {
                       ),
                     )
                   : firstSong != null
-                      ? AlbumArt(
-                          artworkPath: firstSong.artworkPath,
-                          size: 48,
-                          borderRadius: 8,
-                        )
-                      : Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            gradient: LinearGradient(
-                              colors: [
-                                theme.colorScheme.primaryContainer,
-                                theme.colorScheme.secondaryContainer,
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.music_note_rounded,
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
+                  ? AlbumArt(
+                      artworkPath: firstSong.artworkPath,
+                      size: 48,
+                      borderRadius: 8,
+                    )
+                  : Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        gradient: LinearGradient(
+                          colors: [
+                            theme.colorScheme.primaryContainer,
+                            theme.colorScheme.secondaryContainer,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                      ),
+                      child: Icon(
+                        Icons.music_note_rounded,
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                    ),
               title: Text(playlist.name),
               subtitle: Text(context.l10n.songCount(songCount)),
               trailing: PopupMenuButton<int>(
@@ -243,10 +243,9 @@ class PlaylistsTab extends StatelessWidget {
                       playlist,
                     );
                     if (file != null) {
-                      await NativeBridge.shareFiles(
-                        [file.path],
-                        text: exportedMsg,
-                      );
+                      await NativeBridge.shareFiles([
+                        file.path,
+                      ], text: exportedMsg);
                     } else {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context)

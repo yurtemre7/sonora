@@ -207,14 +207,11 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                           builder: (context, _) {
                             var key =
                                 '${widget.album.nameLower}|||${widget.album.artistLower}';
-                            var isFav = widget
-                                .playerProvider
-                                .favoriteAlbums
+                            var isFav = widget.playerProvider.favoriteAlbums
                                 .containsKey(key);
                             return AnimatedFavoriteButton(
                               isFavorite: isFav,
-                              onToggle: () => widget
-                                  .playerProvider
+                              onToggle: () => widget.playerProvider
                                   .toggleFavoriteAlbum(key),
                             );
                           },
@@ -270,8 +267,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   playerProvider: widget.playerProvider,
                   onClearSelection: _clearSongSelection,
                   onSelectAll: () => _selectAllSongs(widget.album.songs),
-                  bottomPadding:
-                      widget.playerProvider.currentSong != null ? 80.0 : 16.0,
+                  bottomPadding: widget.playerProvider.currentSong != null
+                      ? 80.0
+                      : 16.0,
                 ),
               ),
           ],

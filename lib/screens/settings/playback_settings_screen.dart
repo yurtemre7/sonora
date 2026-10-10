@@ -132,9 +132,10 @@ class PlaybackSettingsScreen extends StatelessWidget {
                       title: Text(context.l10n.sleepTimerFadeOut),
                       subtitle: Text(context.l10n.sleepTimerFadeOutSubtitle),
                       trailing: DropdownButton<int>(
-                        value: [0, 10, 30, 60].contains(
-                          settingsProvider.sleepTimerFadeOutSeconds,
-                        )
+                        value:
+                            [0, 10, 30, 60].contains(
+                              settingsProvider.sleepTimerFadeOutSeconds,
+                            )
                             ? settingsProvider.sleepTimerFadeOutSeconds
                             : 10,
                         underline: const SizedBox(),

@@ -110,11 +110,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SongTile(
-              song: song,
-              isSelecting: true,
-              onTap: () {},
-            ),
+            body: SongTile(song: song, isSelecting: true, onTap: () {}),
           ),
         ),
       );
@@ -232,9 +228,18 @@ void main() {
       expect(cleared, isTrue);
 
       // Verify action buttons exist
-      expect(find.byIcon(Icons.playlist_play_rounded), findsOneWidget); // Play Next
-      expect(find.byIcon(Icons.queue_music_rounded), findsOneWidget); // Add to Queue
-      expect(find.byIcon(Icons.playlist_add_rounded), findsOneWidget); // Add to Playlist
+      expect(
+        find.byIcon(Icons.playlist_play_rounded),
+        findsOneWidget,
+      ); // Play Next
+      expect(
+        find.byIcon(Icons.queue_music_rounded),
+        findsOneWidget,
+      ); // Add to Queue
+      expect(
+        find.byIcon(Icons.playlist_add_rounded),
+        findsOneWidget,
+      ); // Add to Playlist
       expect(find.byIcon(Icons.favorite_rounded), findsOneWidget); // Favorite
       expect(find.byIcon(Icons.share_rounded), findsOneWidget); // Share
     });

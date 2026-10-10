@@ -340,9 +340,12 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       title: Text(context.l10n.nowPlayingStyle),
                       subtitle: Text(context.l10n.nowPlayingStyleSubtitle),
                       trailing: DropdownButton<String>(
-                        value: ['modern', 'vinyl', 'minimalist'].contains(
-                          settingsProvider.nowPlayingStyle,
-                        )
+                        value:
+                            [
+                              'modern',
+                              'vinyl',
+                              'minimalist',
+                            ].contains(settingsProvider.nowPlayingStyle)
                             ? settingsProvider.nowPlayingStyle
                             : 'modern',
                         underline: const SizedBox(),

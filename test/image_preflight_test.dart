@@ -50,51 +50,57 @@ void main() {
       service.clearCache();
     });
 
-    test('preflightSongs handles empty or null artwork songs gracefully', () async {
-      var songs = [
-        Song(
-          id: 1,
-          title: 'Song 1',
-          artist: 'Artist 1',
-          album: 'Album 1',
-          duration: const Duration(minutes: 3),
-          filePath: '/music/song1.mp3',
-        ),
-        Song(
-          id: 2,
-          title: 'Song 2',
-          artist: 'Artist 2',
-          album: 'Album 2',
-          duration: const Duration(minutes: 3),
-          filePath: '/music/song2.mp3',
-          artworkPath: '',
-        ),
-      ];
-
-      // Should complete quickly without throwing
-      await service.preflightSongs(songs);
-    });
-
-    test('preflightAlbums and preflightQueueUpcoming execute without error', () async {
-      var album = AlbumGroup(
-        name: 'Test Album',
-        artist: 'Test Artist',
-        songs: [
+    test(
+      'preflightSongs handles empty or null artwork songs gracefully',
+      () async {
+        var songs = [
           Song(
             id: 1,
-            title: 'Track 1',
-            artist: 'Test Artist',
-            album: 'Test Album',
+            title: 'Song 1',
+            artist: 'Artist 1',
+            album: 'Album 1',
             duration: const Duration(minutes: 3),
-            filePath: '/music/test1.mp3',
+            filePath: '/music/song1.mp3',
           ),
-        ],
-      );
+          Song(
+            id: 2,
+            title: 'Song 2',
+            artist: 'Artist 2',
+            album: 'Album 2',
+            duration: const Duration(minutes: 3),
+            filePath: '/music/song2.mp3',
+            artworkPath: '',
+          ),
+        ];
 
-      await service.preflightAlbums([album]);
-      await service.preflightQueueUpcoming([], 0);
-      await service.preflightQueueUpcoming(album.songs, 0);
-    });
+        // Should complete quickly without throwing
+        await service.preflightSongs(songs);
+      },
+    );
+
+    test(
+      'preflightAlbums and preflightQueueUpcoming execute without error',
+      () async {
+        var album = AlbumGroup(
+          name: 'Test Album',
+          artist: 'Test Artist',
+          songs: [
+            Song(
+              id: 1,
+              title: 'Track 1',
+              artist: 'Test Artist',
+              album: 'Test Album',
+              duration: const Duration(minutes: 3),
+              filePath: '/music/test1.mp3',
+            ),
+          ],
+        );
+
+        await service.preflightAlbums([album]);
+        await service.preflightQueueUpcoming([], 0);
+        await service.preflightQueueUpcoming(album.songs, 0);
+      },
+    );
 
     test('preflightSongs pre-warms real image file into imageCache', () async {
       // Create a temporary 1x1 png image file
@@ -102,15 +108,73 @@ void main() {
       var testFile = File('${tempDir.path}/test_art.png');
       // Minimal valid 1x1 PNG bytes
       var pngBytes = <int>[
-        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-        0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-        0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
-        0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
-        0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-        0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
-        0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
-        0x42, 0x60, 0x82,
+        0x89,
+        0x50,
+        0x4E,
+        0x47,
+        0x0D,
+        0x0A,
+        0x1A,
+        0x0A,
+        0x00,
+        0x00,
+        0x00,
+        0x0D,
+        0x49,
+        0x48,
+        0x44,
+        0x52,
+        0x00,
+        0x00,
+        0x00,
+        0x01,
+        0x00,
+        0x00,
+        0x00,
+        0x01,
+        0x08,
+        0x06,
+        0x00,
+        0x00,
+        0x00,
+        0x1F,
+        0x15,
+        0xC4,
+        0x89,
+        0x00,
+        0x00,
+        0x00,
+        0x0A,
+        0x49,
+        0x44,
+        0x41,
+        0x54,
+        0x78,
+        0x9C,
+        0x63,
+        0x00,
+        0x01,
+        0x00,
+        0x00,
+        0x05,
+        0x00,
+        0x01,
+        0x0D,
+        0x0A,
+        0x2D,
+        0xB4,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x49,
+        0x45,
+        0x4E,
+        0x44,
+        0xAE,
+        0x42,
+        0x60,
+        0x82,
       ];
       await testFile.writeAsBytes(pngBytes);
 
@@ -129,7 +193,10 @@ void main() {
       await service.preflightSongs([song], maxItems: 10, chunkSize: 2);
 
       // Verify that imageCache contains the prewarmed image
-      expect(PaintingBinding.instance.imageCache.currentSize, greaterThanOrEqualTo(initialCount));
+      expect(
+        PaintingBinding.instance.imageCache.currentSize,
+        greaterThanOrEqualTo(initialCount),
+      );
 
       // Clean up temp file
       await tempDir.delete(recursive: true);

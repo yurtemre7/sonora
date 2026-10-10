@@ -79,10 +79,7 @@ class ImagePreflightService {
       for (var path in batch) {
         var key = '$path@$targetDim';
         _preflightedProviders.add(key);
-        var provider = AlbumArt.provider(
-          path,
-          cacheDim: targetDim,
-        );
+        var provider = AlbumArt.provider(path, cacheDim: targetDim);
         futures.add(preflightProvider(provider));
       }
 
@@ -133,10 +130,7 @@ class ImagePreflightService {
       for (var path in batch) {
         var key = '$path@$targetDim';
         _preflightedProviders.add(key);
-        var provider = AlbumArt.provider(
-          path,
-          cacheDim: targetDim,
-        );
+        var provider = AlbumArt.provider(path, cacheDim: targetDim);
         futures.add(preflightProvider(provider));
       }
 

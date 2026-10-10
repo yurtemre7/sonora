@@ -13,7 +13,10 @@ class PlaylistSelectorBottomSheet extends StatefulWidget {
     this.song,
     this.songs,
     required this.playerProvider,
-  }) : assert(song != null || songs != null, 'Either song or songs must be provided');
+  }) : assert(
+         song != null || songs != null,
+         'Either song or songs must be provided',
+       );
 
   final Song? song;
   final List<Song>? songs;
@@ -170,7 +173,8 @@ class _PlaylistSelectorBottomSheetState
                                 var playlist = playlists[index];
                                 var targetSongs = widget.targetSongs;
                                 var isSingle = targetSongs.length == 1;
-                                var isAlreadyIn = isSingle &&
+                                var isAlreadyIn =
+                                    isSingle &&
                                     playlist.songIds.contains(
                                       targetSongs.first.id,
                                     );
@@ -208,7 +212,8 @@ class _PlaylistSelectorBottomSheetState
                                               : theme
                                                     .colorScheme
                                                     .surfaceContainerLow,
-                                          leading: playlist.coverImagePath != null
+                                          leading:
+                                              playlist.coverImagePath != null
                                               ? Container(
                                                   width: 40,
                                                   height: 40,
@@ -232,20 +237,20 @@ class _PlaylistSelectorBottomSheetState
                                                   ),
                                                 )
                                               : firstSong != null
-                                                  ? AlbumArt(
-                                                      artworkPath:
-                                                          firstSong.artworkPath,
-                                                      size: 40,
-                                                      borderRadius: 8,
-                                                    )
-                                                  : Icon(
-                                                      Icons.playlist_add_rounded,
-                                                      color: isAlreadyIn
-                                                          ? theme
-                                                                .colorScheme
-                                                                .primary
-                                                          : null,
-                                                    ),
+                                              ? AlbumArt(
+                                                  artworkPath:
+                                                      firstSong.artworkPath,
+                                                  size: 40,
+                                                  borderRadius: 8,
+                                                )
+                                              : Icon(
+                                                  Icons.playlist_add_rounded,
+                                                  color: isAlreadyIn
+                                                      ? theme
+                                                            .colorScheme
+                                                            .primary
+                                                      : null,
+                                                ),
                                           title: Text(
                                             playlist.name,
                                             style: theme.textTheme.bodyLarge
@@ -302,8 +307,8 @@ class _PlaylistSelectorBottomSheetState
                                                     content: Text(
                                                       'Removed "${singleSong.displayTitle}" from ${playlist.name}.',
                                                     ),
-                                                    behavior:
-                                                        SnackBarBehavior.floating,
+                                                    behavior: SnackBarBehavior
+                                                        .floating,
                                                     duration: const Duration(
                                                       seconds: 2,
                                                     ),
@@ -320,8 +325,8 @@ class _PlaylistSelectorBottomSheetState
                                                     content: Text(
                                                       'Added "${singleSong.displayTitle}" to ${playlist.name}.',
                                                     ),
-                                                    behavior:
-                                                        SnackBarBehavior.floating,
+                                                    behavior: SnackBarBehavior
+                                                        .floating,
                                                     duration: const Duration(
                                                       seconds: 2,
                                                     ),

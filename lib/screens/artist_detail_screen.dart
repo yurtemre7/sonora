@@ -209,14 +209,11 @@ class _ArtistDetailScreenState extends State<ArtistDetailScreen> {
                           listenable: widget.playerProvider,
                           builder: (context, _) {
                             var key = widget.artist.nameLower;
-                            var isFav = widget
-                                .playerProvider
-                                .favoriteArtists
+                            var isFav = widget.playerProvider.favoriteArtists
                                 .containsKey(key);
                             return AnimatedFavoriteButton(
                               isFavorite: isFav,
-                              onToggle: () => widget
-                                  .playerProvider
+                              onToggle: () => widget.playerProvider
                                   .toggleFavoriteArtist(key),
                             );
                           },
@@ -382,8 +379,9 @@ class _ArtistDetailScreenState extends State<ArtistDetailScreen> {
                   playerProvider: widget.playerProvider,
                   onClearSelection: _clearSongSelection,
                   onSelectAll: () => _selectAllSongs(widget.artist.songs),
-                  bottomPadding:
-                      widget.playerProvider.currentSong != null ? 80.0 : 16.0,
+                  bottomPadding: widget.playerProvider.currentSong != null
+                      ? 80.0
+                      : 16.0,
                 ),
               ),
           ],

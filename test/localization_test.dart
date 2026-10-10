@@ -6,45 +6,43 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Localization and material_ui delegates', () {
-    testWidgets('Japanese locale resolves MaterialLocalizations and AppLocalizations', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          locale: Locale('ja'),
-          localizationsDelegates: [
-            ...AppLocalizations.localizationsDelegates,
-            ...GlobalMaterialLocalizations.delegates,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: Builder(
-              builder: _buildTestWidget,
-            ),
+    testWidgets(
+      'Japanese locale resolves MaterialLocalizations and AppLocalizations',
+      (tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            locale: Locale('ja'),
+            localizationsDelegates: [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(body: Builder(builder: _buildTestWidget)),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('SONORA_JA_FOUND'), findsOneWidget);
-    });
+        expect(find.text('SONORA_JA_FOUND'), findsOneWidget);
+      },
+    );
 
-    testWidgets('English locale resolves MaterialLocalizations and AppLocalizations', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          locale: Locale('en'),
-          localizationsDelegates: [
-            ...AppLocalizations.localizationsDelegates,
-            ...GlobalMaterialLocalizations.delegates,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: Builder(
-              builder: _buildTestWidget,
-            ),
+    testWidgets(
+      'English locale resolves MaterialLocalizations and AppLocalizations',
+      (tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            locale: Locale('en'),
+            localizationsDelegates: [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(body: Builder(builder: _buildTestWidget)),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('SONORA_JA_FOUND'), findsOneWidget);
-    });
+        expect(find.text('SONORA_JA_FOUND'), findsOneWidget);
+      },
+    );
   });
 }
 

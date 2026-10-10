@@ -4,11 +4,7 @@ import 'package:sonora/models/song_activity.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
 
-enum ThemeColorSource {
-  materialYou,
-  albumArt,
-  custom,
-}
+enum ThemeColorSource { materialYou, albumArt, custom }
 
 class SettingsProvider extends ChangeNotifier {
   static final instance = SettingsProvider._internal();
@@ -81,8 +77,7 @@ class SettingsProvider extends ChangeNotifier {
     if (colorValue != null) {
       dynamicThemeColor = Color(colorValue);
     }
-    nowPlayingStyle =
-        await prefs.getString('now_playing_style') ?? 'modern';
+    nowPlayingStyle = await prefs.getString('now_playing_style') ?? 'modern';
     showVisualizer = await prefs.getBool('show_visualizer') ?? false;
     immersiveMode = await prefs.getBool('immersive_mode') ?? false;
     preferLocalArtistImages =
@@ -116,8 +111,7 @@ class SettingsProvider extends ChangeNotifier {
         await prefs.getBool('restore_last_played_song') ?? true;
 
     pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
-    pauseOnDisconnect =
-        await prefs.getBool('pause_on_disconnect') ?? true;
+    pauseOnDisconnect = await prefs.getBool('pause_on_disconnect') ?? true;
     resumeOnConnect = await prefs.getBool('resume_on_connect') ?? false;
     filterTitleFeatures = await prefs.getBool('filter_title_features') ?? false;
     filterTitleArtist = await prefs.getBool('filter_title_artist') ?? false;

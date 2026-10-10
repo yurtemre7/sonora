@@ -1545,10 +1545,7 @@ class MusicScanner {
   }
 
   /// Adds multiple songs to a playlist if not already present.
-  Future<void> addSongsToPlaylist(
-    String playlistId,
-    List<int> songIds,
-  ) async {
+  Future<void> addSongsToPlaylist(String playlistId, List<int> songIds) async {
     if (songIds.isEmpty) return;
     var playlists = await getPlaylists();
     for (var i = 0; i < playlists.length; i++) {

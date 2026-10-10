@@ -56,7 +56,9 @@ void main() {
   });
 
   group('SongsTab syncPromptBanner Tests', () {
-    testWidgets('Renders syncPromptBanner when showSyncPrompt is true', (tester) async {
+    testWidgets('Renders syncPromptBanner when showSyncPrompt is true', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         testApp(
           Scaffold(
@@ -78,7 +80,9 @@ void main() {
       expect(find.text('SYNC_PROMPT_BANNER_CONTENT'), findsOneWidget);
     });
 
-    testWidgets('Hides syncPromptBanner when showSyncPrompt is false', (tester) async {
+    testWidgets('Hides syncPromptBanner when showSyncPrompt is false', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         testApp(
           Scaffold(
@@ -102,91 +106,97 @@ void main() {
   });
 
   group('HomeScreen Sync Reminder Banner Action Tests', () {
-    testWidgets('Tapping Remind Next Month dismisses banner and calls onPostponeSync', (tester) async {
-      var postponeCalled = false;
+    testWidgets(
+      'Tapping Remind Next Month dismisses banner and calls onPostponeSync',
+      (tester) async {
+        var postponeCalled = false;
 
-      await tester.pumpWidget(
-        testApp(
-          HomeScreen(
-            playerProvider: playerProvider,
-            songs: [sampleSong],
-            onOpenSettings: () {},
-            scanFolder: '/music',
-            onConfigureFolder: () {},
-            onCreatePlaylist: (_) async {},
-            onDeletePlaylist: (_) async {},
-            onRenamePlaylist: (_, _) async {},
-            onAddSongToPlaylist: (_, _) async {},
-            onRemoveSongFromPlaylist: (_, _) async {},
-            onReorderPlaylistSongs: (_, _) async {},
-            isSyncing: false,
-            showSyncPrompt: true,
-            onResyncNow: () async {},
-            onPostponeSync: () async {
-              postponeCalled = true;
-            },
+        await tester.pumpWidget(
+          testApp(
+            HomeScreen(
+              playerProvider: playerProvider,
+              songs: [sampleSong],
+              onOpenSettings: () {},
+              scanFolder: '/music',
+              onConfigureFolder: () {},
+              onCreatePlaylist: (_) async {},
+              onDeletePlaylist: (_) async {},
+              onRenamePlaylist: (_, _) async {},
+              onAddSongToPlaylist: (_, _) async {},
+              onRemoveSongFromPlaylist: (_, _) async {},
+              onReorderPlaylistSongs: (_, _) async {},
+              isSyncing: false,
+              showSyncPrompt: true,
+              onResyncNow: () async {},
+              onPostponeSync: () async {
+                postponeCalled = true;
+              },
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Remind Next Month'), findsOneWidget);
+        expect(find.text('Remind Next Month'), findsOneWidget);
 
-      await tester.tap(find.text('Remind Next Month'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Remind Next Month'));
+        await tester.pumpAndSettle();
 
-      expect(postponeCalled, isTrue);
-      expect(find.text('Remind Next Month'), findsNothing);
-    });
+        expect(postponeCalled, isTrue);
+        expect(find.text('Remind Next Month'), findsNothing);
+      },
+    );
 
-    testWidgets('Tapping Sync Now dismisses banner, shows progress indicator, and calls onResyncNow', (tester) async {
-      var syncCompleter = Completer<void>();
-      var resyncCalled = false;
+    testWidgets(
+      'Tapping Sync Now dismisses banner, shows progress indicator, and calls onResyncNow',
+      (tester) async {
+        var syncCompleter = Completer<void>();
+        var resyncCalled = false;
 
-      await tester.pumpWidget(
-        testApp(
-          HomeScreen(
-            playerProvider: playerProvider,
-            songs: [sampleSong],
-            onOpenSettings: () {},
-            scanFolder: '/music',
-            onConfigureFolder: () {},
-            onCreatePlaylist: (_) async {},
-            onDeletePlaylist: (_) async {},
-            onRenamePlaylist: (_, _) async {},
-            onAddSongToPlaylist: (_, _) async {},
-            onRemoveSongFromPlaylist: (_, _) async {},
-            onReorderPlaylistSongs: (_, _) async {},
-            isSyncing: false,
-            showSyncPrompt: true,
-            onResyncNow: () async {
-              resyncCalled = true;
-              await syncCompleter.future;
-            },
-            onPostponeSync: () async {},
+        await tester.pumpWidget(
+          testApp(
+            HomeScreen(
+              playerProvider: playerProvider,
+              songs: [sampleSong],
+              onOpenSettings: () {},
+              scanFolder: '/music',
+              onConfigureFolder: () {},
+              onCreatePlaylist: (_) async {},
+              onDeletePlaylist: (_) async {},
+              onRenamePlaylist: (_, _) async {},
+              onAddSongToPlaylist: (_, _) async {},
+              onRemoveSongFromPlaylist: (_, _) async {},
+              onReorderPlaylistSongs: (_, _) async {},
+              isSyncing: false,
+              showSyncPrompt: true,
+              onResyncNow: () async {
+                resyncCalled = true;
+                await syncCompleter.future;
+              },
+              onPostponeSync: () async {},
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Sync Now'), findsOneWidget);
-      expect(find.byType(LinearProgressIndicator), findsNothing);
+        expect(find.text('Sync Now'), findsOneWidget);
+        expect(find.byType(LinearProgressIndicator), findsNothing);
 
-      await tester.tap(find.text('Sync Now'));
-      await tester.pump();
+        await tester.tap(find.text('Sync Now'));
+        await tester.pump();
 
-      expect(resyncCalled, isTrue);
-      // Banner should be immediately dismissed
-      expect(find.text('Sync Now'), findsNothing);
-      // Progress indicator should be visible while syncing
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+        expect(resyncCalled, isTrue);
+        // Banner should be immediately dismissed
+        expect(find.text('Sync Now'), findsNothing);
+        // Progress indicator should be visible while syncing
+        expect(find.byType(LinearProgressIndicator), findsOneWidget);
 
-      // Complete the sync
-      syncCompleter.complete();
-      await tester.pumpAndSettle();
+        // Complete the sync
+        syncCompleter.complete();
+        await tester.pumpAndSettle();
 
-      // Progress indicator should be gone after sync completion
-      expect(find.byType(LinearProgressIndicator), findsNothing);
-    });
+        // Progress indicator should be gone after sync completion
+        expect(find.byType(LinearProgressIndicator), findsNothing);
+      },
+    );
   });
 }

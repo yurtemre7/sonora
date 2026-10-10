@@ -220,15 +220,16 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                               ),
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
-                                              color: player.effectiveSpeed != 1.0
+                                              color:
+                                                  player.effectiveSpeed != 1.0
                                                   ? theme
-                                                      .colorScheme
-                                                      .onSurfaceVariant
+                                                        .colorScheme
+                                                        .onSurfaceVariant
                                                   : theme.colorScheme.primary,
                                               fontWeight:
                                                   player.effectiveSpeed != 1.0
-                                                      ? FontWeight.normal
-                                                      : FontWeight.bold,
+                                                  ? FontWeight.normal
+                                                  : FontWeight.bold,
                                               fontFeatures: const [
                                                 FontFeature.tabularFigures(),
                                               ],

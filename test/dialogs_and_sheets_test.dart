@@ -42,7 +42,9 @@ void main() {
         InMemorySharedPreferencesAsync.empty();
   });
   group('ConfirmDeleteDialog Tests', () {
-    testWidgets('Returns true when destructive action is confirmed', (tester) async {
+    testWidgets('Returns true when destructive action is confirmed', (
+      tester,
+    ) async {
       bool? result;
 
       await tester.pumpWidget(
@@ -79,7 +81,9 @@ void main() {
       expect(result, isTrue);
     });
 
-    testWidgets('Returns null/false when cancel button is tapped', (tester) async {
+    testWidgets('Returns null/false when cancel button is tapped', (
+      tester,
+    ) async {
       bool? result;
 
       await tester.pumpWidget(
@@ -115,59 +119,64 @@ void main() {
   });
 
   group('RenamePlaylistDialog Tests', () {
-    testWidgets('Loads initial playlist name and invokes onRename with new name', (tester) async {
-      var playlist = Playlist(
-        id: 'pl_123',
-        name: 'Roadtrip 2026',
-        songIds: [1, 2, 3],
-      );
+    testWidgets(
+      'Loads initial playlist name and invokes onRename with new name',
+      (tester) async {
+        var playlist = Playlist(
+          id: 'pl_123',
+          name: 'Roadtrip 2026',
+          songIds: [1, 2, 3],
+        );
 
-      String? renamedId;
-      String? renamedTitle;
+        String? renamedId;
+        String? renamedTitle;
 
-      await tester.pumpWidget(
-        testApp(
-          Builder(
-            builder: (context) {
-              return ElevatedButton(
-                onPressed: () {
-                  RenamePlaylistDialog.show(
-                    context,
-                    playlist: playlist,
-                    onRename: (id, newName) async {
-                      renamedId = id;
-                      renamedTitle = newName;
-                    },
-                  );
-                },
-                child: const Text('Rename'),
-              );
-            },
+        await tester.pumpWidget(
+          testApp(
+            Builder(
+              builder: (context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    RenamePlaylistDialog.show(
+                      context,
+                      playlist: playlist,
+                      onRename: (id, newName) async {
+                        renamedId = id;
+                        renamedTitle = newName;
+                      },
+                    );
+                  },
+                  child: const Text('Rename'),
+                );
+              },
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.text('Rename'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Rename'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Roadtrip 2026'), findsOneWidget);
+        expect(find.text('Roadtrip 2026'), findsOneWidget);
 
-      // Enter new name
-      await tester.enterText(find.byType(TextField), 'Summer Vibes');
-      await tester.pump();
+        // Enter new name
+        await tester.enterText(find.byType(TextField), 'Summer Vibes');
+        await tester.pump();
 
-      // Tap Save
-      var saveButton = find.byType(FilledButton);
-      await tester.tap(saveButton);
-      await tester.pumpAndSettle();
+        // Tap Save
+        var saveButton = find.byType(FilledButton);
+        await tester.tap(saveButton);
+        await tester.pumpAndSettle();
 
-      expect(renamedId, equals('pl_123'));
-      expect(renamedTitle, equals('Summer Vibes'));
-    });
+        expect(renamedId, equals('pl_123'));
+        expect(renamedTitle, equals('Summer Vibes'));
+      },
+    );
   });
 
   group('EditPlaylistDescriptionDialog Tests', () {
-    testWidgets('Loads current description and submits updated text', (tester) async {
+    testWidgets('Loads current description and submits updated text', (
+      tester,
+    ) async {
       var playlist = Playlist(
         id: 'pl_desc',
         name: 'Chill Beats',
@@ -203,7 +212,10 @@ void main() {
 
       expect(find.text('Old Description'), findsOneWidget);
 
-      await tester.enterText(find.byType(TextField), 'Relaxing lofi tracks for study');
+      await tester.enterText(
+        find.byType(TextField),
+        'Relaxing lofi tracks for study',
+      );
       await tester.pump();
 
       var saveButton = find.byType(FilledButton);
@@ -215,7 +227,9 @@ void main() {
   });
 
   group('AnimatedFavoriteButton Tests', () {
-    testWidgets('Renders favorite border icon and calls onToggle on tap', (tester) async {
+    testWidgets('Renders favorite border icon and calls onToggle on tap', (
+      tester,
+    ) async {
       var toggled = false;
 
       await tester.pumpWidget(
@@ -236,14 +250,11 @@ void main() {
       expect(toggled, isTrue);
     });
 
-    testWidgets('Renders filled favorite icon when isFavorite is true', (tester) async {
+    testWidgets('Renders filled favorite icon when isFavorite is true', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        testApp(
-          AnimatedFavoriteButton(
-            isFavorite: true,
-            onToggle: () {},
-          ),
-        ),
+        testApp(AnimatedFavoriteButton(isFavorite: true, onToggle: () {})),
       );
       await tester.pumpAndSettle();
 
@@ -252,143 +263,149 @@ void main() {
   });
 
   group('SpeedSlider Widget Tests', () {
-    testWidgets('Renders reset button and triggers onChanged when reset is tapped', (tester) async {
-      double? changedSpeed;
+    testWidgets(
+      'Renders reset button and triggers onChanged when reset is tapped',
+      (tester) async {
+        double? changedSpeed;
 
-      await tester.pumpWidget(
-        testApp(
-          SpeedSlider(
-            speed: 1.5,
-            onChanged: (val) => changedSpeed = val,
+        await tester.pumpWidget(
+          testApp(
+            SpeedSlider(speed: 1.5, onChanged: (val) => changedSpeed = val),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.speed_rounded), findsOneWidget);
+        expect(find.byIcon(Icons.speed_rounded), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.speed_rounded));
-      await tester.pump();
+        await tester.tap(find.byIcon(Icons.speed_rounded));
+        await tester.pump();
 
-      expect(changedSpeed, equals(1.0));
-    });
+        expect(changedSpeed, equals(1.0));
+      },
+    );
   });
 
   group('PlaylistsTab & PlaylistDetailScreen Tests', () {
-    testWidgets('PlaylistsTab renders first song artwork as default cover when coverImagePath is null', (tester) async {
-      var audioHandler = SonoraAudioHandler();
-      var settingsProvider = SettingsProvider();
-      var playerProvider = PlayerProvider(
-        audioHandler: audioHandler,
-        settingsProvider: settingsProvider,
-      );
+    testWidgets(
+      'PlaylistsTab renders first song artwork as default cover when coverImagePath is null',
+      (tester) async {
+        var audioHandler = SonoraAudioHandler();
+        var settingsProvider = SettingsProvider();
+        var playerProvider = PlayerProvider(
+          audioHandler: audioHandler,
+          settingsProvider: settingsProvider,
+        );
 
-      var songA = Song(
-        id: 101,
-        title: 'Song One',
-        artist: 'Artist A',
-        album: 'Album A',
-        duration: const Duration(minutes: 3),
-        filePath: '/music/song1.mp3',
-        artworkPath: '/covers/song1.jpg',
-      );
+        var songA = Song(
+          id: 101,
+          title: 'Song One',
+          artist: 'Artist A',
+          album: 'Album A',
+          duration: const Duration(minutes: 3),
+          filePath: '/music/song1.mp3',
+          artworkPath: '/covers/song1.jpg',
+        );
 
-      var songB = Song(
-        id: 102,
-        title: 'Song Two',
-        artist: 'Artist B',
-        album: 'Album B',
-        duration: const Duration(minutes: 4),
-        filePath: '/music/song2.mp3',
-      );
+        var songB = Song(
+          id: 102,
+          title: 'Song Two',
+          artist: 'Artist B',
+          album: 'Album B',
+          duration: const Duration(minutes: 4),
+          filePath: '/music/song2.mp3',
+        );
 
-      var playlistWithSongs = Playlist(
-        id: 'pl_1',
-        name: 'My Roadtrip Mix',
-        songIds: [101, 102],
-      );
+        var playlistWithSongs = Playlist(
+          id: 'pl_1',
+          name: 'My Roadtrip Mix',
+          songIds: [101, 102],
+        );
 
-      playerProvider.updatePlaylists([playlistWithSongs]);
+        playerProvider.updatePlaylists([playlistWithSongs]);
 
-      await tester.pumpWidget(
-        testApp(
-          PlaylistsTab(
-            allSongs: [songA, songB],
-            filteredPlaylists: [playlistWithSongs],
-            playerProvider: playerProvider,
-            onUnfocusSearch: () {},
-            onCreatePlaylistDialog: () {},
-            onDeletePlaylist: (_) async {},
-            onRenamePlaylist: (_, _) async {},
+        await tester.pumpWidget(
+          testApp(
+            PlaylistsTab(
+              allSongs: [songA, songB],
+              filteredPlaylists: [playlistWithSongs],
+              playerProvider: playerProvider,
+              onUnfocusSearch: () {},
+              onCreatePlaylistDialog: () {},
+              onDeletePlaylist: (_) async {},
+              onRenamePlaylist: (_, _) async {},
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('My Roadtrip Mix'), findsOneWidget);
-      expect(find.text('2 songs'), findsOneWidget);
-      // Verify AlbumArt resolved with songA's artworkPath
-      var albumArt = tester.widget<AlbumArt>(find.byType(AlbumArt));
-      expect(albumArt.artworkPath, equals('/covers/song1.jpg'));
-    });
+        expect(find.text('My Roadtrip Mix'), findsOneWidget);
+        expect(find.text('2 songs'), findsOneWidget);
+        // Verify AlbumArt resolved with songA's artworkPath
+        var albumArt = tester.widget<AlbumArt>(find.byType(AlbumArt));
+        expect(albumArt.artworkPath, equals('/covers/song1.jpg'));
+      },
+    );
 
-    testWidgets('PlaylistDetailScreen shows drag handle and enables track reordering', (tester) async {
-      var audioHandler = SonoraAudioHandler();
-      var settingsProvider = SettingsProvider();
-      var playerProvider = PlayerProvider(
-        audioHandler: audioHandler,
-        settingsProvider: settingsProvider,
-      );
+    testWidgets(
+      'PlaylistDetailScreen shows drag handle and enables track reordering',
+      (tester) async {
+        var audioHandler = SonoraAudioHandler();
+        var settingsProvider = SettingsProvider();
+        var playerProvider = PlayerProvider(
+          audioHandler: audioHandler,
+          settingsProvider: settingsProvider,
+        );
 
-      var song1 = Song(
-        id: 1,
-        title: 'First Track',
-        artist: 'Artist 1',
-        album: 'Album 1',
-        duration: const Duration(minutes: 3),
-        filePath: '/music/1.mp3',
-      );
-      var song2 = Song(
-        id: 2,
-        title: 'Second Track',
-        artist: 'Artist 2',
-        album: 'Album 2',
-        duration: const Duration(minutes: 4),
-        filePath: '/music/2.mp3',
-      );
+        var song1 = Song(
+          id: 1,
+          title: 'First Track',
+          artist: 'Artist 1',
+          album: 'Album 1',
+          duration: const Duration(minutes: 3),
+          filePath: '/music/1.mp3',
+        );
+        var song2 = Song(
+          id: 2,
+          title: 'Second Track',
+          artist: 'Artist 2',
+          album: 'Album 2',
+          duration: const Duration(minutes: 4),
+          filePath: '/music/2.mp3',
+        );
 
-      var playlist = Playlist(
-        id: 'pl_reorder',
-        name: 'Reorder Test',
-        songIds: [1, 2],
-      );
+        var playlist = Playlist(
+          id: 'pl_reorder',
+          name: 'Reorder Test',
+          songIds: [1, 2],
+        );
 
-      playerProvider.updatePlaylists([playlist]);
+        playerProvider.updatePlaylists([playlist]);
 
-      await tester.pumpWidget(
-        testApp(
-          PlaylistDetailScreen(
-            playlist: playlist,
-            songs: [song1, song2],
-            playerProvider: playerProvider,
-            onRemoveSong: (_, _) async {},
-            onReorderSongs: (_, _) async {},
-            playlists: [playlist],
-            onAddSongToPlaylist: (_, _) async {},
+        await tester.pumpWidget(
+          testApp(
+            PlaylistDetailScreen(
+              playlist: playlist,
+              songs: [song1, song2],
+              playerProvider: playerProvider,
+              onRemoveSong: (_, _) async {},
+              onReorderSongs: (_, _) async {},
+              playlists: [playlist],
+              onAddSongToPlaylist: (_, _) async {},
+            ),
           ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('Reorder Test'), findsOneWidget);
-      expect(find.text('First Track'), findsOneWidget);
-      expect(find.text('Second Track'), findsOneWidget);
+        expect(find.text('Reorder Test'), findsOneWidget);
+        expect(find.text('First Track'), findsOneWidget);
+        expect(find.text('Second Track'), findsOneWidget);
 
-      // Verify drag handle icons exist for each track
-      expect(find.byIcon(Icons.drag_handle_rounded), findsNWidgets(2));
-      expect(find.byType(ReorderableDragStartListener), findsNWidgets(2));
-    });
+        // Verify drag handle icons exist for each track
+        expect(find.byIcon(Icons.drag_handle_rounded), findsNWidgets(2));
+        expect(find.byType(ReorderableDragStartListener), findsNWidgets(2));
+      },
+    );
   });
 
   group('SongInfoBottomSheet Tests', () {
@@ -468,9 +485,7 @@ void main() {
       playerProvider.currentIndex = 0;
 
       await tester.pumpWidget(
-        testApp(
-          QueueScreen(playerProvider: playerProvider),
-        ),
+        testApp(QueueScreen(playerProvider: playerProvider)),
       );
       await tester.pumpAndSettle();
 

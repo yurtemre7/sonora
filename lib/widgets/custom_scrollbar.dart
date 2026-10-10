@@ -7,11 +7,7 @@ class CustomScrollbar extends StatefulWidget {
   final Widget child;
   final String Function(double scrollPercentage)? sectionGetter;
 
-  const CustomScrollbar({
-    super.key,
-    required this.child,
-    this.sectionGetter,
-  });
+  const CustomScrollbar({super.key, required this.child, this.sectionGetter});
 
   @override
   State<CustomScrollbar> createState() => _CustomScrollbarState();
@@ -93,13 +89,16 @@ class _CustomScrollbarState extends State<CustomScrollbar> {
         : (scrollPercentage * maxThumbOffset);
     if (thumbOffset.isNaN || thumbOffset.isInfinite) thumbOffset = 0;
 
-    var showBubble = _isDragging &&
+    var showBubble =
+        _isDragging &&
         widget.sectionGetter != null &&
         _currentSection != null &&
         _currentSection!.isNotEmpty;
 
-    var bubbleTop = (thumbOffset + (thumbHeight / 2) - 24)
-        .clamp(12.0, (_viewportDimension - 56.0).clamp(12.0, double.infinity));
+    var bubbleTop = (thumbOffset + (thumbHeight / 2) - 24).clamp(
+      12.0,
+      (_viewportDimension - 56.0).clamp(12.0, double.infinity),
+    );
 
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
