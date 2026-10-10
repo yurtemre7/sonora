@@ -2,15 +2,16 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.21.1] - 2026-10-10
+### Fixed
+* Preserve notification drawables in release builds and safeguard transport volume
+
 ## [1.21.0] - 2026-10-10
 ### Added
 * Add scroll to current track in queue and haptic playback toggles
 * Add in-app dev indicator badge for debug builds
 * Add copy path, share file, and tap-to-copy in song info sheet
 ### Fixed
-* Fix missing media notification in release builds caused by stripped close icon
-* Safeguard audio transport volume fade transitions against muted playback
-* Specify compact action indices for system media notification
 * Improve open folder intent compatibility across android file managers
 * Resolve UnsupportedOperationException when opening song folder
 * Include material_ui localization delegates for multi-language support
