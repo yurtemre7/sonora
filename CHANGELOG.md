@@ -20,6 +20,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Chore: Updated packages
 * Chore: Migrate to material_ui
 * Chore: Update dependencies
+* Chore: Add .dev applicationId suffix for debug builds
 * Chore: Update flutter to 3.47.6
 
 ## [1.19.8] - 2026-09-05

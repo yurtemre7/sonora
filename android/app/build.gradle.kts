@@ -29,6 +29,7 @@ android {
         targetSdk = 37
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["appName"] = "Sonora"
     }
 
     signingConfigs {
@@ -42,6 +43,9 @@ android {
 
     buildTypes {
         getByName("debug") {
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            manifestPlaceholders["appName"] = "Sonora Dev"
             signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
