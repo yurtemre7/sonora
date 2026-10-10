@@ -106,7 +106,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> setVolume(double value) async {
     _volume = (value.clamp(0.0, 1.0) * 100).round() / 100;
-    await audioHandler.player.setVolume(_volume);
+    await audioHandler.setVolume(_volume);
     var prefs = SharedPreferencesAsync();
     await prefs.setDouble('volume', _volume);
     notifyListeners();

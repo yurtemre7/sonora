@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:audio_service/audio_service.dart';
@@ -34,6 +35,12 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   // Prevent recursive triggers when updating player sources.
   var _isModifyingSources = false;
+
+  // Invalidates an in-flight transport fade when the user changes direction.
+  var _transportFadeToken = 0;
+  double? _transportFadeRestoreVolume;
+  var _transportWantsPlayback = false;
+  static const _transportFadeDuration = Duration(milliseconds: 400);
 
   // Sleep timer properties for media notification
   var sleepTimerActive = false;
@@ -100,7 +107,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     session.becomingNoisyEventStream.listen((_) {
       if (pauseOnDisconnect && player.playing) {
         _wasPlayingBeforeDisconnect = true;
-        pause();
+        pause(immediate: true);
       }
     });
 
@@ -191,13 +198,13 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       var globalIndex = _rawPlaylist.indexOf(currentItem);
       if (globalIndex >= 0) {
         await loadPlaylist(_rawPlaylist, initialIndex: globalIndex);
-        await player.play();
+        await play();
         return;
       }
     }
     if (_rawPlaylist.isNotEmpty) {
       await loadPlaylist(_rawPlaylist);
-      await player.play();
+      await play();
     }
   }
 
@@ -563,10 +570,100 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   // ---------------------------------------------------------------------------
 
   @override
-  Future<void> play() => player.play();
+  Future<void> play() async {
+    var token = ++_transportFadeToken;
+    _transportWantsPlayback = true;
+    if (player.playing && _transportFadeRestoreVolume == null) return;
+
+    if (!player.playing) {
+      _transportFadeRestoreVolume ??= player.volume;
+      await player.setVolume(0);
+      if (token != _transportFadeToken) return;
+      _startPlayer();
+    }
+    await _fadeTransportVolume(fadeOut: false, token: token);
+    if (token == _transportFadeToken) _transportFadeRestoreVolume = null;
+  }
+
+  /// Sets the user's target volume, including while a transport fade is active.
+  Future<void> setVolume(double volume) async {
+    if (_transportFadeRestoreVolume != null) {
+      _transportFadeRestoreVolume = volume;
+    }
+    await player.setVolume(volume);
+  }
 
   @override
-  Future<void> pause() => player.pause();
+  Future<void> pause({bool immediate = false}) async {
+    var token = ++_transportFadeToken;
+    _transportWantsPlayback = false;
+    var restoreVolume = _transportFadeRestoreVolume;
+    if (!player.playing) {
+      if (restoreVolume != null) {
+        await _restoreTransportVolume(token, restoreVolume);
+      }
+      return;
+    }
+
+    restoreVolume ??= player.volume;
+    _transportFadeRestoreVolume = restoreVolume;
+    if (!immediate) {
+      await _fadeTransportVolume(fadeOut: true, token: token);
+      if (token != _transportFadeToken) return;
+    }
+
+    if (token == _transportFadeToken) {
+      await player.pause();
+      if (token != _transportFadeToken) {
+        await _resumeIfRequested();
+        return;
+      }
+      await _restoreTransportVolume(token, restoreVolume);
+    }
+  }
+
+  Future<void> _restoreTransportVolume(int token, double fallback) async {
+    await player.setVolume(_transportFadeRestoreVolume ?? fallback);
+    if (token != _transportFadeToken) {
+      await _resumeIfRequested();
+      return;
+    }
+    _transportFadeRestoreVolume = null;
+  }
+
+  Future<void> _resumeIfRequested() async {
+    if (_transportWantsPlayback) await play();
+  }
+
+  void _startPlayer() {
+    // just_audio's play future lasts until playback ends, so don't await it here.
+    unawaited(
+      player.play().catchError((Object error, StackTrace stackTrace) {
+        developer.log(
+          'Playback failed to start',
+          name: 'SonoraAudioHandler',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
+    );
+  }
+
+  Future<void> _fadeTransportVolume({
+    required bool fadeOut,
+    required int token,
+  }) async {
+    const steps = 20;
+    for (var step = 1; step <= steps; step++) {
+      await Future<void>.delayed(_transportFadeDuration ~/ steps);
+      if (token != _transportFadeToken) return;
+      var target = fadeOut ? 0.0 : _transportFadeRestoreVolume ?? player.volume;
+      var remainingSteps = steps - step + 1;
+      var nextVolume =
+          player.volume + (target - player.volume) / remainingSteps;
+      await player.setVolume(nextVolume);
+    }
+  }
 
   @override
   Future<void> setSpeed(double speed) => player.setSpeed(speed);
@@ -626,7 +723,19 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   @override
   Future<void> stop() async {
+    var restoreVolume = _transportFadeRestoreVolume;
+    var token = ++_transportFadeToken;
+    _transportWantsPlayback = false;
     await player.stop();
+    if (token != _transportFadeToken) {
+      await _resumeIfRequested();
+      return;
+    }
+    if (restoreVolume != null) {
+      await _restoreTransportVolume(token, restoreVolume);
+    }
+    if (token != _transportFadeToken) return;
+    _transportFadeRestoreVolume = null;
     _rawPlaylist = [];
     _windowStart = 0;
     _windowEnd = 0;
@@ -646,7 +755,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       } else if (_windowEnd < _rawPlaylist.length) {
         var nextIndex = _windowStart + (player.currentIndex ?? 0) + 1;
         await loadPlaylist(_rawPlaylist, initialIndex: nextIndex);
-        await player.play();
+        await play();
       } else {
         await player.seek(Duration.zero);
       }
@@ -666,7 +775,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         } else if (_windowStart > 0) {
           var prevIndex = _windowStart + (player.currentIndex ?? 0) - 1;
           await loadPlaylist(_rawPlaylist, initialIndex: prevIndex);
-          await player.play();
+          await play();
         } else {
           await player.seek(Duration.zero);
         }
@@ -687,7 +796,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     } else {
       // Outside window, force reload window centered on index
       await loadPlaylist(_rawPlaylist, initialIndex: index);
-      await player.play();
+      await play();
     }
   }
 
