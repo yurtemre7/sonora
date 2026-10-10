@@ -2,6 +2,23 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.20.0] - 2026-10-10
+### Added
+* Improve scan
+* Add player close button
+* Add pause/play audio transition
+### Fixed
+* Reset application button now feels more like 3 seconds hold
+* Music discovery fixed
+* Synching reminder button stuck
+### Changed
+* Chore: Bump image cache to 150 MB or 250 images
+* Perf: Improve performance of sync
+* Chore: Updated packages
+* Chore: Migrate to material_ui
+* Chore: Update dependencies
+* Chore: Update flutter to 3.47.6
+
 ## [1.19.8] - 2026-09-05
 ### Added
 * Add play count and add history view + improve sorting view
