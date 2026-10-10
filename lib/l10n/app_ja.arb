@@ -184,6 +184,7 @@
   "queue": "キュー",
   "queueEmpty": "キューは空です",
   "queueNOfM": "キュー（{current} / {total}）",
+  "scrollToCurrentTrack": "現在の曲へスクロール",
   "rateLimitMessage": "GitHub APIのレート制限（匿名リクエストは1時間あたり60回）に達しました。\n\n新しいリリースを確認するには、GitHubリポジトリを直接開いてください。",
   "rateLimitTitle": "レート制限を超過しました",
   "refresh": "更新",

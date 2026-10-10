@@ -625,6 +625,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get scrollToCurrentTrack => 'Scroll to current track';
+
+  @override
   String get rateLimitMessage =>
       'GitHub API rate limit (60 requests/hour for anonymous requests) has been reached.\n\nPlease open the GitHub repository directly to check for new releases.';
 

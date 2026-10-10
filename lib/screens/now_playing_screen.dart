@@ -47,10 +47,17 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   var _viewMode = _ViewMode.player;
   var _lastIndex = -1;
   var _reverse = false;
+  final _queueScrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _queueScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -875,18 +882,40 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                currentIndex >= 0
-                    ? context.l10n.queueNOfM(currentIndex + 1, queue.length)
-                    : context.l10n.queue,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      currentIndex >= 0
+                          ? context.l10n.queueNOfM(currentIndex + 1, queue.length)
+                          : context.l10n.queue,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.my_location_rounded, size: 20),
+                    tooltip: context.l10n.scrollToCurrentTrack,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      if (_queueScrollController.hasClients) {
+                        _queueScrollController.animateTo(
+                          0.0,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOutCubic,
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
             Expanded(
               child: ReorderableListView.builder(
+                scrollController: _queueScrollController,
                 itemCount: displayQueue.length,
                 buildDefaultDragHandles: false,
                 onReorderItem: (oldIndex, newIndex) {

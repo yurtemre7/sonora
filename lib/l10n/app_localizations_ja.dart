@@ -594,6 +594,9 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get scrollToCurrentTrack => '現在の曲へスクロール';
+
+  @override
   String get rateLimitMessage =>
       'GitHub APIのレート制限（匿名リクエストは1時間あたり60回）に達しました。\n\n新しいリリースを確認するには、GitHubリポジトリを直接開いてください。';
 

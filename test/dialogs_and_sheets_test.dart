@@ -1,6 +1,7 @@
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide GlobalMaterialLocalizations;
+import 'package:material_ui/material_ui.dart'
+    hide GlobalMaterialLocalizations, RepeatMode;
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 import 'package:sonora/l10n/app_localizations.dart';
@@ -9,6 +10,7 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
+import 'package:sonora/screens/queue_screen.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
@@ -436,6 +438,67 @@ void main() {
       await tester.tap(find.text('Masterpiece'));
       await tester.pump();
       expect(find.byType(SnackBar), findsOneWidget);
+    });
+  });
+
+  group('QueueScreen & Playback Ergonomics Tests', () {
+    testWidgets('renders queue and scroll to current track button', (
+      tester,
+    ) async {
+      var audioHandler = SonoraAudioHandler();
+      var settingsProvider = SettingsProvider();
+      var playerProvider = PlayerProvider(
+        audioHandler: audioHandler,
+        settingsProvider: settingsProvider,
+      );
+
+      var songs = List.generate(
+        10,
+        (i) => Song(
+          id: i + 1,
+          title: 'Track ${i + 1}',
+          artist: 'Artist',
+          album: 'Album',
+          duration: const Duration(minutes: 3),
+          filePath: '/music/track_${i + 1}.mp3',
+        ),
+      );
+      playerProvider.updateSongs(songs);
+      playerProvider.queue = List.from(songs);
+      playerProvider.currentIndex = 0;
+
+      await tester.pumpWidget(
+        testApp(
+          QueueScreen(playerProvider: playerProvider),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.my_location_rounded), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.my_location_rounded));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 4));
+      playerProvider.dispose();
+    });
+
+    test('Playback toggles cycle with haptic triggers', () async {
+      var audioHandler = SonoraAudioHandler();
+      var settingsProvider = SettingsProvider();
+      var playerProvider = PlayerProvider(
+        audioHandler: audioHandler,
+        settingsProvider: settingsProvider,
+      );
+
+      await playerProvider.cycleRepeatMode();
+      expect(playerProvider.repeatMode, equals(RepeatMode.all));
+
+      await playerProvider.cycleRepeatMode();
+      expect(playerProvider.repeatMode, equals(RepeatMode.one));
+
+      await playerProvider.cycleRepeatMode();
+      expect(playerProvider.repeatMode, equals(RepeatMode.off));
+
+      playerProvider.dispose();
     });
   });
 }

@@ -1202,6 +1202,12 @@ abstract class AppLocalizations {
   /// **'Queue ({current} of {total})'**
   String queueNOfM(int current, int total);
 
+  /// No description provided for @scrollToCurrentTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to current track'**
+  String get scrollToCurrentTrack;
+
   /// No description provided for @rateLimitMessage.
   ///
   /// In en, this message translates to:

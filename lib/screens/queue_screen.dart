@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/utils/l10n_extension.dart';
@@ -80,6 +81,20 @@ class _QueueScreenState extends State<QueueScreen> {
                   : context.l10n.queue,
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.my_location_rounded),
+                tooltip: context.l10n.scrollToCurrentTrack,
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  if (_scrollController.hasClients) {
+                    _scrollController.animateTo(
+                      0.0,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOutCubic,
+                    );
+                  }
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.playlist_add),
                 tooltip: context.l10n.saveAsPlaylist,

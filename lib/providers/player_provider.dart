@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -502,6 +503,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// preserving seamless active track playback. Restores original order after
   /// the current track when disabled.
   Future<void> toggleShuffle() async {
+    unawaited(HapticFeedback.lightImpact());
     if (currentSong == null) return;
     var current = currentSong!;
 
@@ -589,6 +591,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Cycles the repeat mode: off → all → one → off.
   Future<void> cycleRepeatMode() async {
+    unawaited(HapticFeedback.lightImpact());
     switch (repeatMode) {
       case RepeatMode.off:
         repeatMode = RepeatMode.all;
@@ -793,6 +796,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Toggles a song's favorite status in the cache index and favorite playlist.
   Future<void> toggleFavoriteAlbum(String key) async {
+    unawaited(HapticFeedback.lightImpact());
     favoriteAlbums = Map<String, int>.from(favoriteAlbums);
     if (favoriteAlbums.containsKey(key)) {
       favoriteAlbums.remove(key);
@@ -805,6 +809,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> toggleFavoriteArtist(String nameLower) async {
+    unawaited(HapticFeedback.lightImpact());
     favoriteArtists = Map<String, int>.from(favoriteArtists);
     if (favoriteArtists.containsKey(nameLower)) {
       favoriteArtists.remove(nameLower);
@@ -817,6 +822,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> toggleFavorite(int songId) async {
+    unawaited(HapticFeedback.lightImpact());
     var scanner = MusicScanner();
     var updatedSongs = await scanner.toggleFavoriteSong(songId);
 
