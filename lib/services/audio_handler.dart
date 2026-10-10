@@ -54,7 +54,15 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   }
 
   @override
-  Future<dynamic> customAction(String name, [Map<String, dynamic>? extras]) {
+  Future<dynamic> customAction(
+    String name, [
+    Map<String, dynamic>? extras,
+  ]) async {
+    if (name == 'closePlayer') {
+      await stop();
+      onCustomAction?.call(name);
+      return null;
+    }
     if (onCustomAction != null) {
       onCustomAction!(name);
     }
@@ -159,6 +167,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
           MediaControl.skipToPrevious,
           if (playing) MediaControl.pause else MediaControl.play,
           MediaControl.skipToNext,
+          MediaControl.custom(
+            androidIcon: 'drawable/ic_close',
+            label: 'Close player',
+            name: 'closePlayer',
+          ),
           if (sleepTimerActive) ...[
             MediaControl(
               androidIcon: 'drawable/ic_launcher_monochrome',

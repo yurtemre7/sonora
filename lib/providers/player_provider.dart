@@ -356,6 +356,14 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         extendSleepTimer(const Duration(minutes: 1));
       } else if (action == 'stopSleepTimer') {
         stopSleepTimer();
+      } else if (action == 'closePlayer') {
+        queue = [];
+        _originalQueue = [];
+        currentIndex = -1;
+        _playlistContext = null;
+        _resetActivitySession();
+        unawaited(_clearLastPlayedState());
+        notifyListeners();
       }
     };
     SleepTimerNotificationService.onAddOneMin = () {
