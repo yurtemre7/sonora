@@ -417,43 +417,47 @@ class MusicScanner {
         );
         if (scanResult != null) {
           var msSongs = scanResult['songs'] as List<Song>? ?? [];
-          var swArtistImages = Stopwatch()..start();
-          await loadLocalArtistImages();
-          swArtistImages.stop();
-          var artistImagesMs = swArtistImages.elapsedMilliseconds;
+          // MediaStore can omit files in a selected folder (for example, before
+          // Android has indexed them). Let the directory scanner below handle
+          // an empty result instead of treating it as a successful full scan.
+          if (msSongs.isNotEmpty) {
+            var swArtistImages = Stopwatch()..start();
+            await loadLocalArtistImages();
+            swArtistImages.stop();
+            var artistImagesMs = swArtistImages.elapsedMilliseconds;
 
-          var swSort = Stopwatch()..start();
-          var sortSettings = await getTabSortSettings('songs');
-          sortSongs(
-            msSongs,
-            sortSettings['sortBy'] as String,
-            sortSettings['sortAscending'] as bool,
-          );
-          swSort.stop();
-          var sortMs = swSort.elapsedMilliseconds;
+            var swSort = Stopwatch()..start();
+            var sortSettings = await getTabSortSettings('songs');
+            sortSongs(
+              msSongs,
+              sortSettings['sortBy'] as String,
+              sortSettings['sortAscending'] as bool,
+            );
+            swSort.stop();
+            var sortMs = swSort.elapsedMilliseconds;
 
-          var swSave = Stopwatch()..start();
-          unawaited(_writeImportedSongsMetadata(msSongs));
-          swSave.stop();
-          var saveMs = swSave.elapsedMilliseconds;
+            var swSave = Stopwatch()..start();
+            unawaited(_writeImportedSongsMetadata(msSongs));
+            swSave.stop();
+            var saveMs = swSave.elapsedMilliseconds;
 
-          var now = DateTime.now();
-          var formatted = _formatTimestamp(now);
-          await setLastSyncTime(formatted);
-          await setLastSyncTimestamp(now.millisecondsSinceEpoch);
-          await prefs.setInt('metadata_version', 1);
+            var now = DateTime.now();
+            var formatted = _formatTimestamp(now);
+            await setLastSyncTime(formatted);
+            await setLastSyncTimestamp(now.millisecondsSinceEpoch);
+            await prefs.setInt('metadata_version', 1);
 
-          swTotal.stop();
-          var totalMs = swTotal.elapsedMilliseconds;
+            swTotal.stop();
+            var totalMs = swTotal.elapsedMilliseconds;
 
-          var channelMs = scanResult['channel_ms'] as int? ?? 0;
-          var parseMs = scanResult['parse_ms'] as int? ?? 0;
-          var kQueryMs = scanResult['kotlin_query_ms'] as int?;
-          var kLoopMs = scanResult['kotlin_loop_ms'] as int?;
-          var kTotalMs = scanResult['kotlin_total_ms'] as int?;
+            var channelMs = scanResult['channel_ms'] as int? ?? 0;
+            var parseMs = scanResult['parse_ms'] as int? ?? 0;
+            var kQueryMs = scanResult['kotlin_query_ms'] as int?;
+            var kLoopMs = scanResult['kotlin_loop_ms'] as int?;
+            var kTotalMs = scanResult['kotlin_total_ms'] as int?;
 
-          var perfLog =
-              '''
+            var perfLog =
+                '''
 ==== SONORA PERFORMANCE LOG ====
 • Total Scan Duration: ${totalMs}ms
 • Songs Scanned: ${msSongs.length}
@@ -469,12 +473,13 @@ class MusicScanner {
 • Save Preferences (Dart): ${saveMs}ms
 =================================''';
 
-          debugPrint(perfLog);
-          await prefs.setString('last_perf_log', perfLog);
+            debugPrint(perfLog);
+            await prefs.setString('last_perf_log', perfLog);
 
-          await setLastSyncDuration('last', totalMs);
+            await setLastSyncDuration('last', totalMs);
 
-          return msSongs;
+            return msSongs;
+          }
         }
       }
 
