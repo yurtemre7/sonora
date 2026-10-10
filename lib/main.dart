@@ -11,9 +11,9 @@ late SonoraAudioHandler audioHandler;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Cap Flutter image cache to 50 MB / 150 images to prevent RAM inflation during heavy scrolling
-  PaintingBinding.instance.imageCache.maximumSizeBytes = 50 * 1024 * 1024;
-  PaintingBinding.instance.imageCache.maximumSize = 150;
+  // Cap Flutter image cache to 150 MB / 250 images to balance memory and scrolling performance.
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 150 * 1024 * 1024;
+  PaintingBinding.instance.imageCache.maximumSize = 250;
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
