@@ -483,10 +483,46 @@ class MainActivity : AudioServiceActivity() {
             projection.add(MediaStore.Audio.Media.COMPOSER)
         }
 
-        val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+        val normFolderPath = folderPath?.trimEnd('/', '\\')?.replace('\\', '/')
+        val folderPathVariants = linkedSetOf<String>()
+        if (!normFolderPath.isNullOrEmpty()) {
+            folderPathVariants.add(normFolderPath)
+            when {
+                normFolderPath.equals("/sdcard", ignoreCase = true) ||
+                    normFolderPath.startsWith("/sdcard/", ignoreCase = true) -> {
+                    folderPathVariants.add(
+                        normFolderPath.replaceFirst("/sdcard", "/storage/emulated/0", ignoreCase = true)
+                    )
+                }
+                normFolderPath.equals("/storage/emulated/0", ignoreCase = true) ||
+                    normFolderPath.startsWith("/storage/emulated/0/", ignoreCase = true) -> {
+                    folderPathVariants.add(
+                        normFolderPath.replaceFirst("/storage/emulated/0", "/sdcard", ignoreCase = true)
+                    )
+                }
+            }
+        }
+
+        fun escapeLikeValue(value: String): String = value
+            .replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_")
+
+        val folderSelection = if (folderPathVariants.isEmpty()) {
+            ""
+        } else {
+            folderPathVariants.joinToString(
+                separator = " OR ",
+                prefix = " AND (",
+                postfix = ")",
+            ) { "${MediaStore.Audio.Media.DATA} LIKE ? ESCAPE '\\'" }
+        }
+        val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0$folderSelection"
+        val selectionArgs = folderPathVariants
+            .map { "${escapeLikeValue(it)}/%" }
+            .toTypedArray()
         val sortOrder: String? = null
 
-        val normFolderPath = folderPath?.trimEnd('/', '\\')?.replace('\\', '/')
         val albumArtFileMap = mutableMapOf<Long, String?>()
         val cacheArtDir = File(cacheDir, "album_art")
         if (!cacheArtDir.exists()) {
@@ -502,7 +538,7 @@ class MainActivity : AudioServiceActivity() {
                 uri,
                 projection.toTypedArray(),
                 selection,
-                null,
+                selectionArgs,
                 sortOrder
             )
             queryCursorMs = System.currentTimeMillis() - queryStart
@@ -527,15 +563,10 @@ class MainActivity : AudioServiceActivity() {
 
                     if (!normFolderPath.isNullOrEmpty()) {
                         val normFilePath = filePath.replace('\\', '/')
-                        val altNormFolder = if (normFolderPath.startsWith("/sdcard", ignoreCase = true)) {
-                            normFolderPath.replaceFirst("/sdcard", "/storage/emulated/0", ignoreCase = true)
-                        } else if (normFolderPath.startsWith("/storage/emulated/0", ignoreCase = true)) {
-                            normFolderPath.replaceFirst("/storage/emulated/0", "/sdcard", ignoreCase = true)
-                        } else {
-                            normFolderPath
+                        val isInSelectedFolder = folderPathVariants.any { path ->
+                            normFilePath.startsWith("$path/", ignoreCase = true)
                         }
-                        if (!normFilePath.startsWith(normFolderPath, ignoreCase = true) &&
-                            !normFilePath.startsWith(altNormFolder, ignoreCase = true)) {
+                        if (!isInSelectedFolder) {
                             continue
                         }
                     }
