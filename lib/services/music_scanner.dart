@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/services/image_preflight_service.dart';
 
 /// Handles scanning, custom file references, and playlists for the application library.
 class MusicScanner {
@@ -227,6 +228,10 @@ class MusicScanner {
       sortSettings['sortAscending'] as bool,
     );
 
+    if (songs.isNotEmpty) {
+      unawaited(ImagePreflightService.instance.preflightSongs(songs));
+    }
+
     return songs;
   }
 
@@ -385,7 +390,11 @@ class MusicScanner {
 
   /// Performs an asynchronous background scan of the sync folder, updating the metadata index.
   Future<List<Song>> syncLibrary({int maxWorkers = 4}) async {
-    return await syncLibraryFast(maxWorkers: maxWorkers);
+    var songs = await syncLibraryFast(maxWorkers: maxWorkers);
+    if (songs.isNotEmpty) {
+      unawaited(ImagePreflightService.instance.preflightSongs(songs));
+    }
+    return songs;
   }
 
   /// Optimized sub-second background library scan.
@@ -1267,7 +1276,11 @@ class MusicScanner {
   Future<List<Song>> importFromFolder(String folderPath) async {
     try {
       await setScanFolder(folderPath);
-      return await syncLibrary();
+      var songs = await syncLibrary();
+      if (songs.isNotEmpty) {
+        unawaited(ImagePreflightService.instance.preflightSongs(songs));
+      }
+      return songs;
     } catch (_) {
       return [];
     }

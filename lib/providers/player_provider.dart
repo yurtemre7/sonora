@@ -657,6 +657,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     queue.add(song);
     await audioHandler.addQueueItem(_songToMediaItem(song));
     notifyListeners();
+    ImagePreflightService.instance.preflightQueueUpcoming(queue, currentIndex);
   }
 
   /// Appends multiple [songs] to the end of the queue.
@@ -666,6 +667,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _originalQueue.addAll(songs);
     await audioHandler.addQueueItems(songs.map(_songToMediaItem).toList());
     notifyListeners();
+    ImagePreflightService.instance.preflightQueueUpcoming(queue, currentIndex);
   }
 
   Future<void> _loadAndPlay({
@@ -712,6 +714,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
     await audioHandler.insertQueueItemAt(insertIndex, _songToMediaItem(song));
     notifyListeners();
+    ImagePreflightService.instance.preflightQueueUpcoming(queue, currentIndex);
   }
 
   /// Inserts multiple [songs] immediately after the currently playing song.
@@ -728,6 +731,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       songs.map(_songToMediaItem).toList(),
     );
     notifyListeners();
+    ImagePreflightService.instance.preflightQueueUpcoming(queue, currentIndex);
   }
 
   /// Sets all songs and updates the queue with the list.

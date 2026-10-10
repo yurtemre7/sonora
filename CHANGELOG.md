@@ -19,6 +19,7 @@ All notable changes to the Sonora music player project are documented in this fi
 ### Changed
 * Chore: Bump image cache to 150 MB or 250 images
 * Perf: Improve performance of sync
+* Perf: Pre-warm image cache on library scan and sync completion
 * Chore: Updated packages
 * Chore: Migrate to material_ui
 * Chore: Update dependencies
