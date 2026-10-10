@@ -98,9 +98,34 @@
     </application>
 
     <queries>
+        <!-- Package visibility for common Android file managers -->
+        <package android:name="com.google.android.apps.nbu.files" />
+        <package android:name="com.google.android.documentsui" />
+        <package android:name="com.android.documentsui" />
+        <package android:name="com.sec.android.app.myfiles" />
+        <package android:name="com.mi.android.globalFileexplorer" />
+        <package android:name="com.android.fileexplorer" />
+        <package android:name="com.coloros.filemanager" />
+        <package android:name="com.oplus.filemanager" />
+        <package android:name="com.oneplus.filemanager" />
+        <package android:name="pl.solidexplorer2" />
+        <package android:name="com.ghisler.android.TotalCommander" />
+        <package android:name="com.mixplorer" />
+        <package android:name="com.mixplorer.silver" />
+        <package android:name="com.cxinventor.file.explorer" />
+        <package android:name="me.zhanghai.android.files" />
+        <package android:name="ru.zdevs.zarchiver" />
+        <package android:name="nextapp.fx" />
+        <package android:name="com.amaze.filemanager" />
+        <package android:name="com.alphainventor.filemanager" />
+
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:mimeType="*/*"/>
         </intent>
         <intent>
             <action android:name="android.intent.action.VIEW"/>

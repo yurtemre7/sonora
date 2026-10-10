@@ -12,7 +12,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Add in-app dev indicator badge for debug builds
 * Add scroll to current track in queue and haptic playback toggles
 ### Fixed
-* Fix UnsupportedOperationException when opening song folder
+* Improve open folder intent compatibility across Android file managers
 * Fix missing material_ui localization delegates when switching app language
 * Reset application button now feels more like 3 seconds hold
 * Music discovery fixed
