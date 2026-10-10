@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/services/native_bridge.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 
 void showSongInfoBottomSheet(BuildContext context, Song song) {
@@ -65,39 +67,46 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                             title: context.l10n.metadataGroup,
                             children: [
                               _buildInfoRow(
+                                context,
                                 context.l10n.titleLabel,
                                 song.displayTitle,
                                 theme,
                               ),
                               _buildInfoRow(
+                                context,
                                 context.l10n.artistLabel,
                                 song.artist,
                                 theme,
                               ),
                               _buildInfoRow(
+                                context,
                                 context.l10n.albumLabel,
                                 song.album,
                                 theme,
                               ),
                               if (song.trackNumber != null)
                                 _buildInfoRow(
+                                  context,
                                   context.l10n.trackLabel,
                                   song.trackNumber.toString(),
                                   theme,
                                 ),
                               if (song.genre != null)
                                 _buildInfoRow(
+                                  context,
                                   context.l10n.genreLabel,
                                   song.genre!,
                                   theme,
                                 ),
                               if (song.year != null)
                                 _buildInfoRow(
+                                  context,
                                   context.l10n.yearLabel,
                                   song.year.toString(),
                                   theme,
                                 ),
                               _buildInfoRow(
+                                context,
                                 context.l10n.durationLabel,
                                 song.durationFormatted,
                                 theme,
@@ -110,12 +119,17 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                             title: context.l10n.fileInfoGroup,
                             children: [
                               _buildInfoRow(
+                                context,
                                 context.l10n.filePathLabel,
                                 song.filePath,
                                 theme,
                                 isPath: true,
-                                action: Platform.isAndroid
-                                    ? TextButton.icon(
+                                action: Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  children: [
+                                    if (Platform.isAndroid)
+                                      TextButton.icon(
                                         onPressed: () async {
                                           var success =
                                               await MusicScanner.openFileFolder(
@@ -152,17 +166,82 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                                           tapTargetSize:
                                               MaterialTapTargetSize.shrinkWrap,
                                         ),
-                                      )
-                                    : null,
+                                      ),
+                                    TextButton.icon(
+                                      onPressed: () {
+                                        Clipboard.setData(
+                                          ClipboardData(text: song.filePath),
+                                        );
+                                        HapticFeedback.lightImpact();
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).hideCurrentSnackBar();
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              '${context.l10n.filePathLabel}: ${context.l10n.copiedToClipboard}',
+                                            ),
+                                            behavior:
+                                                SnackBarBehavior.floating,
+                                            duration: const Duration(
+                                              seconds: 2,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(
+                                        Icons.copy_rounded,
+                                        size: 16,
+                                      ),
+                                      label: Text(context.l10n.copyPath),
+                                      style: TextButton.styleFrom(
+                                        visualDensity: VisualDensity.compact,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                    ),
+                                    if (Platform.isAndroid)
+                                      TextButton.icon(
+                                        onPressed: () async {
+                                          await NativeBridge.shareFiles(
+                                            [song.filePath],
+                                            title: song.title,
+                                          );
+                                        },
+                                        icon: const Icon(
+                                          Icons.share_rounded,
+                                          size: 16,
+                                        ),
+                                        label: Text(context.l10n.shareFile),
+                                        style: TextButton.styleFrom(
+                                          visualDensity: VisualDensity.compact,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
                               if (song.fileSize != null)
                                 _buildInfoRow(
+                                  context,
                                   context.l10n.fileSize,
                                   _formatFileSize(song.fileSize!),
                                   theme,
                                 ),
                               if (song.lastModifiedMs != null)
                                 _buildInfoRow(
+                                  context,
                                   context.l10n.dateModified,
                                   _formatDate(
                                     context,
@@ -174,6 +253,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                                 ),
                               if (stat != null && stat.changed != stat.modified)
                                 _buildInfoRow(
+                                  context,
                                   context.l10n.dateCreated,
                                   _formatDate(context, stat.changed),
                                   theme,
@@ -183,6 +263,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                                 const SizedBox.shrink()
                               else
                                 _buildInfoRow(
+                                  context,
                                   context.l10n.formatLabel,
                                   song.format!.toUpperCase(),
                                   theme,
@@ -197,6 +278,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                               children: [
                                 if (song.bitrate != null)
                                   _buildInfoRow(
+                                    context,
                                     context.l10n.bitrateLabel,
                                     '${song.bitrate} kbps',
                                     theme,
@@ -204,6 +286,7 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                                   ),
                                 if (song.samplerate != null)
                                   _buildInfoRow(
+                                    context,
                                     context.l10n.sampleRateLabel,
                                     '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
                                     theme,
@@ -265,6 +348,7 @@ Widget _buildInfoGroup({
 }
 
 Widget _buildInfoRow(
+  BuildContext context,
   String label,
   String value,
   ThemeData theme, {
@@ -272,6 +356,19 @@ Widget _buildInfoRow(
   bool isLast = false,
   Widget? action,
 }) {
+  void copyValue() {
+    Clipboard.setData(ClipboardData(text: value));
+    HapticFeedback.lightImpact();
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$label: ${context.l10n.copiedToClipboard}'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -282,21 +379,45 @@ Widget _buildInfoRow(
         ),
       ),
       const SizedBox(height: 2),
-      isPath
-          ? SelectableText(
-              value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                fontFamily: 'monospace',
-                fontSize: 12,
-              ),
-            )
-          : Text(
-              value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
+      if (isPath)
+        SelectableText(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+            fontFamily: 'monospace',
+            fontSize: 12,
+          ),
+        )
+      else
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: copyValue,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      value,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.copy_rounded,
+                    size: 14,
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.35,
+                    ),
+                  ),
+                ],
               ),
             ),
+          ),
+        ),
       if (action != null) ...[
         const SizedBox(height: 6),
         action,

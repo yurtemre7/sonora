@@ -972,6 +972,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get openFolderError => 'フォルダを開けませんでした';
 
   @override
+  String get copyPath => 'パスをコピー';
+
+  @override
+  String get shareFile => 'ファイルを共有';
+
+  @override
+  String get copiedToClipboard => 'クリップボードにコピーしました';
+
+  @override
   String get formatLabel => 'フォーマット';
 
   @override

@@ -1018,6 +1018,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openFolderError => 'Could not open folder';
 
   @override
+  String get copyPath => 'Copy Path';
+
+  @override
+  String get shareFile => 'Share File';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
   String get formatLabel => 'Format';
 
   @override

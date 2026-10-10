@@ -8,6 +8,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Add player close button
 * Add pause/play audio transition
 * Add background image cache pre-flight service
+* Add copy path, share file, and tap-to-copy in song info sheet
 ### Fixed
 * Fix UnsupportedOperationException when opening song folder
 * Fix missing material_ui localization delegates when switching app language

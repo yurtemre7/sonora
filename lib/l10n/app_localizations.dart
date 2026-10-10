@@ -1916,6 +1916,24 @@ abstract class AppLocalizations {
   /// **'Could not open folder'**
   String get openFolderError;
 
+  /// No description provided for @copyPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Path'**
+  String get copyPath;
+
+  /// No description provided for @shareFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Share File'**
+  String get shareFile;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboard;
+
   /// No description provided for @formatLabel.
   ///
   /// In en, this message translates to:

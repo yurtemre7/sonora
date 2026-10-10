@@ -16,6 +16,7 @@ import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/edit_playlist_description_dialog.dart';
 import 'package:sonora/widgets/home/playlists_tab.dart';
 import 'package:sonora/widgets/rename_playlist_dialog.dart';
+import 'package:sonora/widgets/song_info_bottom_sheet.dart';
 import 'package:sonora/widgets/speed_slider.dart';
 
 Widget testApp(Widget child) {
@@ -385,6 +386,56 @@ void main() {
       // Verify drag handle icons exist for each track
       expect(find.byIcon(Icons.drag_handle_rounded), findsNWidgets(2));
       expect(find.byType(ReorderableDragStartListener), findsNWidgets(2));
+    });
+  });
+
+  group('SongInfoBottomSheet Tests', () {
+    testWidgets('renders metadata and provides copy and share actions', (
+      tester,
+    ) async {
+      var song = Song(
+        id: 42,
+        title: 'Masterpiece',
+        artist: 'The Sonora Band',
+        album: 'Acoustic Sessions',
+        duration: const Duration(minutes: 3, seconds: 45),
+        filePath: '/music/test/masterpiece.mp3',
+        format: 'mp3',
+        bitrate: 320,
+        samplerate: 44100,
+      );
+
+      await tester.pumpWidget(
+        testApp(
+          Builder(
+            builder: (context) {
+              return ElevatedButton(
+                onPressed: () => showSongInfoBottomSheet(context, song),
+                child: const Text('Open Info'),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Info'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Masterpiece'), findsOneWidget);
+      expect(find.text('The Sonora Band'), findsOneWidget);
+      expect(find.text('Acoustic Sessions'), findsOneWidget);
+
+      await tester.scrollUntilVisible(find.byType(SelectableText), 100);
+      expect(find.byType(SelectableText), findsOneWidget);
+
+      // Verify Copy Path action exists
+      expect(find.byIcon(Icons.copy_rounded), findsWidgets);
+      expect(find.text('Copy Path'), findsOneWidget);
+
+      // Tap metadata row to trigger copy
+      await tester.tap(find.text('Masterpiece'));
+      await tester.pump();
+      expect(find.byType(SnackBar), findsOneWidget);
     });
   });
 }
