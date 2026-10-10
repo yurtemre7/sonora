@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sonora/services/native_bridge.dart';
+import 'package:sonora/widgets/dev_badge.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -83,6 +85,28 @@ void main() {
 
       var emptySuccess = await NativeBridge.shareFiles([]);
       expect(emptySuccess, isFalse);
+    });
+
+    test('AppPackageInfo.isDevBuild checks flags and package name', () {
+      const devInfo = AppPackageInfo(
+        appName: 'Sonora Dev',
+        packageName: 'de.yurtemre.sonora.dev',
+        version: '1.20.0-dev',
+        buildNumber: '1',
+      );
+      expect(devInfo.isDevBuild, isTrue);
+      expect(devInfo.packageName.endsWith('.dev'), isTrue);
+    });
+
+    testWidgets('DevBadge renders DEV label', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DevBadge(),
+          ),
+        ),
+      );
+      expect(find.text('DEV'), findsOneWidget);
     });
   });
 }

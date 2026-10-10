@@ -13,10 +13,12 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/routing/app_navigation.dart';
 import 'package:sonora/services/library_search_index.dart';
+import 'package:sonora/services/native_bridge.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/custom_scrollbar.dart';
+import 'package:sonora/widgets/dev_badge.dart';
 import 'package:sonora/widgets/home/albums_tab.dart';
 import 'package:sonora/widgets/home/artists_tab.dart';
 import 'package:sonora/widgets/home/playlists_tab.dart';
@@ -87,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen>
   final Set<int> _selectedSongIds = {};
   late bool _showSyncPrompt;
   var _isSyncing = false;
+  var _isDevBuild = false;
 
   SongActivityView get _currentSongActivityView {
     if (_songSortBy == 'plays') {
@@ -100,6 +103,13 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
+    NativeBridge.getPackageInfo().then((info) {
+      if (mounted && info.isDevBuild) {
+        setState(() {
+          _isDevBuild = true;
+        });
+      }
+    });
     _showSyncPrompt = widget.showSyncPrompt;
     _songSortBy = SettingsProvider.instance.songSortBy;
     _songSortAscending = SettingsProvider.instance.songSortAscending;
@@ -1084,6 +1094,7 @@ class _HomeScreenState extends State<HomeScreen>
                         title: ListenableBuilder(
                           listenable: SettingsProvider.instance,
                           builder: (context, _) {
+                            Widget titleWidget;
                             if (SettingsProvider.instance.useGreetingTitle) {
                               var hour = DateTime.now().hour;
                               String greeting;
@@ -1095,7 +1106,7 @@ class _HomeScreenState extends State<HomeScreen>
                               } else {
                                 greeting = context.l10n.goodEvening(userName);
                               }
-                              return Text(
+                              titleWidget = Text(
                                 greeting,
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -1103,24 +1114,34 @@ class _HomeScreenState extends State<HomeScreen>
                                   color: theme.colorScheme.primary,
                                 ),
                               );
+                            } else {
+                              titleWidget = Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    context.l10n.appTitle,
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: -0.5,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.headphones,
+                                    color: theme.colorScheme.primary,
+                                    size: 22,
+                                  ),
+                                ],
+                              );
                             }
+                            if (!_isDevBuild) return titleWidget;
                             return Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  context.l10n.appTitle,
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: -0.5,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Icon(
-                                  Icons.headphones,
-                                  color: theme.colorScheme.primary,
-                                  size: 22,
-                                ),
+                                Flexible(child: titleWidget),
+                                const SizedBox(width: 8),
+                                const DevBadge(),
                               ],
                             );
                           },

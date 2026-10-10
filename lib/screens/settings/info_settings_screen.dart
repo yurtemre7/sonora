@@ -8,6 +8,7 @@ import 'package:sonora/services/native_bridge.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
+import 'package:sonora/widgets/dev_badge.dart';
 import 'package:sonora/widgets/update_dialog.dart';
 
 class InfoSettingsScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
     with SingleTickerProviderStateMixin {
   var _isCheckingUpdate = false;
   var _appVersion = '1.0.0';
+  var _isDevBuild = false;
 
   // For the 3-second hold gesture
   late AnimationController _dangerZoneController;
@@ -52,17 +54,20 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
 
   Future<void> _loadInfo() async {
     var version = '1.0.0';
+    var isDev = false;
     try {
       var packageInfo = await NativeBridge.getPackageInfo();
       version = packageInfo.version;
       if (packageInfo.buildNumber.isNotEmpty) {
         version += '+${packageInfo.buildNumber}';
       }
+      isDev = packageInfo.isDevBuild;
     } catch (_) {}
 
     if (!mounted) return;
     setState(() {
       _appVersion = version;
+      _isDevBuild = isDev;
     });
   }
 
@@ -133,11 +138,21 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
                   child: Image.asset('assets/icon/ic_launcher.png'),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  context.l10n.appTitle,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      context.l10n.appTitle,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (_isDevBuild) ...[
+                      const SizedBox(width: 8),
+                      const DevBadge(),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -210,7 +225,16 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
             // ── App Info ──────────────────────────────────────────────────
             ListTile(
               leading: const Icon(Icons.info_outline_rounded),
-              title: Text(context.l10n.aboutSonora),
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(context.l10n.aboutSonora),
+                  if (_isDevBuild) ...[
+                    const SizedBox(width: 8),
+                    const DevBadge(),
+                  ],
+                ],
+              ),
               subtitle: Text(context.l10n.version(_appVersion)),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => _showAboutAppDialog(context),
