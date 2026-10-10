@@ -15,6 +15,7 @@ import 'package:sonora/routing/app_router.dart';
 import 'package:sonora/screens/home_screen.dart';
 import 'package:sonora/screens/onboarding_screen.dart';
 import 'package:sonora/services/audio_handler.dart';
+import 'package:sonora/services/image_preflight_service.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/permission_service.dart';
 import 'package:sonora/theme/app_theme.dart';
@@ -357,6 +358,7 @@ class _SonoraAppState extends State<SonoraApp> {
     _syncRouterState();
     _playerProvider.stop();
     _playerProvider.updateSongs([]);
+    ImagePreflightService.instance.clearCache();
 
     _scaffoldMessengerKey.currentState?.showSnackBar(
       const SnackBar(

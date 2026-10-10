@@ -7,6 +7,7 @@ All notable changes to the Sonora music player project are documented in this fi
 * Improve scan
 * Add player close button
 * Add pause/play audio transition
+* Add background image cache pre-flight service
 ### Fixed
 * Fix missing material_ui localization delegates when switching app language
 * Reset application button now feels more like 3 seconds hold

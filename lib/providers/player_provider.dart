@@ -12,6 +12,7 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/models/song_activity.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/services/audio_handler.dart';
+import 'package:sonora/services/image_preflight_service.dart';
 import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/sleep_timer_notification_service.dart';
 import 'package:sonora/services/stats_service.dart';
@@ -698,6 +699,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     notifyListeners();
+    ImagePreflightService.instance.preflightQueueUpcoming(queue, currentIndex);
   }
 
   /// Inserts [song] immediately after the currently playing song.
@@ -754,6 +756,15 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
     _startBackgroundColorExtraction();
     _startLocalArtistImageDetection();
+    _startImagePreflight();
+  }
+
+  void _startImagePreflight() {
+    ImagePreflightService.instance.preflightSongs(allSongs);
+    ImagePreflightService.instance.preflightAlbums(cachedAlbums);
+    if (queue.isNotEmpty && currentIndex >= 0) {
+      ImagePreflightService.instance.preflightQueueUpcoming(queue, currentIndex);
+    }
   }
 
   void _refreshLibrarySnapshots() {

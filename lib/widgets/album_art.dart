@@ -14,10 +14,59 @@ class AlbumArt extends StatelessWidget {
   final double size;
   final double borderRadius;
 
+  static final _existingFiles = <String>{};
+  static final _missingFiles = <String>{};
+
+  /// Fast file existence check with in-memory set to prevent repeated sync disk stats during scrolling.
+  static bool checkFileExists(String path) {
+    if (_existingFiles.contains(path)) return true;
+    if (_missingFiles.contains(path)) return false;
+    var exists = File(path).existsSync();
+    if (exists) {
+      _existingFiles.add(path);
+    } else {
+      _missingFiles.add(path);
+    }
+    return exists;
+  }
+
+  /// Clears the file existence cache (e.g. when albums or playlists change).
+  static void clearFileCache([String? path]) {
+    if (path != null) {
+      _existingFiles.remove(path);
+      _missingFiles.remove(path);
+    } else {
+      _existingFiles.clear();
+      _missingFiles.clear();
+    }
+  }
+
+  /// Standardized cache dimension calculation matching [Image.file] resize behavior.
+  static int computeCacheDim(double size, [double devicePixelRatio = 2.0]) {
+    var dpr = devicePixelRatio.clamp(1.0, 2.5);
+    var rawCacheDim = (size * dpr).toInt();
+    return ((rawCacheDim / 128).ceil() * 128).clamp(128, 800);
+  }
+
+  /// Standardized [ImageProvider] factory ensuring pre-flight and UI cache keys match 100%.
+  static ImageProvider provider(
+    String artworkPath, {
+    double size = 48,
+    int? cacheDim,
+    double devicePixelRatio = 2.0,
+  }) {
+    var targetDim = cacheDim ?? computeCacheDim(size, devicePixelRatio);
+    return ResizeImage.resizeIfNeeded(
+      targetDim,
+      null,
+      FileImage(File(artworkPath)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    var hasArtworkFile = artworkPath != null && File(artworkPath!).existsSync();
+    var hasArtworkFile = artworkPath != null && checkFileExists(artworkPath!);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -25,10 +74,8 @@ class AlbumArt extends StatelessWidget {
             ? (constraints.hasBoundedWidth ? constraints.maxWidth : 120.0)
             : size;
 
-        var devicePixelRatio = MediaQuery.of(context).devicePixelRatio
-            .clamp(1.0, 2.5);
-        var rawCacheDim = (resolvedSize * devicePixelRatio).toInt();
-        var targetCacheDim = ((rawCacheDim / 128).ceil() * 128).clamp(128, 800);
+        var dpr = MediaQuery.of(context).devicePixelRatio;
+        var targetCacheDim = computeCacheDim(resolvedSize, dpr);
 
         return Container(
           width: resolvedSize,
@@ -46,12 +93,11 @@ class AlbumArt extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(borderRadius),
             child: hasArtworkFile
-                ? Image.file(
-                    File(artworkPath!),
+                ? Image(
+                    image: provider(artworkPath!, cacheDim: targetCacheDim),
                     width: resolvedSize,
                     height: resolvedSize,
                     fit: BoxFit.cover,
-                    cacheWidth: targetCacheDim,
                     errorBuilder: (context, error, stackTrace) =>
                         _buildPlaceholder(theme, resolvedSize),
                   )
