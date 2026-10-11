@@ -593,8 +593,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     if (player.playing && _transportFadeRestoreVolume == null) return;
 
     if (!player.playing) {
-      _transportFadeRestoreVolume ??=
-          (player.volume > 0.05 ? player.volume : 1.0);
+      _transportFadeRestoreVolume ??= (player.volume > 0.05
+          ? player.volume
+          : 1.0);
       await player.setVolume(0);
       if (token != _transportFadeToken) return;
       _startPlayer();
@@ -681,8 +682,8 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       var target = fadeOut
           ? 0.0
           : (restore != null && restore > 0.05
-              ? restore
-              : (player.volume > 0.05 ? player.volume : 1.0));
+                ? restore
+                : (player.volume > 0.05 ? player.volume : 1.0));
       var remainingSteps = steps - step + 1;
       var nextVolume =
           player.volume + (target - player.volume) / remainingSteps;

@@ -29,8 +29,8 @@ Future<void> main() async {
     config: const AudioServiceConfig(
       androidNotificationChannelId: 'de.yurtemre.sonora.audio',
       androidNotificationChannelName: 'Sonora Music',
-      androidNotificationOngoing: true,
       androidNotificationIcon: 'drawable/ic_launcher_monochrome',
+      androidStopForegroundOnPause: false,
     ),
   );
 
