@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.22.0] - 2026-10-12
+### Fixed
+* Prevent silent playback after background interruptions on Android 14+
+
 ## [1.21.1] - 2026-10-10
 ### Fixed
 * Preserve notification drawables in release builds and safeguard transport volume
