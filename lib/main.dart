@@ -31,6 +31,7 @@ Future<void> main() async {
       androidNotificationChannelName: 'Sonora Music',
       androidNotificationIcon: 'drawable/ic_launcher_monochrome',
       androidStopForegroundOnPause: false,
+      androidResumeOnClick: false,
     ),
   );
 

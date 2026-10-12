@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/services/android_auto_media_browser.dart';
@@ -160,47 +161,55 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   /// Maps [just_audio] playback events to the [audio_service] playback state.
   void _broadcastPlaybackState(PlaybackEvent event) {
+    var isIdle = player.processingState == ProcessingState.idle;
     var playing = player.playing;
     playbackState.add(
       playbackState.value.copyWith(
-        controls: [
-          MediaControl.skipToPrevious,
-          if (playing) MediaControl.pause else MediaControl.play,
-          MediaControl.skipToNext,
-          MediaControl.custom(
-            androidIcon: 'drawable/ic_close',
-            label: 'Close player',
-            name: 'closePlayer',
-          ),
-          if (sleepTimerActive) ...[
-            MediaControl(
-              androidIcon: 'drawable/ic_launcher_monochrome',
-              label: sleepTimerExtendLabel,
-              action: MediaAction.custom,
-              customAction: const CustomMediaAction(name: 'extendSleepTimer'),
-            ),
-            const MediaControl(
-              androidIcon: 'drawable/ic_launcher_monochrome',
-              label: 'End timer',
-              action: MediaAction.custom,
-              customAction: CustomMediaAction(name: 'stopSleepTimer'),
-            ),
-          ],
-        ],
-        systemActions: const {
-          MediaAction.seek,
-          MediaAction.skipToPrevious,
-          MediaAction.skipToNext,
-        },
-        androidCompactActionIndices: const [0, 1, 2],
+        controls: isIdle
+            ? const []
+            : [
+                MediaControl.skipToPrevious,
+                if (playing) MediaControl.pause else MediaControl.play,
+                MediaControl.skipToNext,
+                MediaControl.custom(
+                  androidIcon: 'drawable/ic_close',
+                  label: 'Close player',
+                  name: 'closePlayer',
+                ),
+                if (sleepTimerActive) ...[
+                  MediaControl(
+                    androidIcon: 'drawable/ic_launcher_monochrome',
+                    label: sleepTimerExtendLabel,
+                    action: MediaAction.custom,
+                    customAction:
+                        const CustomMediaAction(name: 'extendSleepTimer'),
+                  ),
+                  const MediaControl(
+                    androidIcon: 'drawable/ic_launcher_monochrome',
+                    label: 'End timer',
+                    action: MediaAction.custom,
+                    customAction: CustomMediaAction(name: 'stopSleepTimer'),
+                  ),
+                ],
+              ],
+        systemActions: isIdle
+            ? const {}
+            : const {
+                MediaAction.seek,
+                MediaAction.skipToPrevious,
+                MediaAction.skipToNext,
+              },
+        androidCompactActionIndices: isIdle ? const [] : const [0, 1, 2],
         processingState: _mapProcessingState(player.processingState),
         playing: playing,
         updatePosition: player.position,
         bufferedPosition: player.bufferedPosition,
         speed: player.speed,
-        queueIndex: event.currentIndex != null
-            ? _windowStart + event.currentIndex!
-            : null,
+        queueIndex: isIdle
+            ? null
+            : (event.currentIndex != null
+                ? _windowStart + event.currentIndex!
+                : null),
       ),
     );
   }
@@ -807,7 +816,27 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     _windowEnd = 0;
     queue.add([]);
     mediaItem.add(null);
+    playbackState.add(
+      playbackState.value.copyWith(
+        processingState: AudioProcessingState.idle,
+        playing: false,
+        controls: const [],
+        systemActions: const {},
+        androidCompactActionIndices: const [],
+      ),
+    );
+    try {
+      await const MethodChannel('de.yurtemre.sonora/volume')
+          .invokeMethod('stopForegroundService');
+    } catch (_) {}
     return super.stop();
+  }
+
+  @override
+  Future<void> onNotificationDeleted() async {
+    await stop();
+    onCustomAction?.call('closePlayer');
+    await super.onNotificationDeleted();
   }
 
   @override

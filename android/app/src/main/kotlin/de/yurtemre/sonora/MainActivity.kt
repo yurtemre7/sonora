@@ -196,6 +196,27 @@ class MainActivity : AudioServiceActivity() {
                         result.success(false)
                     }
                 }
+                "stopForegroundService" -> {
+                    try {
+                        val audioServiceClass = Class.forName("com.ryanheise.audioservice.AudioService")
+                        val instanceField = audioServiceClass.getDeclaredField("instance")
+                        instanceField.isAccessible = true
+                        val service = instanceField.get(null) as? android.app.Service
+                        if (service != null) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                service.stopForeground(android.app.Service.STOP_FOREGROUND_REMOVE)
+                            } else {
+                                @Suppress("DEPRECATION")
+                                service.stopForeground(true)
+                            }
+                        }
+                        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                        notificationManager.cancel(1124)
+                        result.success(true)
+                    } catch (_: Exception) {
+                        result.success(false)
+                    }
+                }
                 else -> result.notImplemented()
             }
         }
