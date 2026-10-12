@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:sonora/l10n/app_localizations.dart';
+import 'package:sonora/models/mfx_preset.dart';
 import 'package:sonora/services/equalizer_service.dart';
 import 'package:sonora/widgets/volume_slider.dart';
 
@@ -82,6 +84,112 @@ void main() {
       );
 
       expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
+    });
+  });
+
+  group('MFX Presets and Quick Effects Tests', () {
+    test('All 14 MfxPreset enum entries exist and have matching speed & pitch', () {
+      expect(MfxPreset.values.length, equals(14));
+
+      for (var preset in MfxPreset.values) {
+        expect(preset.pitch, equals(preset.speed));
+        expect(preset.speed, greaterThan(0.0));
+      }
+    });
+
+    test('All requested quick effects speeds are covered in MfxPreset enum', () {
+      const requestedSpeeds = [
+        0.70,
+        0.75,
+        0.80,
+        0.85,
+        0.90,
+        0.95,
+        1.00,
+        1.05,
+        1.10,
+        1.15,
+        1.20,
+        1.25,
+        1.30,
+        1.50,
+      ];
+
+      for (var speed in requestedSpeeds) {
+        var preset = MfxPreset.fromSpeed(speed);
+        expect(preset, isNotNull, reason: 'Preset for speed $speed must exist');
+        expect(preset!.speed, equals(speed));
+        expect(preset.pitch, equals(speed));
+      }
+    });
+
+    test('MfxPreset.normal behaves as expected', () {
+      expect(MfxPreset.normal.speed, equals(1.0));
+      expect(MfxPreset.normal.pitch, equals(1.0));
+      expect(MfxPreset.normal.isNormal, isTrue);
+
+      for (var preset in MfxPreset.values) {
+        if (preset != MfxPreset.normal) {
+          expect(preset.isNormal, isFalse);
+        }
+      }
+    });
+
+    test('MfxPreset.fromName resolves properly', () {
+      expect(MfxPreset.fromName('superSlowed'), equals(MfxPreset.superSlowed));
+      expect(MfxPreset.fromName('slowed095'), equals(MfxPreset.slowed095));
+      expect(MfxPreset.fromName('normal'), equals(MfxPreset.normal));
+      expect(MfxPreset.fromName('spedUp110'), equals(MfxPreset.spedUp110));
+      expect(MfxPreset.fromName('nightcore'), equals(MfxPreset.nightcore));
+      expect(MfxPreset.fromName('unknown_preset'), isNull);
+      expect(MfxPreset.fromName(null), isNull);
+    });
+
+    test('Presets without unique names have percentage display titles', () {
+      expect(MfxPreset.slowed095.displayTitle, equals('5% slower'));
+      expect(MfxPreset.slowed090.displayTitle, equals('10% slower'));
+      expect(MfxPreset.slowed080.displayTitle, equals('20% slower'));
+      expect(MfxPreset.slowed075.displayTitle, equals('25% slower'));
+
+      expect(MfxPreset.spedUp105.displayTitle, equals('5% faster'));
+      expect(MfxPreset.spedUp110.displayTitle, equals('10% faster'));
+      expect(MfxPreset.spedUp115.displayTitle, equals('15% faster'));
+      expect(MfxPreset.spedUp120.displayTitle, equals('20% faster'));
+    });
+
+    testWidgets('MfxPreset.getTitle renders percentage titles in context', (
+      tester,
+    ) async {
+      late BuildContext buildContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              buildContext = context;
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+
+      expect(MfxPreset.slowed095.getTitle(buildContext), equals('5% slower'));
+      expect(MfxPreset.slowed090.getTitle(buildContext), equals('10% slower'));
+      expect(MfxPreset.slowed080.getTitle(buildContext), equals('20% slower'));
+      expect(MfxPreset.slowed075.getTitle(buildContext), equals('25% slower'));
+      expect(MfxPreset.spedUp105.getTitle(buildContext), equals('5% faster'));
+      expect(MfxPreset.spedUp110.getTitle(buildContext), equals('10% faster'));
+      expect(MfxPreset.spedUp115.getTitle(buildContext), equals('15% faster'));
+      expect(MfxPreset.spedUp120.getTitle(buildContext), equals('20% faster'));
+
+      // Unique names should still render localized names
+      expect(MfxPreset.superSlowed.getTitle(buildContext), equals('Super Slowed'));
+      expect(MfxPreset.slowed.getTitle(buildContext), equals('Slowed'));
+      expect(MfxPreset.normal.getTitle(buildContext), equals('Normal'));
+      expect(MfxPreset.spedUp.getTitle(buildContext), equals('Sped Up'));
+      expect(MfxPreset.nightcore.getTitle(buildContext), equals('Nightcore'));
+      expect(MfxPreset.superSpedUp.getTitle(buildContext), equals('Super Sped Up'));
     });
   });
 }

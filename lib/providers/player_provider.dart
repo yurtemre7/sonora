@@ -8,6 +8,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/grouping.dart';
+import 'package:sonora/models/mfx_preset.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/models/song_activity.dart';
@@ -53,6 +54,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   var _speed = 1.0;
 
   // Experimental MFX
+  MfxPreset? _mfxPreset;
   var _isSlowed = false;
   var _isSuperSlowed = false;
   var _isNightcore = false;
@@ -116,11 +118,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> setSpeed(double value) async {
     _speed = value.clamp(0.5, 2.0);
-    if (!_isSlowed &&
-        !_isSpedUp &&
-        !_isSuperSlowed &&
-        !_isSuperSpedUp &&
-        !_isNightcore) {
+    if (!isMfxPresetActive) {
       await audioHandler.setSpeed(_speed);
     }
     var prefs = SharedPreferencesAsync();
@@ -130,11 +128,23 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   // ── Experimental MFX ──────────────────────────────────────────────────────
 
-  bool get isSlowed => _isSlowed;
-  bool get isSuperSlowed => _isSuperSlowed;
-  bool get isNightcore => _isNightcore;
-  bool get isSpedUp => _isSpedUp;
-  bool get isSuperSpedUp => _isSuperSpedUp;
+  MfxPreset? get mfxPreset => _mfxPreset;
+  bool get isMfxPresetActive => _mfxPreset != null && !_mfxPreset!.isNormal;
+  bool isPreset(MfxPreset preset) {
+    if (preset.isNormal) {
+      return _mfxPreset == null || _mfxPreset!.isNormal;
+    }
+    return _mfxPreset == preset;
+  }
+
+  bool isPresetSpeed(double speed) =>
+      _mfxPreset != null && (_mfxPreset!.speed - speed).abs() < 0.001;
+
+  bool get isSlowed => _mfxPreset == MfxPreset.slowed;
+  bool get isSuperSlowed => _mfxPreset == MfxPreset.superSlowed;
+  bool get isNightcore => _mfxPreset == MfxPreset.nightcore;
+  bool get isSpedUp => _mfxPreset == MfxPreset.spedUp;
+  bool get isSuperSpedUp => _mfxPreset == MfxPreset.superSpedUp;
   bool get isReverbEnabled => _isReverbEnabled;
   bool get isLofiEnabled => _isLofiEnabled;
   bool get isBassBoostEnabled => _isBassBoostEnabled;
@@ -142,11 +152,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   List<double>? get customEqGains => _customEqGains;
 
   double get effectiveSpeed {
-    if (_isSuperSlowed) return 0.70;
-    if (_isSlowed) return 0.85;
-    if (_isSuperSpedUp) return 1.50;
-    if (_isSpedUp) return 1.25;
-    if (_isNightcore) return 1.30;
+    if (_mfxPreset != null && !_mfxPreset!.isNormal) return _mfxPreset!.speed;
     return _speed;
   }
 
@@ -168,11 +174,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   bool get isMfxActive =>
-      _isSlowed ||
-      _isSuperSlowed ||
-      _isSpedUp ||
-      _isSuperSpedUp ||
-      _isNightcore ||
+      isMfxPresetActive ||
       _isReverbEnabled ||
       _isLofiEnabled ||
       _isBassBoostEnabled ||
@@ -181,6 +183,13 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> _saveMfxSettings() async {
     var prefs = SharedPreferencesAsync();
+    if (_mfxPreset != null && !_mfxPreset!.isNormal) {
+      await prefs.setString('mfx_preset_name', _mfxPreset!.name);
+      await prefs.setDouble('mfx_preset', _mfxPreset!.speed);
+    } else {
+      await prefs.remove('mfx_preset_name');
+      await prefs.remove('mfx_preset');
+    }
     await prefs.setBool('mfx_isSlowed', _isSlowed);
     await prefs.setBool('mfx_isSuperSlowed', _isSuperSlowed);
     await prefs.setBool('mfx_isSpedUp', _isSpedUp);
@@ -200,65 +209,34 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  Future<void> setSlowed(bool value) async {
-    _isSlowed = value;
-    if (_isSlowed) {
-      _isSpedUp = false;
-      _isSuperSlowed = false;
-      _isSuperSpedUp = false;
-      _isNightcore = false;
+  Future<void> setMfxPreset(MfxPreset? preset) async {
+    if (preset == null || preset.isNormal) {
+      _mfxPreset = null;
+    } else {
+      _mfxPreset = preset;
     }
+    _isSuperSlowed = _mfxPreset == MfxPreset.superSlowed;
+    _isSlowed = _mfxPreset == MfxPreset.slowed;
+    _isSpedUp = _mfxPreset == MfxPreset.spedUp;
+    _isNightcore = _mfxPreset == MfxPreset.nightcore;
+    _isSuperSpedUp = _mfxPreset == MfxPreset.superSpedUp;
     await _saveMfxSettings();
     await _applyMfx();
   }
 
-  Future<void> setSuperSlowed(bool value) async {
-    _isSuperSlowed = value;
-    if (_isSuperSlowed) {
-      _isSlowed = false;
-      _isSpedUp = false;
-      _isSuperSpedUp = false;
-      _isNightcore = false;
-    }
-    await _saveMfxSettings();
-    await _applyMfx();
-  }
+  Future<void> setMfxPresetFromSpeed(double? speed) =>
+      setMfxPreset(MfxPreset.fromSpeed(speed));
 
-  Future<void> setSpedUp(bool value) async {
-    _isSpedUp = value;
-    if (_isSpedUp) {
-      _isSlowed = false;
-      _isSuperSlowed = false;
-      _isSuperSpedUp = false;
-      _isNightcore = false;
-    }
-    await _saveMfxSettings();
-    await _applyMfx();
-  }
-
-  Future<void> setSuperSpedUp(bool value) async {
-    _isSuperSpedUp = value;
-    if (_isSuperSpedUp) {
-      _isSlowed = false;
-      _isSuperSlowed = false;
-      _isSpedUp = false;
-      _isNightcore = false;
-    }
-    await _saveMfxSettings();
-    await _applyMfx();
-  }
-
-  Future<void> setNightcore(bool value) async {
-    _isNightcore = value;
-    if (_isNightcore) {
-      _isSlowed = false;
-      _isSuperSlowed = false;
-      _isSpedUp = false;
-      _isSuperSpedUp = false;
-    }
-    await _saveMfxSettings();
-    await _applyMfx();
-  }
+  Future<void> setSlowed(bool value) =>
+      setMfxPreset(value ? MfxPreset.slowed : null);
+  Future<void> setSuperSlowed(bool value) =>
+      setMfxPreset(value ? MfxPreset.superSlowed : null);
+  Future<void> setSpedUp(bool value) =>
+      setMfxPreset(value ? MfxPreset.spedUp : null);
+  Future<void> setSuperSpedUp(bool value) =>
+      setMfxPreset(value ? MfxPreset.superSpedUp : null);
+  Future<void> setNightcore(bool value) =>
+      setMfxPreset(value ? MfxPreset.nightcore : null);
 
   Future<void> setReverbEnabled(bool value) async {
     _isReverbEnabled = value;
@@ -301,6 +279,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> resetAllMfx() async {
+    _mfxPreset = null;
     _isSlowed = false;
     _isSuperSlowed = false;
     _isSpedUp = false;
@@ -318,21 +297,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> _applyMfx() async {
-    if (_isSuperSlowed) {
-      await audioHandler.setSpeed(0.70);
-      await audioHandler.setPitch(0.70);
-    } else if (_isSlowed) {
-      await audioHandler.setSpeed(0.85);
-      await audioHandler.setPitch(0.85);
-    } else if (_isSuperSpedUp) {
-      await audioHandler.setSpeed(1.50);
-      await audioHandler.setPitch(1.50);
-    } else if (_isSpedUp) {
-      await audioHandler.setSpeed(1.25);
-      await audioHandler.setPitch(1.25);
-    } else if (_isNightcore) {
-      await audioHandler.setSpeed(1.30);
-      await audioHandler.setPitch(1.30);
+    if (_mfxPreset != null && !_mfxPreset!.isNormal) {
+      await audioHandler.setSpeed(_mfxPreset!.speed);
+      await audioHandler.setPitch(_mfxPreset!.pitch);
     } else {
       await audioHandler.setSpeed(_speed);
       await audioHandler.setPitch(1.0);
@@ -1182,11 +1149,42 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       // We will apply this via _applyMfx below if no presets override it.
     }
 
-    _isSlowed = await prefs.getBool('mfx_isSlowed') ?? false;
-    _isSuperSlowed = await prefs.getBool('mfx_isSuperSlowed') ?? false;
-    _isSpedUp = await prefs.getBool('mfx_isSpedUp') ?? false;
-    _isSuperSpedUp = await prefs.getBool('mfx_isSuperSpedUp') ?? false;
-    _isNightcore = await prefs.getBool('mfx_isNightcore') ?? false;
+    var savedPresetName = await prefs.getString('mfx_preset_name');
+    if (savedPresetName != null) {
+      _mfxPreset = MfxPreset.fromName(savedPresetName);
+    } else {
+      var savedPreset = await prefs.getDouble('mfx_preset');
+      if (savedPreset != null) {
+        _mfxPreset = MfxPreset.fromSpeed(savedPreset);
+      }
+    }
+
+    if (_mfxPreset == null) {
+      _isSlowed = await prefs.getBool('mfx_isSlowed') ?? false;
+      _isSuperSlowed = await prefs.getBool('mfx_isSuperSlowed') ?? false;
+      _isSpedUp = await prefs.getBool('mfx_isSpedUp') ?? false;
+      _isSuperSpedUp = await prefs.getBool('mfx_isSuperSpedUp') ?? false;
+      _isNightcore = await prefs.getBool('mfx_isNightcore') ?? false;
+      if (_isSuperSlowed) {
+        _mfxPreset = MfxPreset.superSlowed;
+      } else if (_isSlowed) {
+        _mfxPreset = MfxPreset.slowed;
+      } else if (_isSuperSpedUp) {
+        _mfxPreset = MfxPreset.superSpedUp;
+      } else if (_isSpedUp) {
+        _mfxPreset = MfxPreset.spedUp;
+      } else if (_isNightcore) {
+        _mfxPreset = MfxPreset.nightcore;
+      }
+    }
+
+    if (_mfxPreset != null) {
+      _isSuperSlowed = _mfxPreset == MfxPreset.superSlowed;
+      _isSlowed = _mfxPreset == MfxPreset.slowed;
+      _isSpedUp = _mfxPreset == MfxPreset.spedUp;
+      _isNightcore = _mfxPreset == MfxPreset.nightcore;
+      _isSuperSpedUp = _mfxPreset == MfxPreset.superSpedUp;
+    }
     _isReverbEnabled = await prefs.getBool('mfx_isReverbEnabled') ?? false;
     _isLofiEnabled = await prefs.getBool('mfx_isLofiEnabled') ?? false;
     _isBassBoostEnabled =

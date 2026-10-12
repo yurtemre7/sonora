@@ -103,12 +103,28 @@ void main() {
 
     // 1.5x speed up -> 40s
     expect(calc(orig1Min, 1.50).inSeconds, 40);
-    // 1.25x speed up -> 48s
-    expect(calc(orig1Min, 1.25).inSeconds, 48);
     // 1.30x nightcore -> 46s
     expect(calc(orig1Min, 1.30).inSeconds, 46);
+    // 1.25x speed up -> 48s
+    expect(calc(orig1Min, 1.25).inSeconds, 48);
+    // 1.20x speed up -> 50s
+    expect(calc(orig1Min, 1.20).inSeconds, 50);
+    // 1.15x speed up -> 52s
+    expect(calc(orig1Min, 1.15).inSeconds, 52);
+    // 1.10x speed up -> 54s (54545ms)
+    expect(calc(orig1Min, 1.10).inSeconds, 54);
+    // 1.05x speed up -> 57s
+    expect(calc(orig1Min, 1.05).inSeconds, 57);
+    // 0.95x slowed -> 63s
+    expect(calc(orig1Min, 0.95).inSeconds, 63);
+    // 0.90x slowed -> 66s (66667ms)
+    expect(calc(orig1Min, 0.90).inSeconds, 66);
     // 0.85x slowed -> 70s (70588ms, 1:10)
     expect(calc(orig1Min, 0.85).inSeconds, 70);
+    // 0.80x slowed -> 75s
+    expect(calc(orig1Min, 0.80).inSeconds, 75);
+    // 0.75x slowed -> 80s
+    expect(calc(orig1Min, 0.75).inSeconds, 80);
     // 0.70x super slowed -> 85s (85714ms, 1:25)
     expect(calc(orig1Min, 0.70).inSeconds, 85);
   });

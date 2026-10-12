@@ -1994,6 +1994,18 @@ abstract class AppLocalizations {
   /// **'Super Sped Up'**
   String get mfxSuperSpedUp;
 
+  /// No description provided for @mfxPercentSlower.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% slower'**
+  String mfxPercentSlower(String percent);
+
+  /// No description provided for @mfxPercentFaster.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% faster'**
+  String mfxPercentFaster(String percent);
+
   /// No description provided for @mfxSpeedSubtitle.
   ///
   /// In en, this message translates to:

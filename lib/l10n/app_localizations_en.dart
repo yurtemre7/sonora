@@ -1057,6 +1057,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mfxSuperSpedUp => 'Super Sped Up';
 
   @override
+  String mfxPercentSlower(String percent) {
+    return '$percent% slower';
+  }
+
+  @override
+  String mfxPercentFaster(String percent) {
+    return '$percent% faster';
+  }
+
+  @override
   String mfxSpeedSubtitle(String speed) {
     return '${speed}x Speed';
   }

@@ -316,6 +316,8 @@
   "mfxSpedUp": "スピードアップ",
   "mfxNightcore": "ナイトコア",
   "mfxSuperSpedUp": "スーパースピードアップ",
+  "mfxPercentSlower": "{percent}% スロー",
+  "mfxPercentFaster": "{percent}% ファスト",
   "mfxSpeedSubtitle": "{speed}x スピード",
   "customEqualizer": "カスタムイコライザー",
   "eqFlat": "フラット",

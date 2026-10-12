@@ -444,6 +444,22 @@
   "mfxSpedUp": "Sped Up",
   "mfxNightcore": "Nightcore",
   "mfxSuperSpedUp": "Super Sped Up",
+  "mfxPercentSlower": "{percent}% slower",
+  "@mfxPercentSlower": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "mfxPercentFaster": "{percent}% faster",
+  "@mfxPercentFaster": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
   "mfxSpeedSubtitle": "{speed}x Speed",
   "@mfxSpeedSubtitle": {
     "placeholders": {

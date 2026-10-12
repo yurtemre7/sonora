@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:sonora/models/mfx_preset.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/custom_equalizer_widget.dart';
@@ -45,12 +46,12 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
   }
 
   int _getSelectedIndex(PlayerProvider player) {
-    if (player.isSuperSlowed) return 0;
-    if (player.isSlowed) return 1;
-    if (player.isSpedUp) return 3;
-    if (player.isNightcore) return 4;
-    if (player.isSuperSpedUp) return 5;
-    return 2; // Normal
+    var preset = player.mfxPreset;
+    if (preset == null || preset.isNormal) {
+      return MfxPreset.values.indexOf(MfxPreset.normal);
+    }
+    var index = MfxPreset.values.indexOf(preset);
+    return index >= 0 ? index : MfxPreset.values.indexOf(MfxPreset.normal);
   }
 
   void _scrollToIndex(int index, {bool animate = true}) {
@@ -274,11 +275,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                     ),
-                                    if (player.isSuperSlowed ||
-                                        player.isSlowed ||
-                                        player.isSpedUp ||
-                                        player.isSuperSpedUp ||
-                                        player.isNightcore)
+                                    if (player.isMfxPresetActive)
                                       TextButton(
                                         style: TextButton.styleFrom(
                                           visualDensity: VisualDensity.compact,
@@ -286,7 +283,11 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                         ),
                                         onPressed: () {
                                           player.resetAllMfx();
-                                          _scrollToIndex(2);
+                                          _scrollToIndex(
+                                            MfxPreset.values.indexOf(
+                                              MfxPreset.normal,
+                                            ),
+                                          );
                                         },
                                         child: Text(context.l10n.resetAll),
                                       )
@@ -314,87 +315,29 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.stretch,
                                     children: [
-                                      PresetCard(
-                                        title: context.l10n.mfxSuperSlowed,
-                                        subtitle: context.l10n.mfxSpeedSubtitle(
-                                          '0.70',
+                                      for (var preset in MfxPreset.values) ...[
+                                        Builder(
+                                          builder: (context) {
+                                            var isSelected =
+                                                player.isPreset(preset);
+                                            return PresetCard(
+                                              title: preset.getTitle(context),
+                                              subtitle:
+                                                  preset.getSubtitle(context),
+                                              icon: preset.icon,
+                                              isSelected: isSelected,
+                                              onTap: () {
+                                                player.setMfxPreset(preset);
+                                                _scrollToIndex(
+                                                  MfxPreset.values.indexOf(
+                                                    preset,
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
                                         ),
-                                        icon: Icons.fast_rewind_rounded,
-                                        isSelected: player.isSuperSlowed,
-                                        onTap: () {
-                                          player.setSuperSlowed(true);
-                                          _scrollToIndex(0);
-                                        },
-                                      ),
-                                      PresetCard(
-                                        title: context.l10n.mfxSlowed,
-                                        subtitle: context.l10n.mfxSpeedSubtitle(
-                                          '0.85',
-                                        ),
-                                        icon: Icons.fast_rewind_rounded,
-                                        isSelected: player.isSlowed,
-                                        onTap: () {
-                                          player.setSlowed(true);
-                                          _scrollToIndex(1);
-                                        },
-                                      ),
-                                      PresetCard(
-                                        title: context.l10n.mfxNormal,
-                                        subtitle: context.l10n.mfxSpeedSubtitle(
-                                          '1.0',
-                                        ),
-                                        icon: Icons.play_arrow_rounded,
-                                        isSelected:
-                                            !player.isSuperSlowed &&
-                                            !player.isSlowed &&
-                                            !player.isSpedUp &&
-                                            !player.isSuperSpedUp &&
-                                            !player.isNightcore,
-                                        onTap: () {
-                                          player.setSuperSlowed(false);
-                                          player.setSlowed(false);
-                                          player.setSpedUp(false);
-                                          player.setSuperSpedUp(false);
-                                          player.setNightcore(false);
-                                          _scrollToIndex(2);
-                                        },
-                                      ),
-                                      PresetCard(
-                                        title: context.l10n.mfxSpedUp,
-                                        subtitle: context.l10n.mfxSpeedSubtitle(
-                                          '1.25',
-                                        ),
-                                        icon: Icons.fast_forward_rounded,
-                                        isSelected: player.isSpedUp,
-                                        onTap: () {
-                                          player.setSpedUp(true);
-                                          _scrollToIndex(3);
-                                        },
-                                      ),
-                                      PresetCard(
-                                        title: context.l10n.mfxNightcore,
-                                        subtitle: context.l10n.mfxSpeedSubtitle(
-                                          '1.30',
-                                        ),
-                                        icon: Icons.bolt_rounded,
-                                        isSelected: player.isNightcore,
-                                        onTap: () {
-                                          player.setNightcore(true);
-                                          _scrollToIndex(4);
-                                        },
-                                      ),
-                                      PresetCard(
-                                        title: context.l10n.mfxSuperSpedUp,
-                                        subtitle: context.l10n.mfxSpeedSubtitle(
-                                          '1.50',
-                                        ),
-                                        icon: Icons.fast_forward_rounded,
-                                        isSelected: player.isSuperSpedUp,
-                                        onTap: () {
-                                          player.setSuperSpedUp(true);
-                                          _scrollToIndex(5);
-                                        },
-                                      ),
+                                      ],
                                     ],
                                   ),
                                 ),
@@ -452,21 +395,9 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                               ),
                               const SizedBox(height: 8),
                               Opacity(
-                                opacity:
-                                    (player.isSlowed ||
-                                        player.isSpedUp ||
-                                        player.isSuperSlowed ||
-                                        player.isSuperSpedUp ||
-                                        player.isNightcore)
-                                    ? 0.5
-                                    : 1.0,
+                                opacity: player.isMfxPresetActive ? 0.5 : 1.0,
                                 child: IgnorePointer(
-                                  ignoring:
-                                      player.isSlowed ||
-                                      player.isSpedUp ||
-                                      player.isSuperSlowed ||
-                                      player.isSuperSpedUp ||
-                                      player.isNightcore,
+                                  ignoring: player.isMfxPresetActive,
                                   child: SpeedSlider(
                                     speed: player.speed,
                                     onChanged: player.setSpeed,
@@ -482,7 +413,7 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                   child: TextButton.icon(
                                     onPressed: () {
                                       player.resetAllMfx();
-                                      _scrollToIndex(2);
+                                      _scrollToIndex(6);
                                     },
                                     icon: const Icon(Icons.refresh_rounded),
                                     label: Text(context.l10n.mfxResetAll),
