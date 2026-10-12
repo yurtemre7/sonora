@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.23.1] - 2026-10-12
+### Changed
+* Chore: Update dependencies
+
 ## [1.23.0] - 2026-10-12
 ### Added
 * Add Bluetooth audio device patch toggle to optimize filter headroom and volume
