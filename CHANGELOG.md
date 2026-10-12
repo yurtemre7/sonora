@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.24.1] - 2026-10-12
+### Changed
+* Chore: Add NDK caching
+
 ## [1.24.0] - 2026-10-12
 ### Fixed
 * Dismiss system media notification cleanly when tapping close button
