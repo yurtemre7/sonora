@@ -2,6 +2,11 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.23.0] - 2026-10-12
+### Added
+* Add Bluetooth audio device patch toggle to optimize filter headroom and volume
+* Add quick music effects presets using an enhanced enum with matching speed, pitch, and percentage labels
+
 ## [1.22.0] - 2026-10-12
 ### Fixed
 * Prevent silent playback after background interruptions on Android 14+
