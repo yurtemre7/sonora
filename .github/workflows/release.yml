@@ -67,6 +67,12 @@ jobs:
       - name: 🐘 Setup Gradle
         uses: gradle/actions/setup-gradle@v6.3.0
 
+      - name: 📦 Cache Android CMake
+        uses: actions/cache@v6.1.0
+        with:
+          path: /usr/local/lib/android/sdk/cmake/3.22.1
+          key: android-cmake-3.22.1-${{ runner.os }}
+
       - name: 🔑 Configure Signing Keystore
         run: |
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
