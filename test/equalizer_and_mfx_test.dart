@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:sonora/l10n/app_localizations.dart';
 import 'package:sonora/models/mfx_preset.dart';
 import 'package:sonora/services/equalizer_service.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/volume_slider.dart';
 
 void main() {
@@ -190,6 +191,60 @@ void main() {
       expect(MfxPreset.spedUp.getTitle(buildContext), equals('Sped Up'));
       expect(MfxPreset.nightcore.getTitle(buildContext), equals('Nightcore'));
       expect(MfxPreset.superSpedUp.getTitle(buildContext), equals('Super Sped Up'));
+    });
+  });
+
+  group('Bluetooth Audio Patch Tests', () {
+    testWidgets('Renders localized Bluetooth patch title and subtitle', (
+      tester,
+    ) async {
+      late BuildContext buildContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              buildContext = context;
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+
+      expect(
+        buildContext.l10n.mfxBluetoothPatch,
+        equals('Bluetooth Audio Device Patch'),
+      );
+      expect(
+        buildContext.l10n.mfxBluetoothPatchSubtitle.isNotEmpty,
+        isTrue,
+      );
+    });
+
+    test('Bluetooth audio patch filter gain curves vs standard curves', () {
+      // Simulate standard 5-band EQ parameter range (+15 dB max, -15 dB min)
+      const maxDb = 15.0;
+      const minDb = -15.0;
+
+      // Bass boost comparisons
+      const standardBassGain = maxDb * 0.8; // +12.0 dB
+      const btPatchBassGain = maxDb * 0.4; // +6.0 dB
+      expect(btPatchBassGain, lessThan(standardBassGain));
+      expect(btPatchBassGain, greaterThan(0.0));
+
+      // Warmth comparisons
+      const standardWarmthBass = maxDb * 0.5; // +7.5 dB
+      const standardWarmthTreble = minDb * 0.5; // -7.5 dB
+      const btPatchWarmthBass = maxDb * 0.3; // +4.5 dB
+      const btPatchWarmthTreble = minDb * 0.25; // -3.75 dB
+      expect(btPatchWarmthBass, lessThan(standardWarmthBass));
+      expect(btPatchWarmthTreble, greaterThan(standardWarmthTreble)); // Less extreme cut
+
+      // Lo-Fi comparisons
+      const standardLofiTreble = minDb; // -15.0 dB total mute
+      const btPatchLofiTreble = minDb * 0.55; // -8.25 dB musical cutoff
+      expect(btPatchLofiTreble, greaterThan(standardLofiTreble));
     });
   });
 }

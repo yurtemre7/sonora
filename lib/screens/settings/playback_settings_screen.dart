@@ -90,6 +90,16 @@ class PlaybackSettingsScreen extends StatelessWidget {
                         );
                       },
                     ),
+                    ListenableBuilder(
+                      listenable: playerProvider,
+                      builder: (context, _) => SwitchListTile(
+                        secondary: const Icon(Icons.bluetooth_audio_rounded),
+                        title: Text(context.l10n.mfxBluetoothPatch),
+                        subtitle: Text(context.l10n.mfxBluetoothPatchSubtitle),
+                        value: playerProvider.isBluetoothMfxPatchEnabled,
+                        onChanged: playerProvider.setBluetoothMfxPatchEnabled,
+                      ),
+                    ),
                   ],
                 );
               },

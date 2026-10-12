@@ -388,6 +388,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mfxWarmthSubtitle => 'EQで再現します（低音ブースト、高域カット）';
 
   @override
+  String get mfxBluetoothPatch => 'Bluetooth機器用パッチ';
+
+  @override
+  String get mfxBluetoothPatchSubtitle => 'Bluetoothイヤホンでの音量低下や歪みを防ぎます';
+
+  @override
   String minuteAbbr(int min) {
     return '$min分';
   }

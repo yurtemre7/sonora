@@ -381,6 +381,20 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                 value: player.isBassBoostEnabled,
                                 onChanged: player.setBassBoostEnabled,
                               ),
+                              SwitchListTile(
+                                title: Text(context.l10n.mfxBluetoothPatch),
+                                subtitle: Text(
+                                  context.l10n.mfxBluetoothPatchSubtitle,
+                                ),
+                                secondary: Icon(
+                                  Icons.bluetooth_audio_rounded,
+                                  color: player.isBluetoothMfxPatchEnabled
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurfaceVariant,
+                                ),
+                                value: player.isBluetoothMfxPatchEnabled,
+                                onChanged: player.setBluetoothMfxPatchEnabled,
+                              ),
                               const Divider(height: 32),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -413,7 +427,11 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                   child: TextButton.icon(
                                     onPressed: () {
                                       player.resetAllMfx();
-                                      _scrollToIndex(6);
+                                      _scrollToIndex(
+                                        MfxPreset.values.indexOf(
+                                          MfxPreset.normal,
+                                        ),
+                                      );
                                     },
                                     icon: const Icon(Icons.refresh_rounded),
                                     label: Text(context.l10n.mfxResetAll),

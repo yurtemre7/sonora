@@ -696,7 +696,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   Future<void> setPitch(double pitch) => player.setPitch(pitch);
 
-  Future<void> setEqMode(String mode, {List<double>? customGains}) async {
+  Future<void> setEqMode(
+    String mode, {
+    List<double>? customGains,
+    bool isBluetoothPatch = false,
+  }) async {
     var enabled = mode != 'off';
     await equalizer.setEnabled(enabled);
     if (enabled) {
@@ -706,29 +710,65 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
           var freq = band.centerFrequency;
 
           if (mode == 'lofi') {
-            // Aggressive high cut and slight bass cut for vintage radio feel
-            if (freq > 2000) {
-              await band.setGain(params.minDecibels); // Maximum cut
-            } else if (freq < 150) {
-              await band.setGain(params.minDecibels * 0.3);
+            if (isBluetoothPatch) {
+              // Bluetooth patch: Moderate rolloff and gentle sub cut with mid presence.
+              // Prevents severe volume ducking from A2DP limiter and avoids hollow lossy audio.
+              if (freq > 3000) {
+                await band.setGain(params.minDecibels * 0.55);
+              } else if (freq < 150) {
+                await band.setGain(params.minDecibels * 0.20);
+              } else if (freq >= 500 && freq <= 2000) {
+                await band.setGain(params.maxDecibels * 0.15);
+              } else {
+                await band.setGain(0.0);
+              }
             } else {
-              await band.setGain(0.0);
+              // Aggressive high cut and slight bass cut for vintage radio feel
+              if (freq > 2000) {
+                await band.setGain(params.minDecibels); // Maximum cut
+              } else if (freq < 150) {
+                await band.setGain(params.minDecibels * 0.3);
+              } else {
+                await band.setGain(0.0);
+              }
             }
           } else if (mode == 'warmth') {
-            // Simple bass boost and treble cut preset for "Slowed + Reverb" warmth
-            if (freq < 250) {
-              await band.setGain(params.maxDecibels * 0.5); // +50% of max boost
-            } else if (freq > 4000) {
-              await band.setGain(params.minDecibels * 0.5); // 50% of max cut
+            if (isBluetoothPatch) {
+              // Bluetooth patch: Smooth harmonic warmth with gentle treble roll-off.
+              // Keeps vocals clear and prevents Bluetooth DSP clipping/ducking.
+              if (freq < 250) {
+                await band.setGain(params.maxDecibels * 0.30);
+              } else if (freq > 4000) {
+                await band.setGain(params.minDecibels * 0.25);
+              } else {
+                await band.setGain(0.0);
+              }
             } else {
-              await band.setGain(0.0);
+              // Simple bass boost and treble cut preset for "Slowed + Reverb" warmth
+              if (freq < 250) {
+                await band.setGain(params.maxDecibels * 0.5); // +50% of max boost
+              } else if (freq > 4000) {
+                await band.setGain(params.minDecibels * 0.5); // 50% of max cut
+              } else {
+                await band.setGain(0.0);
+              }
             }
           } else if (mode == 'bass_boost') {
-            // Strong bass boost without high cut
-            if (freq < 250) {
-              await band.setGain(params.maxDecibels * 0.8); // +80% of max boost
+            if (isBluetoothPatch) {
+              // Bluetooth patch: Controlled punchy bass boost that doesn't trigger
+              // the Android A2DP / Bluetooth AGC limiter that crushes master volume.
+              if (freq < 250) {
+                await band.setGain(params.maxDecibels * 0.40);
+              } else {
+                await band.setGain(0.0);
+              }
             } else {
-              await band.setGain(0.0);
+              // Strong bass boost without high cut
+              if (freq < 250) {
+                await band.setGain(params.maxDecibels * 0.8); // +80% of max boost
+              } else {
+                await band.setGain(0.0);
+              }
             }
           } else if (mode == 'custom' &&
               customGains != null &&

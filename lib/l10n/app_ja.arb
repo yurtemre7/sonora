@@ -120,6 +120,8 @@
   "mfxResetAll": "すべてのエフェクトをリセット",
   "mfxWarmth": "暖かみ（リバーブ）",
   "mfxWarmthSubtitle": "EQで再現します（低音ブースト、高域カット）",
+  "mfxBluetoothPatch": "Bluetooth機器用パッチ",
+  "mfxBluetoothPatchSubtitle": "Bluetoothイヤホンでの音量低下や歪みを防ぎます",
   "minuteAbbr": "{min}分",
   "minutes": "分",
   "musicEffects": "音響エフェクト",

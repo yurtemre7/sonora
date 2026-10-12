@@ -818,6 +818,18 @@ abstract class AppLocalizations {
   /// **'Simulated via EQ (Bass boost, High cut)'**
   String get mfxWarmthSubtitle;
 
+  /// No description provided for @mfxBluetoothPatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Audio Device Patch'**
+  String get mfxBluetoothPatch;
+
+  /// No description provided for @mfxBluetoothPatchSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevents volume drop and distortion in effects on Bluetooth headsets'**
+  String get mfxBluetoothPatchSubtitle;
+
   /// No description provided for @minuteAbbr.
   ///
   /// In en, this message translates to:

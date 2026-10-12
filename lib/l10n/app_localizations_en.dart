@@ -408,6 +408,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mfxWarmthSubtitle => 'Simulated via EQ (Bass boost, High cut)';
 
   @override
+  String get mfxBluetoothPatch => 'Bluetooth Audio Device Patch';
+
+  @override
+  String get mfxBluetoothPatchSubtitle =>
+      'Prevents volume drop and distortion in effects on Bluetooth headsets';
+
+  @override
   String minuteAbbr(int min) {
     return '$min min';
   }

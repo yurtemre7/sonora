@@ -172,6 +172,8 @@
   "mfxResetAll": "Reset All Effects",
   "mfxWarmth": "Warmth (Reverb)",
   "mfxWarmthSubtitle": "Simulated via EQ (Bass boost, High cut)",
+  "mfxBluetoothPatch": "Bluetooth Audio Device Patch",
+  "mfxBluetoothPatchSubtitle": "Prevents volume drop and distortion in effects on Bluetooth headsets",
   "minuteAbbr": "{min} min",
   "@minuteAbbr": {
     "placeholders": {

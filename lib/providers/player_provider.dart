@@ -64,6 +64,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   var _isLofiEnabled = false;
   var _isBassBoostEnabled = false;
   var _isCustomEqEnabled = false;
+  var _isBluetoothMfxPatchEnabled = false;
   List<double>? _customEqGains;
   Timer? _sleepTimer;
   Duration? sleepTimerDuration;
@@ -149,6 +150,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool get isLofiEnabled => _isLofiEnabled;
   bool get isBassBoostEnabled => _isBassBoostEnabled;
   bool get isCustomEqEnabled => _isCustomEqEnabled;
+  bool get isBluetoothMfxPatchEnabled => _isBluetoothMfxPatchEnabled;
   List<double>? get customEqGains => _customEqGains;
 
   double get effectiveSpeed {
@@ -199,6 +201,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await prefs.setBool('mfx_isLofiEnabled', _isLofiEnabled);
     await prefs.setBool('mfx_isBassBoostEnabled', _isBassBoostEnabled);
     await prefs.setBool('mfx_isCustomEqEnabled', _isCustomEqEnabled);
+    await prefs.setBool('mfx_bluetoothMfxPatch', _isBluetoothMfxPatchEnabled);
     if (_customEqGains != null) {
       await prefs.setStringList(
         'mfx_customEqGains',
@@ -278,6 +281,12 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await _applyMfx();
   }
 
+  Future<void> setBluetoothMfxPatchEnabled(bool value) async {
+    _isBluetoothMfxPatchEnabled = value;
+    await _saveMfxSettings();
+    await _applyMfx();
+  }
+
   Future<void> resetAllMfx() async {
     _mfxPreset = null;
     _isSlowed = false;
@@ -315,7 +324,11 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     } else if (_isCustomEqEnabled) {
       eqMode = 'custom';
     }
-    await audioHandler.setEqMode(eqMode, customGains: _customEqGains);
+    await audioHandler.setEqMode(
+      eqMode,
+      customGains: _customEqGains,
+      isBluetoothPatch: _isBluetoothMfxPatchEnabled,
+    );
     notifyListeners();
   }
 
@@ -1190,6 +1203,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isBassBoostEnabled =
         await prefs.getBool('mfx_isBassBoostEnabled') ?? false;
     _isCustomEqEnabled = await prefs.getBool('mfx_isCustomEqEnabled') ?? false;
+    _isBluetoothMfxPatchEnabled =
+        await prefs.getBool('mfx_bluetoothMfxPatch') ?? false;
     var gains = await prefs.getStringList('mfx_customEqGains');
     if (gains != null) {
       _customEqGains = gains.map((e) => double.tryParse(e) ?? 0.0).toList();
