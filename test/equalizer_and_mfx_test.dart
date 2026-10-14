@@ -89,40 +89,50 @@ void main() {
   });
 
   group('MFX Presets and Quick Effects Tests', () {
-    test('All 14 MfxPreset enum entries exist and have matching speed & pitch', () {
-      expect(MfxPreset.values.length, equals(14));
+    test(
+      'All 14 MfxPreset enum entries exist and have matching speed & pitch',
+      () {
+        expect(MfxPreset.values.length, equals(14));
 
-      for (var preset in MfxPreset.values) {
-        expect(preset.pitch, equals(preset.speed));
-        expect(preset.speed, greaterThan(0.0));
-      }
-    });
+        for (var preset in MfxPreset.values) {
+          expect(preset.pitch, equals(preset.speed));
+          expect(preset.speed, greaterThan(0.0));
+        }
+      },
+    );
 
-    test('All requested quick effects speeds are covered in MfxPreset enum', () {
-      const requestedSpeeds = [
-        0.70,
-        0.75,
-        0.80,
-        0.85,
-        0.90,
-        0.95,
-        1.00,
-        1.05,
-        1.10,
-        1.15,
-        1.20,
-        1.25,
-        1.30,
-        1.50,
-      ];
+    test(
+      'All requested quick effects speeds are covered in MfxPreset enum',
+      () {
+        const requestedSpeeds = [
+          0.70,
+          0.75,
+          0.80,
+          0.85,
+          0.90,
+          0.95,
+          1.00,
+          1.05,
+          1.10,
+          1.15,
+          1.20,
+          1.25,
+          1.30,
+          1.50,
+        ];
 
-      for (var speed in requestedSpeeds) {
-        var preset = MfxPreset.fromSpeed(speed);
-        expect(preset, isNotNull, reason: 'Preset for speed $speed must exist');
-        expect(preset!.speed, equals(speed));
-        expect(preset.pitch, equals(speed));
-      }
-    });
+        for (var speed in requestedSpeeds) {
+          var preset = MfxPreset.fromSpeed(speed);
+          expect(
+            preset,
+            isNotNull,
+            reason: 'Preset for speed $speed must exist',
+          );
+          expect(preset!.speed, equals(speed));
+          expect(preset.pitch, equals(speed));
+        }
+      },
+    );
 
     test('MfxPreset.normal behaves as expected', () {
       expect(MfxPreset.normal.speed, equals(1.0));
@@ -185,12 +195,18 @@ void main() {
       expect(MfxPreset.spedUp120.getTitle(buildContext), equals('20% faster'));
 
       // Unique names should still render localized names
-      expect(MfxPreset.superSlowed.getTitle(buildContext), equals('Super Slowed'));
+      expect(
+        MfxPreset.superSlowed.getTitle(buildContext),
+        equals('Super Slowed'),
+      );
       expect(MfxPreset.slowed.getTitle(buildContext), equals('Slowed'));
       expect(MfxPreset.normal.getTitle(buildContext), equals('Normal'));
       expect(MfxPreset.spedUp.getTitle(buildContext), equals('Sped Up'));
       expect(MfxPreset.nightcore.getTitle(buildContext), equals('Nightcore'));
-      expect(MfxPreset.superSpedUp.getTitle(buildContext), equals('Super Sped Up'));
+      expect(
+        MfxPreset.superSpedUp.getTitle(buildContext),
+        equals('Super Sped Up'),
+      );
     });
   });
 
@@ -216,10 +232,7 @@ void main() {
         buildContext.l10n.mfxBluetoothPatch,
         equals('Bluetooth Audio Device Patch'),
       );
-      expect(
-        buildContext.l10n.mfxBluetoothPatchSubtitle.isNotEmpty,
-        isTrue,
-      );
+      expect(buildContext.l10n.mfxBluetoothPatchSubtitle.isNotEmpty, isTrue);
     });
 
     test('Bluetooth audio patch filter gain curves vs standard curves', () {
@@ -239,7 +252,10 @@ void main() {
       const btPatchWarmthBass = maxDb * 0.3; // +4.5 dB
       const btPatchWarmthTreble = minDb * 0.25; // -3.75 dB
       expect(btPatchWarmthBass, lessThan(standardWarmthBass));
-      expect(btPatchWarmthTreble, greaterThan(standardWarmthTreble)); // Less extreme cut
+      expect(
+        btPatchWarmthTreble,
+        greaterThan(standardWarmthTreble),
+      ); // Less extreme cut
 
       // Lo-Fi comparisons
       const standardLofiTreble = minDb; // -15.0 dB total mute

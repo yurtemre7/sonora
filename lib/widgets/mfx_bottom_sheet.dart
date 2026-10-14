@@ -318,12 +318,14 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                       for (var preset in MfxPreset.values) ...[
                                         Builder(
                                           builder: (context) {
-                                            var isSelected =
-                                                player.isPreset(preset);
+                                            var isSelected = player.isPreset(
+                                              preset,
+                                            );
                                             return PresetCard(
                                               title: preset.getTitle(context),
-                                              subtitle:
-                                                  preset.getSubtitle(context),
+                                              subtitle: preset.getSubtitle(
+                                                context,
+                                              ),
                                               icon: preset.icon,
                                               isSelected: isSelected,
                                               onTap: () {

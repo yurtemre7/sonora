@@ -181,8 +181,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
                     androidIcon: 'drawable/ic_launcher_monochrome',
                     label: sleepTimerExtendLabel,
                     action: MediaAction.custom,
-                    customAction:
-                        const CustomMediaAction(name: 'extendSleepTimer'),
+                    customAction: const CustomMediaAction(
+                      name: 'extendSleepTimer',
+                    ),
                   ),
                   const MediaControl(
                     androidIcon: 'drawable/ic_launcher_monochrome',
@@ -208,8 +209,8 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         queueIndex: isIdle
             ? null
             : (event.currentIndex != null
-                ? _windowStart + event.currentIndex!
-                : null),
+                  ? _windowStart + event.currentIndex!
+                  : null),
       ),
     );
   }
@@ -755,7 +756,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
             } else {
               // Simple bass boost and treble cut preset for "Slowed + Reverb" warmth
               if (freq < 250) {
-                await band.setGain(params.maxDecibels * 0.5); // +50% of max boost
+                await band.setGain(
+                  params.maxDecibels * 0.5,
+                ); // +50% of max boost
               } else if (freq > 4000) {
                 await band.setGain(params.minDecibels * 0.5); // 50% of max cut
               } else {
@@ -774,7 +777,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
             } else {
               // Strong bass boost without high cut
               if (freq < 250) {
-                await band.setGain(params.maxDecibels * 0.8); // +80% of max boost
+                await band.setGain(
+                  params.maxDecibels * 0.8,
+                ); // +80% of max boost
               } else {
                 await band.setGain(0.0);
               }

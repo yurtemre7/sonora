@@ -3,10 +3,7 @@ import 'package:sonora/utils/l10n_extension.dart';
 
 /// Predefined Music Effects (MFX) speed & matching pitch presets.
 enum MfxPreset {
-  superSlowed(
-    speed: 0.70,
-    icon: Icons.fast_rewind_rounded,
-  ),
+  superSlowed(speed: 0.70, icon: Icons.fast_rewind_rounded),
   slowed075(
     speed: 0.75,
     icon: Icons.fast_rewind_rounded,
@@ -17,10 +14,7 @@ enum MfxPreset {
     icon: Icons.fast_rewind_rounded,
     displayTitle: '20% slower',
   ),
-  slowed(
-    speed: 0.85,
-    icon: Icons.fast_rewind_rounded,
-  ),
+  slowed(speed: 0.85, icon: Icons.fast_rewind_rounded),
   slowed090(
     speed: 0.90,
     icon: Icons.fast_rewind_rounded,
@@ -31,10 +25,7 @@ enum MfxPreset {
     icon: Icons.fast_rewind_rounded,
     displayTitle: '5% slower',
   ),
-  normal(
-    speed: 1.00,
-    icon: Icons.play_arrow_rounded,
-  ),
+  normal(speed: 1.00, icon: Icons.play_arrow_rounded),
   spedUp105(
     speed: 1.05,
     icon: Icons.fast_forward_rounded,
@@ -55,24 +46,11 @@ enum MfxPreset {
     icon: Icons.fast_forward_rounded,
     displayTitle: '20% faster',
   ),
-  spedUp(
-    speed: 1.25,
-    icon: Icons.fast_forward_rounded,
-  ),
-  nightcore(
-    speed: 1.30,
-    icon: Icons.bolt_rounded,
-  ),
-  superSpedUp(
-    speed: 1.50,
-    icon: Icons.fast_forward_rounded,
-  );
+  spedUp(speed: 1.25, icon: Icons.fast_forward_rounded),
+  nightcore(speed: 1.30, icon: Icons.bolt_rounded),
+  superSpedUp(speed: 1.50, icon: Icons.fast_forward_rounded);
 
-  const MfxPreset({
-    required this.speed,
-    required this.icon,
-    this.displayTitle,
-  });
+  const MfxPreset({required this.speed, required this.icon, this.displayTitle});
 
   /// The playback speed multiplier.
   final double speed;
