@@ -870,6 +870,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get telegramContactSubtitle => '@emredev に連絡';
 
   @override
+  String get thankYouTitle => 'ありがとうございます';
+
+  @override
+  String thankYouTitleWithName(String name) {
+    return '$nameさん、ありがとうございます';
+  }
+
+  @override
+  String get thankYouMessage =>
+      'Sonoraを応援していただき、本当にありがとうございます。使ってくださるあなたの存在は、私にとってかけがえのない宝物です。心から感謝しています。私が大好きなこのSonoraを、あなたにも同じように楽しんでいただけたら嬉しいです。';
+
+  @override
   String get themeMode => 'テーマモード';
 
   @override

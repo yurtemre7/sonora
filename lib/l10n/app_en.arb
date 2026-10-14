@@ -378,6 +378,16 @@
   "systemSubtitle": "Follows your device theme",
   "telegramContact": "Telegram Contact",
   "telegramContactSubtitle": "Reach out via @emredev",
+  "thankYouTitle": "Thank you",
+  "thankYouTitleWithName": "Thank you, {name}",
+  "@thankYouTitleWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "thankYouMessage": "Thank you for supporting Sonora. You mean the world to me. I appreciate you and hope you enjoy Sonora as much as I do.",
   "themeMode": "Theme Mode",
   "timer": "Timer",
   "timerDuration": "Timer Duration",

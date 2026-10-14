@@ -382,6 +382,74 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
 
             const Divider(height: 32),
 
+            // ── Thank You Card ──────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 4.0,
+              ),
+              child: Card(
+                elevation: 0,
+                color: theme.colorScheme.surfaceContainerLow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.5,
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const _BeatingHeartIcon(),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListenableBuilder(
+                              listenable: SettingsProvider.instance,
+                              builder: (context, _) {
+                                var rawName = SettingsProvider.instance.userName
+                                    .trim();
+                                var hasCustomName =
+                                    rawName.isNotEmpty &&
+                                    rawName.toLowerCase() != 'user';
+                                var title = hasCustomName
+                                    ? context.l10n.thankYouTitleWithName(
+                                        rawName,
+                                      )
+                                    : context.l10n.thankYouTitle;
+                                return Text(
+                                  title,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              context.l10n.thankYouMessage,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
             // ── Community & Support ───────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -534,6 +602,89 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BeatingHeartIcon extends StatefulWidget {
+  const _BeatingHeartIcon();
+
+  @override
+  State<_BeatingHeartIcon> createState() => _BeatingHeartIconState();
+}
+
+class _BeatingHeartIconState extends State<_BeatingHeartIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat();
+
+    _animation = TweenSequence<double>([
+      // First gentle beat
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 1.15,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 15,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.15,
+          end: 1.02,
+        ).chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 15,
+      ),
+      // Second smaller beat
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.02,
+          end: 1.10,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 15,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.10,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 15,
+      ),
+      // Rest period before next cycle
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 40),
+    ]).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer,
+        shape: BoxShape.circle,
+      ),
+      child: ScaleTransition(
+        scale: _animation,
+        child: Icon(
+          Icons.favorite_rounded,
+          color: theme.colorScheme.primary,
+          size: 22,
         ),
       ),
     );

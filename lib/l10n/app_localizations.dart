@@ -1724,6 +1724,24 @@ abstract class AppLocalizations {
   /// **'Reach out via @emredev'**
   String get telegramContactSubtitle;
 
+  /// No description provided for @thankYouTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you'**
+  String get thankYouTitle;
+
+  /// No description provided for @thankYouTitleWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you, {name}'**
+  String thankYouTitleWithName(String name);
+
+  /// No description provided for @thankYouMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for supporting Sonora. You mean the world to me. I appreciate you and hope you enjoy Sonora as much as I do.'**
+  String get thankYouMessage;
+
   /// No description provided for @themeMode.
   ///
   /// In en, this message translates to:

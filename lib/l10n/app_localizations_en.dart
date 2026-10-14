@@ -909,6 +909,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get telegramContactSubtitle => 'Reach out via @emredev';
 
   @override
+  String get thankYouTitle => 'Thank you';
+
+  @override
+  String thankYouTitleWithName(String name) {
+    return 'Thank you, $name';
+  }
+
+  @override
+  String get thankYouMessage =>
+      'Thank you for supporting Sonora. You mean the world to me. I appreciate you and hope you enjoy Sonora as much as I do.';
+
+  @override
   String get themeMode => 'Theme Mode';
 
   @override

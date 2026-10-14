@@ -271,6 +271,16 @@
   "systemSubtitle": "端末のテーマに従います",
   "telegramContact": "Telegram連絡先",
   "telegramContactSubtitle": "@emredev に連絡",
+  "thankYouTitle": "ありがとうございます",
+  "thankYouTitleWithName": "{name}さん、ありがとうございます",
+  "@thankYouTitleWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "thankYouMessage": "Sonoraを応援していただき、本当にありがとうございます。使ってくださるあなたの存在は、私にとってかけがえのない宝物です。心から感謝しています。私が大好きなこのSonoraを、あなたにも同じように楽しんでいただけたら嬉しいです。",
   "themeMode": "テーマモード",
   "timer": "タイマー",
   "timerDuration": "タイマー時間",
