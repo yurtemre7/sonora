@@ -2,6 +2,14 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.24.2] - 2026-10-15
+### Added
+* Add thank you note in app info settings
+### Changed
+* Chore: Format files
+* Chore: Update readme files
+* Chore: Update packages
+
 ## [1.24.1] - 2026-10-12
 ### Changed
 * Chore: Add NDK caching
