@@ -190,7 +190,7 @@ class _StatsScreenState extends State<StatsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero listening time card
+          // Hero complete listens card
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
@@ -208,13 +208,13 @@ class _StatsScreenState extends State<StatsScreen> {
             child: Column(
               children: [
                 Icon(
-                  Icons.access_time_rounded,
+                  Icons.headphones_rounded,
                   size: 32,
                   color: theme.colorScheme.onPrimaryContainer,
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  stats.totalListeningTimeFormatted,
+                  '${stats.completeSongListens}',
                   style: theme.textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onPrimaryContainer,
@@ -224,7 +224,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  context.l10n.totalListeningTime,
+                  context.l10n.completeListens.replaceAll('\n', ' '),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onPrimaryContainer.withValues(
                       alpha: 0.7,
@@ -243,18 +243,18 @@ class _StatsScreenState extends State<StatsScreen> {
             children: [
               Expanded(
                 child: _MetricCard(
-                  icon: Icons.check_circle_rounded,
-                  value: '${stats.completeSongListens}',
-                  label: context.l10n.completeListens,
+                  icon: Icons.album_rounded,
+                  value: '$albumCount',
+                  label: context.l10n.albums,
                   theme: theme,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _MetricCard(
-                  icon: Icons.album_rounded,
-                  value: '$albumCount',
-                  label: context.l10n.albums,
+                  icon: Icons.mic_rounded,
+                  value: '$artistCount',
+                  label: context.l10n.artists,
                   theme: theme,
                 ),
               ),
@@ -265,18 +265,18 @@ class _StatsScreenState extends State<StatsScreen> {
             children: [
               Expanded(
                 child: _MetricCard(
-                  icon: Icons.mic_rounded,
-                  value: '$artistCount',
-                  label: context.l10n.artists,
+                  icon: Icons.playlist_play_rounded,
+                  value: '$playlistCount',
+                  label: context.l10n.playlists,
                   theme: theme,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _MetricCard(
-                  icon: Icons.playlist_play_rounded,
-                  value: '$playlistCount',
-                  label: context.l10n.playlists,
+                  icon: Icons.shuffle_rounded,
+                  value: '${stats.shuffleSessionStarts}',
+                  label: context.l10n.shuffleSessions,
                   theme: theme,
                 ),
               ),
@@ -361,14 +361,6 @@ class _StatsScreenState extends State<StatsScreen> {
             Icons.music_note_rounded,
             context.l10n.uniqueSongsPlayed,
             context.l10n.songsCountShort(totalUnique),
-          ),
-          const SizedBox(height: 8),
-          _buildFactRow(
-            context,
-            theme,
-            Icons.shuffle_rounded,
-            context.l10n.shuffleSessions,
-            context.l10n.startsCount(stats.shuffleSessionStarts),
           ),
           const SizedBox(height: 8),
           _buildFactRow(
@@ -1024,16 +1016,6 @@ class _TopSongCardState extends State<_TopSongCard> {
     ];
     var rankColor = rankColors[widget.index % rankColors.length];
 
-    var basePlaytimeMs = _statsService.songCumulativeListenMs(song.id);
-    var playtimeMs =
-        basePlaytimeMs + (widget.entry.count * song.duration.inMilliseconds);
-    var totalSeconds = (playtimeMs / 1000).round();
-    var hours = totalSeconds ~/ 3600;
-    var minutes = (totalSeconds % 3600) ~/ 60;
-    var playtimeStr = hours > 0
-        ? '${hours}h ${minutes}m'
-        : (minutes > 0 ? '${minutes}m' : '< 1m');
-
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       elevation: _isExpanded ? 2 : 0,
@@ -1106,12 +1088,6 @@ class _TopSongCardState extends State<_TopSongCard> {
                           icon: Icons.play_arrow_rounded,
                           label: context.l10n.play,
                           value: '${widget.entry.count}',
-                        ),
-                        _buildStatItem(
-                          context,
-                          icon: Icons.timer_rounded,
-                          label: context.l10n.durationLabel,
-                          value: playtimeStr,
                         ),
                         _buildStatItem(
                           context,

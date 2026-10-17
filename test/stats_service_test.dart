@@ -65,29 +65,25 @@ void main() {
       },
     );
 
-    test('addListeningTime accumulates and records full play upon reaching duration', () {
+    test('recordCompleteListen counts one listen per call', () {
       expect(stats.completeSongListens, 0);
-      expect(stats.totalListeningTimeMs, 0);
 
-      // Add 200 seconds of listening to song 2 (duration is 240s)
-      stats.addListeningTime(200000, 2, 240000);
-      expect(stats.totalListeningTimeMs, 200000);
-      expect(stats.completeSongListens, 0);
-      expect(stats.songCumulativeListenMs(2), 200000);
-
-      // Add 50 more seconds -> total 250s >= 240s -> 1 complete listen, 10s carryover
-      stats.addListeningTime(50000, 2, 240000);
+      stats.recordCompleteListen(2);
       expect(stats.completeSongListens, 1);
-      expect(stats.songCumulativeListenMs(2), 10000);
+      expect(stats.songPlayCount(2), 1);
+      expect(stats.firstPlayedSong(sampleSongs)?.id, 2);
+
+      stats.recordCompleteListen(2);
+      expect(stats.completeSongListens, 2);
 
       var topSongs = stats.topSongs(5, sampleSongs);
       expect(topSongs.length, 1);
       expect(topSongs.first.song.id, 2);
-      expect(topSongs.first.count, 1);
+      expect(topSongs.first.count, 2);
     });
 
     test('topSongs filters against active library without wiping persistent counts', () {
-      stats.addListeningTime(300000, 1, 300000);
+      stats.recordCompleteListen(1);
       stats.recordSongSkip(1);
       stats.recordSongRestart(1);
 
@@ -106,9 +102,10 @@ void main() {
 
     test('topAlbums resolves correct artworkPath and binds AlbumGroup', () {
       // 2 plays for song 2 (Recovery)
-      stats.addListeningTime(240000 * 2, 2, 240000);
+      stats.recordCompleteListen(2);
+      stats.recordCompleteListen(2);
       // 1 play for song 1 (8 Mile)
-      stats.addListeningTime(300000, 1, 300000);
+      stats.recordCompleteListen(1);
 
       var topAlbums = stats.topAlbums(5, sampleSongs);
       expect(topAlbums.length, 2);
@@ -122,9 +119,9 @@ void main() {
 
     test('topArtists parses individual artists from featured artist strings and binds ArtistGroup', () {
       // Song 2 has artist "Eminem feat. Rihanna" -> counts towards both Eminem and Rihanna
-      stats.addListeningTime(240000, 2, 240000);
+      stats.recordCompleteListen(2);
       // Song 3 has artist "Rihanna"
-      stats.addListeningTime(200000, 3, 200000);
+      stats.recordCompleteListen(3);
 
       var topArtists = stats.topArtists(5, sampleSongs);
       expect(topArtists.length, 2);
@@ -146,11 +143,11 @@ void main() {
       ];
 
       // Play song 1 inside pl_1
-      stats.addListeningTime(300000, 1, 300000, playlistId: 'pl_1');
-      stats.addListeningTime(300000, 1, 300000, playlistId: 'pl_1');
+      stats.recordCompleteListen(1, playlistId: 'pl_1');
+      stats.recordCompleteListen(1, playlistId: 'pl_1');
 
       // Play song 3 inside pl_2
-      stats.addListeningTime(200000, 3, 200000, playlistId: 'pl_2');
+      stats.recordCompleteListen(3, playlistId: 'pl_2');
 
       var top = stats.topPlaylists(5, playlists);
       expect(top.length, 2);
@@ -163,9 +160,9 @@ void main() {
     test(
       'albumListenCount and artistListenCount compute unique counts accurately',
       () {
-        stats.addListeningTime(300000, 1, 300000);
-        stats.addListeningTime(240000, 2, 240000);
-        stats.addListeningTime(200000, 3, 200000);
+        stats.recordCompleteListen(1);
+        stats.recordCompleteListen(2);
+        stats.recordCompleteListen(3);
 
         expect(stats.albumListenCount(sampleSongs), 3);
         expect(stats.artistListenCount(sampleSongs), 2); // Eminem and Rihanna
@@ -197,8 +194,10 @@ void main() {
     });
 
     test('most played orders by completed listens descending', () {
-      stats.addListeningTime(300000, 1, 300000);
-      stats.addListeningTime(240000 * 3, 2, 240000);
+      stats.recordCompleteListen(1);
+      stats.recordCompleteListen(2);
+      stats.recordCompleteListen(2);
+      stats.recordCompleteListen(2);
 
       var songs = stats.applyActivityView(
         sampleSongs,
@@ -210,8 +209,9 @@ void main() {
     });
 
     test('least played puts never-played songs first', () {
-      stats.addListeningTime(300000 * 2, 1, 300000);
-      stats.addListeningTime(240000, 2, 240000);
+      stats.recordCompleteListen(1);
+      stats.recordCompleteListen(1);
+      stats.recordCompleteListen(2);
 
       var songs = stats.applyActivityView(
         sampleSongs,

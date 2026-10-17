@@ -1122,9 +1122,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create custom playlists to group and organize your synced music files.';
 
   @override
-  String get totalListeningTime => 'Total Listening Time';
-
-  @override
   String get completeListens => 'Complete\nListens';
 
   @override
@@ -1186,17 +1183,6 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count plays',
       one: '1 play',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String startsCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count starts',
-      one: '1 start',
     );
     return '$_temp0';
   }

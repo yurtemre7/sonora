@@ -16,6 +16,7 @@ import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/image_preflight_service.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/services/position_ticker.dart';
 import 'package:sonora/services/sleep_timer_notification_service.dart';
 import 'package:sonora/services/stats_service.dart';
 import 'package:sonora/theme/app_theme.dart';
@@ -74,13 +75,15 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   var _lastExtractedSongId = -1;
   var defaultThemeColor = const Color(0xFF7C4DFF);
   var _playRequestToken = 0;
-  Timer? _statsTimer;
   String? _playlistContext;
   final statsService = StatsService();
-  int? _activitySongId;
-  var _activitySessionMs = 0;
-  var _activityRecordedForSession = false;
-  Duration? _lastActivityPosition;
+
+  /// One-shot timer armed for the next listen milestone of the current
+  /// playthrough. No periodic work runs for stats while music plays.
+  Timer? _listenTimer;
+  int? _listenSongId;
+  var _recentRecorded = false;
+  var _listenCounted = false;
 
   /// Decouples dynamic theme color changes from general playback state
   /// notifications. Only fires when the seed color actually changes.
@@ -91,6 +94,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   StreamSubscription<MediaItem?>? _mediaItemSub;
   StreamSubscription<bool>? _playingSub;
   StreamSubscription<ProcessingState>? _processingSub;
+  StreamSubscription<PositionDiscontinuity>? _discontinuitySub;
+  StreamSubscription<double>? _speedSub;
 
   // ── Constructor ───────────────────────────────────────────────────────────
 
@@ -343,7 +348,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         _originalQueue = [];
         currentIndex = -1;
         _playlistContext = null;
-        _resetActivitySession();
+        _resetListenSession();
         unawaited(_clearLastPlayedState());
         notifyListeners();
       }
@@ -387,12 +392,22 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool get isCompleted =>
       audioHandler.player.processingState == ProcessingState.completed;
 
-  /// Current playback position stream with high-precision 30 FPS updates.
-  Stream<Duration> get positionStream =>
-      audioHandler.player.createPositionStream(
-        minPeriod: const Duration(milliseconds: 33),
-        maxPeriod: const Duration(milliseconds: 50),
-      );
+  late final _positionTicker = PositionTicker(
+    position: () => audioHandler.player.position,
+    isPlaying: () => audioHandler.player.playing,
+    playerEvents: audioHandler.player.playerEventStream,
+    foreground: _isAppVisible(WidgetsBinding.instance.lifecycleState),
+  );
+
+  /// Current playback position stream, shared by every widget. Ticks every
+  /// 200ms while playing and stops entirely while the app is in the
+  /// background, so no UI work wakes the CPU when nobody can see it.
+  Stream<Duration> get positionStream => _positionTicker.stream;
+
+  static bool _isAppVisible(AppLifecycleState? state) =>
+      state != AppLifecycleState.hidden &&
+      state != AppLifecycleState.paused &&
+      state != AppLifecycleState.detached;
 
   /// Current buffered position stream.
   Stream<Duration> get bufferedPositionStream =>
@@ -459,7 +474,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     queue = [];
     _originalQueue = [];
     currentIndex = -1;
-    _resetActivitySession();
+    _resetListenSession();
     await _clearLastPlayedState();
     notifyListeners();
   }
@@ -660,7 +675,8 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     required bool shuffled,
   }) async {
     var requestToken = ++_playRequestToken;
-    _resetActivitySession(song.id);
+    // Cleared so the media item listener re-arms once the new song loads.
+    _resetListenSession();
 
     queue = List<Song>.from(songList);
     _originalQueue = List<Song>.from(originalQueue);
@@ -919,8 +935,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         (s) => Uri.file(s.filePath).toString() == item.id,
       );
       if (index >= 0) {
-        if (_activitySongId != queue[index].id) {
-          _resetActivitySession(queue[index].id);
+        if (_listenSongId != queue[index].id) {
+          _resetListenSession(queue[index].id);
+          _armListenTimer();
         }
         if (_lastExtractedSongId != queue[index].id) {
           _extractThemeColorForSong(queue[index]);
@@ -938,69 +955,97 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Listens to playback state changes so the UI stays in sync.
   /// Subscribes to playing and processing state separately (not position)
-  /// to avoid notifying listeners on every position update (~5/sec).
-  /// Also tracks listening time via a periodic timer while playing and
-  /// records completed songs via the processing state.
+  /// to avoid notifying listeners on every position update.
+  /// Listen stats are driven by one-shot timers re-armed only on events
+  /// (play/pause, seek, loop, speed change), never by polling.
   void _listenToPlaybackState() {
-    _playingSub = audioHandler.player.playingStream.listen((isPlaying) {
+    var player = audioHandler.player;
+    _playingSub = player.playingStream.listen((isPlaying) {
       notifyListeners();
       _saveLastPlayedState();
-      if (isPlaying) {
-        _statsTimer ??= Timer.periodic(const Duration(seconds: 1), (_) {
-          var song = currentSong;
-          if (song != null && song.duration.inMilliseconds > 0) {
-            _trackSongActivity(song);
-            statsService.addListeningTime(
-              1000,
-              song.id,
-              song.duration.inMilliseconds,
-              playlistId: _playlistContext,
-            );
-          }
-        });
-      } else {
-        _statsTimer?.cancel();
-        _statsTimer = null;
-      }
+      _armListenTimer();
     });
-    _processingSub = audioHandler.player.processingStateStream.listen((state) {
+    _processingSub = player.processingStateStream.listen((state) {
       notifyListeners();
     });
+    _discontinuitySub = player.positionDiscontinuityStream.listen((event) {
+      if (event.reason == PositionDiscontinuityReason.autoAdvance) {
+        // Next track or a repeat-one loop: a fresh playthrough begins.
+        _resetListenSession();
+      } else if (player.position < const Duration(seconds: 3)) {
+        // Seeking back to the start counts as listening again.
+        _resetListenSession(_listenSongId);
+      }
+      _armListenTimer();
+    });
+    _speedSub = player.speedStream.listen((_) => _armListenTimer());
   }
 
-  void _resetActivitySession([int? songId]) {
-    _activitySongId = songId;
-    _activitySessionMs = 0;
-    _activityRecordedForSession = false;
-    _lastActivityPosition = null;
+  void _resetListenSession([int? songId]) {
+    _listenTimer?.cancel();
+    _listenTimer = null;
+    _listenSongId = songId;
+    _recentRecorded = false;
+    _listenCounted = false;
   }
 
-  void _trackSongActivity(Song song) {
-    if (_activitySongId != song.id) {
-      _resetActivitySession(song.id);
-    }
+  /// The position that counts a song as completely listened.
+  static Duration _completeListenThreshold(Duration songDuration) =>
+      songDuration * 0.8;
 
-    var position = audioHandler.player.position;
-    var previousPosition = _lastActivityPosition;
-    var nearTrackEnd =
-        previousPosition != null &&
-        song.duration - previousPosition <= const Duration(seconds: 2);
-    if (nearTrackEnd && position < const Duration(seconds: 2)) {
-      _resetActivitySession(song.id);
-    }
-    _lastActivityPosition = position;
+  /// Schedules a single wake-up for the earliest pending milestone of this
+  /// playthrough: the Recent activity threshold or the 80% complete-listen
+  /// mark.
+  void _armListenTimer() {
+    _listenTimer?.cancel();
+    _listenTimer = null;
 
-    _activitySessionMs += 1000;
-    var thresholdMs = qualifyingRecentPlayThreshold(song.duration)
-        .inMilliseconds;
-    if (!_activityRecordedForSession && _activitySessionMs >= thresholdMs) {
-      _activityRecordedForSession = true;
+    var player = audioHandler.player;
+    var song = currentSong;
+    if (song == null || !player.playing || song.duration <= Duration.zero) {
+      return;
+    }
+    if (_listenSongId != song.id) _resetListenSession(song.id);
+
+    var pending = [
+      if (!_recentRecorded) qualifyingRecentPlayThreshold(song.duration),
+      if (!_listenCounted) _completeListenThreshold(song.duration),
+    ];
+    if (pending.isEmpty) return;
+    var milestone = pending.reduce((a, b) => a < b ? a : b);
+
+    var speed = player.speed > 0 ? player.speed : 1.0;
+    var remaining = milestone - player.position;
+    var delay = remaining > Duration.zero
+        ? remaining * (1 / speed)
+        : Duration.zero;
+    _listenTimer = Timer(delay, _onListenMilestone);
+  }
+
+  void _onListenMilestone() {
+    _listenTimer = null;
+    var player = audioHandler.player;
+    var song = currentSong;
+    if (song == null || song.id != _listenSongId || !player.playing) return;
+
+    // Small tolerance for timer/decoder jitter.
+    var position = player.position + const Duration(milliseconds: 500);
+    if (!_recentRecorded &&
+        position >= qualifyingRecentPlayThreshold(song.duration)) {
+      _recentRecorded = true;
       statsService.recordSongPlayed(song.id);
     }
+    if (!_listenCounted &&
+        position >= _completeListenThreshold(song.duration)) {
+      _listenCounted = true;
+      statsService.recordCompleteListen(song.id, playlistId: _playlistContext);
+    }
+    _armListenTimer();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _positionTicker.setForeground(_isAppVisible(state));
     if (state == AppLifecycleState.resumed) {
       if (settingsProvider.useMaterialYou) {
         settingsProvider.refreshDynamicWallpaperColor();
@@ -1020,7 +1065,10 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _mediaItemSub?.cancel();
     _playingSub?.cancel();
     _processingSub?.cancel();
-    _statsTimer?.cancel();
+    _discontinuitySub?.cancel();
+    _speedSub?.cancel();
+    _listenTimer?.cancel();
+    _positionTicker.dispose();
     WidgetsBinding.instance.removeObserver(this);
     themeColorNotifier.dispose();
     statsService.flush();

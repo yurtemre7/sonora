@@ -10,14 +10,11 @@ import 'package:sonora/models/song.dart';
 import 'package:sonora/models/song_activity.dart';
 
 class _StatsData {
-  var totalListeningTimeMs = 0;
   var completeSongListens = 0;
   var firstPlayedSongId = -1;
   String? firstPlayedDate;
   final songPlayCounts = <int, int>{};
-  final songCumulativeListenMs = <int, int>{};
   final playlistPlayCounts = <String, int>{};
-  final dailyListeningMs = <String, int>{};
   final weeklyPlayCounts = <int, int>{};
   var shuffleSessionStarts = 0;
   final songSkipCounts = <int, int>{};
@@ -43,60 +40,37 @@ class StatsService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Records [ms] of listening time attributed to the given [songId].
+  /// Counts one complete listen of [songId].
   ///
-  /// When the cumulative tracked time for that song reaches or exceeds its
-  /// [songDurationMs], a full listen is counted and [songDurationMs] is
-  /// subtracted from the running total (carry-over). The [playlistId] is
-  /// optional – when provided and a full listen is registered, that playlist
-  /// receives a play too.
-  void addListeningTime(
-    int ms,
-    int songId,
-    int songDurationMs, {
-    String? playlistId,
-  }) {
-    if (ms <= 0) return;
-    var completedListen = false;
-    _data.totalListeningTimeMs += ms;
-
+  /// The player calls this once per playthrough, when playback is still
+  /// running at the 80% mark of the song. The [playlistId] is optional – when
+  /// provided, that playlist receives a play too.
+  void recordCompleteListen(int songId, {String? playlistId}) {
     var now = DateTime.now();
-    var dateKey =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-    _data.dailyListeningMs.update(dateKey, (v) => v + ms, ifAbsent: () => ms);
+    _data.songPlayCounts.update(songId, (v) => v + 1, ifAbsent: () => 1);
+    _data.completeSongListens++;
+    _data.weeklyPlayCounts.update(
+      now.weekday % 7,
+      (v) => v + 1,
+      ifAbsent: () => 1,
+    );
 
-    // Accumulate per-song listening time and check for full listen(s)
-    var cumulative = (_data.songCumulativeListenMs[songId] ?? 0) + ms;
-
-    while (songDurationMs > 0 && cumulative >= songDurationMs) {
-      // Full listen achieved – increment counts and carry over the remainder
-      _data.songPlayCounts.update(songId, (v) => v + 1, ifAbsent: () => 1);
-      _data.completeSongListens++;
-      completedListen = true;
-
-      var weekday = now.weekday % 7;
-      _data.weeklyPlayCounts.update(weekday, (v) => v + 1, ifAbsent: () => 1);
-
-      if (_data.firstPlayedSongId < 0) {
-        _data.firstPlayedSongId = songId;
-        _data.firstPlayedDate = dateKey;
-      }
-
-      if (playlistId != null) {
-        _data.playlistPlayCounts.update(
-          playlistId,
-          (v) => v + 1,
-          ifAbsent: () => 1,
-        );
-      }
-
-      cumulative -= songDurationMs;
+    if (_data.firstPlayedSongId < 0) {
+      _data.firstPlayedSongId = songId;
+      _data.firstPlayedDate =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
     }
 
-    _data.songCumulativeListenMs[songId] = cumulative;
+    if (playlistId != null) {
+      _data.playlistPlayCounts.update(
+        playlistId,
+        (v) => v + 1,
+        ifAbsent: () => 1,
+      );
+    }
 
     _markDirty();
-    if (completedListen) notifyListeners();
+    notifyListeners();
   }
 
   void recordShuffleSessionStart() {
@@ -129,14 +103,11 @@ class StatsService extends ChangeNotifier {
   Future<void> reset() async {
     _debounceTimer?.cancel();
     _debounceTimer = null;
-    _data.totalListeningTimeMs = 0;
     _data.completeSongListens = 0;
     _data.firstPlayedSongId = -1;
     _data.firstPlayedDate = null;
     _data.songPlayCounts.clear();
-    _data.songCumulativeListenMs.clear();
     _data.playlistPlayCounts.clear();
-    _data.dailyListeningMs.clear();
     _data.weeklyPlayCounts.clear();
     _data.shuffleSessionStarts = 0;
     _data.songSkipCounts.clear();
@@ -157,28 +128,6 @@ class StatsService extends ChangeNotifier {
 
   // ── Getters ─────────────────────────────────────────────────────────────
 
-  String get totalListeningTimeFormatted {
-    var totalSeconds = (_data.totalListeningTimeMs / 1000).round();
-    var hours = totalSeconds ~/ 3600;
-    var minutes = (totalSeconds % 3600) ~/ 60;
-    if (hours > 0) return '${hours}h ${minutes}m';
-    if (minutes > 0) return '${minutes}m';
-    return '< 1m';
-  }
-
-  String get totalListeningTimeFull {
-    var totalSeconds = (_data.totalListeningTimeMs / 1000).round();
-    var hours = totalSeconds ~/ 3600;
-    var minutes = (totalSeconds % 3600) ~/ 60;
-    var seconds = totalSeconds % 60;
-    if (hours > 0) {
-      return '${hours}h ${minutes}m ${seconds}s';
-    } else if (minutes > 0) {
-      return '${minutes}m ${seconds}s';
-    }
-    return '${seconds}s';
-  }
-
   int get completeSongListens => _data.completeSongListens;
 
   int get shuffleSessionStarts => _data.shuffleSessionStarts;
@@ -191,8 +140,6 @@ class StatsService extends ChangeNotifier {
   int songSkipCount(int id) => _data.songSkipCounts[id] ?? 0;
 
   int songRestartCount(int id) => _data.songRestartCounts[id] ?? 0;
-
-  int songCumulativeListenMs(int id) => _data.songCumulativeListenMs[id] ?? 0;
 
   int songPlayCount(int id) => _data.songPlayCounts[id] ?? 0;
 
@@ -323,8 +270,6 @@ class StatsService extends ChangeNotifier {
     if (_data.firstPlayedSongId < 0) return null;
     return _buildSongMap(library)[_data.firstPlayedSongId];
   }
-
-  int get totalListeningTimeMs => _data.totalListeningTimeMs;
 
   String get mostActiveDay {
     if (_data.weeklyPlayCounts.isEmpty) return '\u2014';
@@ -481,7 +426,6 @@ class StatsService extends ChangeNotifier {
       var content = await file.readAsString();
       var json = jsonDecode(content) as Map<String, dynamic>;
 
-      _data.totalListeningTimeMs = json['total_listening_time_ms'] as int? ?? 0;
       _data.completeSongListens = json['complete_song_listens'] as int? ?? 0;
       _data.firstPlayedSongId = json['first_played_song_id'] as int? ?? -1;
       _data.firstPlayedDate = json['first_played_date'] as String?;
@@ -494,28 +438,11 @@ class StatsService extends ChangeNotifier {
         }
       }
 
-      var cumulative =
-          json['song_cumulative_listen_ms'] as Map<String, dynamic>?;
-      if (cumulative != null) {
-        _data.songCumulativeListenMs.clear();
-        for (var e in cumulative.entries) {
-          _data.songCumulativeListenMs[int.parse(e.key)] = e.value as int;
-        }
-      }
-
       var plCounts = json['playlist_play_counts'] as Map<String, dynamic>?;
       if (plCounts != null) {
         _data.playlistPlayCounts.clear();
         for (var e in plCounts.entries) {
           _data.playlistPlayCounts[e.key] = e.value as int;
-        }
-      }
-
-      var daily = json['daily_listening_ms'] as Map<String, dynamic>?;
-      if (daily != null) {
-        _data.dailyListeningMs.clear();
-        for (var e in daily.entries) {
-          _data.dailyListeningMs[e.key] = e.value as int;
         }
       }
 
@@ -557,14 +484,11 @@ class StatsService extends ChangeNotifier {
         }
       }
     } catch (_) {
-      _data.totalListeningTimeMs = 0;
       _data.completeSongListens = 0;
       _data.firstPlayedSongId = -1;
       _data.firstPlayedDate = null;
       _data.songPlayCounts.clear();
-      _data.songCumulativeListenMs.clear();
       _data.playlistPlayCounts.clear();
-      _data.dailyListeningMs.clear();
       _data.weeklyPlayCounts.clear();
       _data.shuffleSessionStarts = 0;
       _data.songSkipCounts.clear();
@@ -587,18 +511,13 @@ class StatsService extends ChangeNotifier {
         _hasPendingSave = false;
         var appDir = await getApplicationDocumentsDirectory();
         var json = <String, dynamic>{
-          'total_listening_time_ms': _data.totalListeningTimeMs,
           'complete_song_listens': _data.completeSongListens,
           'first_played_song_id': _data.firstPlayedSongId,
           'first_played_date': _data.firstPlayedDate,
           'song_play_counts': _data.songPlayCounts.map(
             (k, v) => MapEntry(k.toString(), v),
           ),
-          'song_cumulative_listen_ms': _data.songCumulativeListenMs.map(
-            (k, v) => MapEntry(k.toString(), v),
-          ),
           'playlist_play_counts': _data.playlistPlayCounts,
-          'daily_listening_ms': _data.dailyListeningMs,
           'weekly_play_counts': _data.weeklyPlayCounts.map(
             (k, v) => MapEntry(k.toString(), v),
           ),

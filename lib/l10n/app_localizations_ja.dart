@@ -1075,9 +1075,6 @@ class AppLocalizationsJa extends AppLocalizations {
       '同期した音楽ファイルをグループ化して整理するためにカスタムプレイリストを作成しましょう。';
 
   @override
-  String get totalListeningTime => '総再生時間';
-
-  @override
   String get completeListens => '完奏回数';
 
   @override
@@ -1133,11 +1130,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String playsCount(int count) {
     return '$count 回再生';
-  }
-
-  @override
-  String startsCount(int count) {
-    return '$count 回';
   }
 
   @override

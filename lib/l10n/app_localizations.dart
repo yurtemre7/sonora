@@ -2102,12 +2102,6 @@ abstract class AppLocalizations {
   /// **'Create custom playlists to group and organize your synced music files.'**
   String get noPlaylistsYetSubtitle;
 
-  /// No description provided for @totalListeningTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Total Listening Time'**
-  String get totalListeningTime;
-
   /// No description provided for @completeListens.
   ///
   /// In en, this message translates to:
@@ -2215,12 +2209,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 play} other{{count} plays}}'**
   String playsCount(int count);
-
-  /// No description provided for @startsCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 start} other{{count} starts}}'**
-  String startsCount(int count);
 
   /// No description provided for @songsCountShort.
   ///

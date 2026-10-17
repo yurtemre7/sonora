@@ -490,7 +490,6 @@
   "removeFromFavorites": "Remove from favorites",
   "noPlaylistsYet": "No playlists yet",
   "noPlaylistsYetSubtitle": "Create custom playlists to group and organize your synced music files.",
-  "totalListeningTime": "Total Listening Time",
   "completeListens": "Complete\nListens",
   "skips": "Skips",
   "restarts": "Restarts",
@@ -510,14 +509,6 @@
   "noPlaylistStatsYet": "No listening data yet.\nPlay music from playlists to see them here!",
   "playsCount": "{count, plural, =1{1 play} other{{count} plays}}",
   "@playsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "startsCount": "{count, plural, =1{1 start} other{{count} starts}}",
-  "@startsCount": {
     "placeholders": {
       "count": {
         "type": "int"
