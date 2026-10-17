@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.25.0] - 2026-10-17
+### Changed
+* Perf: Cut playback wakeups for stats and progress
+
 ## [1.24.2] - 2026-10-15
 ### Added
 * Add thank you note in app info settings
