@@ -396,6 +396,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     position: () => audioHandler.player.position,
     isPlaying: () => audioHandler.player.playing,
     playerEvents: audioHandler.player.playerEventStream,
+    discontinuities: audioHandler.player.positionDiscontinuityStream,
     foreground: _isAppVisible(WidgetsBinding.instance.lifecycleState),
   );
 

@@ -26,6 +26,65 @@ void main() {
       });
     }
 
+    test('drops a small backward correction at song start', () {
+      fakeAsync((async) {
+        setUpTicker(async);
+        var values = <Duration>[];
+        var sub = ticker.stream.listen(values.add);
+        async.elapse(const Duration(seconds: 1));
+        var shown = values.last;
+
+        // The player corrects its extrapolated position back by ~0.3s.
+        position = shown - const Duration(milliseconds: 300);
+        events.add(null);
+        async.flushMicrotasks();
+        expect(values.last, shown);
+
+        // Once real playback passes the shown position, updates resume.
+        async.elapse(const Duration(seconds: 1));
+        expect(values.last, greaterThan(shown));
+        for (var i = 1; i < values.length; i++) {
+          expect(values[i], greaterThanOrEqualTo(values[i - 1]));
+        }
+        sub.cancel();
+        ticker.dispose();
+      });
+    });
+
+    test('a seek or track change may still move the position back', () {
+      fakeAsync((async) {
+        var discontinuities = StreamController<Object?>.broadcast();
+        events = StreamController<Object?>.broadcast();
+        position = const Duration(seconds: 5);
+        playing = false;
+        ticker = PositionTicker(
+          position: () => position,
+          isPlaying: () => playing,
+          playerEvents: events.stream,
+          discontinuities: discontinuities.stream,
+        );
+        var values = <Duration>[];
+        var sub = ticker.stream.listen(values.add);
+        async.flushMicrotasks();
+
+        // Small seek back: the player event is held, the discontinuity wins.
+        position = const Duration(seconds: 4, milliseconds: 500);
+        events.add(null);
+        discontinuities.add(null);
+        async.flushMicrotasks();
+        expect(values.last, const Duration(seconds: 4, milliseconds: 500));
+
+        // A large jump back (new track) passes even without a discontinuity.
+        position = Duration.zero;
+        events.add(null);
+        async.flushMicrotasks();
+        expect(values.last, Duration.zero);
+
+        sub.cancel();
+        ticker.dispose();
+      });
+    });
+
     test('returns the same stream instance on every access', () {
       fakeAsync((async) {
         setUpTicker(async);

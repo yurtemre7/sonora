@@ -13,6 +13,7 @@ class PositionTicker {
     required this._position,
     required this._isPlaying,
     required this._playerEvents,
+    this._discontinuities = const Stream.empty(),
     this.period = const Duration(milliseconds: 200),
     this._foreground = true,
   });
@@ -21,11 +22,21 @@ class PositionTicker {
   final bool Function() _isPlaying;
   final Stream<Object?> _playerEvents;
 
+  /// Seeks and track changes. Only these may move the position backward.
+  final Stream<Object?> _discontinuities;
+
+  /// Backward moves below this size without a discontinuity are dropped.
+  /// When a song starts, the player extrapolates the position before audio
+  /// actually rolls, then corrects it back by up to about a second, which made
+  /// the progress bar jump back and forth.
+  static const _maxDroppedCorrection = Duration(milliseconds: 1500);
+
   /// Interval between position updates while playing.
   final Duration period;
 
   final _listeners = <MultiStreamController<Duration>>{};
   StreamSubscription<Object?>? _eventSub;
+  StreamSubscription<Object?>? _discontinuitySub;
   Timer? _timer;
   Duration? _lastEmitted;
   bool _foreground;
@@ -72,10 +83,17 @@ class PositionTicker {
     var shouldRun = _foreground && _listeners.isNotEmpty;
     if (shouldRun && _eventSub == null) {
       _eventSub = _playerEvents.listen((_) => _onPlayerEvent());
+      _discontinuitySub = _discontinuities.listen(
+        (_) => _emit(allowBackward: true),
+      );
       _onPlayerEvent();
     } else if (!shouldRun && _eventSub != null) {
       _eventSub?.cancel();
       _eventSub = null;
+      _discontinuitySub?.cancel();
+      _discontinuitySub = null;
+      // Nothing was shown while inactive, so don't hold the old position.
+      _lastEmitted = null;
       _timer?.cancel();
       _timer = null;
     }
@@ -87,8 +105,15 @@ class PositionTicker {
     _timer = _isPlaying() ? Timer.periodic(period, (_) => _emit()) : null;
   }
 
-  void _emit() {
+  void _emit({bool allowBackward = false}) {
     var position = _position();
+    var last = _lastEmitted;
+    if (!allowBackward &&
+        last != null &&
+        position < last &&
+        last - position < _maxDroppedCorrection) {
+      return;
+    }
     if (position == _lastEmitted) return;
     _lastEmitted = position;
     for (var listener in List.of(_listeners)) {
@@ -100,6 +125,8 @@ class PositionTicker {
     _disposed = true;
     _eventSub?.cancel();
     _eventSub = null;
+    _discontinuitySub?.cancel();
+    _discontinuitySub = null;
     _timer?.cancel();
     _timer = null;
     for (var listener in List.of(_listeners)) {
