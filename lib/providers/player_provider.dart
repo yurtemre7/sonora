@@ -1439,6 +1439,12 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       return;
     }
 
+    var colorless = await _loadColorlessArtwork();
+    if (colorless.contains(song.artworkPath)) {
+      _applyThemeColor(defaultThemeColor);
+      return;
+    }
+
     var color = await ColorExtractor.extractDominantColor(song.artworkPath!);
     var newColor = color ?? defaultThemeColor;
     _applyThemeColor(newColor);
@@ -1447,6 +1453,9 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (color != null) {
       var songColor = color.toARGB32();
       _cacheDominantColor(song.id, songColor);
+    } else {
+      colorless.add(song.artworkPath!);
+      unawaited(_saveColorlessArtwork());
     }
   }
 
@@ -1456,29 +1465,47 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     themeColorNotifier.value = color;
   }
 
-  void _cacheDominantColorInMemory(int songId, int color) {
-    for (var i = 0; i < allSongs.length; i++) {
-      if (allSongs[i].id == songId) {
-        allSongs[i] = allSongs[i].copyWith(dominantColor: color);
-        break;
+  /// Writes [colorsById] into every in-memory song list in one pass.
+  void _applyDominantColors(Map<int, int> colorsById) {
+    if (colorsById.isEmpty) return;
+    void apply(List<Song> songs) {
+      for (var i = 0; i < songs.length; i++) {
+        var color = colorsById[songs[i].id];
+        if (color != null && songs[i].dominantColor != color) {
+          songs[i] = songs[i].copyWith(dominantColor: color);
+        }
       }
     }
-    for (var i = 0; i < queue.length; i++) {
-      if (queue[i].id == songId) {
-        queue[i] = queue[i].copyWith(dominantColor: color);
-        break;
-      }
-    }
-    for (var i = 0; i < _originalQueue.length; i++) {
-      if (_originalQueue[i].id == songId) {
-        _originalQueue[i] = _originalQueue[i].copyWith(dominantColor: color);
-        break;
-      }
-    }
+
+    apply(allSongs);
+    apply(queue);
+    apply(_originalQueue);
+  }
+
+  static const _colorlessArtworkKey = 'colorless_artwork_paths';
+  Set<String>? _colorlessArtwork;
+
+  /// Artwork files that produced no usable color, so they are not decoded
+  /// again on every launch.
+  Future<Set<String>> _loadColorlessArtwork() async {
+    if (_colorlessArtwork != null) return _colorlessArtwork!;
+    var stored = await SharedPreferencesAsync().getStringList(
+      _colorlessArtworkKey,
+    );
+    return _colorlessArtwork ??= {...?stored};
+  }
+
+  Future<void> _saveColorlessArtwork() async {
+    var paths = _colorlessArtwork;
+    if (paths == null) return;
+    await SharedPreferencesAsync().setStringList(
+      _colorlessArtworkKey,
+      paths.toList(),
+    );
   }
 
   void _cacheDominantColor(int songId, int color) {
-    _cacheDominantColorInMemory(songId, color);
+    _applyDominantColors({songId: color});
     _refreshLibrarySnapshots();
     // Persist so the cache survives app restarts.
     MusicScanner().saveDominantColor(songId, color);
@@ -1495,10 +1522,14 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       if (!_isExtractingColors) return;
 
       // Group songs by artworkPath to extract color once per unique image
+      var colorless = await _loadColorlessArtwork();
       var artworkMap = <String, List<int>>{};
       for (var song in allSongs) {
-        if (song.artworkPath != null && song.dominantColor == null) {
-          artworkMap.putIfAbsent(song.artworkPath!, () => []).add(song.id);
+        var path = song.artworkPath;
+        if (path != null &&
+            song.dominantColor == null &&
+            !colorless.contains(path)) {
+          artworkMap.putIfAbsent(path, () => []).add(song.id);
         }
       }
 
@@ -1507,28 +1538,24 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         return;
       }
 
-      var processedCount = 0;
-      var dirty = false;
+      // Results are collected and applied once at the end: rebuilding the
+      // album/artist/theme snapshots per batch made the first run quadratic.
+      var colorsById = <int, int>{};
+      var foundColorless = false;
 
       for (var entry in artworkMap.entries) {
         if (!_isExtractingColors) break;
-        var artPath = entry.key;
-        var songIds = entry.value;
 
         try {
-          var color = await ColorExtractor.extractDominantColor(artPath);
+          var color = await ColorExtractor.extractDominantColor(entry.key);
           if (color != null) {
             var songColor = color.toARGB32();
-            for (var id in songIds) {
-              _cacheDominantColorInMemory(id, songColor);
+            for (var id in entry.value) {
+              colorsById[id] = songColor;
             }
-            processedCount++;
-            dirty = true;
-
-            if (processedCount % 5 == 0) {
-              _refreshLibrarySnapshots();
-              notifyListeners();
-            }
+          } else {
+            colorless.add(entry.key);
+            foundColorless = true;
           }
         } catch (_) {}
 
@@ -1536,11 +1563,13 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         await Future.delayed(const Duration(milliseconds: 100));
       }
 
-      if (dirty) {
+      if (foundColorless) await _saveColorlessArtwork();
+      if (colorsById.isNotEmpty && _isExtractingColors) {
+        _applyDominantColors(colorsById);
         _refreshLibrarySnapshots();
         await MusicScanner().saveAllSongsMetadata(allSongs);
+        notifyListeners();
       }
-      notifyListeners();
       _isExtractingColors = false;
     });
   }
