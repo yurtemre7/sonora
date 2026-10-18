@@ -1683,94 +1683,70 @@ class MusicScanner {
 
   // --- Private Helpers ---
 
+  /// Legacy SharedPreferences key that used to hold a second copy of the
+  /// library cache. Migrated to the file on first read, then removed.
+  static const _legacyLibraryPrefsKey = 'imported_songs_json';
+
+  /// Serialises cache writes so they land in call order and reads always see
+  /// the latest write, even when the write was not awaited.
+  var _libraryWrite = Future<void>.value();
+
+  Future<File> _libraryFile() async {
+    var appDir = await getApplicationDocumentsDirectory();
+    return File('${appDir.path}/imported_songs.json');
+  }
+
   Future<List<Song>> _readImportedSongsMetadata() async {
     try {
-      var prefContent = await _prefs.getString('imported_songs_json');
-      String content;
+      await _libraryWrite;
+      var jsonFile = await _libraryFile();
 
-      if (prefContent != null && prefContent.isNotEmpty) {
-        content = prefContent;
-      } else {
-        var appDir = await getApplicationDocumentsDirectory();
-        var jsonFile = File('${appDir.path}/imported_songs.json');
-        if (!jsonFile.existsSync()) return [];
-        content = await jsonFile.readAsString();
-        await _prefs.setString('imported_songs_json', content);
+      var legacyContent = await _prefs.getString(_legacyLibraryPrefsKey);
+      if (legacyContent != null) {
+        // The prefs copy was the primary read source before, so it wins.
+        if (legacyContent.isNotEmpty) {
+          await _writeLibraryFileAtomically(jsonFile, legacyContent);
+        }
+        await _prefs.remove(_legacyLibraryPrefsKey);
+        if (legacyContent.isNotEmpty) {
+          return await _decodeLibraryInIsolate(legacyContent);
+        }
       }
 
-      var jsonList = jsonDecode(content) as List<dynamic>;
-
-      return jsonList.map((item) {
-        return Song(
-          id: item['id'] as int,
-          title: item['title'] as String,
-          artist: item['artist'] as String,
-          album: item['album'] as String,
-          duration: Duration(milliseconds: item['duration_ms'] as int),
-          filePath: item['file_path'] as String,
-          artworkPath: item['artwork_path'] as String?,
-          format: item['format'] as String?,
-          bitrate: item['bitrate'] as int?,
-          samplerate: item['samplerate'] as int?,
-          isFavorite: item['is_favorite'] as bool? ?? false,
-          favoriteDateMs:
-              item['favorite_date_ms'] as int? ??
-              (item['is_favorite'] == true
-                  ? DateTime.now().millisecondsSinceEpoch
-                  : null),
-          lastModifiedMs: item['last_modified_ms'] as int?,
-          fileSize: item['file_size'] as int?,
-          hasLyrics: item['has_lyrics'] == true,
-          dominantColor: item['dominant_color'] as int?,
-          trackNumber: item['track_number'] as int?,
-          discNumber: item['disc_number'] as int?,
-          genre: item['genre'] as String?,
-          year: item['year'] as int?,
-        );
-      }).toList();
+      if (!jsonFile.existsSync()) return [];
+      return await _decodeLibraryInIsolate(await jsonFile.readAsString());
     } catch (_) {
       return [];
     }
   }
 
-  Future<void> _writeImportedSongsMetadata(List<Song> songs) async {
-    try {
-      var jsonList = songs
-          .map(
-            (s) => {
-              'id': s.id,
-              'title': s.title,
-              'artist': s.artist,
-              'album': s.album,
-              'duration_ms': s.duration.inMilliseconds,
-              'file_path': s.filePath,
-              'artwork_path': s.artworkPath,
-              'format': s.format,
-              'bitrate': s.bitrate,
-              'samplerate': s.samplerate,
-              'is_favorite': s.isFavorite,
-              'favorite_date_ms': s.favoriteDateMs,
-              'last_modified_ms': s.lastModifiedMs,
-              'file_size': s.fileSize,
-              'has_lyrics': s.hasLyrics,
-              'dominant_color': s.dominantColor,
-              'track_number': s.trackNumber,
-              'disc_number': s.discNumber,
-              'genre': s.genre,
-              'year': s.year,
-            },
-          )
-          .toList();
-
-      var jsonStr = jsonEncode(jsonList);
-      await _prefs.setString('imported_songs_json', jsonStr);
-
+  Future<void> _writeImportedSongsMetadata(List<Song> songs) {
+    var snapshot = List<Song>.of(songs);
+    return _libraryWrite = _libraryWrite.then((_) async {
       try {
-        var appDir = await getApplicationDocumentsDirectory();
-        var jsonFile = File('${appDir.path}/imported_songs.json');
-        await jsonFile.writeAsString(jsonStr);
+        var jsonStr = await _encodeLibraryInIsolate(snapshot);
+        await _writeLibraryFileAtomically(await _libraryFile(), jsonStr);
       } catch (_) {}
-    } catch (_) {}
+    });
+  }
+
+  // Static so the isolate closures capture only their argument, never `this`
+  // (instance state such as pending futures cannot cross isolates).
+  static Future<List<Song>> _decodeLibraryInIsolate(String content) =>
+      Isolate.run(() => _decodeLibrary(content));
+
+  static Future<String> _encodeLibraryInIsolate(List<Song> songs) =>
+      Isolate.run(() => _encodeLibrary(songs));
+
+  /// Writes to a temp file and renames it over the target, so a crash or
+  /// full disk mid-write never leaves a truncated library behind.
+  static Future<void> _writeLibraryFileAtomically(
+    File target,
+    String content,
+  ) async {
+    var temp = File('${target.path}.tmp');
+    await temp.writeAsString(content, flush: true);
+    await temp.rename(target.path);
   }
 
   /// Persists a dominant color value for a song so it survives app restarts.
@@ -1917,4 +1893,64 @@ class MusicScanner {
     } catch (_) {}
     return [];
   }
+}
+
+List<Song> _decodeLibrary(String content) {
+  var jsonList = jsonDecode(content) as List<dynamic>;
+  return jsonList.map((item) {
+    return Song(
+      id: item['id'] as int,
+      title: item['title'] as String,
+      artist: item['artist'] as String,
+      album: item['album'] as String,
+      duration: Duration(milliseconds: item['duration_ms'] as int),
+      filePath: item['file_path'] as String,
+      artworkPath: item['artwork_path'] as String?,
+      format: item['format'] as String?,
+      bitrate: item['bitrate'] as int?,
+      samplerate: item['samplerate'] as int?,
+      isFavorite: item['is_favorite'] as bool? ?? false,
+      favoriteDateMs:
+          item['favorite_date_ms'] as int? ??
+          (item['is_favorite'] == true
+              ? DateTime.now().millisecondsSinceEpoch
+              : null),
+      lastModifiedMs: item['last_modified_ms'] as int?,
+      fileSize: item['file_size'] as int?,
+      hasLyrics: item['has_lyrics'] == true,
+      dominantColor: item['dominant_color'] as int?,
+      trackNumber: item['track_number'] as int?,
+      discNumber: item['disc_number'] as int?,
+      genre: item['genre'] as String?,
+      year: item['year'] as int?,
+    );
+  }).toList();
+}
+
+String _encodeLibrary(List<Song> songs) {
+  return jsonEncode([
+    for (var s in songs)
+      {
+        'id': s.id,
+        'title': s.title,
+        'artist': s.artist,
+        'album': s.album,
+        'duration_ms': s.duration.inMilliseconds,
+        'file_path': s.filePath,
+        'artwork_path': s.artworkPath,
+        'format': s.format,
+        'bitrate': s.bitrate,
+        'samplerate': s.samplerate,
+        'is_favorite': s.isFavorite,
+        'favorite_date_ms': s.favoriteDateMs,
+        'last_modified_ms': s.lastModifiedMs,
+        'file_size': s.fileSize,
+        'has_lyrics': s.hasLyrics,
+        'dominant_color': s.dominantColor,
+        'track_number': s.trackNumber,
+        'disc_number': s.discNumber,
+        'genre': s.genre,
+        'year': s.year,
+      },
+  ]);
 }
