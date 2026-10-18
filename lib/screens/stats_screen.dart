@@ -180,7 +180,10 @@ class _StatsScreenState extends State<StatsScreen> {
     var topSong = stats.topSongs(1, songs).firstOrNull;
     var firstSong = stats.firstPlayedSong(songs);
     var totalUnique = stats.totalUniqueSongsPlayed;
-    var albumCount = stats.albumListenCount(songs);
+    var albumCount = stats.albumListenCount(
+      songs,
+      cachedAlbums: widget.playerProvider.cachedAlbums,
+    );
     var artistCount = stats.artistListenCount(songs);
     var playlistCount = stats.playlistListenCount;
     var activeDay = stats.mostActiveDay;
@@ -490,7 +493,11 @@ class _StatsScreenState extends State<StatsScreen> {
     ThemeData theme,
     List<Song> songs,
   ) {
-    var top = _statsService.topAlbums(5, songs);
+    var top = _statsService.topAlbums(
+      5,
+      songs,
+      cachedAlbums: widget.playerProvider.cachedAlbums,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),

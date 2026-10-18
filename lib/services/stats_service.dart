@@ -228,19 +228,23 @@ class StatsService extends ChangeNotifier {
     for (var s in library) s.id: s,
   };
 
-  int albumListenCount(List<Song> library) {
-    var songMap = _buildSongMap(library);
-    var albumGroups = buildAlbumGroups(library);
+  /// Maps each library song to its album in one pass. Pass the player's
+  /// [cachedAlbums] to avoid regrouping the whole library on every call.
+  Map<int, AlbumGroup> _albumBySongId(
+    List<Song> library,
+    List<AlbumGroup>? cachedAlbums,
+  ) => {
+    for (var group in cachedAlbums ?? buildAlbumGroups(library))
+      for (var song in group.songs) song.id: group,
+  };
+
+  int albumListenCount(List<Song> library, {List<AlbumGroup>? cachedAlbums}) {
+    var albumBySongId = _albumBySongId(library, cachedAlbums);
     var listenedAlbums = <String>{};
-    for (var entry in _data.songPlayCounts.entries) {
-      var song = songMap[entry.key];
-      if (song != null) {
-        var group = albumGroups
-            .where((a) => a.songs.any((s) => s.id == song.id))
-            .firstOrNull;
-        if (group != null) {
-          listenedAlbums.add('${group.nameLower}|||${group.artistLower}');
-        }
+    for (var songId in _data.songPlayCounts.keys) {
+      var group = albumBySongId[songId];
+      if (group != null) {
+        listenedAlbums.add('${group.nameLower}|||${group.artistLower}');
       }
     }
     return listenedAlbums.length;
@@ -306,23 +310,17 @@ class StatsService extends ChangeNotifier {
       AlbumGroup group,
     })
   >
-  topAlbums(int limit, List<Song> library) {
-    var songMap = _buildSongMap(library);
-    var albumGroups = buildAlbumGroups(library);
+  topAlbums(int limit, List<Song> library, {List<AlbumGroup>? cachedAlbums}) {
+    var albumBySongId = _albumBySongId(library, cachedAlbums);
     var albumCounts = <AlbumGroup, int>{};
     for (var entry in _data.songPlayCounts.entries) {
-      var song = songMap[entry.key];
-      if (song != null) {
-        var group = albumGroups
-            .where((a) => a.songs.any((s) => s.id == song.id))
-            .firstOrNull;
-        if (group != null) {
-          albumCounts.update(
-            group,
-            (v) => v + entry.value,
-            ifAbsent: () => entry.value,
-          );
-        }
+      var group = albumBySongId[entry.key];
+      if (group != null) {
+        albumCounts.update(
+          group,
+          (v) => v + entry.value,
+          ifAbsent: () => entry.value,
+        );
       }
     }
     var sorted = albumCounts.entries.toList()

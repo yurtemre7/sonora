@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sonora/l10n/app_localizations.dart';
+import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/models/song_activity.dart';
@@ -168,6 +169,25 @@ void main() {
         expect(stats.artistListenCount(sampleSongs), 2); // Eminem and Rihanna
       },
     );
+
+    test('album stats reuse cached album groups with the same results', () {
+      stats.recordCompleteListen(2);
+      stats.recordCompleteListen(2);
+      stats.recordCompleteListen(1);
+      var cached = buildAlbumGroups(sampleSongs);
+
+      expect(
+        stats.albumListenCount(sampleSongs, cachedAlbums: cached),
+        stats.albumListenCount(sampleSongs),
+      );
+      var top = stats.topAlbums(5, sampleSongs, cachedAlbums: cached);
+      expect(top.map((a) => (a.album, a.count)), [
+        ('Recovery', 2),
+        ('8 Mile', 1),
+      ]);
+      // The cached group instance is returned, not a rebuilt copy.
+      expect(cached, contains(same(top.first.group)));
+    });
 
     test('recentSongs returns unique active songs in latest-first order', () {
       stats.recordSongPlayed(1, at: DateTime(2025, 1, 1, 12));
