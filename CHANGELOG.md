@@ -2,6 +2,16 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.25.1] - 2026-10-18
+### Added
+* Improve kotlin scan of files
+### Fixed
+* Stop progress bar jitter at song start
+* Dont try to extract a color on songs with no song cover
+### Changed
+* Chore: Improve album cache at stats screen
+* Perf: Only use file to hold copy of imported songs instead of shared preferences
+
 ## [1.25.0] - 2026-10-17
 ### Changed
 * Perf: Cut playback wakeups for stats and progress
