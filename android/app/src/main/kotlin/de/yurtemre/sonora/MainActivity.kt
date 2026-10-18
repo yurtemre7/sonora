@@ -12,8 +12,11 @@ import androidx.core.view.WindowCompat
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import android.util.Size
 import java.io.File
 import java.io.FileOutputStream
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AudioServiceActivity() {
     companion object {
@@ -23,6 +26,8 @@ class MainActivity : AudioServiceActivity() {
             R.drawable.ic_close,
             R.drawable.ic_launcher_monochrome,
         )
+
+        private const val ALBUM_ART_MAX_PX = 1080
     }
 
     private val VOLUME_CHANNEL = "de.yurtemre.sonora/volume"
@@ -600,6 +605,7 @@ class MainActivity : AudioServiceActivity() {
 
         var queryCursorMs: Long = 0
         var cursorLoopMs: Long = 0
+        var querySucceeded = false
 
         try {
             val queryStart = System.currentTimeMillis()
@@ -657,12 +663,13 @@ class MainActivity : AudioServiceActivity() {
 
                     // Resolve album art JPEG instantly from cache without blocking IO
                     if (!albumArtFileMap.containsKey(albumId)) {
-                        val cachedArtFile = File(cacheArtDir, "art_album_$albumId.jpg")
+                        val cachedArtFile = albumArtFile(cacheArtDir, albumId)
                         if (cachedArtFile.exists() && cachedArtFile.length() > 0) {
                             albumArtFileMap[albumId] = cachedArtFile.absolutePath
                         } else {
                             albumArtFileMap[albumId] = null
-                            if (albumId > 0) {
+                            // Albums already known to have no art are not retried.
+                            if (albumId > 0 && !noAlbumArtMarker(cacheArtDir, albumId).exists()) {
                                 missingAlbumIds.add(albumId)
                             }
                         }
@@ -711,6 +718,7 @@ class MainActivity : AudioServiceActivity() {
                     albumSongIndexes.getOrPut(albumId) { mutableListOf() }.add(songIndex)
                 }
                 cursorLoopMs = System.currentTimeMillis() - loopStart
+                querySucceeded = true
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -720,32 +728,28 @@ class MainActivity : AudioServiceActivity() {
         val cacheWasEmpty = albumArtFileMap.values.all { it == null } && missingAlbumIds.isNotEmpty()
 
         if (cacheWasEmpty) {
-            // First scan: extract album art AND resolve artist images synchronously
+            // First scan: extract album art AND resolve artist images synchronously.
+            // Albums are extracted in parallel so a large library doesn't wait on
+            // one album at a time.
+            val workers = Runtime.getRuntime().availableProcessors().coerceIn(1, 4)
+            val pool = Executors.newFixedThreadPool(workers)
+            val extracted = java.util.concurrent.ConcurrentHashMap<Long, String>()
             for (aId in missingAlbumIds.distinct()) {
-                val artFile = File(cacheArtDir, "art_album_$aId.jpg")
-                if (!artFile.exists() || artFile.length() == 0L) {
-                    val albumUri = ContentUris.withAppendedId(
-                        Uri.parse("content://media/external/audio/albumart"),
-                        aId
-                    )
-                    try {
-                        contentResolver.openInputStream(albumUri)?.use { input ->
-                            FileOutputStream(artFile).use { output ->
-                                input.copyTo(output)
-                            }
-                        }
-                    } catch (_: Exception) {
-                        artFile.delete()
+                pool.execute {
+                    val artFile = albumArtFile(cacheArtDir, aId)
+                    if (extractAlbumArt(aId, cacheArtDir)) {
+                        extracted[aId] = artFile.absolutePath
                     }
                 }
-                // Patch artworkPath in songsList for this albumId
-                if (artFile.exists() && artFile.length() > 0) {
-                    val artPath = artFile.absolutePath
-                    albumArtFileMap[aId] = artPath
-                    for (songIndex in albumSongIndexes[aId].orEmpty()) {
-                        songsList[songIndex] = songsList[songIndex].toMutableMap().also {
-                            it["artwork_path"] = artPath
-                        }
+            }
+            pool.shutdown()
+            pool.awaitTermination(5, TimeUnit.MINUTES)
+            // Patch artworkPath in songsList for each extracted album
+            for ((aId, artPath) in extracted) {
+                albumArtFileMap[aId] = artPath
+                for (songIndex in albumSongIndexes[aId].orEmpty()) {
+                    songsList[songIndex] = songsList[songIndex].toMutableMap().also {
+                        it["artwork_path"] = artPath
                     }
                 }
             }
@@ -768,22 +772,7 @@ class MainActivity : AudioServiceActivity() {
             val songsCopy = ArrayList(songsList)
             Thread {
                 for (aId in missingAlbumIds.distinct()) {
-                    val artFile = File(cacheArtDir, "art_album_$aId.jpg")
-                    if (!artFile.exists() || artFile.length() == 0L) {
-                        val albumUri = ContentUris.withAppendedId(
-                            Uri.parse("content://media/external/audio/albumart"),
-                            aId
-                        )
-                        try {
-                            contentResolver.openInputStream(albumUri)?.use { input ->
-                                FileOutputStream(artFile).use { output ->
-                                    input.copyTo(output)
-                                }
-                            }
-                        } catch (_: Exception) {
-                            artFile.delete()
-                        }
-                    }
+                    extractAlbumArt(aId, cacheArtDir)
                 }
                 // Resolve artist images and persist results so Dart can read them next scan
                 val bgArtistMap = mutableMapOf<String, String>()
@@ -819,6 +808,13 @@ class MainActivity : AudioServiceActivity() {
             }.start()
         }
 
+        // Drop cached art for albums no longer in the library. Only after a
+        // successful query: a failed or empty one must not wipe the cache.
+        if (querySucceeded && songsList.isNotEmpty()) {
+            val liveAlbumIds = albumSongIndexes.keys.toSet()
+            Thread { pruneAlbumArtCache(cacheArtDir, liveAlbumIds) }.start()
+        }
+
         val totalKotlinMs = System.currentTimeMillis() - totalStart
 
         return mapOf(
@@ -830,36 +826,69 @@ class MainActivity : AudioServiceActivity() {
         )
     }
 
-    private fun resolveAlbumArtFile(albumId: Long, cacheDir: File, isFast: Boolean = false, missingAlbumIds: MutableList<Long>? = null): String? {
-        if (albumId <= 0) return null
-        val artFile = File(cacheDir, "art_album_$albumId.jpg")
-        if (artFile.exists() && artFile.length() > 0) {
-            return artFile.absolutePath
-        }
+    private fun albumArtFile(cacheArtDir: File, albumId: Long) =
+        File(cacheArtDir, "art_album_$albumId.jpg")
 
-        if (isFast) {
-            missingAlbumIds?.add(albumId)
-            return null
-        }
+    /// Empty marker for an album MediaStore has no art for, so it is not
+    /// retried on every scan.
+    private fun noAlbumArtMarker(cacheArtDir: File, albumId: Long) =
+        File(cacheArtDir, "art_album_$albumId.none")
 
-        val albumUri = ContentUris.withAppendedId(
-            Uri.parse("content://media/external/audio/albumart"),
-            albumId
-        )
-
+    /// Writes the album's cover to the cache, or a no-art marker when it has
+    /// none. Returns true when a cover was written. Android 10+ asks
+    /// MediaStore for a thumbnail capped at [ALBUM_ART_MAX_PX], so huge
+    /// embedded covers don't cost memory and decode time on every display.
+    private fun extractAlbumArt(albumId: Long, cacheArtDir: File): Boolean {
+        val artFile = albumArtFile(cacheArtDir, albumId)
+        if (artFile.exists() && artFile.length() > 0) return true
+        val temp = File(cacheArtDir, "${artFile.name}.tmp")
         try {
-            contentResolver.openInputStream(albumUri)?.use { input ->
-                FileOutputStream(artFile).use { output ->
-                    input.copyTo(output)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val albumUri = ContentUris.withAppendedId(
+                    MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                    albumId
+                )
+                val bitmap = contentResolver.loadThumbnail(
+                    albumUri,
+                    Size(ALBUM_ART_MAX_PX, ALBUM_ART_MAX_PX),
+                    null
+                )
+                FileOutputStream(temp).use { out ->
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
+                }
+                bitmap.recycle()
+            } else {
+                val albumUri = ContentUris.withAppendedId(
+                    Uri.parse("content://media/external/audio/albumart"),
+                    albumId
+                )
+                contentResolver.openInputStream(albumUri)?.use { input ->
+                    FileOutputStream(temp).use { output -> input.copyTo(output) }
                 }
             }
-            if (artFile.exists() && artFile.length() > 0) {
-                return artFile.absolutePath
+            if (temp.exists() && temp.length() > 0 && temp.renameTo(artFile)) {
+                return true
             }
+        } catch (_: java.io.FileNotFoundException) {
+            // MediaStore has no art for this album.
         } catch (_: Exception) {
-            artFile.delete()
+            // Transient failure: leave no marker so the next scan retries.
+            temp.delete()
+            return false
         }
-        return null
+        temp.delete()
+        try {
+            noAlbumArtMarker(cacheArtDir, albumId).createNewFile()
+        } catch (_: Exception) {}
+        return false
+    }
+
+    private fun pruneAlbumArtCache(cacheArtDir: File, liveAlbumIds: Set<Long>) {
+        val pattern = Regex("""^art_album_(\d+)\.(jpg|none|jpg\.tmp)$""")
+        cacheArtDir.listFiles()?.forEach { file ->
+            val id = pattern.find(file.name)?.groupValues?.get(1)?.toLongOrNull()
+            if (id != null && id !in liveAlbumIds) file.delete()
+        }
     }
 
     private fun ensureMediaVolume(): Boolean {
