@@ -213,18 +213,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     player.playbackEventStream.listen(_broadcastPlaybackState);
 
     // Watch current index changes to update active MediaItem and slide the window.
+    // Changes reported while the native playlist is being edited are skipped
+    // (indices may be shifting); [_editSources] re-reads the index afterwards.
     player.currentIndexStream.listen((localIndex) {
-      if (localIndex == null || _isModifyingSources) return;
-      if (_rawPlaylist.isEmpty) return;
-
-      var globalIndex = _windowStart + localIndex;
-      if (globalIndex >= 0 && globalIndex < _rawPlaylist.length) {
-        var newItem = _rawPlaylist[globalIndex];
-        if (mediaItem.valueOrNull != newItem) {
-          mediaItem.add(newItem);
-        }
-        _checkAndSlideWindow(localIndex);
-      }
+      if (_isModifyingSources) return;
+      _onCurrentIndex(localIndex);
     });
 
     // Level each track as it becomes current.
@@ -328,6 +321,39 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   // Sliding Window Management
   // ---------------------------------------------------------------------------
 
+  /// Makes the native track at [localIndex] the current item.
+  void _onCurrentIndex(int? localIndex, {bool slideWindow = true}) {
+    if (localIndex == null || _rawPlaylist.isEmpty) return;
+    var globalIndex = _windowStart + localIndex;
+    if (globalIndex < 0 || globalIndex >= _rawPlaylist.length) return;
+
+    var newItem = _rawPlaylist[globalIndex];
+    if (mediaItem.valueOrNull != newItem) {
+      // Level the new track before anything else reacts to it, so a gapless
+      // transition reaches the right loudness as early as possible.
+      unawaited(_updateReplayGain(newItem));
+      mediaItem.add(newItem);
+    }
+    if (slideWindow) _checkAndSlideWindow(localIndex);
+  }
+
+  /// Runs an edit of the native playlist. Track changes reported during the
+  /// edit are ignored because native indices may be shifting, so once the
+  /// edit completes the current index is read again. Without that, a gapless
+  /// transition that lands mid-edit leaves the previous song as the current
+  /// item until the next transition.
+  ///
+  /// The window is not slid from here; the next transition does that.
+  Future<void> _editSources(Future<void> Function() edit) async {
+    _isModifyingSources = true;
+    try {
+      await edit();
+    } finally {
+      _isModifyingSources = false;
+    }
+    _onCurrentIndex(player.currentIndex, slideWindow: false);
+  }
+
   /// Checks if we need to prepend or append items to the sliding window native player queue.
   Future<void> _checkAndSlideWindow(int localIndex) async {
     if (_isModifyingSources) return;
@@ -340,56 +366,54 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
     // Slide forward (Append more upcoming tracks)
     if (remainingAfter < 10 && _windowEnd < _rawPlaylist.length) {
-      _isModifyingSources = true;
       try {
-        var chunkSize = min(20, _rawPlaylist.length - _windowEnd);
-        var appendItems = _rawPlaylist.sublist(
-          _windowEnd,
-          _windowEnd + chunkSize,
-        );
-        var sources = appendItems
-            .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
-            .toList();
+        await _editSources(() async {
+          var chunkSize = min(20, _rawPlaylist.length - _windowEnd);
+          var appendItems = _rawPlaylist.sublist(
+            _windowEnd,
+            _windowEnd + chunkSize,
+          );
+          var sources = appendItems
+              .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
+              .toList();
 
-        await player.addAudioSources(sources);
-        _windowEnd += chunkSize;
+          await player.addAudioSources(sources);
+          _windowEnd += chunkSize;
 
-        // Broadcast current window to audio_service
-        queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
+          // Broadcast current window to audio_service
+          queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
+        });
       } on PlayerInterruptedException catch (_) {
         // Sequence modification collided with internal decode — recover.
         await _recoverPlayer();
       } on PlayerException catch (_) {
         await _recoverPlayer();
-      } finally {
-        _isModifyingSources = false;
       }
     }
 
     // Slide backward (Prepend previous tracks)
     if (remainingBefore < 5 && _windowStart > 0) {
-      _isModifyingSources = true;
       try {
-        var chunkSize = min(15, _windowStart);
-        var prependItems = _rawPlaylist.sublist(
-          _windowStart - chunkSize,
-          _windowStart,
-        );
-        var sources = prependItems
-            .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
-            .toList();
+        await _editSources(() async {
+          var chunkSize = min(15, _windowStart);
+          var prependItems = _rawPlaylist.sublist(
+            _windowStart - chunkSize,
+            _windowStart,
+          );
+          var sources = prependItems
+              .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
+              .toList();
 
-        await player.insertAudioSources(0, sources);
-        _windowStart -= chunkSize;
+          await player.insertAudioSources(0, sources);
+          _windowStart -= chunkSize;
 
-        // Broadcast current window to audio_service
-        queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
+          // Broadcast current window to audio_service
+          queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
+        });
       } on PlayerInterruptedException catch (_) {
         await _recoverPlayer();
       } on PlayerException catch (_) {
         await _recoverPlayer();
-      } finally {
-        _isModifyingSources = false;
       }
     }
   }
@@ -410,13 +434,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       _windowStart = 0;
       _windowEnd = 0;
       await player.stop();
-      _isModifyingSources = true;
       try {
-        await player.setAudioSources([]);
-      } catch (_) {
-      } finally {
-        _isModifyingSources = false;
-      }
+        await _editSources(() async {
+          await player.setAudioSources([]);
+        });
+      } catch (_) {}
       queue.add([]);
       mediaItem.add(null);
       return;
@@ -439,21 +461,20 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
         .toList();
 
-    _isModifyingSources = true;
     try {
-      await player.setAudioSources(
-        initialBatch,
-        initialIndex: initialNativeIndex,
-        initialPosition: initialPosition ?? Duration.zero,
-      );
+      await _editSources(() async {
+        await player.setAudioSources(
+          initialBatch,
+          initialIndex: initialNativeIndex,
+          initialPosition: initialPosition ?? Duration.zero,
+        );
 
-      queue.add(windowItems);
-      mediaItem.add(_rawPlaylist[initialIndex]);
+        queue.add(windowItems);
+        mediaItem.add(_rawPlaylist[initialIndex]);
+      });
     } catch (_) {
       // Just_audio throws 'Loading interrupted' when another load request overlaps.
       // This is expected during rapid skips/taps, so we handle it silently.
-    } finally {
-      _isModifyingSources = false;
     }
   }
 
@@ -474,8 +495,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     var nativeLength = player.sequence.length;
 
     if (localIndex >= 0 && localIndex < nativeLength) {
-      _isModifyingSources = true;
-      try {
+      await _editSources(() async {
         // Remove all native sources after localIndex
         for (var i = nativeLength - 1; i > localIndex; i--) {
           await player.removeAudioSourceAt(i);
@@ -492,9 +512,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         _windowEnd = _windowStart + localIndex + 1 + chunkSize;
 
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
-      } finally {
-        _isModifyingSources = false;
-      }
+      });
     } else {
       // Current index is outside window - force reload around index
       await loadPlaylist(_rawPlaylist, initialIndex: index);
@@ -515,14 +533,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     // If removed item is within the native window
     if (globalIndex >= _windowStart && globalIndex < _windowEnd) {
       var localIndex = globalIndex - _windowStart;
-      _isModifyingSources = true;
-      try {
+      await _editSources(() async {
         await player.removeAudioSourceAt(localIndex);
         _windowEnd--;
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
-      } finally {
-        _isModifyingSources = false;
-      }
+      });
     } else if (globalIndex < _windowStart) {
       _windowStart--;
       _windowEnd--;
@@ -544,13 +559,10 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         newGlobalIndex < _windowEnd) {
       var localOld = oldGlobalIndex - _windowStart;
       var localNew = newGlobalIndex - _windowStart;
-      _isModifyingSources = true;
-      try {
+      await _editSources(() async {
         await player.moveAudioSource(localOld, localNew);
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
-      } finally {
-        _isModifyingSources = false;
-      }
+      });
     } else {
       // Re-initialize window around current playing song to be safe
       var currentItem = mediaItem.value;
@@ -569,16 +581,13 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     _rawPlaylist.add(item);
 
     if (_windowEnd == _rawPlaylist.length - 1) {
-      _isModifyingSources = true;
-      try {
+      await _editSources(() async {
         await player.addAudioSource(
           AudioSource.uri(Uri.parse(item.id), tag: item),
         );
         _windowEnd++;
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
-      } finally {
-        _isModifyingSources = false;
-      }
+      });
     }
   }
 
@@ -625,17 +634,14 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     _rawPlaylist.addAll(items);
 
     if (wasAtEnd) {
-      _isModifyingSources = true;
-      try {
+      await _editSources(() async {
         var sources = items
             .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
             .toList();
         await player.addAudioSources(sources);
         _windowEnd += items.length;
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
-      } finally {
-        _isModifyingSources = false;
-      }
+      });
     }
   }
 
@@ -650,17 +656,14 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
     if (globalIndex >= _windowStart && globalIndex <= _windowEnd) {
       var localIndex = globalIndex - _windowStart;
-      _isModifyingSources = true;
-      try {
+      await _editSources(() async {
         var sources = items
             .map((item) => AudioSource.uri(Uri.parse(item.id), tag: item))
             .toList();
         await player.insertAudioSources(localIndex, sources);
         _windowEnd += items.length;
         queue.add(_rawPlaylist.sublist(_windowStart, _windowEnd));
-      } finally {
-        _isModifyingSources = false;
-      }
+      });
     } else if (globalIndex < _windowStart) {
       _windowStart += items.length;
       _windowEnd += items.length;

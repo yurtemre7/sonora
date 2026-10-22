@@ -40,6 +40,7 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+  just_audio_platform_interface: ^4.6.0
   shared_preferences_platform_interface: ^2.4.2
   sweeper: ^0.5.0
 
