@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:sonora/models/replay_gain.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/utils/l10n_extension.dart';
@@ -53,6 +54,36 @@ class PlaybackSettingsScreen extends StatelessWidget {
                       onChanged: (val) {
                         settingsProvider.setRestoreLastPlayedSong(val);
                       },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.graphic_eq_rounded),
+                      title: Text(context.l10n.replayGain),
+                      subtitle: Text(context.l10n.replayGainSubtitle),
+                      trailing: DropdownButton<ReplayGainMode>(
+                        value: settingsProvider.replayGainMode,
+                        underline: const SizedBox(),
+                        items: [
+                          for (var mode in ReplayGainMode.values)
+                            DropdownMenuItem(
+                              value: mode,
+                              child: Text(switch (mode) {
+                                ReplayGainMode.off => context.l10n.off,
+                                ReplayGainMode.track =>
+                                  context.l10n.replayGainTrack,
+                                ReplayGainMode.album =>
+                                  context.l10n.replayGainAlbum,
+                              }),
+                            ),
+                        ],
+                        onChanged: (mode) {
+                          if (mode != null) {
+                            settingsProvider.setReplayGainMode(
+                              mode,
+                              playerProvider.audioHandler,
+                            );
+                          }
+                        },
+                      ),
                     ),
                     SwitchListTile(
                       secondary: const Icon(Icons.notifications_paused_rounded),

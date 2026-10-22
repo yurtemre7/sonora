@@ -137,6 +137,7 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
     audioHandler.setPauseOnDisconnect(settings.pauseOnDisconnect);
     audioHandler.setResumeOnConnect(settings.resumeOnConnect);
     await audioHandler.setPauseOnDuck(settings.pauseOnDuck);
+    await audioHandler.setReplayGainMode(settings.replayGainMode);
     await widget.themeProvider.reload();
     await widget.playerProvider.reloadAfterRestore(result.songs);
   }

@@ -1532,4 +1532,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupErrorRestoreFailed => 'Could not restore the backup';
+
+  @override
+  String get replayGain => 'Volume levelling';
+
+  @override
+  String get replayGainSubtitle =>
+      'Use ReplayGain tags to play tracks at a consistent loudness. Untagged tracks play unchanged.';
+
+  @override
+  String get replayGainTrack => 'Track';
+
+  @override
+  String get replayGainAlbum => 'Album';
+
+  @override
+  String get replayGainTrackGainLabel => 'Track gain';
+
+  @override
+  String get replayGainAlbumGainLabel => 'Album gain';
 }

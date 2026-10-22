@@ -268,26 +268,41 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
                                 ),
                             ],
                           ),
-                          if (song.bitrate != null || song.samplerate != null)
+                          if (song.bitrate != null ||
+                              song.samplerate != null ||
+                              song.replayGain != null)
                             _buildInfoGroup(
                               theme: theme,
                               title: context.l10n.audioPropertiesGroup,
                               children: [
-                                if (song.bitrate != null)
+                                for (var (i, row) in [
+                                  if (song.bitrate != null)
+                                    (
+                                      context.l10n.bitrateLabel,
+                                      '${song.bitrate} kbps',
+                                    ),
+                                  if (song.samplerate != null)
+                                    (
+                                      context.l10n.sampleRateLabel,
+                                      '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
+                                    ),
+                                  if (song.replayGainTrack != null)
+                                    (
+                                      context.l10n.replayGainTrackGainLabel,
+                                      _formatGain(song.replayGainTrack!),
+                                    ),
+                                  if (song.replayGainAlbum != null)
+                                    (
+                                      context.l10n.replayGainAlbumGainLabel,
+                                      _formatGain(song.replayGainAlbum!),
+                                    ),
+                                ].indexed)
                                   _buildInfoRow(
                                     context,
-                                    context.l10n.bitrateLabel,
-                                    '${song.bitrate} kbps',
+                                    row.$1,
+                                    row.$2,
                                     theme,
-                                    isLast: song.samplerate == null,
-                                  ),
-                                if (song.samplerate != null)
-                                  _buildInfoRow(
-                                    context,
-                                    context.l10n.sampleRateLabel,
-                                    '${(song.samplerate! / 1000).toStringAsFixed(1)} kHz',
-                                    theme,
-                                    isLast: true,
+                                    isLast: i == _audioRowCount(song) - 1,
                                   ),
                               ],
                             ),
@@ -305,6 +320,16 @@ void showSongInfoBottomSheet(BuildContext context, Song song) {
     },
   );
 }
+
+String _formatGain(double gain) =>
+    '${gain >= 0 ? '+' : ''}${gain.toStringAsFixed(2)} dB';
+
+int _audioRowCount(Song song) => [
+  song.bitrate,
+  song.samplerate,
+  song.replayGainTrack,
+  song.replayGainAlbum,
+].nonNulls.length;
 
 Widget _buildInfoGroup({
   required ThemeData theme,

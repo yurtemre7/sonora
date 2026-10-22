@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 
 import 'package:audio_tags_lofty/audio_tags_lofty.dart' as tags;
 import 'package:flutter/foundation.dart';
@@ -10,8 +11,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
+import 'package:sonora/models/replay_gain.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/image_preflight_service.dart';
+import 'package:sonora/services/replay_gain_reader.dart';
 
 part 'scanner_artist_images.dart';
 part 'scanner_legacy_sync.dart';
@@ -287,6 +290,11 @@ class MusicScanner {
           // Android has indexed them). Let the directory scanner below handle
           // an empty result instead of treating it as a successful full scan.
           if (msSongs.isNotEmpty) {
+            var swReplayGain = Stopwatch()..start();
+            await _fillReplayGain(msSongs, maxWorkers: maxWorkers);
+            swReplayGain.stop();
+            var replayGainMs = swReplayGain.elapsedMilliseconds;
+
             var swArtistImages = Stopwatch()..start();
             await loadLocalArtistImages();
             swArtistImages.stop();
@@ -334,6 +342,7 @@ class MusicScanner {
   └─ Kotlin Total Execution: ${kTotalMs ?? '?'}ms
   └─ IPC Serialization Overhead: ${(channelMs - (kTotalMs ?? 0))}ms
 • Parse JSON Payload (Dart): ${parseMs}ms
+• ReplayGain Tags (Dart): ${replayGainMs}ms
 • Load Local Artist Images (Dart): ${artistImagesMs}ms
 • Sort Library (Dart): ${sortMs}ms
 • Save Preferences (Dart): ${saveMs}ms
@@ -354,6 +363,7 @@ class MusicScanner {
         var verified = cachedSongs
             .where((s) => File(s.filePath).existsSync())
             .toList();
+        await _fillReplayGain(verified, maxWorkers: maxWorkers);
         unawaited(_writeImportedSongsMetadata(verified));
         return verified;
       }
@@ -419,6 +429,48 @@ class MusicScanner {
       return false;
     }
   }
+
+  /// Reads ReplayGain tags for every song not yet checked, in place.
+  ///
+  /// Unchanged files keep their cached [Song] (and its scan marker) during
+  /// sync, so only new or modified files are read, plus, once, songs cached
+  /// before ReplayGain support existed. Reads are split over [maxWorkers]
+  /// background isolates and only touch tag headers.
+  static Future<void> _fillReplayGain(
+    List<Song> songs, {
+    int maxWorkers = 4,
+  }) async {
+    var pending = [
+      for (var i = 0; i < songs.length; i++)
+        if (!songs[i].replayGainScanned) i,
+    ];
+    if (pending.isEmpty) return;
+
+    var workers = maxWorkers.clamp(1, pending.length);
+    var chunkSize = (pending.length / workers).ceil();
+    var chunks = [
+      for (var start = 0; start < pending.length; start += chunkSize)
+        pending.sublist(start, min(start + chunkSize, pending.length)),
+    ];
+    try {
+      var results = await Future.wait([
+        for (var chunk in chunks)
+          _readReplayGainInIsolate([for (var i in chunk) songs[i].filePath]),
+      ]);
+      for (var c = 0; c < chunks.length; c++) {
+        for (var k = 0; k < chunks[c].length; k++) {
+          var index = chunks[c][k];
+          songs[index] = songs[index].withReplayGain(results[c][k]);
+        }
+      }
+    } catch (_) {
+      // Leave songs unmarked so the next sync tries again.
+    }
+  }
+
+  static Future<List<ReplayGainInfo?>> _readReplayGainInIsolate(
+    List<String> paths,
+  ) => Isolate.run(() => [for (var p in paths) ReplayGainReader.readFile(p)]);
 
   // --- Private Helpers ---
 
@@ -564,6 +616,11 @@ List<Song> _decodeLibrary(String content) {
       discNumber: item['disc_number'] as int?,
       genre: item['genre'] as String?,
       year: item['year'] as int?,
+      replayGainTrack: (item['replaygain_track_gain'] as num?)?.toDouble(),
+      replayGainAlbum: (item['replaygain_album_gain'] as num?)?.toDouble(),
+      replayGainTrackPeak: (item['replaygain_track_peak'] as num?)?.toDouble(),
+      replayGainAlbumPeak: (item['replaygain_album_peak'] as num?)?.toDouble(),
+      replayGainScanned: item['replaygain_scanned'] == true,
     );
   }).toList();
 }
@@ -592,6 +649,11 @@ String _encodeLibrary(List<Song> songs) {
         'disc_number': s.discNumber,
         'genre': s.genre,
         'year': s.year,
+        'replaygain_track_gain': s.replayGainTrack,
+        'replaygain_album_gain': s.replayGainAlbum,
+        'replaygain_track_peak': s.replayGainTrackPeak,
+        'replaygain_album_peak': s.replayGainAlbumPeak,
+        'replaygain_scanned': s.replayGainScanned,
       },
   ]);
 }

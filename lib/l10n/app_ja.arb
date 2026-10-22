@@ -457,5 +457,11 @@
   "backupUnmatchedSongs": "ライブラリに見つからない曲 {count}曲",
   "backupErrorInvalidFile": "有効なSonoraのバックアップファイルではありません",
   "backupErrorUnsupportedVersion": "このバックアップは新しいバージョンのSonoraで作成されています。アプリを更新してから再度お試しください。",
-  "backupErrorRestoreFailed": "バックアップを復元できませんでした"
+  "backupErrorRestoreFailed": "バックアップを復元できませんでした",
+  "replayGain": "音量の均一化",
+  "replayGainSubtitle": "ReplayGainタグを使って曲ごとの音量差をそろえます。タグのない曲はそのまま再生されます",
+  "replayGainTrack": "トラック",
+  "replayGainAlbum": "アルバム",
+  "replayGainTrackGainLabel": "トラックゲイン",
+  "replayGainAlbumGainLabel": "アルバムゲイン"
 }

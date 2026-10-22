@@ -7,6 +7,7 @@ import 'package:audio_session/audio_session.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonora/models/replay_gain.dart';
 import 'package:sonora/services/android_auto_media_browser.dart';
 
 /// Custom [AudioHandler] for Sonora that provides background audio playback,
@@ -77,6 +78,45 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     _init();
   }
 
+  // Volume set by the user, transport fades and the sleep timer, before
+  // ReplayGain. The player volume is always this times the ReplayGain
+  // multiplier, applied in [_applyPlayerVolume] only.
+  var _volume = 1.0;
+  var replayGainMode = ReplayGainMode.off;
+  var _replayGainMultiplier = 1.0;
+
+  /// The current volume before ReplayGain levelling.
+  double get volume => _volume;
+
+  /// The ReplayGain multiplier applied to the current track.
+  double get currentReplayGainMultiplier => _replayGainMultiplier;
+
+  /// Sets the volume immediately, ignoring transport fades. Used by the sleep
+  /// timer fade and settings restore.
+  Future<void> applyVolume(double volume) => _applyPlayerVolume(volume);
+
+  Future<void> _applyPlayerVolume(double volume) async {
+    _volume = volume;
+    await player.setVolume(
+      effectiveReplayGainVolume(volume, _replayGainMultiplier),
+    );
+  }
+
+  Future<void> setReplayGainMode(ReplayGainMode mode) async {
+    replayGainMode = mode;
+    await _updateReplayGain(mediaItem.valueOrNull);
+  }
+
+  Future<void> _updateReplayGain(MediaItem? item) async {
+    var multiplier = replayGainMultiplier(
+      ReplayGainExtras.parse(item?.extras),
+      replayGainMode,
+    );
+    if (multiplier == _replayGainMultiplier) return;
+    _replayGainMultiplier = multiplier;
+    await _applyPlayerVolume(_volume);
+  }
+
   var pauseOnDisconnect = true;
   var resumeOnConnect = false;
   var _wasPlayingBeforeDisconnect = false;
@@ -105,6 +145,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     var pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
     pauseOnDisconnect = await prefs.getBool('pause_on_disconnect') ?? true;
     resumeOnConnect = await prefs.getBool('resume_on_connect') ?? false;
+    replayGainMode = ReplayGainMode.fromStorage(
+      await prefs.getString('replay_gain_mode'),
+    );
 
     await session.configure(
       AudioSessionConfiguration.music().copyWith(
@@ -154,6 +197,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         _checkAndSlideWindow(localIndex);
       }
     });
+
+    // Level each track as it becomes current.
+    mediaItem.listen((item) => unawaited(_updateReplayGain(item)));
 
     // Playlist completion is handled by just_audio's internal loop mode.
     // Do not override it here.
@@ -603,10 +649,8 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     if (player.playing && _transportFadeRestoreVolume == null) return;
 
     if (!player.playing) {
-      _transportFadeRestoreVolume ??= (player.volume > 0.05
-          ? player.volume
-          : 1.0);
-      await player.setVolume(0);
+      _transportFadeRestoreVolume ??= (_volume > 0.05 ? _volume : 1.0);
+      await _applyPlayerVolume(0);
       if (token != _transportFadeToken) return;
       _startPlayer();
     }
@@ -619,7 +663,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     if (_transportFadeRestoreVolume != null) {
       _transportFadeRestoreVolume = volume;
     }
-    await player.setVolume(volume);
+    await _applyPlayerVolume(volume);
   }
 
   @override
@@ -634,7 +678,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
       return;
     }
 
-    restoreVolume ??= (player.volume > 0.05 ? player.volume : 1.0);
+    restoreVolume ??= (_volume > 0.05 ? _volume : 1.0);
     _transportFadeRestoreVolume = restoreVolume;
     if (!immediate) {
       await _fadeTransportVolume(fadeOut: true, token: token);
@@ -654,7 +698,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   Future<void> _restoreTransportVolume(int token, double fallback) async {
     var target = _transportFadeRestoreVolume ?? fallback;
     if (target <= 0.05) target = 1.0;
-    await player.setVolume(target);
+    await _applyPlayerVolume(target);
     if (token != _transportFadeToken) {
       await _resumeIfRequested();
       return;
@@ -693,11 +737,10 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
           ? 0.0
           : (restore != null && restore > 0.05
                 ? restore
-                : (player.volume > 0.05 ? player.volume : 1.0));
+                : (_volume > 0.05 ? _volume : 1.0));
       var remainingSteps = steps - step + 1;
-      var nextVolume =
-          player.volume + (target - player.volume) / remainingSteps;
-      await player.setVolume(nextVolume);
+      var nextVolume = _volume + (target - _volume) / remainingSteps;
+      await _applyPlayerVolume(nextVolume);
     }
   }
 
@@ -980,6 +1023,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
             album: s.album,
             duration: s.duration,
             artUri: s.artworkPath != null ? Uri.file(s.artworkPath!) : null,
+            extras: s.replayGainExtras,
           ),
         )
         .toList();
@@ -1010,6 +1054,7 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
             album: s.album,
             duration: s.duration,
             artUri: s.artworkPath != null ? Uri.file(s.artworkPath!) : null,
+            extras: s.replayGainExtras,
           ),
         )
         .toList();

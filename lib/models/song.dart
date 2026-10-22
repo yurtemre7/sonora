@@ -1,3 +1,4 @@
+import 'package:sonora/models/replay_gain.dart';
 import 'package:sonora/providers/settings_provider.dart';
 
 class Song {
@@ -22,6 +23,16 @@ class Song {
   final String? genre;
   final int? year;
 
+  /// ReplayGain track/album gain in dB and linear peaks, when tagged.
+  final double? replayGainTrack;
+  final double? replayGainAlbum;
+  final double? replayGainTrackPeak;
+  final double? replayGainAlbumPeak;
+
+  /// Whether the file's tags were checked for ReplayGain values. Songs cached
+  /// before ReplayGain support lack this, so the next sync reads them once.
+  final bool replayGainScanned;
+
   Song({
     required this.id,
     required this.title,
@@ -43,6 +54,11 @@ class Song {
     this.discNumber,
     this.genre,
     this.year,
+    this.replayGainTrack,
+    this.replayGainAlbum,
+    this.replayGainTrackPeak,
+    this.replayGainAlbumPeak,
+    this.replayGainScanned = false,
   });
 
   // Pre-normalized lowercase keys computed once at construction time
@@ -77,6 +93,11 @@ class Song {
     int? discNumber,
     String? genre,
     int? year,
+    double? replayGainTrack,
+    double? replayGainAlbum,
+    double? replayGainTrackPeak,
+    double? replayGainAlbumPeak,
+    bool? replayGainScanned,
   }) {
     return Song(
       id: id ?? this.id,
@@ -99,6 +120,62 @@ class Song {
       discNumber: discNumber ?? this.discNumber,
       genre: genre ?? this.genre,
       year: year ?? this.year,
+      replayGainTrack: replayGainTrack ?? this.replayGainTrack,
+      replayGainAlbum: replayGainAlbum ?? this.replayGainAlbum,
+      replayGainTrackPeak: replayGainTrackPeak ?? this.replayGainTrackPeak,
+      replayGainAlbumPeak: replayGainAlbumPeak ?? this.replayGainAlbumPeak,
+      replayGainScanned: replayGainScanned ?? this.replayGainScanned,
+    );
+  }
+
+  /// The song's ReplayGain values, or `null` when it has no gain tags.
+  ReplayGainInfo? get replayGain {
+    var info = ReplayGainInfo(
+      trackGain: replayGainTrack,
+      albumGain: replayGainAlbum,
+      trackPeak: replayGainTrackPeak,
+      albumPeak: replayGainAlbumPeak,
+    );
+    return info.hasGain ? info : null;
+  }
+
+  /// MediaItem extras that let the audio handler level this song.
+  Map<String, dynamic>? get replayGainExtras => ReplayGainExtras.build(
+    trackGain: replayGainTrack,
+    albumGain: replayGainAlbum,
+    trackPeak: replayGainTrackPeak,
+    albumPeak: replayGainAlbumPeak,
+  );
+
+  /// Returns a copy holding exactly [info] (clearing stale values when it is
+  /// `null`) and marked as scanned for ReplayGain.
+  Song withReplayGain(ReplayGainInfo? info) {
+    return Song(
+      id: id,
+      title: title,
+      artist: artist,
+      album: album,
+      duration: duration,
+      filePath: filePath,
+      artworkPath: artworkPath,
+      format: format,
+      bitrate: bitrate,
+      samplerate: samplerate,
+      isFavorite: isFavorite,
+      favoriteDateMs: favoriteDateMs,
+      lastModifiedMs: lastModifiedMs,
+      fileSize: fileSize,
+      hasLyrics: hasLyrics,
+      dominantColor: dominantColor,
+      trackNumber: trackNumber,
+      discNumber: discNumber,
+      genre: genre,
+      year: year,
+      replayGainTrack: info?.trackGain,
+      replayGainAlbum: info?.albumGain,
+      replayGainTrackPeak: info?.trackPeak,
+      replayGainAlbumPeak: info?.albumPeak,
+      replayGainScanned: true,
     );
   }
 

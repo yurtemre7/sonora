@@ -1444,4 +1444,23 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get backupErrorRestoreFailed => 'バックアップを復元できませんでした';
+
+  @override
+  String get replayGain => '音量の均一化';
+
+  @override
+  String get replayGainSubtitle =>
+      'ReplayGainタグを使って曲ごとの音量差をそろえます。タグのない曲はそのまま再生されます';
+
+  @override
+  String get replayGainTrack => 'トラック';
+
+  @override
+  String get replayGainAlbum => 'アルバム';
+
+  @override
+  String get replayGainTrackGainLabel => 'トラックゲイン';
+
+  @override
+  String get replayGainAlbumGainLabel => 'アルバムゲイン';
 }

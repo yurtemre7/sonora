@@ -2749,6 +2749,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not restore the backup'**
   String get backupErrorRestoreFailed;
+
+  /// No description provided for @replayGain.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume levelling'**
+  String get replayGain;
+
+  /// No description provided for @replayGainSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use ReplayGain tags to play tracks at a consistent loudness. Untagged tracks play unchanged.'**
+  String get replayGainSubtitle;
+
+  /// No description provided for @replayGainTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get replayGainTrack;
+
+  /// No description provided for @replayGainAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Album'**
+  String get replayGainAlbum;
+
+  /// No description provided for @replayGainTrackGainLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Track gain'**
+  String get replayGainTrackGainLabel;
+
+  /// No description provided for @replayGainAlbumGainLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Album gain'**
+  String get replayGainAlbumGainLabel;
 }
 
 class _AppLocalizationsDelegate

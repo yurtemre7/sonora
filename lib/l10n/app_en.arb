@@ -738,5 +738,11 @@
   },
   "backupErrorInvalidFile": "This file is not a valid Sonora backup",
   "backupErrorUnsupportedVersion": "This backup was made by a newer version of Sonora. Update the app and try again.",
-  "backupErrorRestoreFailed": "Could not restore the backup"
+  "backupErrorRestoreFailed": "Could not restore the backup",
+  "replayGain": "Volume levelling",
+  "replayGainSubtitle": "Use ReplayGain tags to play tracks at a consistent loudness. Untagged tracks play unchanged.",
+  "replayGainTrack": "Track",
+  "replayGainAlbum": "Album",
+  "replayGainTrackGainLabel": "Track gain",
+  "replayGainAlbumGainLabel": "Album gain"
 }

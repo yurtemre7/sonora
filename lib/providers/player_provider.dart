@@ -288,6 +288,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       album: song.album,
       duration: song.duration,
       artUri: song.artworkPath != null ? Uri.file(song.artworkPath!) : null,
+      extras: song.replayGainExtras,
     );
   }
 

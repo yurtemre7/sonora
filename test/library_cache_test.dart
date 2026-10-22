@@ -6,7 +6,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+import 'package:sonora/models/replay_gain.dart';
+import 'package:sonora/models/song.dart';
 import 'package:sonora/services/music_scanner.dart';
+
+import 'helpers/replay_gain_fixtures.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -101,6 +105,76 @@ void main() {
       expect(File('${libraryFile().path}.tmp').existsSync(), isFalse);
       var onDisk = jsonDecode(libraryFile().readAsStringSync()) as List;
       expect(onDisk.single['is_favorite'], isFalse);
+    });
+  });
+
+  group('Library cache ReplayGain', () {
+    Song song(int id, String path) => Song(
+      id: id,
+      title: 'Song $id',
+      artist: 'Artist',
+      album: 'Album',
+      duration: const Duration(minutes: 3),
+      filePath: path,
+    );
+
+    test('round-trips ReplayGain fields', () async {
+      var scanner = MusicScanner();
+      await scanner.saveAllSongsMetadata([
+        song(1, '/mock/1.mp3').withReplayGain(
+          const ReplayGainInfo(
+            trackGain: -7.25,
+            albumGain: -6.5,
+            trackPeak: 0.98,
+            albumPeak: 1.01,
+          ),
+        ),
+        song(2, '/mock/2.mp3').withReplayGain(null),
+        song(3, '/mock/3.mp3'),
+      ]);
+
+      var songs = await scanner.scanAllSongs();
+      var byId = {for (var s in songs) s.id: s};
+
+      expect(byId[1]!.replayGainTrack, -7.25);
+      expect(byId[1]!.replayGainAlbum, -6.5);
+      expect(byId[1]!.replayGainTrackPeak, 0.98);
+      expect(byId[1]!.replayGainAlbumPeak, 1.01);
+      expect(byId[1]!.replayGainScanned, isTrue);
+      expect(byId[2]!.replayGain, isNull);
+      expect(byId[2]!.replayGainScanned, isTrue);
+      expect(byId[3]!.replayGainScanned, isFalse);
+    });
+
+    test('loads caches written before ReplayGain support', () async {
+      await libraryFile().writeAsString(jsonEncode([songJson(4)]));
+
+      var loaded = (await MusicScanner().scanAllSongs()).single;
+
+      expect(loaded.replayGain, isNull);
+      expect(loaded.replayGainScanned, isFalse);
+    });
+
+    test('sync reads tags once for songs cached without them', () async {
+      var audio = File('${tempDocsDir.path}/tagged.mp3')
+        ..writeAsBytesSync(
+          id3Tag([
+            id3Frame('TXXX', txxxPayload('REPLAYGAIN_TRACK_GAIN', '-4.5 dB')),
+          ]),
+        );
+      var cached = songJson(5)..['file_path'] = audio.path;
+      await libraryFile().writeAsString(jsonEncode([cached]));
+
+      var synced = (await MusicScanner().syncLibrary()).single;
+
+      expect(synced.replayGainTrack, -4.5);
+      expect(synced.replayGainScanned, isTrue);
+      // Reading waits for the pending cache write.
+      var reloaded = (await MusicScanner().scanAllSongs()).single;
+      expect(reloaded.replayGainTrack, -4.5);
+      var onDisk = jsonDecode(libraryFile().readAsStringSync()) as List;
+      expect(onDisk.single['replaygain_track_gain'], -4.5);
+      expect(onDisk.single['replaygain_scanned'], isTrue);
     });
   });
 }

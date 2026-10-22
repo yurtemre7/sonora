@@ -255,6 +255,7 @@ class BackupService {
     'keep_playing_on_close': _PrefType.boolean,
     'restore_last_played_song': _PrefType.boolean,
     'pause_on_duck': _PrefType.boolean,
+    'replay_gain_mode': _PrefType.string,
     'pause_on_disconnect': _PrefType.boolean,
     'resume_on_connect': _PrefType.boolean,
     'filter_title_features': _PrefType.boolean,

@@ -30,7 +30,7 @@ extension PlayerPersistence on PlayerProvider {
     var savedVolume = await prefs.getDouble('volume');
     if (savedVolume != null) {
       _volume = savedVolume;
-      await audioHandler.player.setVolume(_volume);
+      await audioHandler.applyVolume(_volume);
     }
 
     var savedSpeed = await prefs.getDouble('speed');

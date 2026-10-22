@@ -20,6 +20,7 @@ extension ScannerLegacySync on MusicScanner {
         var verified = cachedSongs
             .where((s) => File(s.filePath).existsSync())
             .toList();
+        await MusicScanner._fillReplayGain(verified, maxWorkers: maxWorkers);
         await _writeImportedSongsMetadata(verified);
         return verified;
       }
@@ -39,6 +40,7 @@ extension ScannerLegacySync on MusicScanner {
         var msResult = await _scanViaMediaStore(folderPath, cachedSongs);
         var msSongs = msResult?['songs'] as List<Song>?;
         if (msSongs != null && msSongs.isNotEmpty) {
+          await MusicScanner._fillReplayGain(msSongs, maxWorkers: maxWorkers);
           await loadLocalArtistImages();
           if (localArtistImages.isEmpty) {
             unawaited(detectLocalArtistImages(folderPath, msSongs));
@@ -429,6 +431,7 @@ extension ScannerLegacySync on MusicScanner {
       });
 
       var resultSongs = isolateData['songs'] as List<Song>;
+      await MusicScanner._fillReplayGain(resultSongs, maxWorkers: maxWorkers);
       var finalArtistImages =
           isolateData['artistImages'] as Map<String, String>;
 

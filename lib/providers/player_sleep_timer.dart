@@ -28,7 +28,7 @@ extension PlayerSleepTimer on PlayerProvider {
     _isFadingOut = false;
     _isFinishingCurrentSong = false;
     _finishSongTargetSongId = null;
-    _originalVolumeBeforeFade = audioHandler.player.volume;
+    _originalVolumeBeforeFade = audioHandler.volume;
     sleepTimerFinishSongActive =
         finishSong ?? SettingsProvider.instance.sleepTimerFinishSong;
     var fadeDurationSecs =
@@ -66,10 +66,10 @@ extension PlayerSleepTimer on PlayerProvider {
             remaining.inSeconds <= fadeDurationSecs) {
           if (!_isFadingOut) {
             _isFadingOut = true;
-            _originalVolumeBeforeFade = audioHandler.player.volume;
+            _originalVolumeBeforeFade = audioHandler.volume;
           }
           var fraction = remaining.inSeconds / fadeDurationSecs.toDouble();
-          await audioHandler.player.setVolume(
+          await audioHandler.applyVolume(
             (_originalVolumeBeforeFade * fraction).clamp(0.0, 1.0),
           );
         }
@@ -89,7 +89,7 @@ extension PlayerSleepTimer on PlayerProvider {
     _originalVolumeBeforeFade = _volume;
 
     // Reset volume to normal volume in case it was attenuated
-    audioHandler.player.setVolume(_originalVolumeBeforeFade);
+    audioHandler.applyVolume(_originalVolumeBeforeFade);
     _isFadingOut = false;
 
     SleepTimerNotificationService().updateTimerNotification(
@@ -145,7 +145,7 @@ extension PlayerSleepTimer on PlayerProvider {
         var fraction =
             remainingInSong.inMilliseconds /
             (fadeDurationSecs * 1000).toDouble();
-        await audioHandler.player.setVolume(
+        await audioHandler.applyVolume(
           (_originalVolumeBeforeFade * fraction).clamp(0.0, 1.0),
         );
       }
@@ -161,7 +161,7 @@ extension PlayerSleepTimer on PlayerProvider {
     _sleepTimer = null;
 
     await audioHandler.pause();
-    await audioHandler.player.setVolume(_volume);
+    await audioHandler.applyVolume(_volume);
 
     sleepTimerDuration = null;
     sleepTimerOriginalDuration = null;
@@ -186,7 +186,7 @@ extension PlayerSleepTimer on PlayerProvider {
     _finishSongTargetSongId = null;
     sleepTimerFinishSongActive = false;
     if (_isFadingOut) {
-      audioHandler.player.setVolume(_originalVolumeBeforeFade);
+      audioHandler.applyVolume(_originalVolumeBeforeFade);
       _isFadingOut = false;
     }
     _updateMediaNotificationControls();
@@ -206,7 +206,7 @@ extension PlayerSleepTimer on PlayerProvider {
 
     if (_isFadingOut) {
       _isFadingOut = false;
-      audioHandler.player.setVolume(_originalVolumeBeforeFade);
+      audioHandler.applyVolume(_originalVolumeBeforeFade);
     }
 
     var newDuration = (sleepTimerDuration ?? Duration.zero) + extension;

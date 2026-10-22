@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonora/models/replay_gain.dart';
 import 'package:sonora/models/song_activity.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/music_scanner.dart';
@@ -41,6 +42,7 @@ class SettingsProvider extends ChangeNotifier {
   var restoreLastPlayedSong = true;
 
   var pauseOnDuck = false;
+  var replayGainMode = ReplayGainMode.off;
   var pauseOnDisconnect = true;
   var resumeOnConnect = false;
   var filterTitleFeatures = false;
@@ -111,6 +113,9 @@ class SettingsProvider extends ChangeNotifier {
         await prefs.getBool('restore_last_played_song') ?? true;
 
     pauseOnDuck = await prefs.getBool('pause_on_duck') ?? false;
+    replayGainMode = ReplayGainMode.fromStorage(
+      await prefs.getString('replay_gain_mode'),
+    );
     pauseOnDisconnect = await prefs.getBool('pause_on_disconnect') ?? true;
     resumeOnConnect = await prefs.getBool('resume_on_connect') ?? false;
     filterTitleFeatures = await prefs.getBool('filter_title_features') ?? false;
@@ -272,6 +277,17 @@ class SettingsProvider extends ChangeNotifier {
     var prefs = SharedPreferencesAsync();
     await prefs.setBool('pause_on_duck', value);
     await audioHandler.setPauseOnDuck(value);
+  }
+
+  Future<void> setReplayGainMode(
+    ReplayGainMode value,
+    SonoraAudioHandler audioHandler,
+  ) async {
+    replayGainMode = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setString('replay_gain_mode', value.name);
+    await audioHandler.setReplayGainMode(value);
   }
 
   Future<void> setFilterTitleFeatures(bool value) async {
