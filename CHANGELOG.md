@@ -2,6 +2,25 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.26.0] - 2026-10-22
+### Added
+* Add now playing home screen widget
+* Add ReplayGain volume levelling
+* Add backup and restore of playlists, favorites, stats and settings
+### Fixed
+* Keep current track in sync when a gapless transition races a queue edit
+* Render home widget off the main thread and keep reflected fields
+* Retry ReplayGain reads after I/O errors and refresh queued gains
+* Make backup restore safe against empty library and partial failure
+### Changed
+* Style: Format up_next_queue_view
+* Refactor: Extract lyrics overlay and up-next view from now playing
+* Refactor: Extract sort sheet, sync banner and create dialog from home screen
+* Refactor: Split MusicScanner into part files by concern
+* Refactor: Split PlayerProvider into part files by concern
+* Chore: Update packages
+* Chore: Use flutter 3.47.7
+
 ## [1.25.1] - 2026-10-18
 ### Added
 * Improve kotlin scan of files
