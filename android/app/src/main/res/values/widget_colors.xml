@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Now playing widget, light. Android 12+ uses dynamic colors (values-v31). -->
+    <color name="widget_surface">#FFF3EDF7</color>
+    <color name="widget_on_surface">#FF1D1B20</color>
+    <color name="widget_on_surface_variant">#FF49454F</color>
+    <color name="widget_primary">#FF6750A4</color>
+    <color name="widget_on_primary">#FFFFFFFF</color>
+    <color name="widget_placeholder">#FFE8DEF8</color>
+    <color name="widget_on_placeholder">#FF6750A4</color>
+</resources>

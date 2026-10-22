@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Now playing widget, dark. -->
+    <color name="widget_surface">#FF211F26</color>
+    <color name="widget_on_surface">#FFE6E0E9</color>
+    <color name="widget_on_surface_variant">#FFCAC4D0</color>
+    <color name="widget_primary">#FFD0BCFF</color>
+    <color name="widget_on_primary">#FF381E72</color>
+    <color name="widget_placeholder">#FF4A4458</color>
+    <color name="widget_on_placeholder">#FFD0BCFF</color>
+</resources>

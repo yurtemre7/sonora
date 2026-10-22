@@ -41,6 +41,8 @@ class MainActivity : AudioServiceActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
+        NowPlayingWidget.registerChannel(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, VOLUME_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "ensureMediaVolume" -> {

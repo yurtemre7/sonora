@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_label">再生中</string>
+    <string name="widget_description">再生中の曲を表示し、再生を操作できます</string>
+    <string name="widget_nothing_playing">再生中の曲はありません</string>
+    <string name="widget_tap_to_open">タップして Sonora を開く</string>
+    <string name="widget_album_art">アルバムアート</string>
+    <string name="widget_play">再生</string>
+    <string name="widget_pause">一時停止</string>
+    <string name="widget_previous">前の曲</string>
+    <string name="widget_next">次の曲</string>
+</resources>

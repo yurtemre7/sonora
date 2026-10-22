@@ -1,3 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@drawable/ic_close,@drawable/ic_launcher_monochrome" />
+    tools:keep="@drawable/ic_close,@drawable/ic_launcher_monochrome,@drawable/ic_widget_play,@drawable/ic_widget_pause,@drawable/ic_widget_previous,@drawable/ic_widget_next,@drawable/widget_art_placeholder,@layout/widget_now_playing,@layout/widget_now_playing_large" />

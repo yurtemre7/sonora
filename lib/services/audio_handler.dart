@@ -9,6 +9,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/replay_gain.dart';
 import 'package:sonora/services/android_auto_media_browser.dart';
+import 'package:sonora/services/home_widget_sync.dart';
 
 /// Custom [AudioHandler] for Sonora that provides background audio playback,
 /// media notification controls, and lock-screen integration.
@@ -71,11 +72,33 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
     return super.customAction(name, extras);
   }
 
-  SonoraAudioHandler() {
+  /// Mirrors the current track to the Android home screen widget.
+  final HomeWidgetSync homeWidget;
+
+  SonoraAudioHandler({HomeWidgetSync? homeWidget})
+    : homeWidget = homeWidget ?? HomeWidgetSync() {
     player = AudioPlayer(
       audioPipeline: AudioPipeline(androidAudioEffects: [equalizer]),
     );
+    _syncHomeWidget();
     _init();
+  }
+
+  // Every source of playback (app UI, notification, Android Auto, media
+  // buttons) ends up in [mediaItem] and [playbackState], so the widget
+  // follows those two streams. [HomeWidgetSync] drops unchanged states, so
+  // position updates do not reach the platform channel.
+  void _syncHomeWidget() {
+    void push() => unawaited(
+      homeWidget.update(
+        HomeWidgetState.from(
+          mediaItem.valueOrNull,
+          playing: playbackState.value.playing,
+        ),
+      ),
+    );
+    mediaItem.listen((_) => push());
+    playbackState.listen((_) => push());
   }
 
   // Volume set by the user, transport fades and the sleep timer, before
