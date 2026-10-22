@@ -3,6 +3,7 @@ package de.yurtemre.sonora
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -15,6 +16,7 @@ import android.graphics.RectF
 import android.graphics.Shader
 import android.os.Bundle
 import android.os.SystemClock
+import android.util.Log
 import android.view.KeyEvent
 import android.widget.RemoteViews
 import io.flutter.embedding.engine.FlutterEngineCache
@@ -54,8 +56,12 @@ object NowPlayingWidget {
     // Height from which the two-row layout with larger art is used.
     private const val LARGE_MIN_HEIGHT_DP = 100
 
-    // Keeps RemoteViews bitmaps far below the binder transaction limit.
-    private const val ART_MAX_PX = 320
+    // Large art is 96dp, so 384px covers xxxhdpi without upscaling while an
+    // ARGB bitmap stays at ~590 KB, well under the 1 MB binder limit.
+    private const val ART_MAX_PX = 384
+
+    private const val TAG = "NowPlayingWidget"
+    @Volatile private var reflectionWarned = false
 
     private val renderExecutor = Executors.newSingleThreadExecutor()
 
@@ -86,7 +92,7 @@ object NowPlayingWidget {
                         )
                     }
                     save(appContext, state)
-                    renderExecutor.execute { renderAll(appContext) }
+                    renderAsync(appContext)
                     result.success(null)
                 }
                 else -> result.notImplemented()
@@ -134,17 +140,41 @@ object NowPlayingWidget {
         fun staticField(name: String): Any? =
             cls.getDeclaredField(name).apply { isAccessible = true }.get(null)
         staticField("instance") != null && staticField("listener") != null
-    } catch (_: Throwable) {
+    } catch (e: Throwable) {
+        if (!reflectionWarned) {
+            reflectionWarned = true
+            Log.w(TAG, "Cannot read audio_service state; widget buttons will open the app", e)
+        }
         false
     }
 
-    fun renderAll(context: Context) {
-        val manager = AppWidgetManager.getInstance(context)
-        val ids = manager.getAppWidgetIds(ComponentName(context, NowPlayingWidgetProvider::class.java))
-        render(context, manager, ids)
+    /**
+     * Renders [ids] (all instances when null) on the render thread, which
+     * decodes art and reads preferences. Finishes [pending] when done so a
+     * receiver's process stays alive until the widget is drawn.
+     */
+    fun renderAsync(
+        context: Context,
+        ids: IntArray? = null,
+        pending: BroadcastReceiver.PendingResult? = null,
+    ) {
+        val appContext = context.applicationContext
+        renderExecutor.execute {
+            try {
+                val manager = AppWidgetManager.getInstance(appContext)
+                val targets = ids ?: manager.getAppWidgetIds(
+                    ComponentName(appContext, NowPlayingWidgetProvider::class.java),
+                )
+                render(appContext, manager, targets)
+            } catch (e: Exception) {
+                Log.w(TAG, "Widget render failed", e)
+            } finally {
+                pending?.finish()
+            }
+        }
     }
 
-    fun render(context: Context, manager: AppWidgetManager, ids: IntArray) {
+    private fun render(context: Context, manager: AppWidgetManager, ids: IntArray) {
         if (ids.isEmpty()) return
         val state = load(context)
         val controlsPlayback = state.hasTrack && isPlaybackServiceReady()
@@ -240,13 +270,19 @@ object NowPlayingWidget {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-    /** Forwards a widget button to the playback service, or opens the app. */
-    fun handleAction(context: Context, action: String) {
+    /**
+     * Forwards a widget button to the playback service, or opens the app.
+     * [pending] is finished once any redraw is done.
+     */
+    fun handleAction(context: Context, action: String, pending: BroadcastReceiver.PendingResult) {
         val keyCode = when (action) {
             ACTION_PLAY_PAUSE -> KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
             ACTION_NEXT -> KeyEvent.KEYCODE_MEDIA_NEXT
             ACTION_PREVIOUS -> KeyEvent.KEYCODE_MEDIA_PREVIOUS
-            else -> return
+            else -> {
+                pending.finish()
+                return
+            }
         }
         if (isPlaybackServiceReady()) {
             val now = SystemClock.uptimeMillis()
@@ -255,15 +291,16 @@ object NowPlayingWidget {
                 putExtra(Intent.EXTRA_KEY_EVENT, KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0))
             }
             context.sendBroadcast(intent)
+            pending.finish()
             return
         }
-        // The service died since the widget was drawn: redraw so the buttons
-        // open the app, and try to open it now.
-        renderAll(context)
+        // The service died since the widget was drawn: open the app now and
+        // redraw so the buttons open it directly from then on.
         try {
             context.startActivity(launchIntent(context))
         } catch (_: Exception) {
         }
+        renderAsync(context, pending = pending)
     }
 
     private fun loadArt(context: Context, path: String, sizePx: Int): Bitmap? = try {
@@ -316,13 +353,13 @@ class NowPlayingWidgetProvider : AppWidgetProvider() {
         when (val action = intent.action) {
             NowPlayingWidget.ACTION_PLAY_PAUSE,
             NowPlayingWidget.ACTION_NEXT,
-            NowPlayingWidget.ACTION_PREVIOUS -> NowPlayingWidget.handleAction(context, action)
+            NowPlayingWidget.ACTION_PREVIOUS -> NowPlayingWidget.handleAction(context, action, goAsync())
             else -> super.onReceive(context, intent)
         }
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        NowPlayingWidget.render(context, appWidgetManager, appWidgetIds)
+        NowPlayingWidget.renderAsync(context, appWidgetIds, goAsync())
     }
 
     override fun onAppWidgetOptionsChanged(
@@ -331,6 +368,6 @@ class NowPlayingWidgetProvider : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle,
     ) {
-        NowPlayingWidget.render(context, appWidgetManager, intArrayOf(appWidgetId))
+        NowPlayingWidget.renderAsync(context, intArrayOf(appWidgetId), goAsync())
     }
 }
