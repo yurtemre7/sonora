@@ -17,12 +17,15 @@ import 'package:sonora/services/native_bridge.dart';
 import 'package:sonora/services/update_service.dart';
 import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
+import 'package:sonora/widgets/create_playlist_dialog.dart';
 import 'package:sonora/widgets/custom_scrollbar.dart';
 import 'package:sonora/widgets/dev_badge.dart';
 import 'package:sonora/widgets/home/albums_tab.dart';
 import 'package:sonora/widgets/home/artists_tab.dart';
 import 'package:sonora/widgets/home/playlists_tab.dart';
 import 'package:sonora/widgets/home/songs_tab.dart';
+import 'package:sonora/widgets/home/sort_bottom_sheet.dart';
+import 'package:sonora/widgets/home/sync_prompt_banner.dart';
 import 'package:sonora/widgets/multi_select_action_bar.dart';
 import 'package:sonora/widgets/update_dialog.dart';
 
@@ -355,289 +358,29 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showSortBottomSheet({int tabIndex = 0}) {
-    var theme = Theme.of(context);
-
-    String title;
-    switch (tabIndex) {
-      case 1:
-        title = context.l10n.sortAlbumsBy;
-      case 2:
-        title = context.l10n.sortArtistsBy;
-      case 3:
-        title = context.l10n.sortPlaylistsBy;
-      default:
-        title = context.l10n.sortSongsBy;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
-      ),
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (sheetContext, setSheetState) {
-            var currentGroupValue = _sortByForTab(tabIndex);
-
-            List<(String, String, IconData)> options;
-            switch (tabIndex) {
-              case 1:
-                options = [
-                  (context.l10n.sortByAlbumName, 'name', Icons.album_rounded),
-                  (context.l10n.sortByArtist, 'artist', Icons.person_rounded),
-                  (
-                    context.l10n.sortByTrackCount,
-                    'tracks',
-                    Icons.format_list_numbered_rounded,
-                  ),
-                  (
-                    context.l10n.sortByRecentlyAdded,
-                    'recent',
-                    Icons.calendar_today_rounded,
-                  ),
-                ];
-              case 2:
-                options = [
-                  (context.l10n.sortByArtistName, 'name', Icons.person_rounded),
-                  (
-                    context.l10n.sortByAlbumCount,
-                    'albums',
-                    Icons.album_rounded,
-                  ),
-                  (
-                    context.l10n.sortBySongCount,
-                    'songs',
-                    Icons.music_note_rounded,
-                  ),
-                ];
-              case 3:
-                options = [
-                  (
-                    context.l10n.sortByPlaylistName,
-                    'name',
-                    Icons.playlist_play_rounded,
-                  ),
-                  (
-                    context.l10n.sortBySongCount,
-                    'songs',
-                    Icons.music_note_rounded,
-                  ),
-                ];
-              default:
-                var isPlaysSelected = currentGroupValue == 'plays';
-                var playsLabel = isPlaysSelected && _songSortAscending
-                    ? context.l10n.leastPlayed
-                    : context.l10n.mostPlayed;
-                var playsIcon = isPlaysSelected && _songSortAscending
-                    ? Icons.trending_down_rounded
-                    : Icons.trending_up_rounded;
-
-                options = [
-                  (
-                    context.l10n.sortByTitle,
-                    'title',
-                    Icons.sort_by_alpha_rounded,
-                  ),
-                  (context.l10n.sortByArtist, 'artist', Icons.person_rounded),
-                  (
-                    context.l10n.sortByDuration,
-                    'duration',
-                    Icons.schedule_rounded,
-                  ),
-                  (
-                    context.l10n.sortByRecentlyAdded,
-                    'recent',
-                    Icons.calendar_today_rounded,
-                  ),
-                  (playsLabel, 'plays', playsIcon),
-                ];
-            }
-
-            return SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primaryContainer
-                                .withValues(alpha: 0.6),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            Icons.sort_rounded,
-                            size: 20,
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.colorScheme.outlineVariant.withValues(
-                            alpha: 0.2,
-                          ),
-                        ),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          for (var i = 0; i < options.length; i++) ...[
-                            if (i > 0)
-                              Divider(
-                                height: 1,
-                                thickness: 1,
-                                indent: 52,
-                                endIndent: 16,
-                                color: theme.colorScheme.outlineVariant
-                                    .withValues(alpha: 0.2),
-                              ),
-                            _SortOptionTile(
-                              icon: options[i].$3,
-                              label: options[i].$1,
-                              isSelected: currentGroupValue == options[i].$2,
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                var val = options[i].$2;
-                                if (tabIndex == 0) {
-                                  if (val == 'plays') {
-                                    if (_songSortBy != 'plays') {
-                                      _songSortAscending = false;
-                                    }
-                                    _songSortBy = 'plays';
-                                  } else {
-                                    if (_songSortBy == 'plays') {
-                                      _songSortAscending = true;
-                                    }
-                                    _songSortBy = val;
-                                  }
-                                } else {
-                                  _setSortByForTab(tabIndex, val);
-                                }
-                                _saveSortSettingsForTab(tabIndex);
-                                setSheetState(() {});
-                                setState(() {});
-                              },
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4, bottom: 8),
-                      child: Text(
-                        context.l10n.sort,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: SegmentedButton<bool>(
-                        segments:
-                            (tabIndex == 0 && currentGroupValue == 'plays')
-                            ? [
-                                ButtonSegment<bool>(
-                                  value: false,
-                                  icon: const Icon(
-                                    Icons.trending_up_rounded,
-                                    size: 18,
-                                  ),
-                                  label: Text(
-                                    context.l10n.mostPlayed,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                ButtonSegment<bool>(
-                                  value: true,
-                                  icon: const Icon(
-                                    Icons.trending_down_rounded,
-                                    size: 18,
-                                  ),
-                                  label: Text(
-                                    context.l10n.leastPlayed,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ]
-                            : [
-                                ButtonSegment<bool>(
-                                  value: true,
-                                  icon: const Icon(
-                                    Icons.arrow_upward_rounded,
-                                    size: 18,
-                                  ),
-                                  label: Text(
-                                    context.l10n.sortAscending,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                ButtonSegment<bool>(
-                                  value: false,
-                                  icon: const Icon(
-                                    Icons.arrow_downward_rounded,
-                                    size: 18,
-                                  ),
-                                  label: Text(
-                                    context.l10n.sortDescending,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                        selected: {_sortAscendingForTab(tabIndex)},
-                        onSelectionChanged: (newSelection) {
-                          HapticFeedback.selectionClick();
-                          var asc = newSelection.first;
-                          _setSortAscendingForTab(tabIndex, asc);
-                          _saveSortSettingsForTab(tabIndex);
-                          setSheetState(() {});
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
+    showSortBottomSheet(
+      context,
+      tabIndex: tabIndex,
+      sortBy: () => _sortByForTab(tabIndex),
+      ascending: () => _sortAscendingForTab(tabIndex),
+      onSortBySelected: (val) {
+        if (tabIndex == 0) {
+          // Switching into or out of play-count sorting flips the default
+          // direction so "most played" shows first.
+          if (val == 'plays' && _songSortBy != 'plays') {
+            _songSortAscending = false;
+          } else if (val != 'plays' && _songSortBy == 'plays') {
+            _songSortAscending = true;
+          }
+        }
+        _setSortByForTab(tabIndex, val);
+        _saveSortSettingsForTab(tabIndex);
+        setState(() {});
+      },
+      onAscendingSelected: (asc) {
+        _setSortAscendingForTab(tabIndex, asc);
+        _saveSortSettingsForTab(tabIndex);
+        setState(() {});
       },
     );
   }
@@ -925,7 +668,7 @@ class _HomeScreenState extends State<HomeScreen>
     await showDialog(
       context: context,
       builder: (dialogContext) =>
-          _CreatePlaylistDialogContent(onCreate: widget.onCreatePlaylist),
+          CreatePlaylistDialogContent(onCreate: widget.onCreatePlaylist),
     );
   }
 
@@ -966,88 +709,6 @@ class _HomeScreenState extends State<HomeScreen>
         });
       }
     }
-  }
-
-  Widget _buildSyncPromptBanner(ThemeData theme) {
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      elevation: 0,
-      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.25),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: theme.colorScheme.primary.withValues(alpha: 0.15),
-          width: 1.5,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.sync_problem_rounded,
-                    color: theme.colorScheme.primary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  context.l10n.syncLibraryDatabase,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              context.l10n.syncLibraryDatabaseSubtitle,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.9,
-                ),
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: _isSyncing ? null : _handlePostponeSync,
-                  child: Text(
-                    'Remind Next Month',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                FilledButton.tonal(
-                  onPressed: _isSyncing ? null : _handleResyncNow,
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(context.l10n.syncNow),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -1343,8 +1004,10 @@ class _HomeScreenState extends State<HomeScreen>
                                       onConfigureFolder:
                                           widget.onConfigureFolder,
                                       onUnfocusSearch: _searchFocusNode.unfocus,
-                                      syncPromptBanner: _buildSyncPromptBanner(
-                                        theme,
+                                      syncPromptBanner: SyncPromptBanner(
+                                        isSyncing: _isSyncing,
+                                        onPostpone: _handlePostponeSync,
+                                        onResyncNow: _handleResyncNow,
                                       ),
                                       activityView: _currentSongActivityView,
                                       selectedSongIds: _selectedSongIds,
@@ -1381,126 +1044,6 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         );
       },
-    );
-  }
-}
-
-class _CreatePlaylistDialogContent extends StatefulWidget {
-  const _CreatePlaylistDialogContent({required this.onCreate});
-
-  final Future<void> Function(String name) onCreate;
-
-  @override
-  State<_CreatePlaylistDialogContent> createState() =>
-      _CreatePlaylistDialogContentState();
-}
-
-class _CreatePlaylistDialogContentState
-    extends State<_CreatePlaylistDialogContent> {
-  late final TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(context.l10n.createPlaylist),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        decoration: InputDecoration(hintText: context.l10n.playlistName),
-        textCapitalization: TextCapitalization.sentences,
-      ),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(context.l10n.cancel),
-        ),
-        FilledButton(
-          onPressed: () async {
-            var name = _controller.text.trim();
-            if (name.isNotEmpty) {
-              Navigator.pop(context);
-              await widget.onCreate(name);
-            }
-          },
-          child: Text(context.l10n.create),
-        ),
-      ],
-    );
-  }
-}
-
-class _SortOptionTile extends StatelessWidget {
-  const _SortOptionTile({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    return Material(
-      color: isSelected
-          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.35)
-          : Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 20,
-                color: isSelected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  label,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
-                    color: isSelected
-                        ? theme.colorScheme.onSurface
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.85),
-                  ),
-                ),
-              ),
-              if (isSelected)
-                Icon(
-                  Icons.check_rounded,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                )
-              else
-                const SizedBox(width: 20),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
