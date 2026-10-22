@@ -1,4 +1,3 @@
-
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sonora/providers/player_provider.dart';
