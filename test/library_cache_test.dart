@@ -9,6 +9,7 @@ import 'package:shared_preferences_platform_interface/shared_preferences_async_p
 import 'package:sonora/models/replay_gain.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/music_scanner.dart';
+import 'package:sonora/services/replay_gain_reader.dart';
 
 import 'helpers/replay_gain_fixtures.dart';
 
@@ -175,6 +176,45 @@ void main() {
       var onDisk = jsonDecode(libraryFile().readAsStringSync()) as List;
       expect(onDisk.single['replaygain_track_gain'], -4.5);
       expect(onDisk.single['replaygain_scanned'], isTrue);
+    });
+
+    test(
+      'a failed read leaves the song unmarked so the next sync retries',
+      () async {
+        var audio = File('${tempDocsDir.path}/locked.mp3')
+          ..writeAsBytesSync(
+            id3Tag([
+              id3Frame('TXXX', txxxPayload('REPLAYGAIN_TRACK_GAIN', '-2 dB')),
+            ]),
+          );
+        var cached = songJson(6)..['file_path'] = audio.path;
+        await libraryFile().writeAsString(jsonEncode([cached]));
+
+        Process.runSync('chmod', ['000', audio.path]);
+        var failed = (await MusicScanner().syncLibrary()).single;
+        Process.runSync('chmod', ['644', audio.path]);
+
+        expect(failed.replayGainScanned, isFalse);
+        expect(failed.replayGain, isNull);
+
+        var retried = (await MusicScanner().syncLibrary()).single;
+        expect(retried.replayGainScanned, isTrue);
+        expect(retried.replayGainTrack, -2);
+      },
+      skip: Platform.isWindows ? 'needs chmod' : false,
+    );
+
+    test('tryReadFile tells failed reads from untagged files', () {
+      var missing = ReplayGainReader.tryReadFile(
+        '${tempDocsDir.path}/nope.mp3',
+      );
+      expect(missing.failed, isTrue);
+
+      var plain = File('${tempDocsDir.path}/plain.mp3')
+        ..writeAsBytesSync(List.filled(64, 7));
+      var untagged = ReplayGainReader.tryReadFile(plain.path);
+      expect(untagged.failed, isFalse);
+      expect(untagged.info, isNull);
     });
   });
 }

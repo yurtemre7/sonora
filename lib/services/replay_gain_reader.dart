@@ -13,13 +13,21 @@ import 'package:sonora/models/replay_gain.dart';
 /// never throws.
 abstract final class ReplayGainReader {
   /// Reads the ReplayGain values of the file at [path], or `null`.
-  static ReplayGainInfo? readFile(String path) {
+  static ReplayGainInfo? readFile(String path) => tryReadFile(path).info;
+
+  /// Reads the file at [path], telling a failed read (the file could not be
+  /// opened or read, which may be transient) apart from a file that was read
+  /// but has no usable ReplayGain tags.
+  static ReplayGainReadResult tryReadFile(String path) {
     RandomAccessFile? file;
     try {
       file = File(path).openSync();
-      return _read(_FileSource(file));
+      return ReplayGainReadResult(_read(_FileSource(file)));
+    } on IOException {
+      return const ReplayGainReadResult.failed();
     } catch (_) {
-      return null;
+      // Malformed tag data: the file was readable, it just has no usable tags.
+      return const ReplayGainReadResult(null);
     } finally {
       try {
         file?.closeSync();
@@ -470,6 +478,18 @@ abstract final class ReplayGainReader {
       b[offset + 1] << 8 |
       b[offset + 2] << 16 |
       b[offset + 3] << 24;
+}
+
+/// Outcome of [ReplayGainReader.tryReadFile].
+class ReplayGainReadResult {
+  const ReplayGainReadResult(this.info) : failed = false;
+  const ReplayGainReadResult.failed() : info = null, failed = true;
+
+  /// The values read, or `null` when the file has none (or the read failed).
+  final ReplayGainInfo? info;
+
+  /// Whether the file could not be read; such files should be retried later.
+  final bool failed;
 }
 
 /// Collects ReplayGain values from tag key/value pairs.

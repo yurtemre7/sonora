@@ -11,7 +11,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/playlist.dart';
-import 'package:sonora/models/replay_gain.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/image_preflight_service.dart';
 import 'package:sonora/services/replay_gain_reader.dart';
@@ -460,7 +459,10 @@ class MusicScanner {
       for (var c = 0; c < chunks.length; c++) {
         for (var k = 0; k < chunks[c].length; k++) {
           var index = chunks[c][k];
-          songs[index] = songs[index].withReplayGain(results[c][k]);
+          var result = results[c][k];
+          // A failed read stays unmarked so the next sync retries it.
+          if (result.failed) continue;
+          songs[index] = songs[index].withReplayGain(result.info);
         }
       }
     } catch (_) {
@@ -468,9 +470,10 @@ class MusicScanner {
     }
   }
 
-  static Future<List<ReplayGainInfo?>> _readReplayGainInIsolate(
+  static Future<List<ReplayGainReadResult>> _readReplayGainInIsolate(
     List<String> paths,
-  ) => Isolate.run(() => [for (var p in paths) ReplayGainReader.readFile(p)]);
+  ) =>
+      Isolate.run(() => [for (var p in paths) ReplayGainReader.tryReadFile(p)]);
 
   // --- Private Helpers ---
 

@@ -21,8 +21,13 @@ extension PlayerLibrary on PlayerProvider {
         _originalQueue = List<Song>.from(songs);
       }
     } else {
-      // A song is playing — keep the queue intact but refresh the audio
-      // handler's raw playlist metadata so index-based skips stay correct.
+      // A song is playing — keep the queue order intact but swap in the
+      // rescanned songs (same file) so new metadata such as ReplayGain gains
+      // reaches the queue, then refresh the audio handler's raw playlist so
+      // index-based skips stay correct.
+      var byPath = {for (var s in allSongs) s.filePath: s};
+      queue = [for (var s in queue) byPath[s.filePath] ?? s];
+      _originalQueue = [for (var s in _originalQueue) byPath[s.filePath] ?? s];
       audioHandler.syncQueueMetadata(queue.map(_songToMediaItem).toList());
     }
     _notify();

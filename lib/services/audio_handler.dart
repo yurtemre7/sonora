@@ -104,14 +104,20 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
 
   Future<void> setReplayGainMode(ReplayGainMode mode) async {
     replayGainMode = mode;
-    await _updateReplayGain(mediaItem.valueOrNull);
+    await _applyReplayGain();
   }
 
+  // Gains of the current item, kept apart from [mediaItem] so a library
+  // resync can refresh them without re-announcing the item.
+  ReplayGainInfo? _currentReplayGain;
+
   Future<void> _updateReplayGain(MediaItem? item) async {
-    var multiplier = replayGainMultiplier(
-      ReplayGainExtras.parse(item?.extras),
-      replayGainMode,
-    );
+    _currentReplayGain = ReplayGainExtras.parse(item?.extras);
+    await _applyReplayGain();
+  }
+
+  Future<void> _applyReplayGain() async {
+    var multiplier = replayGainMultiplier(_currentReplayGain, replayGainMode);
     if (multiplier == _replayGainMultiplier) return;
     _replayGainMultiplier = multiplier;
     await _applyPlayerVolume(_volume);
@@ -575,6 +581,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
         _rawPlaylist[i] = updated;
       }
     }
+
+    // Pick up gains the resync read for the track that is playing now.
+    var current = mediaItem.valueOrNull;
+    var updatedCurrent = current == null ? null : byUri[current.id];
+    if (updatedCurrent != null) unawaited(_updateReplayGain(updatedCurrent));
 
     // Broadcast the refreshed window slice so that the notification and
     // lock-screen now show up-to-date metadata.

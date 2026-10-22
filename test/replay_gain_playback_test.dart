@@ -6,6 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 import 'package:sonora/models/replay_gain.dart';
+import 'package:sonora/models/song.dart';
+import 'package:sonora/providers/player_provider.dart';
+import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/services/audio_handler.dart';
 
 void main() {
@@ -66,5 +69,44 @@ void main() {
     handler.mediaItem.add(item('a', trackGain: -6));
     await Future<void>.delayed(Duration.zero);
     expect(handler.player.volume, 0.5);
+  });
+
+  test('a library resync refreshes gains of already queued songs', () async {
+    var handler = SonoraAudioHandler();
+    var provider = PlayerProvider(
+      audioHandler: handler,
+      settingsProvider: SettingsProvider(),
+    );
+    await provider.loadSettings();
+    await handler.setReplayGainMode(ReplayGainMode.track);
+
+    var untagged = Song(
+      id: 1,
+      title: 'Song',
+      artist: 'Artist',
+      album: 'Album',
+      duration: const Duration(minutes: 3),
+      filePath: '/test/music/song.mp3',
+    );
+    var queued = MediaItem(
+      id: Uri.file(untagged.filePath).toString(),
+      title: 'Song',
+    );
+    handler.mediaItem.add(queued);
+    provider.queue = [untagged];
+    provider.currentIndex = 0;
+    await Future<void>.delayed(Duration.zero);
+    expect(handler.player.volume, 1.0);
+
+    // The first sync after upgrading reads the song's tags.
+    var tagged = untagged.withReplayGain(const ReplayGainInfo(trackGain: -6));
+    provider.updateSongs([tagged]);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(provider.queue.single.replayGainTrack, -6);
+    expect(
+      handler.player.volume,
+      closeTo(math.pow(10, -6 / 20).toDouble(), 1e-9),
+    );
   });
 }
