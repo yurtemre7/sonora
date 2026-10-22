@@ -1452,4 +1452,84 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get backupRestore => 'Backup & restore';
+
+  @override
+  String get backupRestoreSubtitle =>
+      'Save playlists, favorites, stats and settings to a file';
+
+  @override
+  String get backupContentsTitle => 'What\'s in a backup';
+
+  @override
+  String get backupContentsContent =>
+      'Playlists, favorite songs, albums and artists, listening stats and your settings. Music files, playlist cover images and the library cache are not included; the library is rescanned on the new device.';
+
+  @override
+  String get backupExportTitle => 'Export backup';
+
+  @override
+  String get backupExportDescription =>
+      'Save your personal data to a JSON file you can keep somewhere safe.';
+
+  @override
+  String get backupImportTitle => 'Restore backup';
+
+  @override
+  String get backupImportDescription =>
+      'Load a Sonora backup file, for example after reinstalling the app or on a new phone.';
+
+  @override
+  String get backupExportSuccess => 'Backup saved';
+
+  @override
+  String get backupExportFailed => 'Could not save the backup';
+
+  @override
+  String get backupRestoreConfirmTitle => 'Restore this backup?';
+
+  @override
+  String backupRestoreConfirmContent(String date) {
+    return 'Backup from $date.\n\n• Settings from the backup replace your current ones.\n• Playlists are merged. A playlist that exists in both is overwritten by the backup version.\n• Favorites are added to your current favorites.\n• Listening stats are replaced completely.\n\nSongs are matched to your current library. Songs that can\'t be found are skipped.';
+  }
+
+  @override
+  String get backupRestoreAction => 'Restore';
+
+  @override
+  String get backupRestoreSuccess => 'Backup restored';
+
+  @override
+  String backupRestoredFavorites(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count favorite songs',
+      one: '1 favorite song',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backupUnmatchedSongs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs not found in your library',
+      one: '1 song not found in your library',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupErrorInvalidFile => 'This file is not a valid Sonora backup';
+
+  @override
+  String get backupErrorUnsupportedVersion =>
+      'This backup was made by a newer version of Sonora. Update the app and try again.';
+
+  @override
+  String get backupErrorRestoreFailed => 'Could not restore the backup';
 }

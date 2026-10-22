@@ -514,6 +514,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.settings_backup_restore_rounded),
+            title: Text(context.l10n.backupRestore),
+            subtitle: Text(context.l10n.backupRestoreSubtitle),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              context.push(AppRoutes.settingsBackup);
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.info_outline_rounded),
             title: Text(context.l10n.infoSettings),
             subtitle: Text(context.l10n.infoSubtitle),

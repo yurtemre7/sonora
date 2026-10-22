@@ -31,11 +31,11 @@ class StatsService extends ChangeNotifier {
   Timer? _debounceTimer;
   var _dirty = false;
 
-  var _loadGuard = false;
+  Future<void>? _loadFuture;
 
-  Future<void> ensureLoaded() async {
-    if (_loadGuard) return;
-    _loadGuard = true;
+  Future<void> ensureLoaded() => _loadFuture ??= _loadAndNotify();
+
+  Future<void> _loadAndNotify() async {
     await _load();
     notifyListeners();
   }
@@ -113,6 +113,27 @@ class StatsService extends ChangeNotifier {
     _data.songSkipCounts.clear();
     _data.songRestartCounts.clear();
     _data.songLastPlayedAtMs.clear();
+    _dirty = true;
+    await _save();
+    notifyListeners();
+  }
+
+  /// Returns a copy of all statistics in their on-disk JSON shape, keyed by
+  /// the song ids of this device. Used by the backup export.
+  Future<Map<String, dynamic>> exportSnapshot() async {
+    await ensureLoaded();
+    return jsonDecode(jsonEncode(_toJson())) as Map<String, dynamic>;
+  }
+
+  /// Replaces all statistics with [json] (same shape as [exportSnapshot]),
+  /// persists them immediately and notifies listeners.
+  Future<void> replaceWithSnapshot(Map<String, dynamic> json) async {
+    // Let a pending initial load finish first so it cannot overwrite the
+    // restored data afterwards.
+    await ensureLoaded();
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+    _applyJson(json);
     _dirty = true;
     await _save();
     notifyListeners();
@@ -422,78 +443,108 @@ class StatsService extends ChangeNotifier {
       if (!file.existsSync()) return;
 
       var content = await file.readAsString();
-      var json = jsonDecode(content) as Map<String, dynamic>;
-
-      _data.completeSongListens = json['complete_song_listens'] as int? ?? 0;
-      _data.firstPlayedSongId = json['first_played_song_id'] as int? ?? -1;
-      _data.firstPlayedDate = json['first_played_date'] as String?;
-
-      var playCounts = json['song_play_counts'] as Map<String, dynamic>?;
-      if (playCounts != null) {
-        _data.songPlayCounts.clear();
-        for (var e in playCounts.entries) {
-          _data.songPlayCounts[int.parse(e.key)] = e.value as int;
-        }
-      }
-
-      var plCounts = json['playlist_play_counts'] as Map<String, dynamic>?;
-      if (plCounts != null) {
-        _data.playlistPlayCounts.clear();
-        for (var e in plCounts.entries) {
-          _data.playlistPlayCounts[e.key] = e.value as int;
-        }
-      }
-
-      var weekly = json['weekly_play_counts'] as Map<String, dynamic>?;
-      if (weekly != null) {
-        _data.weeklyPlayCounts.clear();
-        for (var e in weekly.entries) {
-          _data.weeklyPlayCounts[int.parse(e.key)] = e.value as int;
-        }
-      }
-
-      _data.shuffleSessionStarts = json['shuffle_session_starts'] as int? ?? 0;
-
-      var skips = json['song_skip_counts'] as Map<String, dynamic>?;
-      if (skips != null) {
-        _data.songSkipCounts.clear();
-        for (var e in skips.entries) {
-          _data.songSkipCounts[int.parse(e.key)] = e.value as int;
-        }
-      }
-
-      var restarts = json['song_restart_counts'] as Map<String, dynamic>?;
-      if (restarts != null) {
-        _data.songRestartCounts.clear();
-        for (var e in restarts.entries) {
-          _data.songRestartCounts[int.parse(e.key)] = e.value as int;
-        }
-      }
-
-      var lastPlayed = json['song_last_played_at_ms'];
-      if (lastPlayed is Map<String, dynamic>) {
-        _data.songLastPlayedAtMs.clear();
-        for (var entry in lastPlayed.entries) {
-          var songId = int.tryParse(entry.key);
-          var timestamp = entry.value;
-          if (songId != null && timestamp is int && timestamp > 0) {
-            _data.songLastPlayedAtMs[songId] = timestamp;
-          }
-        }
-      }
+      _applyJson(jsonDecode(content) as Map<String, dynamic>);
     } catch (_) {
-      _data.completeSongListens = 0;
-      _data.firstPlayedSongId = -1;
-      _data.firstPlayedDate = null;
-      _data.songPlayCounts.clear();
-      _data.playlistPlayCounts.clear();
-      _data.weeklyPlayCounts.clear();
-      _data.shuffleSessionStarts = 0;
-      _data.songSkipCounts.clear();
-      _data.songRestartCounts.clear();
-      _data.songLastPlayedAtMs.clear();
+      _clearData();
     }
   }
+
+  void _clearData() {
+    _data.completeSongListens = 0;
+    _data.firstPlayedSongId = -1;
+    _data.firstPlayedDate = null;
+    _data.songPlayCounts.clear();
+    _data.playlistPlayCounts.clear();
+    _data.weeklyPlayCounts.clear();
+    _data.shuffleSessionStarts = 0;
+    _data.songSkipCounts.clear();
+    _data.songRestartCounts.clear();
+    _data.songLastPlayedAtMs.clear();
+  }
+
+  void _applyJson(Map<String, dynamic> json) {
+    _clearData();
+    _data.completeSongListens = json['complete_song_listens'] as int? ?? 0;
+    _data.firstPlayedSongId = json['first_played_song_id'] as int? ?? -1;
+    _data.firstPlayedDate = json['first_played_date'] as String?;
+
+    var playCounts = json['song_play_counts'] as Map<String, dynamic>?;
+    if (playCounts != null) {
+      _data.songPlayCounts.clear();
+      for (var e in playCounts.entries) {
+        _data.songPlayCounts[int.parse(e.key)] = e.value as int;
+      }
+    }
+
+    var plCounts = json['playlist_play_counts'] as Map<String, dynamic>?;
+    if (plCounts != null) {
+      _data.playlistPlayCounts.clear();
+      for (var e in plCounts.entries) {
+        _data.playlistPlayCounts[e.key] = e.value as int;
+      }
+    }
+
+    var weekly = json['weekly_play_counts'] as Map<String, dynamic>?;
+    if (weekly != null) {
+      _data.weeklyPlayCounts.clear();
+      for (var e in weekly.entries) {
+        _data.weeklyPlayCounts[int.parse(e.key)] = e.value as int;
+      }
+    }
+
+    _data.shuffleSessionStarts = json['shuffle_session_starts'] as int? ?? 0;
+
+    var skips = json['song_skip_counts'] as Map<String, dynamic>?;
+    if (skips != null) {
+      _data.songSkipCounts.clear();
+      for (var e in skips.entries) {
+        _data.songSkipCounts[int.parse(e.key)] = e.value as int;
+      }
+    }
+
+    var restarts = json['song_restart_counts'] as Map<String, dynamic>?;
+    if (restarts != null) {
+      _data.songRestartCounts.clear();
+      for (var e in restarts.entries) {
+        _data.songRestartCounts[int.parse(e.key)] = e.value as int;
+      }
+    }
+
+    var lastPlayed = json['song_last_played_at_ms'];
+    if (lastPlayed is Map<String, dynamic>) {
+      _data.songLastPlayedAtMs.clear();
+      for (var entry in lastPlayed.entries) {
+        var songId = int.tryParse(entry.key);
+        var timestamp = entry.value;
+        if (songId != null && timestamp is int && timestamp > 0) {
+          _data.songLastPlayedAtMs[songId] = timestamp;
+        }
+      }
+    }
+  }
+
+  Map<String, dynamic> _toJson() => {
+    'complete_song_listens': _data.completeSongListens,
+    'first_played_song_id': _data.firstPlayedSongId,
+    'first_played_date': _data.firstPlayedDate,
+    'song_play_counts': _data.songPlayCounts.map(
+      (k, v) => MapEntry(k.toString(), v),
+    ),
+    'playlist_play_counts': Map<String, int>.of(_data.playlistPlayCounts),
+    'weekly_play_counts': _data.weeklyPlayCounts.map(
+      (k, v) => MapEntry(k.toString(), v),
+    ),
+    'shuffle_session_starts': _data.shuffleSessionStarts,
+    'song_skip_counts': _data.songSkipCounts.map(
+      (k, v) => MapEntry(k.toString(), v),
+    ),
+    'song_restart_counts': _data.songRestartCounts.map(
+      (k, v) => MapEntry(k.toString(), v),
+    ),
+    'song_last_played_at_ms': _data.songLastPlayedAtMs.map(
+      (k, v) => MapEntry(k.toString(), v),
+    ),
+  };
 
   var _isSaving = false;
   var _hasPendingSave = false;
@@ -508,28 +559,7 @@ class StatsService extends ChangeNotifier {
       do {
         _hasPendingSave = false;
         var appDir = await getApplicationDocumentsDirectory();
-        var json = <String, dynamic>{
-          'complete_song_listens': _data.completeSongListens,
-          'first_played_song_id': _data.firstPlayedSongId,
-          'first_played_date': _data.firstPlayedDate,
-          'song_play_counts': _data.songPlayCounts.map(
-            (k, v) => MapEntry(k.toString(), v),
-          ),
-          'playlist_play_counts': _data.playlistPlayCounts,
-          'weekly_play_counts': _data.weeklyPlayCounts.map(
-            (k, v) => MapEntry(k.toString(), v),
-          ),
-          'shuffle_session_starts': _data.shuffleSessionStarts,
-          'song_skip_counts': _data.songSkipCounts.map(
-            (k, v) => MapEntry(k.toString(), v),
-          ),
-          'song_restart_counts': _data.songRestartCounts.map(
-            (k, v) => MapEntry(k.toString(), v),
-          ),
-          'song_last_played_at_ms': _data.songLastPlayedAtMs.map(
-            (k, v) => MapEntry(k.toString(), v),
-          ),
-        };
+        var json = _toJson();
 
         var file = File('${appDir.path}/listening_stats.json');
         await file.writeAsString(jsonEncode(json), flush: true);

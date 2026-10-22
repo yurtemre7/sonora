@@ -15,6 +15,7 @@ import 'package:sonora/screens/now_playing_screen.dart';
 import 'package:sonora/screens/playlist_detail_screen.dart';
 import 'package:sonora/screens/recently_played_screen.dart';
 import 'package:sonora/screens/settings/appearance_settings_screen.dart';
+import 'package:sonora/screens/settings/backup_settings_screen.dart';
 import 'package:sonora/screens/settings/formatting_settings_screen.dart';
 import 'package:sonora/screens/settings/info_settings_screen.dart';
 import 'package:sonora/screens/settings/playback_settings_screen.dart';
@@ -201,6 +202,14 @@ class SonoraAppRouter {
           GoRoute(
             path: AppRoutes.settingsPrivacy,
             builder: (context, state) => const PrivacySettingsScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.settingsBackup,
+            builder: (context, state) => BackupSettingsScreen(
+              playerProvider: playerProvider,
+              settingsProvider: settingsProvider,
+              themeProvider: themeProvider,
+            ),
           ),
           GoRoute(
             path: AppRoutes.album,

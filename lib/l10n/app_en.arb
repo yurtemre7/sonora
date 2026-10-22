@@ -698,5 +698,45 @@
         "type": "int"
       }
     }
-  }
+  },
+  "backupRestore": "Backup & restore",
+  "backupRestoreSubtitle": "Save playlists, favorites, stats and settings to a file",
+  "backupContentsTitle": "What's in a backup",
+  "backupContentsContent": "Playlists, favorite songs, albums and artists, listening stats and your settings. Music files, playlist cover images and the library cache are not included; the library is rescanned on the new device.",
+  "backupExportTitle": "Export backup",
+  "backupExportDescription": "Save your personal data to a JSON file you can keep somewhere safe.",
+  "backupImportTitle": "Restore backup",
+  "backupImportDescription": "Load a Sonora backup file, for example after reinstalling the app or on a new phone.",
+  "backupExportSuccess": "Backup saved",
+  "backupExportFailed": "Could not save the backup",
+  "backupRestoreConfirmTitle": "Restore this backup?",
+  "backupRestoreConfirmContent": "Backup from {date}.\n\n• Settings from the backup replace your current ones.\n• Playlists are merged. A playlist that exists in both is overwritten by the backup version.\n• Favorites are added to your current favorites.\n• Listening stats are replaced completely.\n\nSongs are matched to your current library. Songs that can't be found are skipped.",
+  "@backupRestoreConfirmContent": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestoreAction": "Restore",
+  "backupRestoreSuccess": "Backup restored",
+  "backupRestoredFavorites": "{count, plural, =1{1 favorite song} other{{count} favorite songs}}",
+  "@backupRestoredFavorites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupUnmatchedSongs": "{count, plural, =1{1 song not found in your library} other{{count} songs not found in your library}}",
+  "@backupUnmatchedSongs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupErrorInvalidFile": "This file is not a valid Sonora backup",
+  "backupErrorUnsupportedVersion": "This backup was made by a newer version of Sonora. Update the app and try again.",
+  "backupErrorRestoreFailed": "Could not restore the backup"
 }

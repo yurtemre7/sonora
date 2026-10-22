@@ -1378,4 +1378,70 @@ class AppLocalizationsJa extends AppLocalizations {
   String listensCount(int count) {
     return '$count 回再生';
   }
+
+  @override
+  String get backupRestore => 'バックアップと復元';
+
+  @override
+  String get backupRestoreSubtitle => 'プレイリスト、お気に入り、統計、設定をファイルに保存';
+
+  @override
+  String get backupContentsTitle => 'バックアップの内容';
+
+  @override
+  String get backupContentsContent =>
+      'プレイリスト、お気に入りの曲・アルバム・アーティスト、再生統計、各種設定が含まれます。音楽ファイル、プレイリストのカバー画像、ライブラリのキャッシュは含まれません。新しい端末ではライブラリが再スキャンされます。';
+
+  @override
+  String get backupExportTitle => 'バックアップを書き出す';
+
+  @override
+  String get backupExportDescription => '個人データをJSONファイルに保存します。安全な場所に保管してください。';
+
+  @override
+  String get backupImportTitle => 'バックアップから復元';
+
+  @override
+  String get backupImportDescription =>
+      'アプリの再インストール後や新しいスマートフォンで、Sonoraのバックアップファイルを読み込みます。';
+
+  @override
+  String get backupExportSuccess => 'バックアップを保存しました';
+
+  @override
+  String get backupExportFailed => 'バックアップを保存できませんでした';
+
+  @override
+  String get backupRestoreConfirmTitle => 'このバックアップを復元しますか？';
+
+  @override
+  String backupRestoreConfirmContent(String date) {
+    return '$date のバックアップです。\n\n• バックアップの設定で現在の設定を上書きします。\n• プレイリストは統合されます。両方にあるプレイリストはバックアップの内容で上書きされます。\n• お気に入りは現在のお気に入りに追加されます。\n• 再生統計はすべて置き換えられます。\n\n曲は現在のライブラリと照合され、見つからない曲はスキップされます。';
+  }
+
+  @override
+  String get backupRestoreAction => '復元';
+
+  @override
+  String get backupRestoreSuccess => 'バックアップを復元しました';
+
+  @override
+  String backupRestoredFavorites(int count) {
+    return 'お気に入りの曲 $count曲';
+  }
+
+  @override
+  String backupUnmatchedSongs(int count) {
+    return 'ライブラリに見つからない曲 $count曲';
+  }
+
+  @override
+  String get backupErrorInvalidFile => '有効なSonoraのバックアップファイルではありません';
+
+  @override
+  String get backupErrorUnsupportedVersion =>
+      'このバックアップは新しいバージョンのSonoraで作成されています。アプリを更新してから再度お試しください。';
+
+  @override
+  String get backupErrorRestoreFailed => 'バックアップを復元できませんでした';
 }

@@ -114,6 +114,35 @@ extension ScannerPlaylists on MusicScanner {
     }
   }
 
+  /// Returns the cached library exactly as stored, without sorting or
+  /// triggering any background work.
+  Future<List<Song>> readLibrarySongs() => _readImportedSongsMetadata();
+
+  /// Marks the songs in [favoriteDates] (song id to favorite timestamp) as
+  /// favorites. Songs that already are favorites keep their current date, so
+  /// running this twice changes nothing the second time.
+  Future<List<Song>> mergeFavoriteSongs(Map<int, int?> favoriteDates) async {
+    var songs = await _readImportedSongsMetadata();
+    if (favoriteDates.isEmpty) return songs;
+    var now = DateTime.now().millisecondsSinceEpoch;
+    var modified = false;
+
+    for (var i = 0; i < songs.length; i++) {
+      var song = songs[i];
+      if (song.isFavorite || !favoriteDates.containsKey(song.id)) continue;
+      songs[i] = song.copyWith(
+        isFavorite: true,
+        favoriteDateMs: favoriteDates[song.id] ?? now,
+      );
+      modified = true;
+    }
+
+    if (modified) {
+      await _writeImportedSongsMetadata(songs);
+    }
+    return songs;
+  }
+
   /// Creates a new empty playlist.
   Future<void> createPlaylist(String name) async {
     var playlists = await getPlaylists();

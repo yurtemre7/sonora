@@ -2635,6 +2635,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{Never played} =1{1 listen} other{{count} listens}}'**
   String listensCount(int count);
+
+  /// No description provided for @backupRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & restore'**
+  String get backupRestore;
+
+  /// No description provided for @backupRestoreSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save playlists, favorites, stats and settings to a file'**
+  String get backupRestoreSubtitle;
+
+  /// No description provided for @backupContentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s in a backup'**
+  String get backupContentsTitle;
+
+  /// No description provided for @backupContentsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists, favorite songs, albums and artists, listening stats and your settings. Music files, playlist cover images and the library cache are not included; the library is rescanned on the new device.'**
+  String get backupContentsContent;
+
+  /// No description provided for @backupExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export backup'**
+  String get backupExportTitle;
+
+  /// No description provided for @backupExportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your personal data to a JSON file you can keep somewhere safe.'**
+  String get backupExportDescription;
+
+  /// No description provided for @backupImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore backup'**
+  String get backupImportTitle;
+
+  /// No description provided for @backupImportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Load a Sonora backup file, for example after reinstalling the app or on a new phone.'**
+  String get backupImportDescription;
+
+  /// No description provided for @backupExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved'**
+  String get backupExportSuccess;
+
+  /// No description provided for @backupExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the backup'**
+  String get backupExportFailed;
+
+  /// No description provided for @backupRestoreConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore this backup?'**
+  String get backupRestoreConfirmTitle;
+
+  /// No description provided for @backupRestoreConfirmContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup from {date}.\n\n• Settings from the backup replace your current ones.\n• Playlists are merged. A playlist that exists in both is overwritten by the backup version.\n• Favorites are added to your current favorites.\n• Listening stats are replaced completely.\n\nSongs are matched to your current library. Songs that can\'t be found are skipped.'**
+  String backupRestoreConfirmContent(String date);
+
+  /// No description provided for @backupRestoreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get backupRestoreAction;
+
+  /// No description provided for @backupRestoreSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored'**
+  String get backupRestoreSuccess;
+
+  /// No description provided for @backupRestoredFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 favorite song} other{{count} favorite songs}}'**
+  String backupRestoredFavorites(int count);
+
+  /// No description provided for @backupUnmatchedSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 song not found in your library} other{{count} songs not found in your library}}'**
+  String backupUnmatchedSongs(int count);
+
+  /// No description provided for @backupErrorInvalidFile.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a valid Sonora backup'**
+  String get backupErrorInvalidFile;
+
+  /// No description provided for @backupErrorUnsupportedVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup was made by a newer version of Sonora. Update the app and try again.'**
+  String get backupErrorUnsupportedVersion;
+
+  /// No description provided for @backupErrorRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore the backup'**
+  String get backupErrorRestoreFailed;
 }
 
 class _AppLocalizationsDelegate

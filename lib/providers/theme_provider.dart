@@ -46,6 +46,9 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
+  /// Re-reads the stored theme mode, e.g. after a backup was restored.
+  Future<void> reload() => _loadThemeMode();
+
   Future<void> setThemeMode(ThemeMode mode) async {
     _themeMode = mode;
     notifyListeners();

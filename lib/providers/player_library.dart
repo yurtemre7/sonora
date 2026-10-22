@@ -181,6 +181,25 @@ extension PlayerLibrary on PlayerProvider {
     playlists = await scanner.getPlaylists();
     _notify();
   }
+
+  /// Reloads everything a restored backup can change: favorite flags from
+  /// [songs], playlists and the player's own settings (favorite albums and
+  /// artists, volume, speed, effects, theme color).
+  Future<void> reloadAfterRestore(List<Song> songs) async {
+    var byId = {for (var s in songs) s.id: s};
+    // Keep the current sort order; only swap in the updated song objects.
+    allSongs = [for (var s in allSongs) byId[s.id] ?? s];
+    for (var i = 0; i < queue.length; i++) {
+      queue[i] = byId[queue[i].id] ?? queue[i];
+    }
+    for (var i = 0; i < _originalQueue.length; i++) {
+      _originalQueue[i] = byId[_originalQueue[i].id] ?? _originalQueue[i];
+    }
+    playlists = await MusicScanner().getPlaylists();
+    _refreshLibrarySnapshots();
+    await loadSettings();
+  }
+
   // ── Playlist management APIs ────────────────────────────────────────────────
 
   void updatePlaylists(List<Playlist> newPlaylists) {
