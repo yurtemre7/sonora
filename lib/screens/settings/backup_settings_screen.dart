@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:sonora/l10n/app_localizations.dart';
 import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/providers/theme_provider.dart';
@@ -32,6 +33,25 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
   final _backupService = BackupService();
   var _isBusy = false;
 
+  void _showMessage(ScaffoldMessengerState messenger, String text) {
+    messenger.showSnackBar(
+      SnackBar(content: Text(text), duration: const Duration(seconds: 6)),
+    );
+  }
+
+  String _messageFor(BackupException e, AppLocalizations l10n) =>
+      switch (e.kind) {
+        BackupErrorKind.unsupportedVersion =>
+          l10n.backupErrorUnsupportedVersion,
+        BackupErrorKind.invalidJson ||
+        BackupErrorKind.notABackup ||
+        BackupErrorKind.malformed => l10n.backupErrorInvalidFile,
+        BackupErrorKind.libraryEmpty => l10n.backupErrorLibraryEmpty,
+        BackupErrorKind.noMatchingSongs => l10n.backupErrorNoMatchingSongs,
+        BackupErrorKind.readFailed => l10n.backupErrorRestoreFailed,
+        BackupErrorKind.writeFailed => l10n.backupErrorRolledBack,
+      };
+
   Future<void> _export() async {
     if (_isBusy) return;
     var l10n = context.l10n;
@@ -54,13 +74,18 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
         type: FileType.custom,
         allowedExtensions: const ['json'],
       );
-      if (uri != null) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.backupExportSuccess)),
-        );
-      }
+      if (uri != null) _showMessage(messenger, l10n.backupExportSuccess);
+    } on BackupException catch (e) {
+      _showMessage(
+        messenger,
+        e.kind == BackupErrorKind.libraryEmpty
+            ? l10n.backupErrorLibraryEmpty
+            : l10n.backupExportFailed,
+      );
+    } on PlatformException {
+      _showMessage(messenger, l10n.backupErrorFilePicker);
     } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(l10n.backupExportFailed)));
+      _showMessage(messenger, l10n.backupExportFailed);
     } finally {
       if (mounted) setState(() => _isBusy = false);
     }
@@ -78,23 +103,17 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
         allowedExtensions: const ['json'],
       );
       if (file == null) return;
-      var content = utf8.decode(await file.readAsBytes());
-      document = BackupService.parse(content);
-    } on BackupException catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            e.kind == BackupErrorKind.unsupportedVersion
-                ? l10n.backupErrorUnsupportedVersion
-                : l10n.backupErrorInvalidFile,
-          ),
-        ),
+      document = BackupService.parse(
+        BackupService.decodeFile(await file.readAsBytes()),
       );
+    } on BackupException catch (e) {
+      _showMessage(messenger, _messageFor(e, l10n));
+      return;
+    } on PlatformException {
+      _showMessage(messenger, l10n.backupErrorFilePicker);
       return;
     } catch (_) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.backupErrorInvalidFile)),
-      );
+      _showMessage(messenger, l10n.backupErrorInvalidFile);
       return;
     }
 
@@ -103,30 +122,38 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
     if (confirmed != true || !mounted) return;
 
     setState(() => _isBusy = true);
+    BackupRestoreResult result;
     try {
-      var result = await _backupService.restoreDocument(document);
-      await _reloadProviders(result);
-
-      var parts = [
-        l10n.backupRestoreSuccess,
-        l10n.playlistCount(result.playlistsRestored),
-        l10n.backupRestoredFavorites(result.favoriteSongsRestored),
-        if (result.unmatchedSongs > 0)
-          l10n.backupUnmatchedSongs(result.unmatchedSongs),
-      ];
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(parts.join(' · ')),
-          duration: const Duration(seconds: 6),
-        ),
-      );
-    } catch (_) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.backupErrorRestoreFailed)),
-      );
-    } finally {
+      result = await _backupService.restoreDocument(document);
+    } on BackupException catch (e) {
+      _showMessage(messenger, _messageFor(e, l10n));
       if (mounted) setState(() => _isBusy = false);
+      return;
+    } catch (_) {
+      _showMessage(messenger, l10n.backupErrorRestoreFailed);
+      if (mounted) setState(() => _isBusy = false);
+      return;
     }
+
+    // The data is safely written at this point; a failing reload only means
+    // the app shows the old state until it is restarted.
+    var needsRestart = false;
+    try {
+      await _reloadProviders(result);
+    } catch (_) {
+      needsRestart = true;
+    }
+    if (mounted) setState(() => _isBusy = false);
+
+    var parts = [
+      l10n.backupRestoreSuccess,
+      l10n.playlistCount(result.playlistsRestored),
+      l10n.backupRestoredFavorites(result.favoriteSongsRestored),
+      if (result.unmatchedSongs > 0)
+        l10n.backupUnmatchedSongs(result.unmatchedSongs),
+      if (needsRestart) l10n.backupRestartNeeded,
+    ];
+    _showMessage(messenger, parts.join(' · '));
   }
 
   /// Applies the restored data to the running app so no restart is needed.

@@ -1463,4 +1463,21 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get replayGainAlbumGainLabel => 'アルバムゲイン';
+
+  @override
+  String get backupErrorLibraryEmpty =>
+      '音楽ライブラリが空です。先に音楽フォルダをスキャンしてから、もう一度お試しください。';
+
+  @override
+  String get backupErrorNoMatchingSongs =>
+      'このバックアップの曲がライブラリに1曲も見つかりません。正しい音楽フォルダが選択・スキャンされているか確認してください。';
+
+  @override
+  String get backupErrorRolledBack => 'バックアップを復元できませんでした。以前のデータはそのまま保持されています。';
+
+  @override
+  String get backupErrorFilePicker => 'ファイルを開けませんでした。もう一度お試しください。';
+
+  @override
+  String get backupRestartNeeded => 'すべての変更を反映するにはアプリを再起動してください';
 }

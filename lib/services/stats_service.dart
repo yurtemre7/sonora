@@ -46,6 +46,7 @@ class StatsService extends ChangeNotifier {
   /// running at the 80% mark of the song. The [playlistId] is optional – when
   /// provided, that playlist receives a play too.
   void recordCompleteListen(int songId, {String? playlistId}) {
+    if (_isRecordingPaused) return;
     var now = DateTime.now();
     _data.songPlayCounts.update(songId, (v) => v + 1, ifAbsent: () => 1);
     _data.completeSongListens++;
@@ -74,16 +75,19 @@ class StatsService extends ChangeNotifier {
   }
 
   void recordShuffleSessionStart() {
+    if (_isRecordingPaused) return;
     _data.shuffleSessionStarts++;
     _markDirty();
   }
 
   void recordSongSkip(int songId) {
+    if (_isRecordingPaused) return;
     _data.songSkipCounts.update(songId, (v) => v + 1, ifAbsent: () => 1);
     _markDirty();
   }
 
   void recordSongRestart(int songId) {
+    if (_isRecordingPaused) return;
     _data.songRestartCounts.update(songId, (v) => v + 1, ifAbsent: () => 1);
     _markDirty();
   }
@@ -93,6 +97,7 @@ class StatsService extends ChangeNotifier {
   /// This is intentionally separate from completed-listen counts: a song can
   /// become recent before enough listening time has accrued for a full listen.
   void recordSongPlayed(int songId, {DateTime? at}) {
+    if (_isRecordingPaused) return;
     var timestamp = (at ?? DateTime.now()).millisecondsSinceEpoch;
     _data.songLastPlayedAtMs[songId] = timestamp;
     _markDirty();
@@ -126,7 +131,9 @@ class StatsService extends ChangeNotifier {
   }
 
   /// Replaces all statistics with [json] (same shape as [exportSnapshot]),
-  /// persists them immediately and notifies listeners.
+  /// writes them to disk before returning and notifies listeners. Throws when
+  /// the write fails; the in-memory data is then already replaced, so callers
+  /// that roll back should replace it again with the previous snapshot.
   Future<void> replaceWithSnapshot(Map<String, dynamic> json) async {
     // Let a pending initial load finish first so it cannot overwrite the
     // restored data afterwards.
@@ -135,9 +142,24 @@ class StatsService extends ChangeNotifier {
     _debounceTimer = null;
     _applyJson(json);
     _dirty = true;
-    await _save();
-    notifyListeners();
+    try {
+      await _saveStrict();
+    } finally {
+      notifyListeners();
+    }
   }
+
+  var _recordingPauses = 0;
+
+  /// Stops counting plays, skips and restarts until [resumeRecording] is
+  /// called, e.g. while a backup is restored. Calls nest.
+  void pauseRecording() => _recordingPauses++;
+
+  void resumeRecording() {
+    if (_recordingPauses > 0) _recordingPauses--;
+  }
+
+  bool get _isRecordingPaused => _recordingPauses > 0;
 
   Future<void> flush() async {
     _debounceTimer?.cancel();
@@ -546,27 +568,49 @@ class StatsService extends ChangeNotifier {
     ),
   };
 
-  var _isSaving = false;
+  /// The save currently writing, if any. Further [_save] calls during it
+  /// only request one more pass and share this future.
+  Future<void>? _activeSave;
   var _hasPendingSave = false;
 
-  Future<void> _save() async {
-    if (_isSaving) {
+  Future<void> _save() {
+    var active = _activeSave;
+    if (active != null) {
       _hasPendingSave = true;
-      return;
+      return active.catchError((_) {});
     }
-    _isSaving = true;
+    var run = _runSaves(strict: false);
+    _activeSave = run;
+    return run;
+  }
+
+  /// Writes the current data, waiting for any save already in flight first.
+  /// Unlike [_save], a failed write is rethrown.
+  Future<void> _saveStrict() async {
+    while (_activeSave != null) {
+      await _activeSave!.catchError((_) {});
+    }
+    var run = _runSaves(strict: true);
+    _activeSave = run;
+    await run;
+  }
+
+  Future<void> _runSaves({required bool strict}) async {
     try {
       do {
         _hasPendingSave = false;
-        var appDir = await getApplicationDocumentsDirectory();
-        var json = _toJson();
-
-        var file = File('${appDir.path}/listening_stats.json');
-        await file.writeAsString(jsonEncode(json), flush: true);
-        _dirty = false;
+        try {
+          var appDir = await getApplicationDocumentsDirectory();
+          var file = File('${appDir.path}/listening_stats.json');
+          await file.writeAsString(jsonEncode(_toJson()), flush: true);
+          _dirty = false;
+        } catch (_) {
+          if (strict) rethrow;
+        }
       } while (_hasPendingSave);
-    } catch (_) {}
-    _isSaving = false;
+    } finally {
+      _activeSave = null;
+    }
   }
 
   void _markDirty() {

@@ -35,8 +35,8 @@ Map<String, dynamic> _song(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   // Set before any SharedPreferencesAsync is created: instances capture it.
-  SharedPreferencesAsyncPlatform.instance =
-      InMemorySharedPreferencesAsync.empty();
+  var platform = _FlakyPrefs();
+  SharedPreferencesAsyncPlatform.instance = platform;
 
   late Directory docsDir;
   var tempDirs = <Directory>[];
@@ -48,6 +48,7 @@ void main() {
   Future<void> newDevice() async {
     docsDir = Directory.systemTemp.createTempSync('sonora_backup_test_');
     tempDirs.add(docsDir);
+    platform.failingKeys.clear();
     await prefs.clear();
     await stats.reset();
   }
@@ -65,6 +66,24 @@ void main() {
     ],
     'stats': await stats.exportSnapshot(),
   };
+
+  Future<void> expectRejected(String content, BackupErrorKind kind) async {
+    var before = await snapshotState();
+    var playlistsBefore = (await scanner.getPlaylists())
+        .map((p) => p.toJson())
+        .toList();
+
+    await expectLater(
+      BackupService().restore(content),
+      throwsA(isA<BackupException>().having((e) => e.kind, 'kind', kind)),
+    );
+
+    expect(await snapshotState(), before);
+    expect(
+      (await scanner.getPlaylists()).map((p) => p.toJson()).toList(),
+      playlistsBefore,
+    );
+  }
 
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -284,24 +303,6 @@ void main() {
     });
 
     group('rejects bad files without writing anything', () {
-      Future<void> expectRejected(String content, BackupErrorKind kind) async {
-        var before = await snapshotState();
-        var playlistsBefore = (await scanner.getPlaylists())
-            .map((p) => p.toJson())
-            .toList();
-
-        await expectLater(
-          BackupService().restore(content),
-          throwsA(isA<BackupException>().having((e) => e.kind, 'kind', kind)),
-        );
-
-        expect(await snapshotState(), before);
-        expect(
-          (await scanner.getPlaylists()).map((p) => p.toJson()).toList(),
-          playlistsBefore,
-        );
-      }
-
       setUp(() async {
         await newDevice();
         await writeLibrary([_song(1, '/m/one.mp3', 'One')]);
@@ -360,9 +361,247 @@ void main() {
       });
     });
   });
+
+  group('BackupService safety', () {
+    test('refuses to restore into an empty library', () async {
+      var json = await exportFromDeviceA();
+      await newDevice();
+      await prefs.setString('now_playing_style', 'modern');
+      stats.recordCompleteListen(5);
+
+      await expectRejected(json, BackupErrorKind.libraryEmpty);
+      expect(stats.songPlayCount(5), 1);
+    });
+
+    test('refuses when no backed-up song is in the library', () async {
+      var json = await exportFromDeviceA();
+      await newDevice();
+      await writeLibrary([_song(9, '/elsewhere/x.mp3', 'Unrelated')]);
+      await scanner.savePlaylists([
+        Playlist(id: 'p1', name: 'Mine', songIds: [9]),
+      ]);
+
+      await expectRejected(json, BackupErrorKind.noMatchingSongs);
+      expect((await scanner.getPlaylists()).single.songIds, [9]);
+    });
+
+    test('aborts when current playlists cannot be read', () async {
+      var json = await exportFromDeviceA();
+      await newDevice();
+      await writeLibrary([
+        _song(101, '/storage/emulated/0/Music/one.mp3', 'One'),
+      ]);
+      await prefs.setString('playlists_json', '{broken');
+
+      await expectRejected(json, BackupErrorKind.readFailed);
+      expect(await prefs.getString('playlists_json'), '{broken');
+    });
+
+    test('rolls back everything when the library write fails', () async {
+      var json = await exportFromDeviceA();
+      await newDevice();
+      await writeLibrary([
+        _song(101, '/storage/emulated/0/Music/one.mp3', 'One'),
+      ]);
+      await scanner.savePlaylists([
+        Playlist(id: 'p1', name: 'Mine', songIds: [101]),
+      ]);
+      await prefs.setString('now_playing_style', 'modern');
+      // The library is written via a temp file; a directory in its place
+      // makes that write fail after settings and playlists were written.
+      Directory('${docsDir.path}/imported_songs.json.tmp').createSync();
+
+      await expectRejected(json, BackupErrorKind.writeFailed);
+      expect(await prefs.getString('now_playing_style'), 'modern');
+      expect(await prefs.getBool('amoled_dark'), isNull);
+      expect((await scanner.getPlaylists()).single.name, 'Mine');
+    });
+
+    test('rolls back everything when the stats write fails', () async {
+      var json = await exportFromDeviceA();
+      await newDevice();
+      await writeLibrary([
+        _song(101, '/storage/emulated/0/Music/one.mp3', 'One'),
+      ]);
+      stats.recordCompleteListen(101);
+      File('${docsDir.path}/listening_stats.json').deleteSync();
+      Directory('${docsDir.path}/listening_stats.json').createSync();
+
+      await expectRejected(json, BackupErrorKind.writeFailed);
+      expect(stats.songPlayCount(101), 1);
+      var songs = await scanner.readLibrarySongs();
+      expect(songs.single.isFavorite, isFalse);
+      expect(await scanner.getPlaylists(), isEmpty);
+    });
+
+    test('rolls back settings when a prefs write fails', () async {
+      var json = await exportFromDeviceA();
+      await newDevice();
+      await writeLibrary([
+        _song(101, '/storage/emulated/0/Music/one.mp3', 'One'),
+      ]);
+      await prefs.setString('theme_mode', 'light');
+      platform.failingKeys.add('playlists_json');
+
+      await expectRejected(json, BackupErrorKind.writeFailed);
+      expect(await prefs.getString('theme_mode'), 'light');
+      expect(await prefs.getDouble('speed'), isNull);
+    });
+
+    test('pauses stats recording only while restoring', () {
+      stats.pauseRecording();
+      stats.recordCompleteListen(77);
+      stats.resumeRecording();
+      expect(stats.songPlayCount(77), 0);
+      stats.recordCompleteListen(77);
+      expect(stats.songPlayCount(77), 1);
+    });
+
+    test('export refuses an empty library', () async {
+      await newDevice();
+      await expectLater(
+        BackupService().exportToJson(appVersion: 'x'),
+        throwsA(
+          isA<BackupException>().having(
+            (e) => e.kind,
+            'kind',
+            BackupErrorKind.libraryEmpty,
+          ),
+        ),
+      );
+    });
+
+    test('legacy favorite lists are exported and not shadowed', () async {
+      await newDevice();
+      await writeLibrary([_song(1, '/m/one.mp3', 'One')]);
+      await prefs.setStringList('favorite_albums', ['al|||ar']);
+      var doc = jsonDecode(await BackupService().exportToJson(appVersion: 'x'));
+      expect((doc['favorites']['albums'] as Map).keys, ['al|||ar']);
+
+      await newDevice();
+      await writeLibrary([_song(1, '/m/one.mp3', 'One')]);
+      await prefs.setStringList('favorite_artists', ['old']);
+      doc['favorites']['artists'] = {'new': 5};
+      await BackupService().restore(jsonEncode(doc));
+
+      var artists =
+          jsonDecode((await prefs.getString('favorite_artists_map'))!) as Map;
+      expect(artists.keys.toSet(), {'old', 'new'});
+      expect(artists['new'], 5);
+      var albums = jsonDecode((await prefs.getString('favorite_albums_map'))!);
+      expect((albums as Map).keys, ['al|||ar']);
+    });
+
+    test('restores "no effects" by removing preset keys', () async {
+      await newDevice();
+      await writeLibrary([_song(1, '/m/one.mp3', 'One')]);
+      var json = await BackupService().exportToJson(appVersion: 'x');
+
+      await prefs.setString('mfx_preset_name', 'slowed');
+      await prefs.setDouble('mfx_preset', 0.8);
+      await prefs.setStringList('mfx_customEqGains', ['1.0']);
+      await prefs.setDouble('volume', 0.5);
+      await BackupService().restore(json);
+
+      expect(await prefs.getString('mfx_preset_name'), isNull);
+      expect(await prefs.getDouble('mfx_preset'), isNull);
+      expect(await prefs.getStringList('mfx_customEqGains'), isNull);
+      expect(await prefs.getDouble('volume'), 0.5);
+    });
+
+    test('accepts a file with a UTF-8 byte order mark', () async {
+      await newDevice();
+      await writeLibrary([_song(1, '/m/one.mp3', 'One')]);
+      var json = await BackupService().exportToJson(appVersion: 'x');
+      expect(BackupService.parse('﻿$json').appVersion, 'x');
+      var bytes = [0xEF, 0xBB, 0xBF, ...utf8.encode(json)];
+      expect(
+        BackupService.parse(BackupService.decodeFile(bytes)).appVersion,
+        'x',
+      );
+    });
+  });
+
+  group('matchSongs', () {
+    BackupSongRef ref(
+      int id,
+      String path,
+      String title, {
+      String artist = 'A',
+    }) => BackupSongRef(
+      id: id,
+      path: path,
+      title: title,
+      artist: artist,
+      album: 'Al',
+      durationMs: 100000,
+    );
+    Song song(int id, String path, String title, {String artist = 'A'}) => Song(
+      id: id,
+      title: title,
+      artist: artist,
+      album: 'Al',
+      duration: const Duration(milliseconds: 100000),
+      filePath: path,
+    );
+
+    test('is one to one; a colliding song stays unmatched', () {
+      var refs = [ref(2, '/a/x.mp3', 'T'), ref(1, '/b/y.mp3', 'T')];
+      var library = [song(10, '/c/z.mp3', 'T')];
+      expect(BackupService.matchSongs(refs, library), {1: 10});
+    });
+
+    test('exact path wins over an earlier tag match', () {
+      var refs = [ref(1, '/a/x.mp3', 'T'), ref(2, '/lib/t.mp3', 'T')];
+      var library = [song(10, '/lib/t.mp3', 'T')];
+      expect(BackupService.matchSongs(refs, library), {2: 10});
+    });
+
+    test('ties go to the lowest library id', () {
+      var library = [song(20, '/c/a.mp3', 'T'), song(11, '/c/b.mp3', 'T')];
+      expect(BackupService.matchSongs([ref(1, '/x/q.mp3', 'T')], library), {
+        1: 11,
+      });
+    });
+
+    test('path tail needs the title or artist to agree', () {
+      var r = ref(1, '/old/Music/x.mp3', 'Title', artist: 'Band');
+      expect(
+        BackupService.matchSongs(
+          [r],
+          [song(5, '/new/Music/x.mp3', 'Other', artist: 'Someone')],
+        ),
+        isEmpty,
+      );
+      expect(
+        BackupService.matchSongs(
+          [r],
+          [song(5, '/new/Music/x.mp3', 'Other', artist: 'band')],
+        ),
+        {1: 5},
+      );
+    });
+  });
 }
 
 /// A minimal valid backup built from the current state, for tests that only
 /// need to tamper with the header.
 Future<String> exportFromDeviceAKeepingState() =>
     BackupService().exportToJson(appVersion: 'test');
+
+/// In-memory prefs whose string writes fail for [failingKeys].
+final class _FlakyPrefs extends InMemorySharedPreferencesAsync {
+  _FlakyPrefs() : super.empty();
+
+  final failingKeys = <String>{};
+
+  @override
+  Future<bool> setString(
+    String key,
+    String value,
+    SharedPreferencesOptions options,
+  ) {
+    if (failingKeys.contains(key)) throw StateError('simulated failure');
+    return super.setString(key, value, options);
+  }
+}

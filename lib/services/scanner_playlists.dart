@@ -7,54 +7,74 @@ extension ScannerPlaylists on MusicScanner {
   /// Reads the playlists list from SharedPreferencesAsync (with fallback migration to playlists.json).
   Future<List<Playlist>> getPlaylists() async {
     try {
-      var prefContent = await _prefs.getString('playlists_json');
-      var list = <Playlist>[];
-
-      if (prefContent != null && prefContent.isNotEmpty) {
-        var jsonList = jsonDecode(prefContent) as List<dynamic>;
-        list = jsonList
-            .map((item) => Playlist.fromJson(item as Map<String, dynamic>))
-            .toList();
-      } else {
-        // Fallback to legacy disk file if present
-        var appDir = await getApplicationDocumentsDirectory();
-        var file = File('${appDir.path}/playlists.json');
-        if (file.existsSync()) {
-          var content = await file.readAsString();
-          var jsonList = jsonDecode(content) as List<dynamic>;
-          list = jsonList
-              .map((item) => Playlist.fromJson(item as Map<String, dynamic>))
-              .toList();
-          // Save to SharedPreferencesAsync
-          await savePlaylists(list);
-        }
-      }
-
-      // Migrate existing users by removing the legacy favorites playlist
-      if (list.any((p) => p.id == 'favorites')) {
-        list.removeWhere((p) => p.id == 'favorites');
-        await savePlaylists(list);
-      }
-      return list;
+      return await getPlaylistsStrict();
     } catch (_) {
       return [];
     }
   }
 
+  /// Like [getPlaylists] but throws when stored playlists cannot be read, so callers can tell "no playlists" from "read failed".
+  Future<List<Playlist>> getPlaylistsStrict() async {
+    var prefContent = await _prefs.getString('playlists_json');
+    var list = <Playlist>[];
+
+    if (prefContent != null && prefContent.isNotEmpty) {
+      var jsonList = jsonDecode(prefContent) as List<dynamic>;
+      list = jsonList
+          .map((item) => Playlist.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } else {
+      // Fallback to legacy disk file if present
+      var appDir = await getApplicationDocumentsDirectory();
+      var file = File('${appDir.path}/playlists.json');
+      if (file.existsSync()) {
+        var content = await file.readAsString();
+        var jsonList = jsonDecode(content) as List<dynamic>;
+        list = jsonList
+            .map((item) => Playlist.fromJson(item as Map<String, dynamic>))
+            .toList();
+        // Save to SharedPreferencesAsync
+        await savePlaylists(list);
+      }
+    }
+
+    // Migrate existing users by removing the legacy favorites playlist
+    if (list.any((p) => p.id == 'favorites')) {
+      list.removeWhere((p) => p.id == 'favorites');
+      await savePlaylists(list);
+    }
+    return list;
+  }
+
   /// Writes the playlists list to SharedPreferencesAsync and disk backup.
   Future<void> savePlaylists(List<Playlist> playlists) async {
     try {
-      var jsonList = playlists.map((p) => p.toJson()).toList();
-      var jsonStr = jsonEncode(jsonList);
-      await _prefs.setString('playlists_json', jsonStr);
-
-      // Keep legacy file updated as double backup so playlists are NEVER lost
-      try {
-        var appDir = await getApplicationDocumentsDirectory();
-        var file = File('${appDir.path}/playlists.json');
-        await file.writeAsString(jsonStr);
-      } catch (_) {}
+      await savePlaylistsStrict(playlists);
     } catch (_) {}
+  }
+
+  /// Like [savePlaylists] but throws when the primary (prefs) write fails.
+  /// The legacy disk copy stays best effort.
+  Future<void> savePlaylistsStrict(List<Playlist> playlists) async {
+    var jsonList = playlists.map((p) => p.toJson()).toList();
+    var jsonStr = jsonEncode(jsonList);
+    await _prefs.setString('playlists_json', jsonStr);
+
+    // Keep legacy file updated as double backup so playlists are NEVER lost
+    try {
+      var appDir = await getApplicationDocumentsDirectory();
+      var file = File('${appDir.path}/playlists.json');
+      await file.writeAsString(jsonStr);
+    } catch (_) {}
+  }
+
+  /// Removes all stored playlists (prefs and legacy disk copy), returning
+  /// to the state of a fresh install. Throws when the prefs write fails.
+  Future<void> clearStoredPlaylistsStrict() async {
+    await _prefs.remove('playlists_json');
+    var appDir = await getApplicationDocumentsDirectory();
+    var file = File('${appDir.path}/playlists.json');
+    if (file.existsSync()) await file.delete();
   }
 
   /// Toggles a song's favorite status in the cache index and updates the default Favorites playlist.
@@ -115,14 +135,20 @@ extension ScannerPlaylists on MusicScanner {
   }
 
   /// Returns the cached library exactly as stored, without sorting or
-  /// triggering any background work.
-  Future<List<Song>> readLibrarySongs() => _readImportedSongsMetadata();
+  /// triggering any background work. Throws when the cache exists but cannot
+  /// be read; returns an empty list when there is no cache yet.
+  Future<List<Song>> readLibrarySongs() => _readImportedSongsMetadataStrict();
+
+  /// Writes [songs] as the library cache; throws when the write fails.
+  Future<void> writeLibrarySongs(List<Song> songs) =>
+      _writeImportedSongsMetadataStrict(songs);
 
   /// Marks the songs in [favoriteDates] (song id to favorite timestamp) as
   /// favorites. Songs that already are favorites keep their current date, so
-  /// running this twice changes nothing the second time.
+  /// running this twice changes nothing the second time. Throws when the
+  /// library cannot be read or written.
   Future<List<Song>> mergeFavoriteSongs(Map<int, int?> favoriteDates) async {
-    var songs = await _readImportedSongsMetadata();
+    var songs = await _readImportedSongsMetadataStrict();
     if (favoriteDates.isEmpty) return songs;
     var now = DateTime.now().millisecondsSinceEpoch;
     var modified = false;
@@ -138,7 +164,7 @@ extension ScannerPlaylists on MusicScanner {
     }
 
     if (modified) {
-      await _writeImportedSongsMetadata(songs);
+      await _writeImportedSongsMetadataStrict(songs);
     }
     return songs;
   }

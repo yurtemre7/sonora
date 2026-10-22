@@ -39,6 +39,9 @@ extension PlayerPersistence on PlayerProvider {
       // We will apply this via _applyMfx below if no presets override it.
     }
 
+    // Start from "no preset" so a reload (e.g. after a backup restore) can
+    // also turn a preset off; at startup this is already the case.
+    _mfxPreset = null;
     var savedPresetName = await prefs.getString('mfx_preset_name');
     if (savedPresetName != null) {
       _mfxPreset = MfxPreset.fromName(savedPresetName);
@@ -83,9 +86,7 @@ extension PlayerPersistence on PlayerProvider {
     _isBluetoothMfxPatchEnabled =
         await prefs.getBool('mfx_bluetoothMfxPatch') ?? false;
     var gains = await prefs.getStringList('mfx_customEqGains');
-    if (gains != null) {
-      _customEqGains = gains.map((e) => double.tryParse(e) ?? 0.0).toList();
-    }
+    _customEqGains = gains?.map((e) => double.tryParse(e) ?? 0.0).toList();
 
     // Apply initial audio settings
     await _applyMfx();

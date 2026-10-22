@@ -489,26 +489,32 @@ class MusicScanner {
 
   Future<List<Song>> _readImportedSongsMetadata() async {
     try {
-      await _libraryWrite;
-      var jsonFile = await _libraryFile();
-
-      var legacyContent = await _prefs.getString(_legacyLibraryPrefsKey);
-      if (legacyContent != null) {
-        // The prefs copy was the primary read source before, so it wins.
-        if (legacyContent.isNotEmpty) {
-          await _writeLibraryFileAtomically(jsonFile, legacyContent);
-        }
-        await _prefs.remove(_legacyLibraryPrefsKey);
-        if (legacyContent.isNotEmpty) {
-          return await _decodeLibraryInIsolate(legacyContent);
-        }
-      }
-
-      if (!jsonFile.existsSync()) return [];
-      return await _decodeLibraryInIsolate(await jsonFile.readAsString());
+      return await _readImportedSongsMetadataStrict();
     } catch (_) {
       return [];
     }
+  }
+
+  /// Like [_readImportedSongsMetadata] but throws when the cache exists and
+  /// cannot be read, so callers can tell "empty" from "failed".
+  Future<List<Song>> _readImportedSongsMetadataStrict() async {
+    await _libraryWrite;
+    var jsonFile = await _libraryFile();
+
+    var legacyContent = await _prefs.getString(_legacyLibraryPrefsKey);
+    if (legacyContent != null) {
+      // The prefs copy was the primary read source before, so it wins.
+      if (legacyContent.isNotEmpty) {
+        await _writeLibraryFileAtomically(jsonFile, legacyContent);
+      }
+      await _prefs.remove(_legacyLibraryPrefsKey);
+      if (legacyContent.isNotEmpty) {
+        return await _decodeLibraryInIsolate(legacyContent);
+      }
+    }
+
+    if (!jsonFile.existsSync()) return [];
+    return await _decodeLibraryInIsolate(await jsonFile.readAsString());
   }
 
   Future<void> _writeImportedSongsMetadata(List<Song> songs) {
@@ -519,6 +525,23 @@ class MusicScanner {
         await _writeLibraryFileAtomically(await _libraryFile(), jsonStr);
       } catch (_) {}
     });
+  }
+
+  /// Like [_writeImportedSongsMetadata] but the returned future fails when
+  /// the write fails. The shared write queue itself never fails.
+  Future<void> _writeImportedSongsMetadataStrict(List<Song> songs) {
+    var snapshot = List<Song>.of(songs);
+    var result = Completer<void>();
+    _libraryWrite = _libraryWrite.then((_) async {
+      try {
+        var jsonStr = await _encodeLibraryInIsolate(snapshot);
+        await _writeLibraryFileAtomically(await _libraryFile(), jsonStr);
+        result.complete();
+      } catch (e, stack) {
+        result.completeError(e, stack);
+      }
+    });
+    return result.future;
   }
 
   // Static so the isolate closures capture only their argument, never `this`

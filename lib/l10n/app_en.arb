@@ -744,5 +744,10 @@
   "replayGainTrack": "Track",
   "replayGainAlbum": "Album",
   "replayGainTrackGainLabel": "Track gain",
-  "replayGainAlbumGainLabel": "Album gain"
+  "replayGainAlbumGainLabel": "Album gain",
+  "backupErrorLibraryEmpty": "Your music library is empty. Scan your music folder first, then try again.",
+  "backupErrorNoMatchingSongs": "None of the songs in this backup are in your library. Check that the right music folder is selected and scanned.",
+  "backupErrorRolledBack": "Could not restore the backup. Your previous data was kept.",
+  "backupErrorFilePicker": "Could not open the file. Please try again.",
+  "backupRestartNeeded": "Restart the app to see all changes"
 }

@@ -2785,6 +2785,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Album gain'**
   String get replayGainAlbumGainLabel;
+
+  /// No description provided for @backupErrorLibraryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your music library is empty. Scan your music folder first, then try again.'**
+  String get backupErrorLibraryEmpty;
+
+  /// No description provided for @backupErrorNoMatchingSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'None of the songs in this backup are in your library. Check that the right music folder is selected and scanned.'**
+  String get backupErrorNoMatchingSongs;
+
+  /// No description provided for @backupErrorRolledBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore the backup. Your previous data was kept.'**
+  String get backupErrorRolledBack;
+
+  /// No description provided for @backupErrorFilePicker.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the file. Please try again.'**
+  String get backupErrorFilePicker;
+
+  /// No description provided for @backupRestartNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart the app to see all changes'**
+  String get backupRestartNeeded;
 }
 
 class _AppLocalizationsDelegate

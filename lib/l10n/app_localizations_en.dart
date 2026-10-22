@@ -1551,4 +1551,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get replayGainAlbumGainLabel => 'Album gain';
+
+  @override
+  String get backupErrorLibraryEmpty =>
+      'Your music library is empty. Scan your music folder first, then try again.';
+
+  @override
+  String get backupErrorNoMatchingSongs =>
+      'None of the songs in this backup are in your library. Check that the right music folder is selected and scanned.';
+
+  @override
+  String get backupErrorRolledBack =>
+      'Could not restore the backup. Your previous data was kept.';
+
+  @override
+  String get backupErrorFilePicker =>
+      'Could not open the file. Please try again.';
+
+  @override
+  String get backupRestartNeeded => 'Restart the app to see all changes';
 }

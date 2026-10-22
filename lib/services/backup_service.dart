@@ -19,10 +19,26 @@ enum BackupErrorKind {
 
   /// The file claims to be a Sonora backup but a section is malformed.
   malformed,
+
+  /// The music library is empty (not scanned yet), so songs cannot be
+  /// exported or matched. Nothing was written.
+  libraryEmpty,
+
+  /// The backup refers to songs but none of them are in this library, which
+  /// usually means the wrong music folder is selected. Nothing was written.
+  noMatchingSongs,
+
+  /// Current data (library or playlists) could not be read. Nothing was
+  /// written.
+  readFailed,
+
+  /// Writing the restored data failed. Everything already written was
+  /// rolled back as far as possible.
+  writeFailed,
 }
 
-/// Thrown when a backup file fails validation. Nothing has been written when
-/// this is thrown.
+/// Thrown when a backup cannot be exported or restored. For every kind except
+/// [BackupErrorKind.writeFailed] nothing has been written.
 class BackupException implements Exception {
   final BackupErrorKind kind;
   final String message;
@@ -162,6 +178,9 @@ class BackupDocument {
   final String appVersion;
   final Map<int, BackupSongRef> songs;
   final Map<String, Object> settings;
+
+  /// Whether the file had a settings section at all.
+  final bool hasSettings;
   final List<BackupPlaylist>? playlists;
   final Map<int, int?>? favoriteSongs;
   final Map<String, int>? favoriteAlbums;
@@ -173,6 +192,7 @@ class BackupDocument {
     required this.appVersion,
     required this.songs,
     required this.settings,
+    this.hasSettings = true,
     required this.playlists,
     required this.favoriteSongs,
     required this.favoriteAlbums,
@@ -296,7 +316,13 @@ class BackupService {
     required String appVersion,
     DateTime? now,
   }) async {
-    var library = await _scanner.readLibrarySongs();
+    var library = await _readLibrary();
+    if (library.isEmpty) {
+      throw const BackupException(
+        BackupErrorKind.libraryEmpty,
+        'The library is empty; scan the music folder first',
+      );
+    }
     var songById = {for (var s in library) s.id: s};
     var referenced = <int>{};
 
@@ -313,7 +339,7 @@ class BackupService {
     }
 
     var playlists = [
-      for (var playlist in await _scanner.getPlaylists())
+      for (var playlist in await _readPlaylists())
         {
           'id': playlist.id,
           'name': playlist.name,
@@ -361,8 +387,8 @@ class BackupService {
       'playlists': playlists,
       'favorites': {
         'songs': favoriteSongs,
-        'albums': await _readFavoriteMap('favorite_albums_map'),
-        'artists': await _readFavoriteMap('favorite_artists_map'),
+        'albums': await _readFavoriteMap(_favoriteAlbumsKey),
+        'artists': await _readFavoriteMap(_favoriteArtistsKey),
       },
       'stats': stats,
     };
@@ -389,15 +415,53 @@ class BackupService {
     }
   }
 
+  static const _favoriteAlbumsKey = 'favorite_albums_map';
+  static const _favoriteArtistsKey = 'favorite_artists_map';
+
+  /// Older versions stored favorite albums and artists as plain lists.
+  static const _legacyFavoriteKeys = {
+    _favoriteAlbumsKey: 'favorite_albums',
+    _favoriteArtistsKey: 'favorite_artists',
+  };
+
+  /// Reads a favorite albums/artists map, falling back to the legacy list
+  /// the player still migrates from (see `PlayerPersistence.loadSettings`).
   Future<Map<String, int>> _readFavoriteMap(String key) async {
     try {
       var raw = await _prefs.getString(key);
-      if (raw == null) return {};
-      return Map<String, int>.from(jsonDecode(raw) as Map);
+      if (raw != null) return Map<String, int>.from(jsonDecode(raw) as Map);
+      var legacy = await _prefs.getStringList(_legacyFavoriteKeys[key]!);
+      if (legacy == null) return {};
+      var now = DateTime.now().millisecondsSinceEpoch;
+      return {for (var k in legacy) k: now};
     } catch (_) {
       return {};
     }
   }
+
+  Future<List<Song>> _readLibrary() async {
+    try {
+      return await _scanner.readLibrarySongs();
+    } catch (e) {
+      throw BackupException(BackupErrorKind.readFailed, 'library: $e');
+    }
+  }
+
+  Future<List<Playlist>> _readPlaylists() async {
+    try {
+      return await _scanner.getPlaylistsStrict();
+    } catch (e) {
+      throw BackupException(BackupErrorKind.readFailed, 'playlists: $e');
+    }
+  }
+
+  /// Strips a leading UTF-8 byte order mark, which some editors add.
+  static String _stripBom(String content) =>
+      content.startsWith('\uFEFF') ? content.substring(1) : content;
+
+  /// Decodes the raw bytes of a picked backup file.
+  static String decodeFile(List<int> bytes) =>
+      _stripBom(utf8.decode(bytes, allowMalformed: false));
 
   // ── Parse and validate ──────────────────────────────────────────────────
 
@@ -406,7 +470,7 @@ class BackupService {
   static BackupDocument parse(String content) {
     Object? decoded;
     try {
-      decoded = jsonDecode(content);
+      decoded = jsonDecode(_stripBom(content));
     } on FormatException catch (e) {
       throw BackupException(BackupErrorKind.invalidJson, e.message);
     }
@@ -553,6 +617,7 @@ class BackupService {
           : '',
       songs: songs,
       settings: settings,
+      hasSettings: rawSettings != null,
       playlists: playlists,
       favoriteSongs: favoriteSongs,
       favoriteAlbums: favoriteAlbums,
@@ -612,6 +677,14 @@ class BackupService {
 
   // ── Restore ─────────────────────────────────────────────────────────────
 
+  /// Effect keys the player removes while effects are off. A backup made in
+  /// that state does not contain them, so they are removed on restore too.
+  static const _removedWhenAbsent = [
+    'mfx_preset_name',
+    'mfx_preset',
+    'mfx_customEqGains',
+  ];
+
   /// Validates [content] completely, then restores it.
   ///
   /// Settings in the backup replace the stored ones (others are kept),
@@ -623,90 +696,166 @@ class BackupService {
     return await restoreDocument(document);
   }
 
+  /// Restores an already parsed [doc].
+  ///
+  /// Everything is read and planned first; an empty library, a backup whose
+  /// songs match nothing, or unreadable current data aborts before anything
+  /// is written. If a write fails, everything written so far is rolled back
+  /// and a [BackupErrorKind.writeFailed] exception is thrown.
   Future<BackupRestoreResult> restoreDocument(BackupDocument doc) async {
-    var library = await _scanner.readLibrarySongs();
-    var idMap = matchSongs(doc.songs.values, library);
-    var unmatched = doc.referencedSongIds
-        .where((id) => !idMap.containsKey(id))
-        .length;
+    _stats.pauseRecording();
+    try {
+      return await _restore(doc);
+    } finally {
+      _stats.resumeRecording();
+    }
+  }
 
-    // Settings: replace only the keys that are in the backup.
-    for (var entry in doc.settings.entries) {
-      await _writePref(entry.key, entry.value);
+  Future<BackupRestoreResult> _restore(BackupDocument doc) async {
+    // ── Read and plan; nothing is written in this part. ──
+    var library = await _readLibrary();
+    if (library.isEmpty) {
+      throw const BackupException(
+        BackupErrorKind.libraryEmpty,
+        'The library is empty; scan the music folder first',
+      );
+    }
+    var idMap = matchSongs(doc.songs.values, library);
+    var referenced = doc.referencedSongIds;
+    if (referenced.isNotEmpty && !referenced.any(idMap.containsKey)) {
+      throw const BackupException(
+        BackupErrorKind.noMatchingSongs,
+        'None of the backed-up songs are in this library',
+      );
+    }
+    var unmatched = referenced.where((id) => !idMap.containsKey(id)).length;
+
+    // Pref writes; a null value removes the key.
+    var prefWrites = <String, Object?>{...doc.settings};
+    if (doc.hasSettings) {
+      for (var key in _removedWhenAbsent) {
+        if (!doc.settings.containsKey(key)) prefWrites[key] = null;
+      }
     }
 
-    // Playlists: merge by id, backup wins, others are kept.
+    var favoriteGroupsRestored = 0;
+    for (var (key, backup) in [
+      (_favoriteAlbumsKey, doc.favoriteAlbums),
+      (_favoriteArtistsKey, doc.favoriteArtists),
+    ]) {
+      if (backup == null) continue;
+      favoriteGroupsRestored += backup.length;
+      var current = await _readFavoriteMap(key);
+      // Existing entries keep their date so a second restore changes nothing.
+      var merged = {...backup, ...current};
+      var stored = await _prefs.getString(key);
+      if (merged.length != current.length ||
+          (stored == null && merged.isNotEmpty)) {
+        prefWrites[key] = jsonEncode(merged);
+      }
+    }
+
+    List<Playlist>? playlistsBefore;
+    List<Playlist>? playlistsAfter;
+    var hadStoredPlaylists = false;
     var playlistsRestored = 0;
-    if (doc.playlists case var backupPlaylists?) {
-      var current = await _scanner.getPlaylists();
+    if (doc.playlists case var backupPlaylists?
+        when backupPlaylists.isNotEmpty) {
+      playlistsBefore = await _readPlaylists();
+      hadStoredPlaylists = await _prefs.containsKey('playlists_json');
+      playlistsAfter = List<Playlist>.of(playlistsBefore);
       var indexById = {
-        for (var (i, playlist) in current.indexed) playlist.id: i,
+        for (var (i, playlist) in playlistsAfter.indexed) playlist.id: i,
       };
       for (var backup in backupPlaylists) {
-        var songIds = _remapIds(backup.songIds, idMap);
         var existingIndex = indexById[backup.id];
         var restored = Playlist(
           id: backup.id,
           name: backup.name,
-          songIds: songIds,
+          songIds: _remapIds(backup.songIds, idMap),
           description: backup.description,
           // Cover images are files on this device and are not backed up.
           coverImagePath: existingIndex == null
               ? null
-              : current[existingIndex].coverImagePath,
+              : playlistsAfter[existingIndex].coverImagePath,
         );
         if (existingIndex == null) {
-          indexById[backup.id] = current.length;
-          current.add(restored);
+          indexById[backup.id] = playlistsAfter.length;
+          playlistsAfter.add(restored);
         } else {
-          current[existingIndex] = restored;
+          playlistsAfter[existingIndex] = restored;
         }
         playlistsRestored++;
       }
-      if (backupPlaylists.isNotEmpty) {
-        await _scanner.savePlaylists(current);
-      }
     }
 
-    // Favorites: union with what is already there.
-    var favoriteSongsRestored = 0;
-    var favoriteGroupsRestored = 0;
-    if (doc.favoriteSongs case var favoriteSongs?) {
-      var dates = <int, int?>{};
-      for (var entry in favoriteSongs.entries) {
-        var newId = idMap[entry.key];
-        if (newId == null) continue;
-        var existing = dates[newId];
-        var date = entry.value;
-        // Two backed-up songs mapped onto one: keep the earlier date.
-        dates[newId] = existing == null || (date != null && date < existing)
-            ? date
-            : existing;
-      }
-      favoriteSongsRestored = dates.length;
-      library = await _scanner.mergeFavoriteSongs(dates);
-    }
-    if (doc.favoriteAlbums case var albums?) {
-      await _mergeFavoriteMap('favorite_albums_map', albums);
-      favoriteGroupsRestored += albums.length;
-    }
-    if (doc.favoriteArtists case var artists?) {
-      await _mergeFavoriteMap('favorite_artists_map', artists);
-      favoriteGroupsRestored += artists.length;
-    }
+    var favoriteDates = <int, int?>{
+      for (var entry in (doc.favoriteSongs ?? const <int, int?>{}).entries)
+        ?idMap[entry.key]: entry.value,
+    };
+    var needsFavoriteWrite = library.any(
+      (s) => !s.isFavorite && favoriteDates.containsKey(s.id),
+    );
 
-    // Stats: replace.
+    Map<String, dynamic>? statsAfter;
+    Map<String, dynamic>? statsBefore;
     if (doc.stats case var stats?) {
-      await _stats.replaceWithSnapshot(_remapStats(stats, idMap));
+      statsAfter = _remapStats(stats, idMap);
+      statsBefore = await _stats.exportSnapshot();
+    }
+
+    var prefsBefore = await _prefs.getAll(allowList: prefWrites.keys.toSet());
+
+    // ── Write, undoing every started step if one fails. ──
+    var rollbacks = <Future<void> Function()>[];
+    try {
+      rollbacks.add(() => _restorePrefs(prefsBefore, prefWrites.keys));
+      for (var entry in prefWrites.entries) {
+        var value = entry.value;
+        if (value == null) {
+          await _prefs.remove(entry.key);
+        } else {
+          await _writePref(entry.key, value);
+        }
+      }
+
+      if (playlistsAfter != null) {
+        var before = playlistsBefore!;
+        rollbacks.add(
+          () => hadStoredPlaylists
+              ? _scanner.savePlaylistsStrict(before)
+              : _scanner.clearStoredPlaylistsStrict(),
+        );
+        await _scanner.savePlaylistsStrict(playlistsAfter);
+      }
+
+      if (needsFavoriteWrite) {
+        var before = library;
+        rollbacks.add(() => _scanner.writeLibrarySongs(before));
+        library = await _scanner.mergeFavoriteSongs(favoriteDates);
+      }
+
+      if (statsAfter != null) {
+        var before = statsBefore!;
+        rollbacks.add(() => _stats.replaceWithSnapshot(before));
+        await _stats.replaceWithSnapshot(statsAfter);
+      }
+    } catch (e) {
+      for (var rollback in rollbacks.reversed) {
+        try {
+          await rollback();
+        } catch (_) {}
+      }
+      throw BackupException(BackupErrorKind.writeFailed, '$e');
     }
 
     return BackupRestoreResult(
       playlistsRestored: playlistsRestored,
-      favoriteSongsRestored: favoriteSongsRestored,
+      favoriteSongsRestored: favoriteDates.length,
       favoriteAlbumsAndArtistsRestored: favoriteGroupsRestored,
       unmatchedSongs: unmatched,
       settingsRestored: doc.settings.length,
-      statsRestored: doc.stats != null,
+      statsRestored: statsAfter != null,
       songs: library,
     );
   }
@@ -721,18 +870,24 @@ class BackupService {
         await _prefs.setDouble(key, v);
       case String v:
         await _prefs.setString(key, v);
-      case List<String> v:
-        await _prefs.setStringList(key, v);
+      case List<dynamic> v:
+        await _prefs.setStringList(key, List<String>.from(v));
     }
   }
 
-  Future<void> _mergeFavoriteMap(String key, Map<String, int> backup) async {
-    if (backup.isEmpty) return;
-    var current = await _readFavoriteMap(key);
-    // Existing entries keep their date so a second restore changes nothing.
-    var merged = {...backup, ...current};
-    if (merged.length != current.length) {
-      await _prefs.setString(key, jsonEncode(merged));
+  /// Puts [keys] back to the values in [before], removing the ones that were
+  /// not set.
+  Future<void> _restorePrefs(
+    Map<String, Object?> before,
+    Iterable<String> keys,
+  ) async {
+    for (var key in keys) {
+      var value = before[key];
+      if (value == null) {
+        await _prefs.remove(key);
+      } else {
+        await _writePref(key, value);
+      }
     }
   }
 
@@ -783,21 +938,27 @@ class BackupService {
 
   // ── Song matching ───────────────────────────────────────────────────────
 
-  /// Maps backed-up song ids onto ids in [library].
+  /// Maps backed-up song ids onto ids in [library], one to one.
   ///
-  /// Tries, in order: the exact file path, the same title, artist and album
-  /// with a near-equal duration, and finally the same file name inside the
-  /// same folder name (a library moved to another root). Songs that match
-  /// nothing are left out of the result.
+  /// Runs three passes, each over the backed-up songs in id order: the exact
+  /// file path; the same title, artist and album with a near-equal duration;
+  /// and the same folder and file name (a library moved to another root)
+  /// when the title or artist also agrees. A library song is claimed by the
+  /// first match only, so a later backed-up song that would land on it stays
+  /// unmatched. Ties go to the closest duration, then the lowest library id.
   static Map<int, int> matchSongs(
     Iterable<BackupSongRef> refs,
     List<Song> library,
   ) {
+    var sortedRefs = refs.toList()..sort((a, b) => a.id.compareTo(b.id));
+    var sortedLibrary = List<Song>.of(library)
+      ..sort((a, b) => a.id.compareTo(b.id));
+
     var byPath = <String, Song>{};
     var byTags = <String, List<Song>>{};
     var byTail = <String, List<Song>>{};
-    for (var song in library) {
-      byPath[song.filePath] = song;
+    for (var song in sortedLibrary) {
+      byPath.putIfAbsent(song.filePath, () => song);
       byTags
           .putIfAbsent(_tagKey(song.title, song.artist, song.album), () => [])
           .add(song);
@@ -805,23 +966,42 @@ class BackupService {
     }
 
     var result = <int, int>{};
-    for (var ref in refs) {
-      var match =
-          byPath[ref.path] ??
-          _closestByDuration(
-            byTags[_tagKey(ref.title, ref.artist, ref.album)],
-            ref.durationMs,
-          ) ??
-          _closestByDuration(byTail[_pathTail(ref.path)], ref.durationMs);
-      if (match != null) result[ref.id] = match.id;
+    var claimed = <int>{};
+
+    void matchPass(Song? Function(BackupSongRef ref) find) {
+      for (var ref in sortedRefs) {
+        if (result.containsKey(ref.id)) continue;
+        var song = find(ref);
+        if (song != null && claimed.add(song.id)) result[ref.id] = song.id;
+      }
     }
+
+    matchPass((ref) => byPath[ref.path]);
+    matchPass(
+      (ref) => _closestByDuration(
+        byTags[_tagKey(ref.title, ref.artist, ref.album)],
+        ref.durationMs,
+        claimed,
+      ),
+    );
+    matchPass(
+      (ref) => _closestByDuration(
+        byTail[_pathTail(ref.path)]?.where(
+          (song) =>
+              _norm(song.title) == _norm(ref.title) ||
+              _norm(song.artist) == _norm(ref.artist),
+        ),
+        ref.durationMs,
+        claimed,
+      ),
+    );
     return result;
   }
 
+  static String _norm(String value) => value.trim().toLowerCase();
+
   static String _tagKey(String title, String artist, String album) =>
-      '${title.trim().toLowerCase()}\u0000'
-      '${artist.trim().toLowerCase()}\u0000'
-      '${album.trim().toLowerCase()}';
+      '${_norm(title)}\u0000${_norm(artist)}\u0000${_norm(album)}';
 
   /// The last folder plus the file name, separator- and case-insensitive.
   static String _pathTail(String path) {
@@ -834,11 +1014,18 @@ class BackupService {
     return segments.sublist(start).join('/').toLowerCase();
   }
 
-  static Song? _closestByDuration(List<Song>? candidates, int durationMs) {
+  /// The unclaimed candidate closest in duration (within tolerance); ties go
+  /// to the first candidate, i.e. the lowest id.
+  static Song? _closestByDuration(
+    Iterable<Song>? candidates,
+    int durationMs,
+    Set<int> claimed,
+  ) {
     if (candidates == null) return null;
     Song? best;
     var bestDiff = _durationToleranceMs + 1;
     for (var song in candidates) {
+      if (claimed.contains(song.id)) continue;
       var diff = (song.duration.inMilliseconds - durationMs).abs();
       if (diff < bestDiff) {
         best = song;
