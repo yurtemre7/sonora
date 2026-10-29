@@ -2,6 +2,14 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.26.2] - 2026-10-29
+### Changed
+* Chore: Update packages
+
+## [1.26.1] - 2026-10-23
+### Changed
+* Chore: Use flutter 3.47.8
+
 ## [1.26.0] - 2026-10-22
 ### Added
 * Add now playing home screen widget
