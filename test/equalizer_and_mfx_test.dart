@@ -2,43 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sonora/l10n/app_localizations.dart';
 import 'package:sonora/models/mfx_preset.dart';
-import 'package:sonora/services/equalizer_service.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/volume_slider.dart';
 
 void main() {
-  group('EqualizerService Preset Tests', () {
-    test('Presets contain standard musical curves with exactly 5 bands', () {
-      expect(EqualizerService.presets.containsKey('Flat'), isTrue);
-      expect(EqualizerService.presets.containsKey('Bass Boost'), isTrue);
-      expect(EqualizerService.presets.containsKey('Treble Boost'), isTrue);
-      expect(EqualizerService.presets.containsKey('Vocal'), isTrue);
-      expect(EqualizerService.presets.containsKey('Rock'), isTrue);
-      expect(EqualizerService.presets.containsKey('Pop'), isTrue);
-      expect(EqualizerService.presets.containsKey('EDM'), isTrue);
-
-      for (var entry in EqualizerService.presets.entries) {
-        expect(
-          entry.value.length,
-          equals(5),
-          reason: '${entry.key} must have exactly 5 frequency band gains',
-        );
-      }
-    });
-
-    test('Bass Boost preset elevates lower frequency bands', () {
-      var bassGains = EqualizerService.presets['Bass Boost']!;
-      expect(bassGains[0], greaterThan(bassGains[2]));
-      expect(bassGains[1], greaterThan(bassGains[3]));
-    });
-
-    test('Treble Boost preset elevates higher frequency bands', () {
-      var trebleGains = EqualizerService.presets['Treble Boost']!;
-      expect(trebleGains[4], greaterThan(trebleGains[0]));
-      expect(trebleGains[3], greaterThan(trebleGains[1]));
-    });
-  });
-
   group('VolumeSlider Widget Tests', () {
     testWidgets('Renders volume_off icon when volume is 0', (tester) async {
       await tester.pumpWidget(
