@@ -125,7 +125,7 @@ extension PlayerSleepTimer on PlayerProvider {
           (_finishSongTargetSongId != null &&
               song.id != _finishSongTargetSongId)) {
         timer.cancel();
-        await audioHandler.pause();
+        await audioHandler.pause(immediate: true);
         await _finalizeSleepTimerStop();
         return;
       }
@@ -138,7 +138,7 @@ extension PlayerSleepTimer on PlayerProvider {
       if (remainingInSong <= const Duration(milliseconds: 250) ||
           pos >= songDuration) {
         timer.cancel();
-        await audioHandler.pause();
+        await audioHandler.pause(immediate: true);
         await _finalizeSleepTimerStop();
         return;
       }
