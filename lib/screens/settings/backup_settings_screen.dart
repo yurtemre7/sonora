@@ -71,8 +71,6 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
         fileName: BackupService.defaultFileName(DateTime.now()),
         bytes: Uint8List.fromList(utf8.encode(json)),
         mimeType: 'application/json',
-        type: FileType.custom,
-        allowedExtensions: const ['json'],
       );
       if (uri != null) _showMessage(messenger, l10n.backupExportSuccess);
     } on BackupException catch (e) {
