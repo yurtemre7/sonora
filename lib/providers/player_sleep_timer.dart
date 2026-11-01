@@ -28,7 +28,7 @@ extension PlayerSleepTimer on PlayerProvider {
     _isFadingOut = false;
     _isFinishingCurrentSong = false;
     _finishSongTargetSongId = null;
-    _originalVolumeBeforeFade = audioHandler.volume;
+    _originalVolumeBeforeFade = _volume;
     sleepTimerFinishSongActive =
         finishSong ?? SettingsProvider.instance.sleepTimerFinishSong;
     var fadeDurationSecs =
@@ -66,7 +66,7 @@ extension PlayerSleepTimer on PlayerProvider {
             remaining.inSeconds <= fadeDurationSecs) {
           if (!_isFadingOut) {
             _isFadingOut = true;
-            _originalVolumeBeforeFade = audioHandler.volume;
+            _originalVolumeBeforeFade = _volume;
           }
           var fraction = remaining.inSeconds / fadeDurationSecs.toDouble();
           await audioHandler.applyVolume(

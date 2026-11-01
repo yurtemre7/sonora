@@ -96,6 +96,37 @@ void main() {
       playerProvider.stopSleepTimer();
     });
 
+    test('Fade-out restores the user volume, not a mid-fade value', () async {
+      var audioHandler = SonoraAudioHandler();
+      var playerProvider = PlayerProvider(
+        audioHandler: audioHandler,
+        settingsProvider: SettingsProvider(),
+      );
+      await playerProvider.loadSettings();
+      playerProvider.queue = [
+        createDummySong(
+          id: 1,
+          title: 'Song 1',
+          duration: const Duration(minutes: 3),
+        ),
+      ];
+      playerProvider.currentIndex = 0;
+
+      await playerProvider.setVolume(0.8);
+      // A transport fade-in is still low when the sleep-timer fade begins.
+      await audioHandler.applyVolume(0.1);
+
+      playerProvider.startSleepTimer(
+        const Duration(seconds: 3),
+        finishSong: false,
+        fadeOutSecs: 3,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
+      playerProvider.stopSleepTimer();
+
+      expect(audioHandler.volume, 0.8);
+    });
+
     test('Standard sleep timer pauses without clearing queue', () async {
       var audioHandler = SonoraAudioHandler();
       var settingsProvider = SettingsProvider();
