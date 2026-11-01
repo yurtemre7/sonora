@@ -7,6 +7,12 @@ import 'package:sonora/providers/player_provider.dart';
 import 'package:sonora/providers/settings_provider.dart';
 import 'package:sonora/services/audio_handler.dart';
 
+class _SlowPauseHandler extends SonoraAudioHandler {
+  @override
+  Future<void> pause({bool immediate = false}) =>
+      Future<void>.delayed(const Duration(milliseconds: 400));
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -52,6 +58,44 @@ void main() {
   }
 
   group('Sleep Timer Logic Tests', () {
+    test('Timer started while the previous one is stopping survives', () async {
+      var playerProvider = PlayerProvider(
+        audioHandler: _SlowPauseHandler(),
+        settingsProvider: SettingsProvider(),
+      );
+      await playerProvider.loadSettings();
+      playerProvider.queue = [
+        createDummySong(
+          id: 1,
+          title: 'Song 1',
+          duration: const Duration(minutes: 3),
+        ),
+      ];
+      playerProvider.currentIndex = 0;
+
+      playerProvider.startSleepTimer(
+        const Duration(seconds: 1),
+        finishSong: false,
+        fadeOutSecs: 0,
+      );
+      // The first timer has expired and its stop is waiting on pause().
+      await Future<void>.delayed(const Duration(milliseconds: 1150));
+      playerProvider.startSleepTimer(
+        const Duration(seconds: 30),
+        finishSong: false,
+        fadeOutSecs: 0,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+
+      expect(playerProvider.sleepTimerDuration, isNotNull);
+      expect(
+        playerProvider.sleepTimerOriginalDuration,
+        const Duration(seconds: 30),
+      );
+
+      playerProvider.stopSleepTimer();
+    });
+
     test('Standard sleep timer pauses without clearing queue', () async {
       var audioHandler = SonoraAudioHandler();
       var settingsProvider = SettingsProvider();

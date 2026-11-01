@@ -160,18 +160,20 @@ extension PlayerSleepTimer on PlayerProvider {
     _sleepTimer?.cancel();
     _sleepTimer = null;
 
-    await audioHandler.pause();
-    await audioHandler.applyVolume(_volume);
-
+    // Reset state before the first await: a timer started while the pause
+    // fade runs must not have its state cleared afterwards.
     sleepTimerDuration = null;
     sleepTimerOriginalDuration = null;
     _isFadingOut = false;
     _isFinishingCurrentSong = false;
     _finishSongTargetSongId = null;
     sleepTimerFinishSongActive = false;
+    SleepTimerNotificationService().cancelNotification();
+
+    await audioHandler.pause();
+    await audioHandler.applyVolume(_volume);
 
     _updateMediaNotificationControls();
-    SleepTimerNotificationService().cancelNotification();
     _notify();
   }
 
