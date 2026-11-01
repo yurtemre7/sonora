@@ -176,12 +176,6 @@ abstract class AppLocalizations {
   /// **'A beautiful local music player for Android, built with Flutter and Material 3 Expressive design.'**
   String get appDescription;
 
-  /// No description provided for @appInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'App Info'**
-  String get appInfo;
-
   /// No description provided for @appLanguage.
   ///
   /// In en, this message translates to:
@@ -314,12 +308,6 @@ abstract class AppLocalizations {
   /// **'For best results, choose a square image.'**
   String get chooseSquareImage;
 
-  /// No description provided for @chooseTheme.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose Theme'**
-  String get chooseTheme;
-
   /// No description provided for @close.
   ///
   /// In en, this message translates to:
@@ -350,18 +338,6 @@ abstract class AppLocalizations {
   /// **'Create a playlist'**
   String get createPlaylist;
 
-  /// No description provided for @customDuration.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom Duration...'**
-  String get customDuration;
-
-  /// No description provided for @customSleepTimer.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom Sleep Timer'**
-  String get customSleepTimer;
-
   /// No description provided for @customSpeed.
   ///
   /// In en, this message translates to:
@@ -380,12 +356,6 @@ abstract class AppLocalizations {
   /// **'Dark'**
   String get dark;
 
-  /// No description provided for @darkSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Always use dark theme'**
-  String get darkSubtitle;
-
   /// No description provided for @dataManagement.
   ///
   /// In en, this message translates to:
@@ -403,12 +373,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Date Modified'**
   String get dateModified;
-
-  /// No description provided for @defaultAppColor.
-  ///
-  /// In en, this message translates to:
-  /// **'Default App Color'**
-  String get defaultAppColor;
 
   /// No description provided for @defaultSleepTimer.
   ///
@@ -488,24 +452,6 @@ abstract class AppLocalizations {
   /// **'Displayed As:'**
   String get displayedAs;
 
-  /// No description provided for @download.
-  ///
-  /// In en, this message translates to:
-  /// **'Download'**
-  String get download;
-
-  /// No description provided for @dynamicTheme.
-  ///
-  /// In en, this message translates to:
-  /// **'Dynamic Theme (Album Art)'**
-  String get dynamicTheme;
-
-  /// No description provided for @dynamicThemeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatically theme the app using active album art'**
-  String get dynamicThemeSubtitle;
-
   /// No description provided for @editDescription.
   ///
   /// In en, this message translates to:
@@ -517,12 +463,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable shuffle'**
   String get enableShuffle;
-
-  /// No description provided for @enterDurationHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter duration'**
-  String get enterDurationHint;
 
   /// No description provided for @enterYourName.
   ///
@@ -680,24 +620,6 @@ abstract class AppLocalizations {
   /// **'Automatically restore the last played song and queue when opening Sonora'**
   String get restoreLastPlayedSongSubtitle;
 
-  /// No description provided for @language.
-  ///
-  /// In en, this message translates to:
-  /// **'Language'**
-  String get language;
-
-  /// No description provided for @languageEnglish.
-  ///
-  /// In en, this message translates to:
-  /// **'English'**
-  String get languageEnglish;
-
-  /// No description provided for @languageJapanese.
-  ///
-  /// In en, this message translates to:
-  /// **'Japanese'**
-  String get languageJapanese;
-
   /// No description provided for @lastSync.
   ///
   /// In en, this message translates to:
@@ -739,12 +661,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Light'**
   String get light;
-
-  /// No description provided for @lightSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Always use light theme'**
-  String get lightSubtitle;
 
   /// No description provided for @listeningStatistics.
   ///
@@ -836,12 +752,6 @@ abstract class AppLocalizations {
   /// **'{min} min'**
   String minuteAbbr(int min);
 
-  /// No description provided for @minutes.
-  ///
-  /// In en, this message translates to:
-  /// **'minutes'**
-  String get minutes;
-
   /// No description provided for @musicEffects.
   ///
   /// In en, this message translates to:
@@ -853,12 +763,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Never synced'**
   String get neverSynced;
-
-  /// No description provided for @next.
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get next;
 
   /// No description provided for @nextTooltip.
   ///
@@ -926,29 +830,11 @@ abstract class AppLocalizations {
   /// **'No music files found'**
   String get noMusicFilesFound;
 
-  /// No description provided for @noPlaylistsFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No playlists found'**
-  String get noPlaylistsFound;
-
   /// No description provided for @noRelatedSongs.
   ///
   /// In en, this message translates to:
   /// **'No related songs'**
   String get noRelatedSongs;
-
-  /// No description provided for @noSongsFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No songs found'**
-  String get noSongsFound;
-
-  /// No description provided for @ok.
-  ///
-  /// In en, this message translates to:
-  /// **'OK'**
-  String get ok;
 
   /// No description provided for @onboardingDescription.
   ///
@@ -998,12 +884,6 @@ abstract class AppLocalizations {
   /// **'To play and control your music, Sonora needs runtime authorization permissions from your device.'**
   String get permissionsExplanation;
 
-  /// No description provided for @permissionsGrantedSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Permissions configured successfully!'**
-  String get permissionsGrantedSuccess;
-
   /// No description provided for @permissionsNeeded.
   ///
   /// In en, this message translates to:
@@ -1027,12 +907,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Play'**
   String get play;
-
-  /// No description provided for @playAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Play All'**
-  String get playAll;
 
   /// No description provided for @playNext.
   ///
@@ -1466,12 +1340,6 @@ abstract class AppLocalizations {
   /// **'Shuffle'**
   String get shuffle;
 
-  /// No description provided for @shuffleAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Shuffle All'**
-  String get shuffleAll;
-
   /// No description provided for @shufflePlay.
   ///
   /// In en, this message translates to:
@@ -1706,12 +1574,6 @@ abstract class AppLocalizations {
   /// **'System Default'**
   String get systemDefault;
 
-  /// No description provided for @systemSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Follows your device theme'**
-  String get systemSubtitle;
-
   /// No description provided for @telegramContact.
   ///
   /// In en, this message translates to:
@@ -1753,12 +1615,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Timer'**
   String get timer;
-
-  /// No description provided for @timerDuration.
-  ///
-  /// In en, this message translates to:
-  /// **'Timer Duration'**
-  String get timerDuration;
 
   /// No description provided for @titleFilters.
   ///
@@ -1837,12 +1693,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See your playback history and stats'**
   String get viewStatisticsSubtitle;
-
-  /// No description provided for @volume.
-  ///
-  /// In en, this message translates to:
-  /// **'Volume'**
-  String get volume;
 
   /// No description provided for @welcomeToSonora.
   ///
@@ -2294,12 +2144,6 @@ abstract class AppLocalizations {
   /// **'Collapse'**
   String get collapse;
 
-  /// No description provided for @minimize.
-  ///
-  /// In en, this message translates to:
-  /// **'Minimize'**
-  String get minimize;
-
   /// No description provided for @debugCacheInfo.
   ///
   /// In en, this message translates to:
@@ -2353,18 +2197,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wait for currently playing song to finish before stopping'**
   String get finishCurrentSongSubtitle;
-
-  /// No description provided for @useMaterialYou.
-  ///
-  /// In en, this message translates to:
-  /// **'Material You Dynamic Colors'**
-  String get useMaterialYou;
-
-  /// No description provided for @useMaterialYouSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Extract theme colors from your system wallpaper (Android 12+)'**
-  String get useMaterialYouSubtitle;
 
   /// No description provided for @off.
   ///
@@ -2468,36 +2300,6 @@ abstract class AppLocalizations {
   /// **'Share'**
   String get share;
 
-  /// No description provided for @overriddenByMaterialYou.
-  ///
-  /// In en, this message translates to:
-  /// **'Overridden by Material You wallpaper colors'**
-  String get overriddenByMaterialYou;
-
-  /// No description provided for @dynamicThemeOverriddenTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Album art theming is inactive while Material You wallpaper colors are enabled'**
-  String get dynamicThemeOverriddenTooltip;
-
-  /// No description provided for @defaultColorOverriddenTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom color selection is inactive while Material You wallpaper colors are enabled'**
-  String get defaultColorOverriddenTooltip;
-
-  /// No description provided for @defaultColorFallbackSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Fallback color when no song is playing or artwork color is neutral'**
-  String get defaultColorFallbackSubtitle;
-
-  /// No description provided for @defaultColorPrimarySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Primary app theme accent color'**
-  String get defaultColorPrimarySubtitle;
-
   /// No description provided for @themeColorsHeader.
   ///
   /// In en, this message translates to:
@@ -2569,12 +2371,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose Accent Color'**
   String get customColorHeader;
-
-  /// No description provided for @activityView.
-  ///
-  /// In en, this message translates to:
-  /// **'Listening Activity'**
-  String get activityView;
 
   /// No description provided for @allSongs.
   ///

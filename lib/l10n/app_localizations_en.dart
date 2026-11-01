@@ -60,9 +60,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'A beautiful local music player for Android, built with Flutter and Material 3 Expressive design.';
 
   @override
-  String get appInfo => 'App Info';
-
-  @override
   String get appLanguage => 'App Language';
 
   @override
@@ -139,9 +136,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseSquareImage => 'For best results, choose a square image.';
 
   @override
-  String get chooseTheme => 'Choose Theme';
-
-  @override
   String get close => 'Close';
 
   @override
@@ -157,12 +151,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createPlaylist => 'Create a playlist';
 
   @override
-  String get customDuration => 'Custom Duration...';
-
-  @override
-  String get customSleepTimer => 'Custom Sleep Timer';
-
-  @override
   String get customSpeed => 'Custom Speed';
 
   @override
@@ -172,9 +160,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dark => 'Dark';
 
   @override
-  String get darkSubtitle => 'Always use dark theme';
-
-  @override
   String get dataManagement => 'Data Management';
 
   @override
@@ -182,9 +167,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dateModified => 'Date Modified';
-
-  @override
-  String get defaultAppColor => 'Default App Color';
 
   @override
   String get defaultSleepTimer => 'Default Sleep Timer';
@@ -229,23 +211,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get displayedAs => 'Displayed As:';
 
   @override
-  String get download => 'Download';
-
-  @override
-  String get dynamicTheme => 'Dynamic Theme (Album Art)';
-
-  @override
-  String get dynamicThemeSubtitle =>
-      'Automatically theme the app using active album art';
-
-  @override
   String get editDescription => 'Edit description';
 
   @override
   String get enableShuffle => 'Enable shuffle';
-
-  @override
-  String get enterDurationHint => 'Enter duration';
 
   @override
   String get enterYourName => 'Enter Your Name';
@@ -339,15 +308,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Automatically restore the last played song and queue when opening Sonora';
 
   @override
-  String get language => 'Language';
-
-  @override
-  String get languageEnglish => 'English';
-
-  @override
-  String get languageJapanese => 'Japanese';
-
-  @override
   String get lastSync => 'Last Sync';
 
   @override
@@ -367,9 +327,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get light => 'Light';
-
-  @override
-  String get lightSubtitle => 'Always use light theme';
 
   @override
   String get listeningStatistics => 'Listening Statistics';
@@ -420,16 +377,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get minutes => 'minutes';
-
-  @override
   String get musicEffects => 'Music Effects';
 
   @override
   String get neverSynced => 'Never synced';
-
-  @override
-  String get next => 'Next';
 
   @override
   String get nextTooltip => 'Next';
@@ -465,16 +416,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noMusicFilesFound => 'No music files found';
 
   @override
-  String get noPlaylistsFound => 'No playlists found';
-
-  @override
   String get noRelatedSongs => 'No related songs';
-
-  @override
-  String get noSongsFound => 'No songs found';
-
-  @override
-  String get ok => 'OK';
 
   @override
   String get onboardingDescription =>
@@ -504,10 +446,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'To play and control your music, Sonora needs runtime authorization permissions from your device.';
 
   @override
-  String get permissionsGrantedSuccess =>
-      'Permissions configured successfully!';
-
-  @override
   String get permissionsNeeded => 'Permissions Needed';
 
   @override
@@ -519,9 +457,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get play => 'Play';
-
-  @override
-  String get playAll => 'Play All';
 
   @override
   String get playNext => 'Play Next';
@@ -763,9 +698,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shuffle => 'Shuffle';
 
   @override
-  String get shuffleAll => 'Shuffle All';
-
-  @override
   String get shufflePlay => 'Shuffle Play';
 
   @override
@@ -900,9 +832,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get systemDefault => 'System Default';
 
   @override
-  String get systemSubtitle => 'Follows your device theme';
-
-  @override
   String get telegramContact => 'Telegram Contact';
 
   @override
@@ -925,9 +854,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timer => 'Timer';
-
-  @override
-  String get timerDuration => 'Timer Duration';
 
   @override
   String get titleFilters => 'Title Filters';
@@ -981,9 +907,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewStatisticsSubtitle => 'See your playback history and stats';
-
-  @override
-  String get volume => 'Volume';
 
   @override
   String get welcomeToSonora => 'Welcome to Sonora';
@@ -1244,9 +1167,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collapse => 'Collapse';
 
   @override
-  String get minimize => 'Minimize';
-
-  @override
   String get debugCacheInfo => 'Debug Cache Info';
 
   @override
@@ -1276,13 +1196,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get finishCurrentSongSubtitle =>
       'Wait for currently playing song to finish before stopping';
-
-  @override
-  String get useMaterialYou => 'Material You Dynamic Colors';
-
-  @override
-  String get useMaterialYouSubtitle =>
-      'Extract theme colors from your system wallpaper (Android 12+)';
 
   @override
   String get off => 'Off';
@@ -1353,25 +1266,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get share => 'Share';
 
   @override
-  String get overriddenByMaterialYou =>
-      'Overridden by Material You wallpaper colors';
-
-  @override
-  String get dynamicThemeOverriddenTooltip =>
-      'Album art theming is inactive while Material You wallpaper colors are enabled';
-
-  @override
-  String get defaultColorOverriddenTooltip =>
-      'Custom color selection is inactive while Material You wallpaper colors are enabled';
-
-  @override
-  String get defaultColorFallbackSubtitle =>
-      'Fallback color when no song is playing or artwork color is neutral';
-
-  @override
-  String get defaultColorPrimarySubtitle => 'Primary app theme accent color';
-
-  @override
   String get themeColorsHeader => 'Theme Colors & Accent';
 
   @override
@@ -1409,9 +1303,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customColorHeader => 'Choose Accent Color';
-
-  @override
-  String get activityView => 'Listening Activity';
 
   @override
   String get allSongs => 'All Songs';

@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sonora/models/song.dart';
 
@@ -76,14 +75,18 @@ class AppTheme {
       brightness: brightness,
     );
 
-    var outfitTextTheme = GoogleFonts.outfitTextTheme(base).apply(
-      bodyColor: colorScheme.onSurface,
-      displayColor: colorScheme.onSurface,
-    );
-    var interTextTheme = GoogleFonts.interTextTheme(base).apply(
-      bodyColor: colorScheme.onSurface,
-      displayColor: colorScheme.onSurface,
-    );
+    var outfitTextTheme = base
+        .apply(fontFamily: 'Outfit')
+        .apply(
+          bodyColor: colorScheme.onSurface,
+          displayColor: colorScheme.onSurface,
+        );
+    var interTextTheme = base
+        .apply(fontFamily: 'Inter')
+        .apply(
+          bodyColor: colorScheme.onSurface,
+          displayColor: colorScheme.onSurface,
+        );
 
     return TextTheme(
       displayLarge: outfitTextTheme.displayLarge,
@@ -127,7 +130,8 @@ class AppTheme {
 
     var textTheme = _buildTextTheme(brightness, seedColor);
 
-    var outfitTitleStyle = GoogleFonts.outfit(
+    var outfitTitleStyle = TextStyle(
+      fontFamily: 'Outfit',
       fontWeight: FontWeight.w600,
       color: colorScheme.onSurface,
     );

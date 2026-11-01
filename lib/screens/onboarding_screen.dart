@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sonora/services/permission_service.dart';
@@ -157,7 +156,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: [
                       Text(
                         'SONORA',
-                        style: GoogleFonts.outfit(
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 2.0,
@@ -331,7 +331,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(height: 48),
             Text(
               context.l10n.welcomeToSonora,
-              style: GoogleFonts.outfit(
+              style: TextStyle(
+                fontFamily: 'Outfit',
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onSurface,
@@ -428,7 +429,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(height: 40),
             Text(
               context.l10n.permissionsNeeded,
-              style: GoogleFonts.outfit(
+              style: TextStyle(
+                fontFamily: 'Outfit',
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onSurface,
@@ -496,7 +498,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(height: 40),
             Text(
               context.l10n.setupMusicDirectory,
-              style: GoogleFonts.outfit(
+              style: TextStyle(
+                fontFamily: 'Outfit',
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onSurface,

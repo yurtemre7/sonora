@@ -53,9 +53,6 @@ class AppLocalizationsJa extends AppLocalizations {
       'FlutterとMaterial 3 Expressiveデザインで構築された、Android向けの美しいローカル音楽プレーヤーです。';
 
   @override
-  String get appInfo => 'アプリ情報';
-
-  @override
   String get appLanguage => 'アプリの言語';
 
   @override
@@ -125,9 +122,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get chooseSquareImage => '最適な表示のため、正方形の画像を選択してください。';
 
   @override
-  String get chooseTheme => 'テーマを選択';
-
-  @override
   String get close => '閉じる';
 
   @override
@@ -143,12 +137,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get createPlaylist => 'プレイリストを作成';
 
   @override
-  String get customDuration => 'カスタム時間...';
-
-  @override
-  String get customSleepTimer => 'カスタムスリープタイマー';
-
-  @override
   String get customSpeed => 'カスタム速度';
 
   @override
@@ -158,9 +146,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get dark => 'ダーク';
 
   @override
-  String get darkSubtitle => '常にダークテーマを使用します';
-
-  @override
   String get dataManagement => 'データ管理';
 
   @override
@@ -168,9 +153,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get dateModified => '更新日';
-
-  @override
-  String get defaultAppColor => 'デフォルトのアプリカラー';
 
   @override
   String get defaultSleepTimer => 'デフォルトのスリープタイマー';
@@ -214,22 +196,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get displayedAs => '表示形式:';
 
   @override
-  String get download => 'ダウンロード';
-
-  @override
-  String get dynamicTheme => 'ダイナミックテーマ（アルバムアート）';
-
-  @override
-  String get dynamicThemeSubtitle => '再生中のアルバムアートに合わせてアプリのテーマを自動調整します';
-
-  @override
   String get editDescription => '説明を編集';
 
   @override
   String get enableShuffle => 'シャッフルをオン';
-
-  @override
-  String get enterDurationHint => '時間を入力';
 
   @override
   String get enterYourName => '名前を入力';
@@ -319,15 +289,6 @@ class AppLocalizationsJa extends AppLocalizations {
       'Sonora起動時に最後に再生した曲とキューを自動的に復元します';
 
   @override
-  String get language => '言語';
-
-  @override
-  String get languageEnglish => '英語';
-
-  @override
-  String get languageJapanese => '日本語';
-
-  @override
   String get lastSync => '最終同期';
 
   @override
@@ -347,9 +308,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get light => 'ライト';
-
-  @override
-  String get lightSubtitle => '常にライトテーマを使用します';
 
   @override
   String get listeningStatistics => '再生統計';
@@ -399,16 +357,10 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get minutes => '分';
-
-  @override
   String get musicEffects => '音響エフェクト';
 
   @override
   String get neverSynced => '一度も同期していません';
-
-  @override
-  String get next => '次へ';
 
   @override
   String get nextTooltip => '次へ';
@@ -444,16 +396,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noMusicFilesFound => '音楽ファイルが見つかりません';
 
   @override
-  String get noPlaylistsFound => 'プレイリストが見つかりません';
-
-  @override
   String get noRelatedSongs => '関連する曲はありません';
-
-  @override
-  String get noSongsFound => '曲が見つかりません';
-
-  @override
-  String get ok => 'OK';
 
   @override
   String get onboardingDescription =>
@@ -481,9 +424,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get permissionsExplanation => '音楽を再生・操作するために、Sonoraは端末の実行時権限を必要とします。';
 
   @override
-  String get permissionsGrantedSuccess => '権限の設定が完了しました！';
-
-  @override
   String get permissionsNeeded => '必要な権限';
 
   @override
@@ -495,9 +435,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get play => '再生';
-
-  @override
-  String get playAll => 'すべて再生';
 
   @override
   String get playNext => '次に再生';
@@ -731,9 +668,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shuffle => 'シャッフル';
 
   @override
-  String get shuffleAll => 'すべてシャッフル';
-
-  @override
   String get shufflePlay => 'シャッフル再生';
 
   @override
@@ -861,9 +795,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get systemDefault => 'システムのデフォルト';
 
   @override
-  String get systemSubtitle => '端末のテーマに従います';
-
-  @override
   String get telegramContact => 'Telegram連絡先';
 
   @override
@@ -886,9 +817,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get timer => 'タイマー';
-
-  @override
-  String get timerDuration => 'タイマー時間';
 
   @override
   String get titleFilters => 'タイトルフィルター';
@@ -934,9 +862,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get viewStatisticsSubtitle => '再生履歴と統計を確認します';
-
-  @override
-  String get volume => '音量';
 
   @override
   String get welcomeToSonora => 'Sonoraへようこそ';
@@ -1187,9 +1112,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get collapse => '折りたたむ';
 
   @override
-  String get minimize => '最小化';
-
-  @override
   String get debugCacheInfo => 'デバッグキャッシュ情報';
 
   @override
@@ -1215,12 +1137,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get finishCurrentSongSubtitle => '停止する前に再生中の曲が終わるのを待ちます';
-
-  @override
-  String get useMaterialYou => 'Material You ダイナミックカラー';
-
-  @override
-  String get useMaterialYouSubtitle => 'システム壁紙からテーマカラーを抽出します（Android 12以降）';
 
   @override
   String get off => 'オフ';
@@ -1290,24 +1206,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get share => '共有';
 
   @override
-  String get overriddenByMaterialYou => 'Material You（壁紙カラー）により無効化されています';
-
-  @override
-  String get dynamicThemeOverriddenTooltip =>
-      'Material You壁紙カラーが有効な間、アルバムアートテーマは無効になります';
-
-  @override
-  String get defaultColorOverriddenTooltip =>
-      'Material You壁紙カラーが有効な間、アクセントカラーの選択は無効になります';
-
-  @override
-  String get defaultColorFallbackSubtitle =>
-      '曲が再生されていない場合やアルバム色がニュートラルの時に使用されます';
-
-  @override
-  String get defaultColorPrimarySubtitle => 'アプリのメインテーマカラー';
-
-  @override
   String get themeColorsHeader => 'テーマカラーとアクセント';
 
   @override
@@ -1343,9 +1241,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get customColorHeader => 'アクセントカラーの選択';
-
-  @override
-  String get activityView => '再生活動';
 
   @override
   String get allSongs => 'すべての曲';
