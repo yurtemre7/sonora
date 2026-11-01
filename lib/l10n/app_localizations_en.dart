@@ -1483,4 +1483,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get endTimer => 'End timer';
+
+  @override
+  String get addMusic => 'Add music';
+
+  @override
+  String get addMusicHint =>
+      'Add songs with the button below, or copy them into Sonora\'s folder in the Files app (On My iPhone > Sonora > Music).';
 }

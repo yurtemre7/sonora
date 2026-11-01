@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:io';
 import 'dart:math';
 
 import 'package:audio_service/audio_service.dart';
@@ -84,7 +85,11 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   SonoraAudioHandler({HomeWidgetSync? homeWidget})
     : homeWidget = homeWidget ?? HomeWidgetSync() {
     player = AudioPlayer(
-      audioPipeline: AudioPipeline(androidAudioEffects: [equalizer]),
+      // just_audio activates every pipeline effect on load, and the iOS plugin
+      // has no equalizer, so the load would fail there.
+      audioPipeline: AudioPipeline(
+        androidAudioEffects: Platform.isIOS ? const [] : [equalizer],
+      ),
     );
     _syncHomeWidget();
     _init();
@@ -792,7 +797,9 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   @override
   Future<void> setSpeed(double speed) => player.setSpeed(speed);
 
-  Future<void> setPitch(double pitch) => player.setPitch(pitch);
+  // just_audio has no pitch control on iOS; the call would throw there.
+  Future<void> setPitch(double pitch) =>
+      Platform.isIOS ? Future<void>.value() : player.setPitch(pitch);
 
   Future<void> setEqMode(
     String mode, {

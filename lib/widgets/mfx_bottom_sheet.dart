@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:sonora/models/mfx_preset.dart';
 import 'package:sonora/providers/player_provider.dart';
@@ -421,8 +423,11 @@ class _MfxBottomSheetState extends State<_MfxBottomSheet> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              const Divider(height: 32),
-                              CustomEqualizerWidget(playerProvider: player),
+                              // The equalizer is an Android audio effect.
+                              if (Platform.isAndroid) ...[
+                                const Divider(height: 32),
+                                CustomEqualizerWidget(playerProvider: player),
+                              ],
                               const SizedBox(height: 32),
                               SafeArea(
                                 child: Center(

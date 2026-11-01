@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _checkUpdateAutomatically() async {
-    if (kDebugMode) return;
+    if (kDebugMode || !Platform.isAndroid) return;
     if (!SettingsProvider.instance.autoCheckUpdates) return;
 
     var result = await UpdateService.checkForUpdate();

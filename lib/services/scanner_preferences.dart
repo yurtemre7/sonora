@@ -3,8 +3,16 @@ part of 'music_scanner.dart';
 /// Scan folder, sync bookkeeping and sort preferences.
 extension ScannerPreferences on MusicScanner {
   /// Reads the configured scan folder path from shared preferences.
+  /// On iOS the app can only read its own sandbox, so the folder is fixed to
+  /// `Documents/Music` (visible in the Files app).
   Future<String?> getScanFolder() async {
     try {
+      if (Platform.isIOS) {
+        var docs = await getApplicationDocumentsDirectory();
+        var music = Directory('${docs.path}/Music');
+        if (!music.existsSync()) music.createSync(recursive: true);
+        return music.path;
+      }
       return await _prefs.getString('scan_folder_path');
     } catch (_) {
       return null;

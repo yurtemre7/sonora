@@ -28,7 +28,10 @@ class SleepTimerNotificationService {
   Future<void> initialize() async {
     if (_initialized) return;
 
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    // The countdown notification is an Android ongoing notification. iOS
+    // would re-announce it every second, so there it is skipped.
+    if (Platform.environment.containsKey('FLUTTER_TEST') ||
+        !Platform.isAndroid) {
       _initialized = true;
       return;
     }
@@ -71,7 +74,10 @@ class SleepTimerNotificationService {
     AppLocalizations l10n, {
     bool finishingSong = false,
   }) async {
-    if (Platform.environment.containsKey('FLUTTER_TEST')) return;
+    if (Platform.environment.containsKey('FLUTTER_TEST') ||
+        !Platform.isAndroid) {
+      return;
+    }
 
     try {
       if (!_initialized) await initialize();

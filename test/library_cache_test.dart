@@ -109,6 +109,70 @@ void main() {
     });
   });
 
+  group('Container path rebase', () {
+    Song song(String path, {String? art}) => Song(
+      id: 1,
+      title: 'Song',
+      artist: 'Artist',
+      album: 'Album',
+      duration: const Duration(minutes: 3),
+      filePath: path,
+      artworkPath: art,
+    );
+
+    test('re-points paths from an old container at the current one', () {
+      var rebased = MusicScanner.rebaseDocumentsPaths([
+        song(
+          '/var/mobile/Containers/Data/Application/OLD/Documents/Music/a.mp3',
+          art:
+              '/var/mobile/Containers/Data/Application/OLD/Documents/art/a.jpg',
+        ),
+      ], '/var/mobile/Containers/Data/Application/NEW/Documents').single;
+
+      expect(
+        rebased.filePath,
+        '/var/mobile/Containers/Data/Application/NEW/Documents/Music/a.mp3',
+      );
+      expect(
+        rebased.artworkPath,
+        '/var/mobile/Containers/Data/Application/NEW/Documents/art/a.jpg',
+      );
+    });
+
+    test('leaves current, unrelated and missing paths alone', () {
+      var songs = [
+        song('/docs/Documents/Music/a.mp3'),
+        song('/storage/emulated/0/Music/b.mp3', art: '/cache/b.jpg'),
+      ];
+
+      var rebased = MusicScanner.rebaseDocumentsPaths(songs, '/docs/Documents');
+
+      expect(rebased[0].filePath, '/docs/Documents/Music/a.mp3');
+      expect(rebased[0].artworkPath, isNull);
+      expect(rebased[1].filePath, '/storage/emulated/0/Music/b.mp3');
+      expect(rebased[1].artworkPath, '/cache/b.jpg');
+    });
+  });
+
+  group('Missing scan folder', () {
+    test('sync returns nothing but keeps the cached library', () async {
+      await libraryFile().writeAsString(
+        jsonEncode([songJson(7, isFavorite: true)]),
+      );
+      var scanner = MusicScanner();
+      await scanner.setScanFolder('${tempDocsDir.path}/unplugged');
+      // The scanner singleton keeps its first prefs store, so undo the folder.
+      addTearDown(() => scanner.setScanFolder(null));
+
+      expect(await scanner.syncLibraryFast(), isEmpty);
+      expect(await scanner.syncLibraryLegacy(), isEmpty);
+
+      var kept = (await scanner.scanAllSongs()).single;
+      expect(kept.id, 7);
+      expect(kept.isFavorite, isTrue);
+    });
+  });
+
   group('Library cache ReplayGain', () {
     Song song(int id, String path) => Song(
       id: id,

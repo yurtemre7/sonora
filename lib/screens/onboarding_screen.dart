@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sonora/services/music_scanner.dart';
 import 'package:sonora/services/permission_service.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 
@@ -31,6 +32,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void initState() {
     super.initState();
     _checkInitialPermissions();
+    if (Platform.isIOS) _useAppMusicFolder();
+  }
+
+  /// iOS only reads its own sandbox, so the folder is fixed and preselected.
+  Future<void> _useAppMusicFolder() async {
+    var folder = await MusicScanner().getScanFolder();
+    if (folder != null && mounted) setState(() => _selectedFolder = folder);
   }
 
   @override
@@ -78,7 +86,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _pickFolder() async {
     try {
-      var folderPath = await FilePicker.getDirectoryPath();
+      var folderPath = Platform.isIOS
+          ? await MusicScanner().pickAudioFilesIntoLibrary()
+          : await FilePicker.getDirectoryPath();
       if (folderPath != null && mounted) {
         setState(() {
           _selectedFolder = folderPath;
@@ -508,7 +518,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              _selectedFolder == null
+              Platform.isIOS
+                  ? context.l10n.addMusicHint
+                  : _selectedFolder == null
                   ? context.l10n.chooseMusicFolder
                   : context.l10n.selectedDirectory,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -549,7 +561,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     : Icons.folder_shared_rounded,
               ),
               label: Text(
-                _selectedFolder == null
+                Platform.isIOS
+                    ? context.l10n.addMusic
+                    : _selectedFolder == null
                     ? context.l10n.selectFolder
                     : context.l10n.changeFolder,
               ),

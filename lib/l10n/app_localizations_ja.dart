@@ -1397,4 +1397,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get endTimer => 'タイマーを終了';
+
+  @override
+  String get addMusic => '音楽を追加';
+
+  @override
+  String get addMusicHint =>
+      '下のボタンで曲を追加するか、「ファイル」アプリの「このiPhone内 > Sonora > Music」にコピーしてください。';
 }

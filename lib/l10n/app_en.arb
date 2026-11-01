@@ -733,5 +733,7 @@
       }
     }
   },
-  "endTimer": "End timer"
+  "endTimer": "End timer",
+  "addMusic": "Add music",
+  "addMusicHint": "Add songs with the button below, or copy them into Sonora's folder in the Files app (On My iPhone > Sonora > Music)."
 }

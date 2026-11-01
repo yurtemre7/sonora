@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'dart:math';
 
 import 'package:audio_tags_lofty/audio_tags_lofty.dart' as tags;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,6 +17,7 @@ import 'package:sonora/services/image_preflight_service.dart';
 import 'package:sonora/services/replay_gain_reader.dart';
 
 part 'scanner_artist_images.dart';
+part 'scanner_import.dart';
 part 'scanner_legacy_sync.dart';
 part 'scanner_preferences.dart';
 part 'scanner_playlists.dart';
@@ -269,7 +271,8 @@ class MusicScanner {
       if (folderPath != null && folderPath.isNotEmpty) {
         var dir = Directory(folderPath);
         if (!dir.existsSync()) {
-          unawaited(_writeImportedSongsMetadata([]));
+          // The folder may only be unmounted or temporarily unreachable.
+          // Keep the cache so favorites survive until it comes back.
           return [];
         }
       }
@@ -512,12 +515,44 @@ class MusicScanner {
       }
       await _prefs.remove(_legacyLibraryPrefsKey);
       if (legacyContent.isNotEmpty) {
-        return await _decodeLibraryInIsolate(legacyContent);
+        return await _rebaseOnIos(await _decodeLibraryInIsolate(legacyContent));
       }
     }
 
     if (!jsonFile.existsSync()) return [];
-    return await _decodeLibraryInIsolate(await jsonFile.readAsString());
+    return await _rebaseOnIos(
+      await _decodeLibraryInIsolate(await jsonFile.readAsString()),
+    );
+  }
+
+  Future<List<Song>> _rebaseOnIos(List<Song> songs) async {
+    if (!Platform.isIOS) return songs;
+    var documents = await getApplicationDocumentsDirectory();
+    return rebaseDocumentsPaths(songs, documents.path);
+  }
+
+  /// iOS gives the app a new container path after a reinstall, so cached
+  /// absolute paths below `Documents` are re-pointed at [documentsPath].
+  @visibleForTesting
+  static List<Song> rebaseDocumentsPaths(
+    List<Song> songs,
+    String documentsPath,
+  ) {
+    const marker = '/Documents/';
+    String? rebase(String? path) {
+      if (path == null || path.startsWith(documentsPath)) return path;
+      var at = path.indexOf(marker);
+      if (at < 0) return path;
+      return '$documentsPath/${path.substring(at + marker.length)}';
+    }
+
+    return [
+      for (var song in songs)
+        song.copyWith(
+          filePath: rebase(song.filePath),
+          artworkPath: rebase(song.artworkPath),
+        ),
+    ];
   }
 
   Future<void> _writeImportedSongsMetadata(List<Song> songs) {

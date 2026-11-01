@@ -130,6 +130,27 @@ void main() {
     });
   });
 
+  group('Artist fallback from the folder structure', () {
+    test(
+      'an untagged file directly in the scan folder has no artist',
+      () async {
+        var library = Directory.systemTemp.createTempSync('sonora_flat_');
+        addTearDown(() => library.deleteSync(recursive: true));
+        File('${library.path}/Flat Song.mp3').writeAsBytesSync([0, 1, 2, 3]);
+        Directory('${library.path}/Some Artist/Album')
+            .createSync(recursive: true);
+        File('${library.path}/Some Artist/Album/Nested Song.mp3')
+            .writeAsBytesSync([0, 1, 2, 3]);
+
+        var songs = await MusicScanner().importFromFolder(library.path);
+        var byTitle = {for (var s in songs) s.title: s};
+
+        expect(byTitle['Flat Song']!.artist, 'Unknown Artist');
+        expect(byTitle['Nested Song']!.artist, 'Some Artist');
+      },
+    );
+  });
+
   group('Widget Tests using Scanned Music Data', () {
     testWidgets('SongTile renders title, artist, and trailing menu', (
       WidgetTester tester,

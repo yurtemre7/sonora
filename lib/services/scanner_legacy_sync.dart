@@ -27,8 +27,8 @@ extension ScannerLegacySync on MusicScanner {
 
       var dir = Directory(folderPath);
       if (!dir.existsSync()) {
-        // Synced folder no longer exists.
-        await _writeImportedSongsMetadata([]);
+        // Synced folder is unreachable. Keep the cache (favorites live in it)
+        // so it is still intact when the folder comes back.
         return [];
       }
 
@@ -302,7 +302,10 @@ extension ScannerLegacySync on MusicScanner {
                 var parentDirName = file.parent.parent.path
                     .split(RegExp(r'[/\\]'))
                     .last;
-                if (parentDirName.isNotEmpty &&
+                // A file directly in the scan folder has no artist folder;
+                // its grandparent is outside the library.
+                if (file.parent.parent.path.startsWith(folderPath) &&
+                    parentDirName.isNotEmpty &&
                     parentDirName != 'music' &&
                     parentDirName != 'Download') {
                   artist = parentDirName;

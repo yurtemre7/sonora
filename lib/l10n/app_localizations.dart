@@ -2647,6 +2647,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'End timer'**
   String get endTimer;
+
+  /// No description provided for @addMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Add music'**
+  String get addMusic;
+
+  /// No description provided for @addMusicHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add songs with the button below, or copy them into Sonora\'s folder in the Files app (On My iPhone > Sonora > Music).'**
+  String get addMusicHint;
 }
 
 class _AppLocalizationsDelegate

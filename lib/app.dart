@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
@@ -513,7 +514,10 @@ class _SonoraAppState extends State<SonoraApp> {
 
   Future<void> _configureScanFolder() async {
     var scanner = MusicScanner();
-    var folderPath = await FilePicker.getDirectoryPath();
+    // iOS cannot read outside its sandbox, so music is added to the app folder.
+    var folderPath = Platform.isIOS
+        ? await scanner.pickAudioFilesIntoLibrary()
+        : await FilePicker.getDirectoryPath();
     if (folderPath != null) {
       await scanner.setScanFolder(folderPath);
 

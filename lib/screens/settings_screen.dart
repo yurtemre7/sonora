@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -173,7 +175,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                               ),
                               child: Text(
-                                widget.settingsProvider.scanFolder == null
+                                Platform.isIOS
+                                    ? context.l10n.addMusic
+                                    : widget.settingsProvider.scanFolder == null
                                     ? context.l10n.setSyncFolder
                                     : context.l10n.change,
                               ),

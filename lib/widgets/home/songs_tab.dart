@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/models/song_activity.dart';
@@ -68,7 +70,9 @@ class SongsTab extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                scanFolder == null
+                Platform.isIOS
+                    ? context.l10n.addMusicHint
+                    : scanFolder == null
                     ? context.l10n.chooseFolderSubtitle
                     : context.l10n.noMusicFilesInFolderSubtitle(scanFolder!),
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -87,7 +91,9 @@ class SongsTab extends StatelessWidget {
                       : Icons.create_new_folder_rounded,
                 ),
                 label: Text(
-                  scanFolder == null
+                  Platform.isIOS
+                      ? context.l10n.addMusic
+                      : scanFolder == null
                       ? context.l10n.setMusicDirectory
                       : context.l10n.change,
                 ),

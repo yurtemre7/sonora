@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -239,101 +241,104 @@ class _InfoSettingsScreenState extends State<InfoSettingsScreen>
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => _showAboutAppDialog(context),
             ),
-            ListTile(
-              leading: _isCheckingUpdate
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.system_update_rounded),
-              title: Text(context.l10n.checkForUpdates),
-              subtitle: Text(context.l10n.checkForUpdatesSubtitle),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: _isCheckingUpdate
-                  ? null
-                  : () async {
-                      setState(() {
-                        _isCheckingUpdate = true;
-                      });
+            // Updates install an APK, so they only exist on Android.
+            if (Platform.isAndroid)
+              ListTile(
+                leading: _isCheckingUpdate
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.system_update_rounded),
+                title: Text(context.l10n.checkForUpdates),
+                subtitle: Text(context.l10n.checkForUpdatesSubtitle),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: _isCheckingUpdate
+                    ? null
+                    : () async {
+                        setState(() {
+                          _isCheckingUpdate = true;
+                        });
 
-                      var result = await UpdateService.checkForUpdate();
+                        var result = await UpdateService.checkForUpdate();
 
-                      if (!context.mounted) return;
-                      setState(() {
-                        _isCheckingUpdate = false;
-                      });
+                        if (!context.mounted) return;
+                        setState(() {
+                          _isCheckingUpdate = false;
+                        });
 
-                      if (result.isRateLimited) {
-                        showDialog(
-                          context: context,
-                          builder: (dialogContext) => AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            title: Row(
-                              children: [
-                                const Icon(
-                                  Icons.warning_amber_rounded,
-                                  color: Colors.orange,
+                        if (result.isRateLimited) {
+                          showDialog(
+                            context: context,
+                            builder: (dialogContext) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              title: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.orange,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(context.l10n.rateLimitTitle),
+                                ],
+                              ),
+                              content: Text(context.l10n.rateLimitMessage),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(dialogContext),
+                                  child: Text(context.l10n.cancel),
                                 ),
-                                const SizedBox(width: 12),
-                                Text(context.l10n.rateLimitTitle),
+                                FilledButton.icon(
+                                  onPressed: () async {
+                                    Navigator.pop(dialogContext);
+                                    await NativeBridge.openUrl(
+                                      'https://github.com/yurtemre7/sonora/releases',
+                                    );
+                                  },
+                                  icon: const Icon(Icons.open_in_new_rounded),
+                                  label: Text(context.l10n.openGithubReleases),
+                                ),
                               ],
                             ),
-                            content: Text(context.l10n.rateLimitMessage),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(dialogContext),
-                                child: Text(context.l10n.cancel),
-                              ),
-                              FilledButton.icon(
-                                onPressed: () async {
-                                  Navigator.pop(dialogContext);
-                                  await NativeBridge.openUrl(
-                                    'https://github.com/yurtemre7/sonora/releases',
-                                  );
-                                },
-                                icon: const Icon(Icons.open_in_new_rounded),
-                                label: Text(context.l10n.openGithubReleases),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else if (result.hasError) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(context.l10n.updateCheckFailed),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      } else if (result.update != null) {
-                        showDialog(
-                          context: context,
-                          builder: (context) =>
-                              UpdateDialog(updateInfo: result.update!),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(context.l10n.alreadyOnLatest),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      }
-                    },
-            ),
-            SwitchListTile(
-              secondary: const Icon(Icons.sync_rounded),
-              title: Text(context.l10n.autoCheckUpdates),
-              subtitle: Text(context.l10n.autoCheckUpdatesSubtitle),
-              value: SettingsProvider.instance.autoCheckUpdates,
-              onChanged: (val) {
-                setState(() {
-                  SettingsProvider.instance.setAutoCheckUpdates(val);
-                });
-              },
-            ),
+                          );
+                        } else if (result.hasError) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(context.l10n.updateCheckFailed),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        } else if (result.update != null) {
+                          showDialog(
+                            context: context,
+                            builder: (context) =>
+                                UpdateDialog(updateInfo: result.update!),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(context.l10n.alreadyOnLatest),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
+              ),
+            if (Platform.isAndroid)
+              SwitchListTile(
+                secondary: const Icon(Icons.sync_rounded),
+                title: Text(context.l10n.autoCheckUpdates),
+                subtitle: Text(context.l10n.autoCheckUpdatesSubtitle),
+                value: SettingsProvider.instance.autoCheckUpdates,
+                onChanged: (val) {
+                  setState(() {
+                    SettingsProvider.instance.setAutoCheckUpdates(val);
+                  });
+                },
+              ),
             ListTile(
               leading: const Icon(Icons.history_rounded),
               title: Text(context.l10n.changelogTitle),
