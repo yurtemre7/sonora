@@ -165,6 +165,7 @@ extension PlayerQueue on PlayerProvider {
   /// Appends [song] to the end of the queue.
   Future<void> addToQueue(Song song) async {
     queue.add(song);
+    _originalQueue.add(song);
     await audioHandler.addQueueItem(_songToMediaItem(song));
     _notify();
     ImagePreflightService.instance.preflightQueueUpcoming(queue, currentIndex);
@@ -223,6 +224,7 @@ extension PlayerQueue on PlayerProvider {
     } else {
       queue.insert(insertIndex, song);
     }
+    _insertAfterCurrentInOriginalQueue([song]);
     await audioHandler.insertQueueItemAt(insertIndex, _songToMediaItem(song));
     _notify();
     ImagePreflightService.instance.preflightQueueUpcoming(queue, currentIndex);
@@ -237,11 +239,24 @@ extension PlayerQueue on PlayerProvider {
     } else {
       queue.insertAll(insertIndex, songs);
     }
+    _insertAfterCurrentInOriginalQueue(songs);
     await audioHandler.insertQueueItemsAt(
       insertIndex,
       songs.map(_songToMediaItem).toList(),
     );
     _notify();
     ImagePreflightService.instance.preflightQueueUpcoming(queue, currentIndex);
+  }
+
+  /// Mirrors a "play next" insert into the unshuffled order so the songs
+  /// survive turning shuffle off.
+  void _insertAfterCurrentInOriginalQueue(List<Song> songs) {
+    var currentId = currentSong?.id;
+    var origIndex = _originalQueue.indexWhere((s) => s.id == currentId);
+    if (origIndex < 0) {
+      _originalQueue.addAll(songs);
+    } else {
+      _originalQueue.insertAll(origIndex + 1, songs);
+    }
   }
 }
