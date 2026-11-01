@@ -84,14 +84,21 @@ class UpdateService {
     var sink = file.openWrite();
     var received = 0;
 
-    await for (var chunk in response.stream) {
-      sink.add(chunk);
-      received += chunk.length;
-      onProgress(received, contentLength);
+    try {
+      await for (var chunk in response.stream) {
+        sink.add(chunk);
+        received += chunk.length;
+        onProgress(received, contentLength);
+      }
+      await sink.flush();
+      await sink.close();
+    } catch (_) {
+      try {
+        await sink.close();
+        await file.delete();
+      } catch (_) {}
+      rethrow;
     }
-
-    await sink.flush();
-    await sink.close();
 
     return file.path;
   }

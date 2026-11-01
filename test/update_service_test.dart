@@ -107,6 +107,17 @@ void main() {
       expect(requests, ['GET /apk-redirect', 'GET /apk']);
     });
 
+    test('deletes the partial file when the download fails midway', () async {
+      await expectLater(
+        UpdateService.downloadApk(
+          url('/apk').toString(),
+          onProgress: (_, _) => throw StateError('stop'),
+        ),
+        throwsStateError,
+      );
+      expect(File('${tempDir.path}/sonora_update.apk').existsSync(), isFalse);
+    });
+
     test('throws on non-200 and leaves no file', () async {
       await expectLater(
         UpdateService.downloadApk(
