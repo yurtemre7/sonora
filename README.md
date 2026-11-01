@@ -4,10 +4,20 @@
 
 *🌐 Read this in: [日本語](README_JP.md)*
 
-Sonora is a privacy-first local music player built with Flutter. It features a Material 3 Expressive design with dynamic album-art and Material You wallpaper theming, directory-based library sync, multi-band equalizer & sound effects (MFX), multi-select batch actions, and seamless background playback — all without ever copying or uploading your files. Android is the primary target, with Windows builds also supported.
+Sonora is a privacy-first local music player built with Flutter. It features a Material 3 Expressive design with dynamic album-art and Material You wallpaper theming, directory-based library sync, multi-band equalizer & sound effects (MFX), multi-select batch actions, and seamless background playback — all without ever copying or uploading your files. Android is the primary target, with Windows and iOS builds also supported (see [Platforms](#platforms)).
 
 > [!NOTE]
 > **AI Disclaimer:** This project is built entirely with AI assistance using Google's Antigravity agentic coding framework. All code, architecture decisions, and features were designed, implemented, and refined through AI-human pair programming.
+
+## Platforms
+
+| Platform | Status | Download |
+|---|---|---|
+| Android | Primary target | Release APKs on GitHub |
+| iOS | Works, tested on a simulator only | Unsigned IPA in GitHub releases for [sideloading](#sideloading-the-ios-app), or [build it yourself](#ios) |
+| Windows | Works | Not downloadable. [Build it yourself](#windows) |
+
+New to the iOS version? Read **[Adding music on iOS](#adding-music-on-ios-how-to-guide)**: iOS apps can only read their own folder, so music has to be put there first.
 
 ## Screenshots
 
@@ -21,7 +31,7 @@ Sonora is a privacy-first local music player built with Flutter. It features a M
 
 ### Library & Sync
 
-- **Directory-Based Sync**: Point Sonora at any folder and play your music directly — no files are ever copied into app storage.
+- **Directory-Based Sync**: Point Sonora at any folder and play your music directly — no files are ever copied into app storage (on iOS, music lives in the app's own folder; see [Adding music on iOS](#adding-music-on-ios-how-to-guide)).
 - **Incremental Sync**: Unchanged files are skipped using size and modification timestamps, keeping re-scans fast. All scanning runs in background isolates so the UI stays responsive.
 - **Instant Launch**: Cached library data is available in milliseconds on startup; metadata and durations refresh asynchronously in the background.
 - **Image Cache & Pre-Flight Service**: Background pre-flight caching pre-warms album artwork on library scan and sync completion (up to 150 MB / 250 images) ensuring buttery smooth list scrolling.
@@ -90,6 +100,12 @@ Sonora is a privacy-first local music player built with Flutter. It features a M
 - **Notification Controls**: Media controls and interactive sleep timer actions (+1 min, End timer) directly in the Android notification shade.
 - **In-App Update Checker**: Checks latest GitHub releases and recommends matching APK downloads based on the device's CPU architecture (`armeabi-v7a`, `arm64-v8a`, `x86_64`).
 
+### iOS Support & Limits
+
+- **Own music folder**: iOS apps cannot read arbitrary folders, so Sonora scans a fixed folder inside the app (`Documents/Music`). It is visible in the Files app and in Finder, and music can also be added from inside the app with the *Add music* button.
+- **System media controls**: Track, artist, album, artwork and progress are published to the iOS now-playing panel (lock screen and Control Center), and playback continues in the background. The panel itself has only been checked in a simulator.
+- **Not available on iOS**: equalizer and pitch controls (speed presets work), the home screen widget, CarPlay, custom media buttons (+1 min / End timer), the ongoing sleep timer notification (the timer itself works), and the in-app APK updater.
+
 ---
 
 ## Architecture
@@ -128,7 +144,6 @@ lib/
 ├── services/
 │   ├── android_auto_media_browser.dart - MediaBrowserService for Android Auto head units
 │   ├── audio_handler.dart            - AudioService background controller
-│   ├── equalizer_service.dart        - Hardware equalizer controller
 │   ├── image_preflight_service.dart  - Background image cache pre-flight service
 │   ├── library_search_index.dart     - Fast in-memory search index
 │   ├── lyrics_service.dart           - LRC/TXT lyrics loading and parsing
@@ -155,6 +170,7 @@ lib/
 - Android SDK **24+** (compile/target SDK 37)
 - A connected Android device or emulator
 - *(Windows, optional)* Visual Studio 2022 with the **Desktop development with C++** workload
+- *(iOS, optional)* A Mac with Xcode (the project was verified with Xcode 27.2) and an Apple ID for signing when running on a real iPhone
 
 ## Getting Started
 
@@ -206,9 +222,85 @@ fvm flutter build windows --release
 
 The output is in `build/windows/x64/runner/Release/`.
 
+### iOS
+
+Sonora is not on the App Store. Every GitHub release includes an **unsigned `sonora-ios.ipa`** that you can [sideload](#sideloading-the-ios-app), or you can build it yourself on a Mac with Xcode. So far it has only been tested on an iOS simulator, not on a physical iPhone.
+
+Run on a simulator:
+
+```bash
+fvm flutter run -d "iPhone"
+```
+
+Run on your iPhone: open `ios/Runner.xcworkspace` in Xcode once, choose your Apple ID team under *Runner → Signing & Capabilities*, change the bundle identifier if it is taken, then:
+
+```bash
+fvm flutter run -d <your-device-id> --release
+```
+
+Apps signed with a free Apple ID expire after 7 days and must be reinstalled.
+
+To build the same unsigned IPA the release workflow produces (needs only a Mac with Xcode, no signing):
+
+```bash
+fvm flutter build ios --release --no-codesign
+mkdir Payload && cp -R build/ios/iphoneos/Runner.app Payload/
+zip -qry sonora-ios.ipa Payload
+```
+
+## Sideloading the iOS app
+
+The `sonora-ios.ipa` on the [releases page](https://github.com/yurtemre7/sonora/releases) is **unsigned**: iOS refuses to install it directly (not through Safari, not through the Files app). A sideloading tool signs it with your own Apple ID and installs it. Common options:
+
+- **[AltStore](https://altstore.io/)**: install AltServer on a Mac or Windows PC, then open the IPA in AltStore on the iPhone. AltStore refreshes the app in the background while the computer is nearby on the same Wi-Fi.
+- **[SideStore](https://sidestore.io/)**: works like AltStore but refreshes on the iPhone itself, without a computer after the one-time setup.
+- **[Sideloadly](https://sideloadly.io/)**: a desktop tool (Windows or macOS): connect the iPhone, drag in the IPA, enter your Apple ID, and click *Start*.
+- **TrollStore**: installs permanently without expiry, but only works on specific iOS versions.
+
+Things to know:
+
+- On iOS 16 and later, turn on **Developer Mode** first (*Settings → Privacy & Security → Developer Mode*), then restart the phone.
+- After installing, open *Settings → General → VPN & Device Management*, trust your Apple ID profile, then open Sonora.
+- A **free Apple ID** allows only 3 sideloaded apps at a time, and the app **expires after 7 days** until it is refreshed (AltStore and SideStore do this automatically). Apple's paid developer program lifts this to one year.
+- The IPA keeps the bundle identifier `de.yurtemre.sonora`. Your sideloading tool rewrites it for your Apple ID.
+- Updating means installing the newer IPA over the old one. Your music and library should stay, as long as you do not delete the app first and your sideloading tool keeps the same bundle identifier.
+- The iOS build is new in the release workflow and has only run on a simulator, not on a real device. Please report problems.
+- Sonora is not affiliated with or endorsed by any of the sideloading tools above.
+
+## Adding music on iOS (how-to guide)
+
+On iOS, Sonora plays music from its own folder: **`Documents/Music` inside the app**. This is the only place iOS lets the app read, so the files have to be put there first. Nothing is uploaded anywhere.
+
+**Option A: with the Files app (no computer needed)**
+
+1. Open Sonora once, so it creates its folder.
+2. Open the **Files** app and go to **Browse → On My iPhone → Sonora → Music**.
+3. Copy or move your audio files into that folder (for example from iCloud Drive or a download).
+4. Open Sonora and pull down on the song list, or go to **Settings → Sync Now**.
+
+**Option B: with a Mac (Finder)**
+
+1. Connect the iPhone and select it in Finder.
+2. Open the **Files** tab, expand **Sonora**, and drag your music into the **Music** folder.
+3. Run **Sync Now** in Sonora.
+
+**Option C: inside the app**
+
+1. Tap **Add music** (onboarding, Settings, or the empty library screen).
+2. Pick one or more audio files. Sonora copies them into its `Music` folder.
+3. Run **Sync Now** if they do not show up right away.
+
+**Good to know**
+
+- **Folder layout**: `Music/Artist/Album/Track.mp3` is recommended. When a file has no artist or album tags, Sonora uses these folder names instead.
+- **Lyrics**: put a `.lrc` (or `.txt`) file with the same name next to the audio file; it is detected during sync.
+- **Formats**: `.mp3`, `.m4a`/`.aac`, `.flac` and `.wav` are the safe choices, and they are the ones the *Add music* picker offers. Others (`.opus`, `.ogg`, `.wma`, ...) depend on your iOS version: `.opus` decoded in an iOS 27.2 simulator, but this is not guaranteed elsewhere.
+- **Storage**: the files take up space on the iPhone and are removed if you delete the app. They are included in device backups by default.
+- **Removing songs**: delete them in the Files app, then run **Sync Now**.
+
 ## Releases
 
-Release APKs (Android only) are built automatically via GitHub Actions whenever a commit to `main` includes a release prefix in its message (e.g., `release: v1.19.1` or `chore(release): bump to version 1.19.1`). See [CHANGELOG.md](CHANGELOG.md) for the full version history.
+Release APKs and the unsigned iOS IPA are built automatically via GitHub Actions whenever a commit to `main` includes a release prefix in its message (e.g., `release: v1.19.1` or `chore(release): bump to version 1.19.1`). The IPA is optional: if the iOS build fails, the Android release is still published. See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
 ## License
 
