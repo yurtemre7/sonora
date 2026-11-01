@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -40,6 +41,11 @@ class UpdateResult {
 class UpdateService {
   static const _githubApiUrl =
       'https://api.github.com/repos/yurtemre7/sonora/releases/latest';
+  static const _changelogUrl =
+      'https://raw.githubusercontent.com/yurtemre7/sonora/main/CHANGELOG.md';
+
+  /// Shared client so connections are reused across update calls.
+  static final _client = http.Client();
 
   /// Queries the native platform to get the device CPU ABI.
   static Future<String?> getDeviceAbi() async {
@@ -66,11 +72,11 @@ class UpdateService {
       } catch (_) {}
     }
 
-    var client = http.Client();
     var request = http.Request('GET', Uri.parse(url));
-    var response = await client.send(request);
+    var response = await _client.send(request);
 
     if (response.statusCode != 200) {
+      await response.stream.drain<void>();
       throw Exception('HTTP error ${response.statusCode}');
     }
 
@@ -86,7 +92,6 @@ class UpdateService {
 
     await sink.flush();
     await sink.close();
-    client.close();
 
     return file.path;
   }
@@ -105,10 +110,13 @@ class UpdateService {
   }
 
   /// Checks for an update via GitHub API releases.
-  static Future<UpdateResult> checkForUpdate() async {
+  static Future<UpdateResult> checkForUpdate({
+    @visibleForTesting Uri? apiUrl,
+    @visibleForTesting Uri? changelogUrl,
+  }) async {
     try {
-      var response = await http.get(
-        Uri.parse(_githubApiUrl),
+      var response = await _client.get(
+        apiUrl ?? Uri.parse(_githubApiUrl),
         headers: {'Accept': 'application/vnd.github.v3+json'},
       );
 
@@ -126,7 +134,7 @@ class UpdateService {
           var isNewer = await _isVersionNewer(tagName);
           if (isNewer) {
             // Fetch latest changelog from main repository as well
-            await fetchChangelog(forceRefresh: true);
+            await fetchChangelog(forceRefresh: true, url: changelogUrl);
 
             var assets = data['assets'] as List<dynamic>? ?? [];
             var apkAssets = <String, String>{};
@@ -221,7 +229,10 @@ class UpdateService {
 
   /// Fetches the full CHANGELOG.md from the main branch.
   /// Caches the result in SharedPreferencesAsync for 12 hours unless [forceRefresh] is true.
-  static Future<String?> fetchChangelog({bool forceRefresh = false}) async {
+  static Future<String?> fetchChangelog({
+    bool forceRefresh = false,
+    @visibleForTesting Uri? url,
+  }) async {
     try {
       var prefs = SharedPreferencesAsync();
       const cachedChangelogKey = 'cached_changelog_content';
@@ -241,14 +252,10 @@ class UpdateService {
         }
       }
 
-      var response = await http.get(
-        Uri.parse(
-          'https://raw.githubusercontent.com/yurtemre7/sonora/main/CHANGELOG.md',
-        ),
-      );
+      var response = await _client.get(url ?? Uri.parse(_changelogUrl));
 
       if (response.statusCode == 200) {
-        var content = response.body;
+        var content = utf8.decode(response.bodyBytes);
         await prefs.setString(cachedChangelogKey, content);
         await prefs.setString(
           lastChangelogCheckKey,
