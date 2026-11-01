@@ -2,6 +2,27 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.27.0] - 2026-11-01
+### Added
+* Add iOS support
+* Update the app's icon
+### Fixed
+* Pause immediately at the end of the finishing song
+* Localize sleep timer UI and stop per-second provider rebuilds
+* Restore user volume after sleep timer fade
+* Reset sleep timer state before awaiting pause
+* Close sink and delete partial apk on failed download
+* Keep songs added to queue when unshuffling
+* Drop deprecated saveFile args in backup export
+### Changed
+* Docs: Add iOS build, sideloading and add-music guides
+* Build an unsigned iOS IPA and attach it to releases
+* Chore: Remove unused EqualizerService
+* Refactor: Reuse one http client in update service
+* Chore: Trim dependencies and bundle fonts
+* Chore: Update readme to state windows version exists, but self-building is required
+* Chore: Update packages
+
 ## [1.26.2] - 2026-10-29
 ### Changed
 * Chore: Update packages
