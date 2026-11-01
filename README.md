@@ -13,11 +13,11 @@ Sonora is a privacy-first local music player built with Flutter. It features a M
 
 | Platform | Status | Download |
 |---|---|---|
-| Android | Primary target | Release APKs on GitHub |
-| iOS | Works, tested on a simulator only | Unsigned IPA in GitHub releases for [sideloading](#sideloading-the-ios-app), or [build it yourself](#ios) |
+| Android | Primary target | Release APKs on GitHub ([install](#install)) |
+| iOS | Works, tested on a simulator only | Unsigned IPA in GitHub releases for [sideloading](#sideloading-the-ipa), or [build it yourself](#ios) |
 | Windows | Works | Not downloadable. [Build it yourself](#windows) |
 
-New to the iOS version? Read **[Adding music on iOS](#adding-music-on-ios-how-to-guide)**: iOS apps can only read their own folder, so music has to be put there first.
+New to the iOS version? Read **[Adding music on iOS](#adding-music-to-the-app)**: iOS apps can only read their own folder, so music has to be put there first.
 
 ## Screenshots
 
@@ -31,7 +31,7 @@ New to the iOS version? Read **[Adding music on iOS](#adding-music-on-ios-how-to
 
 ### Library & Sync
 
-- **Directory-Based Sync**: Point Sonora at any folder and play your music directly — no files are ever copied into app storage (on iOS, music lives in the app's own folder; see [Adding music on iOS](#adding-music-on-ios-how-to-guide)).
+- **Directory-Based Sync**: Point Sonora at any folder and play your music directly — no files are ever copied into app storage (on iOS, music lives in the app's own folder; see [Adding music to the app](#adding-music-to-the-app)).
 - **Incremental Sync**: Unchanged files are skipped using size and modification timestamps, keeping re-scans fast. All scanning runs in background isolates so the UI stays responsive.
 - **Instant Launch**: Cached library data is available in milliseconds on startup; metadata and durations refresh asynchronously in the background.
 - **Image Cache & Pre-Flight Service**: Background pre-flight caching pre-warms album artwork on library scan and sync completion (up to 150 MB / 250 images) ensuring buttery smooth list scrolling.
@@ -40,7 +40,7 @@ New to the iOS version? Read **[Adding music on iOS](#adding-music-on-ios-how-to
 - **Lyrics Detection**: Sidecar `.lrc` and `.txt` lyrics files are automatically detected during sync.
 - **Manual & Automatic Resync**: Pull-to-refresh on any library tab, a *Sync Now* button in Settings, and a monthly reminder banner (snoozeable for 30 days).
 - **Sync Details Panel**: Displays total library size, detected audio formats, unique dynamic theme count, and the number of lyrics-synced songs.
-- **Onboarding**: A four-step first-run flow covering welcome, sync introduction, permissions, and folder selection.
+- **Onboarding**: A three-step first-run flow: welcome (with an optional name), permissions, and music folder selection.
 
 ### Library Browsing & Multi-Select
 
@@ -62,6 +62,7 @@ New to the iOS version? Read **[Adding music on iOS](#adding-music-on-ios-how-to
 - **Full Transport Controls**: Play/pause, next/previous, seek bar with elapsed and remaining time, shuffle, and repeat (off → all → one).
 - **Audio Transitions & Clean Close**: Smooth audio pause/play fade transitions, plus a dedicated Player Close button to dismiss active playback and cleanly clear the system media notification.
 - **Queue Management & Quick Scroll**: Standalone Queue screen and *Up Next* tab in Now Playing with drag-to-reorder, swipe-to-remove, active track highlighting, and one-tap **Scroll to Current Track**.
+- **Volume Levelling (ReplayGain)**: Optional track or album ReplayGain levelling that plays tagged tracks at a consistent loudness. Untagged tracks play unchanged.
 - **Audio Equalizer & MFX**: Built-in graphic equalizer presets (Lo-Fi, Warmth, Bass Boost) and customizable multi-band EQ with live pitch and playback speed controls.
 - **Quick Music Effects (MFX) Presets**: One-tap speed & matching pitch presets via an enhanced enum: Super Slowed (0.70x), percentage-based steps (5%–25% slower/faster), Normal (1.00x), Sped Up (1.25x), Nightcore (1.30x), and Super Sped Up (1.50x).
 - **Bluetooth Audio Device Patch**: Dedicated toggle to optimize equalizer filter headroom and volume output when streaming to Bluetooth audio devices.
@@ -85,6 +86,13 @@ New to the iOS version? Read **[Adding music on iOS](#adding-music-on-ios-how-to
 - **In-App Dev Indicator**: Subtle developer badge indicator in debug builds.
 - **In-App Changelog Viewer**: View full release notes and version history directly within the app.
 
+### Backup, Privacy & Languages
+
+- **Backup & Restore**: Export playlists, favorites (songs, albums, artists), listening stats and settings to a JSON file and restore them on a new device or after reinstalling. Music files, playlist covers and the library cache are not included; the library is rescanned. Songs are matched against your current library, and missing ones are skipped.
+- **Offline & Private**: No account, no analytics, no uploads. The only network use is fetching the changelog from GitHub (and, on Android, checking GitHub for app updates). The in-app *Privacy & Permissions* screen explains every permission, and a *Danger Zone* wipes all app data.
+- **Languages**: English and Japanese, following the system language or a language picked in Settings.
+- **Library Formatting**: Choose how song titles are displayed, for example removing "(feat.)" or the "Artist - " prefix.
+
 ### Statistics
 
 - **Listening Dashboard**: A five-page swipeable statistics screen accessible from Settings.
@@ -92,7 +100,7 @@ New to the iOS version? Read **[Adding music on iOS](#adding-music-on-ios-how-to
 - **Top Charts**: Top 5 songs, albums, artists, and playlists — tap any entry to navigate or play.
 - **Reset Statistics**: Clear listening history with confirmation prompt.
 
-### Android Integration & In-House Native Bridge
+### Android Integration
 
 - **Background Playback**: Foreground service keeps music running with full media controls in the notification drawer and on the lock screen.
 - **Android Auto Support**: Full hierarchical `MediaBrowserService` integration allowing browsing and playback of Songs, Albums, Artists, and Playlists directly from automotive head units.
@@ -100,7 +108,7 @@ New to the iOS version? Read **[Adding music on iOS](#adding-music-on-ios-how-to
 - **Notification Controls**: Media controls and interactive sleep timer actions (+1 min, End timer) directly in the Android notification shade.
 - **In-App Update Checker**: Checks latest GitHub releases and recommends matching APK downloads based on the device's CPU architecture (`armeabi-v7a`, `arm64-v8a`, `x86_64`).
 
-### iOS Support & Limits
+### iOS Integration
 
 - **Own music folder**: iOS apps cannot read arbitrary folders, so Sonora scans a fixed folder inside the app (`Documents/Music`). It is visible in the Files app and in Finder, and music can also be added from inside the app with the *Add music* button.
 - **System media controls**: Track, artist, album, artwork and progress are published to the iOS now-playing panel (lock screen and Control Center), and playback continues in the background. The panel itself has only been checked in a simulator.
@@ -108,109 +116,108 @@ New to the iOS version? Read **[Adding music on iOS](#adding-music-on-ios-how-to
 
 ---
 
-## Architecture
+## Install
 
-Sonora is structured around clean, decoupled components using `go_router` for navigation:
+**Android**: download the APK that matches your device from the [latest release](https://github.com/yurtemre7/sonora/releases/latest) and open it (Android will ask to allow installs from your browser or file manager):
 
-```
-lib/
-├── models/
-│   ├── grouping.dart        - Album/artist grouping helpers
-│   ├── mfx_preset.dart      - Quick audio effect speed & pitch presets
-│   ├── playlist.dart        - Playlist model
-│   ├── song.dart            - Song metadata container
-│   └── song_activity.dart   - Listening activity and play count records
-├── providers/
-│   ├── player_provider.dart  - Playback, queue, library, audio effects, and sleep timer state
-│   ├── settings_provider.dart - App preferences and ThemeColorSource state
-│   └── theme_provider.dart   - ThemeMode preference
-├── routing/
-│   ├── app_router.dart      - GoRouter configuration and shell routes
-│   ├── app_routes.dart      - Route path constants
-│   └── app_navigation.dart  - Typed navigation helpers
-├── screens/
-│   ├── album_detail_screen.dart      - Album track listing
-│   ├── artist_detail_screen.dart     - Artist discography
-│   ├── changelog_screen.dart         - In-app version changelog viewer
-│   ├── favorites_screen.dart         - Dedicated favorites playlist screen
-│   ├── home_screen.dart              - Main tab layout (Songs / Albums / Artists / Playlists)
-│   ├── now_playing_screen.dart       - Fullscreen player with lyrics, queue, and related tabs
-│   ├── onboarding_screen.dart        - First-run setup flow
-│   ├── playlist_detail_screen.dart   - Reorderable playlist tracks and M3U actions
-│   ├── queue_screen.dart             - Standalone play queue with jump and reorder
-│   ├── recently_played_screen.dart   - Listening history and play count view
-│   ├── settings/                     - Modular settings screens (Appearance, Playback, Privacy, Info, etc.)
-│   └── stats_screen.dart             - Listening statistics and top charts
-├── services/
-│   ├── android_auto_media_browser.dart - MediaBrowserService for Android Auto head units
-│   ├── audio_handler.dart            - AudioService background controller
-│   ├── image_preflight_service.dart  - Background image cache pre-flight service
-│   ├── library_search_index.dart     - Fast in-memory search index
-│   ├── lyrics_service.dart           - LRC/TXT lyrics loading and parsing
-│   ├── music_scanner.dart            - Filesystem scanner and library cache
-│   ├── native_bridge.dart            - Native Android Kotlin platform bridge
-│   ├── permission_service.dart       - Storage and notification permissions
-│   ├── sleep_timer_notification_service.dart - Sleep timer notification controller
-│   ├── stats_service.dart            - Play-time and play-count tracking
-│   └── update_service.dart           - In-app update checker with CPU ABI detection
-├── theme/
-│   └── app_theme.dart         - Material 3 theme colors, schemes, and typography
-├── utils/
-│   ├── color_extractor.dart   - Background album-art color extraction
-│   └── logger.dart            - Route and debug logging
-├── widgets/                   - Reusable UI (mini player, seek bar, album art, visualizer, etc.)
-├── app.dart                   - App bootstrap and lifecycle orchestration
-└── main.dart                  - Entry point
-```
+| File | For |
+|---|---|
+| `sonora-arm64-v8a.apk` | Almost every phone from the last decade (pick this if unsure) |
+| `sonora-armeabi-v7a.apk` | Older 32-bit ARM phones |
+| `sonora-x86_64.apk` | Emulators and Intel-based Chromebooks |
 
-## Requirements
+Sonora checks GitHub for new releases itself and offers the matching APK when one is available.
 
-- [FVM](https://fvm.app/) with Flutter **3.47.6** (pinned in `.fvmrc`)
+**iOS**: download `sonora-ios.ipa` from the same release and [sideload it](#sideloading-the-ipa). Then read [Adding music to the app](#adding-music-to-the-app), because iOS needs the music files in the app's own folder.
+
+**Windows**: no binaries are published, [build it yourself](#windows).
+
+## iOS Guide
+
+Sonora is not on the App Store, and iOS apps can only read their own folder. Two steps get you going: [sideload the app](#sideloading-the-ipa), then [add your music](#adding-music-to-the-app).
+
+### Sideloading the IPA
+
+The `sonora-ios.ipa` on the [releases page](https://github.com/yurtemre7/sonora/releases) is **unsigned**: iOS refuses to install it directly (not through Safari, not through the Files app). A sideloading tool signs it with your own Apple ID and installs it. Common options:
+
+- **[AltStore](https://altstore.io/)**: install AltServer on a Mac or Windows PC, then open the IPA in AltStore on the iPhone. AltStore refreshes the app in the background while the computer is nearby on the same Wi-Fi.
+- **[SideStore](https://sidestore.io/)**: works like AltStore but refreshes on the iPhone itself, without a computer after the one-time setup.
+- **[Sideloadly](https://sideloadly.io/)**: a desktop tool (Windows or macOS): connect the iPhone, drag in the IPA, enter your Apple ID, and click *Start*.
+- **TrollStore**: installs permanently without expiry, but only works on specific iOS versions.
+
+Things to know:
+
+- On iOS 16 and later, turn on **Developer Mode** first (*Settings → Privacy & Security → Developer Mode*), then restart the phone.
+- After installing, open *Settings → General → VPN & Device Management*, trust your Apple ID profile, then open Sonora.
+- A **free Apple ID** allows only 3 sideloaded apps at a time, and the app **expires after 7 days** until it is refreshed (AltStore and SideStore do this automatically). Apple's paid developer program lifts this to one year.
+- The IPA keeps the bundle identifier `de.yurtemre.sonora`. Your sideloading tool rewrites it for your Apple ID.
+- Updating means installing the newer IPA over the old one. Your music and library should stay, as long as you do not delete the app first and your sideloading tool keeps the same bundle identifier.
+- The iOS build is new in the release workflow and has only run on a simulator, not on a real device. Please report problems.
+- Sonora is not affiliated with or endorsed by any of the sideloading tools above.
+
+### Adding Music to the App
+
+On iOS, Sonora plays music from its own folder: **`Documents/Music` inside the app**. This is the only place iOS lets the app read, so the files have to be put there first. Nothing is uploaded anywhere.
+
+#### Option A: with the Files app (no computer needed)
+
+1. Open Sonora once, so it creates its folder.
+2. Open the **Files** app and go to **Browse → On My iPhone → Sonora → Music**.
+3. Copy or move your audio files into that folder (for example from iCloud Drive or a download).
+4. Open Sonora and pull down on the song list, or go to **Settings → Sync Now**.
+
+#### Option B: with a Mac (Finder)
+
+1. Connect the iPhone and select it in Finder.
+2. Open the **Files** tab, expand **Sonora**, and drag your music into the **Music** folder.
+3. Run **Sync Now** in Sonora.
+
+#### Option C: inside the app
+
+1. Tap **Add music** (onboarding, Settings, or the empty library screen).
+2. Pick one or more audio files. Sonora copies them into its `Music` folder.
+3. Run **Sync Now** if they do not show up right away.
+
+#### Good to know
+
+- **Folder layout**: `Music/Artist/Album/Track.mp3` is recommended. When a file has no artist or album tags, Sonora uses these folder names instead.
+- **Lyrics**: put a `.lrc` (or `.txt`) file with the same name next to the audio file; it is detected during sync.
+- **Formats**: `.mp3`, `.m4a`/`.aac`, `.flac` and `.wav` are the safe choices, and they are the ones the *Add music* picker offers. Others (`.opus`, `.ogg`, `.wma`, ...) depend on your iOS version: `.opus` decoded in an iOS 27.2 simulator, but this is not guaranteed elsewhere.
+- **Storage**: the files take up space on the iPhone and are removed if you delete the app. They are included in device backups by default.
+- **Removing songs**: delete them in the Files app, then run **Sync Now**.
+
+## Building from Source
+
+### Requirements
+
+- [FVM](https://fvm.app/) with Flutter **3.47.8** (pinned in `.fvmrc`)
 - Dart SDK **^3.13.0**
-- Android SDK **24+** (compile/target SDK 37)
-- A connected Android device or emulator
-- *(Windows, optional)* Visual Studio 2022 with the **Desktop development with C++** workload
-- *(iOS, optional)* A Mac with Xcode (the project was verified with Xcode 27.2) and an Apple ID for signing when running on a real iPhone
+- **Android**: Android SDK **24+** (compile/target SDK 37), JDK 17+, and a connected device or emulator
+- **Windows** *(optional)*: Visual Studio 2022 with the **Desktop development with C++** workload
+- **iOS** *(optional)*: a Mac with Xcode (verified with Xcode 27.2) and an Apple ID for signing when running on a real iPhone
 
-## Getting Started
+### Set Up
 
-1. **Clone the repository:**
+```bash
+git clone https://github.com/yurtemre7/sonora.git
+cd sonora
+fvm install
+fvm flutter pub get
+```
 
-   ```bash
-   git clone https://github.com/yurtemre7/sonora.git
-   cd sonora
-   ```
+Check that everything is healthy:
 
-2. **Install the pinned Flutter version and fetch dependencies:**
+```bash
+fvm flutter analyze
+fvm flutter test
+```
 
-   ```bash
-   fvm install
-   fvm flutter pub get
-   ```
+### Android
 
-3. **Run static analysis:**
-
-   ```bash
-   fvm flutter analyze
-   ```
-
-4. **Run tests:**
-
-   ```bash
-   fvm flutter test
-   ```
-
-5. **Run on a connected device or emulator:**
-
-   ```bash
-   fvm flutter run
-   ```
-
-6. **Build a release APK:**
-
-   ```bash
-   fvm flutter build apk --release
-   ```
+```bash
+fvm flutter run                      # run on a connected device or emulator
+fvm flutter build apk --release      # build a release APK
+```
 
 ### Windows
 
@@ -224,7 +231,7 @@ The output is in `build/windows/x64/runner/Release/`.
 
 ### iOS
 
-Sonora is not on the App Store. Every GitHub release includes an **unsigned `sonora-ios.ipa`** that you can [sideload](#sideloading-the-ios-app), or you can build it yourself on a Mac with Xcode. So far it has only been tested on an iOS simulator, not on a physical iPhone.
+Sonora is not on the App Store. Every GitHub release includes an **unsigned `sonora-ios.ipa`** that you can [sideload](#sideloading-the-ipa), or you can build it yourself on a Mac with Xcode. So far it has only been tested on an iOS simulator, not on a physical iPhone.
 
 Run on a simulator:
 
@@ -248,55 +255,49 @@ mkdir Payload && cp -R build/ios/iphoneos/Runner.app Payload/
 zip -qry sonora-ios.ipa Payload
 ```
 
-## Sideloading the iOS app
+### Changelog
 
-The `sonora-ios.ipa` on the [releases page](https://github.com/yurtemre7/sonora/releases) is **unsigned**: iOS refuses to install it directly (not through Safari, not through the Files app). A sideloading tool signs it with your own Apple ID and installs it. Common options:
+`CHANGELOG.md` is generated from the git history (conventional commits) and the version in `pubspec.yaml`:
 
-- **[AltStore](https://altstore.io/)**: install AltServer on a Mac or Windows PC, then open the IPA in AltStore on the iPhone. AltStore refreshes the app in the background while the computer is nearby on the same Wi-Fi.
-- **[SideStore](https://sidestore.io/)**: works like AltStore but refreshes on the iPhone itself, without a computer after the one-time setup.
-- **[Sideloadly](https://sideloadly.io/)**: a desktop tool (Windows or macOS): connect the iPhone, drag in the IPA, enter your Apple ID, and click *Start*.
-- **TrollStore**: installs permanently without expiry, but only works on specific iOS versions.
+```bash
+fvm dart scripts/generate_changelog.dart
+```
 
-Things to know:
+## Architecture
 
-- On iOS 16 and later, turn on **Developer Mode** first (*Settings → Privacy & Security → Developer Mode*), then restart the phone.
-- After installing, open *Settings → General → VPN & Device Management*, trust your Apple ID profile, then open Sonora.
-- A **free Apple ID** allows only 3 sideloaded apps at a time, and the app **expires after 7 days** until it is refreshed (AltStore and SideStore do this automatically). Apple's paid developer program lifts this to one year.
-- The IPA keeps the bundle identifier `de.yurtemre.sonora`. Your sideloading tool rewrites it for your Apple ID.
-- Updating means installing the newer IPA over the old one. Your music and library should stay, as long as you do not delete the app first and your sideloading tool keeps the same bundle identifier.
-- The iOS build is new in the release workflow and has only run on a simulator, not on a real device. Please report problems.
-- Sonora is not affiliated with or endorsed by any of the sideloading tools above.
+Sonora is a single Flutter app. State lives in `ChangeNotifier` providers, screens are routed with `go_router`, and platform work is isolated in services:
 
-## Adding music on iOS (how-to guide)
+```
+lib/
+├── main.dart / app.dart        - Entry point, app bootstrap and lifecycle
+├── models/                     - Song, Playlist, album/artist grouping, MFX presets, ReplayGain, listening activity
+├── providers/
+│   ├── player_provider.dart    - Playback state, split by concern into the player_*.dart parts
+│   │                             (library, queue, MFX, persistence, theme, sleep timer)
+│   ├── settings_provider.dart  - App preferences, language, theme color source
+│   └── theme_provider.dart     - Theme mode
+├── routing/                    - GoRouter config, route constants, typed navigation helpers
+├── screens/                    - Home, now playing, queue, album/artist/playlist detail, favorites,
+│                                 history, stats, onboarding, changelog and settings/ sub-screens
+├── services/
+│   ├── audio_handler.dart      - just_audio + audio_service background playback
+│   ├── music_scanner.dart      - Library scan and cache (scanner_*.dart parts: playlists, import,
+│   │                             artist images, preferences, directory sync)
+│   ├── backup_service.dart     - Backup and restore of playlists, favorites, stats and settings
+│   ├── stats_service.dart      - Play time and play counts
+│   ├── lyrics_service.dart     - LRC/TXT lyrics loading and parsing
+│   ├── replay_gain_reader.dart - ReplayGain tag reading
+│   ├── native_bridge.dart      - Platform channel to the native Android (Kotlin) and iOS (Swift) code
+│   ├── android_auto_media_browser.dart - Android Auto media browser tree
+│   ├── update_service.dart     - GitHub release check and APK download (Android)
+│   └── ...                     - Search index, image pre-flight cache, permissions, sleep timer notification
+├── theme/                      - Material 3 color schemes and typography
+├── utils/                      - Color extraction, formatting, image helpers, l10n extension
+├── widgets/                    - Reusable UI (mini player, seek bar, album art, visualizer, sheets, ...)
+└── l10n/                       - ARB files (English, Japanese) and generated localizations
+```
 
-On iOS, Sonora plays music from its own folder: **`Documents/Music` inside the app**. This is the only place iOS lets the app read, so the files have to be put there first. Nothing is uploaded anywhere.
-
-**Option A: with the Files app (no computer needed)**
-
-1. Open Sonora once, so it creates its folder.
-2. Open the **Files** app and go to **Browse → On My iPhone → Sonora → Music**.
-3. Copy or move your audio files into that folder (for example from iCloud Drive or a download).
-4. Open Sonora and pull down on the song list, or go to **Settings → Sync Now**.
-
-**Option B: with a Mac (Finder)**
-
-1. Connect the iPhone and select it in Finder.
-2. Open the **Files** tab, expand **Sonora**, and drag your music into the **Music** folder.
-3. Run **Sync Now** in Sonora.
-
-**Option C: inside the app**
-
-1. Tap **Add music** (onboarding, Settings, or the empty library screen).
-2. Pick one or more audio files. Sonora copies them into its `Music` folder.
-3. Run **Sync Now** if they do not show up right away.
-
-**Good to know**
-
-- **Folder layout**: `Music/Artist/Album/Track.mp3` is recommended. When a file has no artist or album tags, Sonora uses these folder names instead.
-- **Lyrics**: put a `.lrc` (or `.txt`) file with the same name next to the audio file; it is detected during sync.
-- **Formats**: `.mp3`, `.m4a`/`.aac`, `.flac` and `.wav` are the safe choices, and they are the ones the *Add music* picker offers. Others (`.opus`, `.ogg`, `.wma`, ...) depend on your iOS version: `.opus` decoded in an iOS 27.2 simulator, but this is not guaranteed elsewhere.
-- **Storage**: the files take up space on the iPhone and are removed if you delete the app. They are included in device backups by default.
-- **Removing songs**: delete them in the Files app, then run **Sync Now**.
+Native code: `android/` (Kotlin: MediaStore scan, widget, Android Auto, installer), `ios/` (Swift: URL launching and app info), `windows/`.
 
 ## Releases
 
