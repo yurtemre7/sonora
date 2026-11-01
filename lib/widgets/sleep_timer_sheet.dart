@@ -56,7 +56,10 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
     var theme = Theme.of(context);
 
     return ListenableBuilder(
-      listenable: widget.playerProvider,
+      listenable: Listenable.merge([
+        widget.playerProvider,
+        widget.playerProvider.sleepTimerRemaining,
+      ]),
       builder: (context, _) {
         var activeTimerDuration = widget.playerProvider.sleepTimerDuration;
         var isTimerActive = activeTimerDuration != null;
@@ -128,7 +131,7 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                             Text(
                               widget.playerProvider.isFinishingCurrentSong
                                   ? context.l10n.finishCurrentSong
-                                  : 'Music stops in',
+                                  : context.l10n.sleepTimerMusicStopsIn,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
@@ -136,7 +139,7 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                             const SizedBox(height: 8),
                             Text(
                               widget.playerProvider.isFinishingCurrentSong
-                                  ? 'Finishing song...'
+                                  ? context.l10n.sleepTimerFinishingSong
                                   : _formatDuration(activeTimerDuration),
                               style: theme.textTheme.displaySmall?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -200,7 +203,9 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                         child: Column(
                           children: [
                             Text(
-                              '${_selectedMinutes.round()} min',
+                              context.l10n.sleepTimerMinutes(
+                                _selectedMinutes.round(),
+                              ),
                               style: theme.textTheme.displayMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: theme.colorScheme.primary,
@@ -209,7 +214,7 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Drag to set timer (1 to 60 minutes)',
+                              context.l10n.sleepTimerDragHint,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
@@ -235,7 +240,9 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                                 min: 1,
                                 max: 60,
                                 divisions: 59, // 1 min increments from 1 to 60
-                                label: '${_selectedMinutes.round()} min',
+                                label: context.l10n.sleepTimerMinutes(
+                                  _selectedMinutes.round(),
+                                ),
                                 onChanged: (val) {
                                   setState(() {
                                     _selectedMinutes = val;
@@ -263,7 +270,9 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                             return Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: ChoiceChip(
-                                label: Text('$min min'),
+                                label: Text(
+                                  context.l10n.sleepTimerMinutes(min),
+                                ),
                                 selected: isSelected,
                                 showCheckmark: true,
                                 checkmarkColor: theme.colorScheme.onPrimary,
@@ -340,7 +349,7 @@ class _SleepTimerBottomSheetState extends State<SleepTimerBottomSheet> {
                           },
                           icon: const Icon(Icons.play_arrow_rounded),
                           label: Text(
-                            '${context.l10n.startTimer} (${_selectedMinutes.round()} min)',
+                            '${context.l10n.startTimer} (${context.l10n.sleepTimerMinutes(_selectedMinutes.round())})',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

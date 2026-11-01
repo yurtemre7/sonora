@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:sonora/l10n/app_localizations.dart';
 
 class SleepTimerNotificationService {
   static final _instance = SleepTimerNotificationService._internal();
@@ -64,9 +65,11 @@ class SleepTimerNotificationService {
     }
   }
 
+  /// Shows the countdown, or the "finishing song" text when [finishingSong].
   Future<void> updateTimerNotification(
-    Duration remaining, {
-    String? customBody,
+    Duration remaining,
+    AppLocalizations l10n, {
+    bool finishingSong = false,
   }) async {
     if (Platform.environment.containsKey('FLUTTER_TEST')) return;
 
@@ -88,7 +91,7 @@ class SleepTimerNotificationService {
             '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
       }
 
-      var androidDetails = const AndroidNotificationDetails(
+      var androidDetails = AndroidNotificationDetails(
         _channelId,
         _channelName,
         channelDescription: _channelDescription,
@@ -102,12 +105,12 @@ class SleepTimerNotificationService {
         actions: [
           AndroidNotificationAction(
             'add_1_min',
-            'Add 1 min',
+            l10n.plusOneMin,
             showsUserInterface: true,
           ),
           AndroidNotificationAction(
             'end_timer',
-            'End timer',
+            l10n.endTimer,
             showsUserInterface: true,
           ),
         ],
@@ -117,8 +120,10 @@ class SleepTimerNotificationService {
 
       await _notificationsPlugin.show(
         id: _notificationId,
-        title: 'Sleep Timer',
-        body: customBody ?? '$formatted remaining',
+        title: l10n.sleepTimer,
+        body: finishingSong
+            ? l10n.sleepTimerFinishingSong
+            : l10n.sleepTimerRemaining(formatted),
         notificationDetails: notificationDetails,
       );
     } catch (_) {}

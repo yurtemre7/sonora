@@ -616,8 +616,16 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   }
 
   Widget _buildTimerChip(BuildContext context) {
+    return ValueListenableBuilder<Duration?>(
+      valueListenable: widget.playerProvider.sleepTimerRemaining,
+      builder: (context, remaining, _) =>
+          _buildTimerChipFor(context, remaining),
+    );
+  }
+
+  Widget _buildTimerChipFor(BuildContext context, Duration? remaining) {
     var theme = Theme.of(context);
-    var timerActive = widget.playerProvider.sleepTimerDuration != null;
+    var timerActive = remaining != null;
 
     if (timerActive) {
       return Material(
@@ -639,9 +647,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  context.l10n.stopInX(
-                    _formatDuration(widget.playerProvider.sleepTimerDuration!),
-                  ),
+                  widget.playerProvider.isFinishingCurrentSong
+                      ? context.l10n.sleepTimerFinishingSong
+                      : context.l10n.stopInX(_formatDuration(remaining)),
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,

@@ -87,10 +87,9 @@ void main() {
       );
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
-      expect(playerProvider.sleepTimerDuration, isNotNull);
       expect(
-        playerProvider.sleepTimerOriginalDuration,
-        const Duration(seconds: 30),
+        playerProvider.sleepTimerDuration,
+        greaterThan(const Duration(seconds: 20)),
       );
 
       playerProvider.stopSleepTimer();
@@ -125,6 +124,39 @@ void main() {
       playerProvider.stopSleepTimer();
 
       expect(audioHandler.volume, 0.8);
+    });
+
+    test('Countdown ticks do not notify provider listeners', () async {
+      var playerProvider = PlayerProvider(
+        audioHandler: SonoraAudioHandler(),
+        settingsProvider: SettingsProvider(),
+      );
+      await playerProvider.loadSettings();
+      playerProvider.queue = [
+        createDummySong(
+          id: 1,
+          title: 'Song 1',
+          duration: const Duration(minutes: 3),
+        ),
+      ];
+      playerProvider.currentIndex = 0;
+
+      playerProvider.startSleepTimer(
+        const Duration(seconds: 30),
+        finishSong: false,
+        fadeOutSecs: 0,
+      );
+      var providerNotifications = 0;
+      var countdownUpdates = 0;
+      playerProvider.addListener(() => providerNotifications++);
+      playerProvider.sleepTimerRemaining.addListener(() => countdownUpdates++);
+
+      await Future<void>.delayed(const Duration(milliseconds: 2300));
+
+      expect(countdownUpdates, greaterThanOrEqualTo(2));
+      expect(providerNotifications, 0);
+
+      playerProvider.stopSleepTimer();
     });
 
     test('Standard sleep timer pauses without clearing queue', () async {

@@ -1461,4 +1461,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupRestartNeeded => 'Restart the app to see all changes';
+
+  @override
+  String get sleepTimerMusicStopsIn => 'Music stops in';
+
+  @override
+  String get sleepTimerFinishingSong => 'Finishing song...';
+
+  @override
+  String get sleepTimerDragHint => 'Drag to set timer (1 to 60 minutes)';
+
+  @override
+  String sleepTimerMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String sleepTimerRemaining(String time) {
+    return '$time remaining';
+  }
+
+  @override
+  String get endTimer => 'End timer';
 }

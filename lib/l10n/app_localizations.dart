@@ -2611,6 +2611,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restart the app to see all changes'**
   String get backupRestartNeeded;
+
+  /// No description provided for @sleepTimerMusicStopsIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Music stops in'**
+  String get sleepTimerMusicStopsIn;
+
+  /// No description provided for @sleepTimerFinishingSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishing song...'**
+  String get sleepTimerFinishingSong;
+
+  /// No description provided for @sleepTimerDragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to set timer (1 to 60 minutes)'**
+  String get sleepTimerDragHint;
+
+  /// No description provided for @sleepTimerMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String sleepTimerMinutes(int minutes);
+
+  /// No description provided for @sleepTimerRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} remaining'**
+  String sleepTimerRemaining(String time);
+
+  /// No description provided for @endTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'End timer'**
+  String get endTimer;
 }
 
 class _AppLocalizationsDelegate

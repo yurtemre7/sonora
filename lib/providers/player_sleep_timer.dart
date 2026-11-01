@@ -2,10 +2,15 @@ part of 'player_provider.dart';
 
 /// Sleep timer, finish-song mode and fade-out.
 extension PlayerSleepTimer on PlayerProvider {
+  AppLocalizations get _l10n =>
+      localizationsFor(SettingsProvider.instance.currentLocale);
+
   void _updateMediaNotificationControls() {
+    var l10n = _l10n;
     audioHandler.updateSleepTimerState(
       active: sleepTimerDuration != null,
-      label: '+1 min',
+      label: l10n.plusOneMin,
+      endLabel: l10n.endTimer,
     );
   }
 
@@ -23,7 +28,6 @@ extension PlayerSleepTimer on PlayerProvider {
   }) {
     stopSleepTimer();
 
-    sleepTimerOriginalDuration = duration;
     sleepTimerDuration = duration;
     _isFadingOut = false;
     _isFinishingCurrentSong = false;
@@ -35,7 +39,7 @@ extension PlayerSleepTimer on PlayerProvider {
         fadeOutSecs ?? SettingsProvider.instance.sleepTimerFadeOutSeconds;
 
     _updateMediaNotificationControls();
-    SleepTimerNotificationService().updateTimerNotification(duration);
+    SleepTimerNotificationService().updateTimerNotification(duration, _l10n);
 
     _sleepTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (sleepTimerDuration == null) {
@@ -74,8 +78,10 @@ extension PlayerSleepTimer on PlayerProvider {
           );
         }
 
-        SleepTimerNotificationService().updateTimerNotification(remaining);
-        _notify();
+        SleepTimerNotificationService().updateTimerNotification(
+          remaining,
+          _l10n,
+        );
       }
     });
 
@@ -94,7 +100,8 @@ extension PlayerSleepTimer on PlayerProvider {
 
     SleepTimerNotificationService().updateTimerNotification(
       Duration.zero,
-      customBody: 'Finishing active song...',
+      _l10n,
+      finishingSong: true,
     );
 
     _finishSongTimer = Timer.periodic(const Duration(milliseconds: 250), (
@@ -163,7 +170,6 @@ extension PlayerSleepTimer on PlayerProvider {
     // Reset state before the first await: a timer started while the pause
     // fade runs must not have its state cleared afterwards.
     sleepTimerDuration = null;
-    sleepTimerOriginalDuration = null;
     _isFadingOut = false;
     _isFinishingCurrentSong = false;
     _finishSongTargetSongId = null;
@@ -183,7 +189,6 @@ extension PlayerSleepTimer on PlayerProvider {
     _finishSongTimer?.cancel();
     _finishSongTimer = null;
     sleepTimerDuration = null;
-    sleepTimerOriginalDuration = null;
     _isFinishingCurrentSong = false;
     _finishSongTargetSongId = null;
     sleepTimerFinishSongActive = false;

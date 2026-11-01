@@ -432,5 +432,11 @@
   "backupErrorNoMatchingSongs": "このバックアップの曲がライブラリに1曲も見つかりません。正しい音楽フォルダが選択・スキャンされているか確認してください。",
   "backupErrorRolledBack": "バックアップを復元できませんでした。以前のデータはそのまま保持されています。",
   "backupErrorFilePicker": "ファイルを開けませんでした。もう一度お試しください。",
-  "backupRestartNeeded": "すべての変更を反映するにはアプリを再起動してください"
+  "backupRestartNeeded": "すべての変更を反映するにはアプリを再起動してください",
+  "sleepTimerMusicStopsIn": "停止まで",
+  "sleepTimerFinishingSong": "曲を最後まで再生中…",
+  "sleepTimerDragHint": "ドラッグしてタイマーを設定（1〜60分）",
+  "sleepTimerMinutes": "{minutes}分",
+  "sleepTimerRemaining": "残り{time}",
+  "endTimer": "タイマーを終了"
 }

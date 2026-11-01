@@ -1375,4 +1375,26 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get backupRestartNeeded => 'すべての変更を反映するにはアプリを再起動してください';
+
+  @override
+  String get sleepTimerMusicStopsIn => '停止まで';
+
+  @override
+  String get sleepTimerFinishingSong => '曲を最後まで再生中…';
+
+  @override
+  String get sleepTimerDragHint => 'ドラッグしてタイマーを設定（1〜60分）';
+
+  @override
+  String sleepTimerMinutes(int minutes) {
+    return '$minutes分';
+  }
+
+  @override
+  String sleepTimerRemaining(String time) {
+    return '残り$time';
+  }
+
+  @override
+  String get endTimer => 'タイマーを終了';
 }

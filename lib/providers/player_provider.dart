@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonora/l10n/app_localizations.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/mfx_preset.dart';
 import 'package:sonora/models/playlist.dart';
@@ -21,6 +22,7 @@ import 'package:sonora/services/sleep_timer_notification_service.dart';
 import 'package:sonora/services/stats_service.dart';
 import 'package:sonora/theme/app_theme.dart';
 import 'package:sonora/utils/color_extractor.dart';
+import 'package:sonora/utils/l10n_extension.dart';
 
 part 'player_mfx.dart';
 part 'player_queue.dart';
@@ -75,8 +77,13 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   var _isBluetoothMfxPatchEnabled = false;
   List<double>? _customEqGains;
   Timer? _sleepTimer;
-  Duration? sleepTimerDuration;
-  Duration? sleepTimerOriginalDuration;
+
+  /// Remaining sleep timer time, `null` while no timer runs. Ticks update
+  /// only this notifier, so the countdown does not rebuild every
+  /// [PlayerProvider] listener once a second.
+  final sleepTimerRemaining = ValueNotifier<Duration?>(null);
+  Duration? get sleepTimerDuration => sleepTimerRemaining.value;
+  set sleepTimerDuration(Duration? value) => sleepTimerRemaining.value = value;
   var _isFadingOut = false;
   var _originalVolumeBeforeFade = 1.0;
   var _lastExtractedSongId = -1;
@@ -433,6 +440,7 @@ class PlayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   void dispose() {
     _isExtractingColors = false;
     stopSleepTimer();
+    sleepTimerRemaining.dispose();
     _mediaItemSub?.cancel();
     _playingSub?.cancel();
     _processingSub?.cancel();

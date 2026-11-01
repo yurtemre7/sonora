@@ -713,5 +713,25 @@
   "backupErrorNoMatchingSongs": "None of the songs in this backup are in your library. Check that the right music folder is selected and scanned.",
   "backupErrorRolledBack": "Could not restore the backup. Your previous data was kept.",
   "backupErrorFilePicker": "Could not open the file. Please try again.",
-  "backupRestartNeeded": "Restart the app to see all changes"
+  "backupRestartNeeded": "Restart the app to see all changes",
+  "sleepTimerMusicStopsIn": "Music stops in",
+  "sleepTimerFinishingSong": "Finishing song...",
+  "sleepTimerDragHint": "Drag to set timer (1 to 60 minutes)",
+  "sleepTimerMinutes": "{minutes} min",
+  "@sleepTimerMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "sleepTimerRemaining": "{time} remaining",
+  "@sleepTimerRemaining": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "endTimer": "End timer"
 }

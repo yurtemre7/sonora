@@ -48,11 +48,17 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
   // Sleep timer properties for media notification
   var sleepTimerActive = false;
   var sleepTimerExtendLabel = '+5 min';
+  var sleepTimerEndLabel = 'End timer';
   Function(String)? onCustomAction;
 
-  void updateSleepTimerState({required bool active, required String label}) {
+  void updateSleepTimerState({
+    required bool active,
+    required String label,
+    required String endLabel,
+  }) {
     sleepTimerActive = active;
     sleepTimerExtendLabel = label;
+    sleepTimerEndLabel = endLabel;
     _broadcastPlaybackState(player.playbackEvent);
   }
 
@@ -253,11 +259,13 @@ class SonoraAudioHandler extends BaseAudioHandler with QueueHandler {
                       name: 'extendSleepTimer',
                     ),
                   ),
-                  const MediaControl(
+                  MediaControl(
                     androidIcon: 'drawable/ic_launcher_monochrome',
-                    label: 'End timer',
+                    label: sleepTimerEndLabel,
                     action: MediaAction.custom,
-                    customAction: CustomMediaAction(name: 'stopSleepTimer'),
+                    customAction: const CustomMediaAction(
+                      name: 'stopSleepTimer',
+                    ),
                   ),
                 ],
               ],
