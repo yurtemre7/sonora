@@ -154,6 +154,7 @@ lib/
 - Dart SDK **^3.13.0**
 - Android SDK **24+** (compile/target SDK 37)
 - A connected Android device or emulator
+- *(Windows, optional)* Visual Studio 2022 with the **Desktop development with C++** workload
 
 ## Getting Started
 
@@ -195,9 +196,19 @@ lib/
    fvm flutter build apk --release
    ```
 
+### Windows
+
+The Windows version works but is **not available for download**: no Windows binaries are published. Build it yourself:
+
+```bash
+fvm flutter build windows --release
+```
+
+The output is in `build/windows/x64/runner/Release/`.
+
 ## Releases
 
-Release APKs are built automatically via GitHub Actions whenever a commit to `main` includes a release prefix in its message (e.g., `release: v1.19.1` or `chore(release): bump to version 1.19.1`). See [CHANGELOG.md](CHANGELOG.md) for the full version history.
+Release APKs (Android only) are built automatically via GitHub Actions whenever a commit to `main` includes a release prefix in its message (e.g., `release: v1.19.1` or `chore(release): bump to version 1.19.1`). See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
 ## License
 

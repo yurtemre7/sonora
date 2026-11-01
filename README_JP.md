@@ -154,6 +154,7 @@ lib/
 - Dart SDK **^3.13.0**
 - Android SDK **24+**（コンパイル/ターゲット SDK 37）
 - 接続済みの Android デバイスまたはエミュレーター
+- *（Windows の場合のみ）* **C++ によるデスクトップ開発** ワークロードを含む Visual Studio 2022
 
 ## はじめに
 
@@ -195,9 +196,19 @@ lib/
    fvm flutter build apk --release
    ```
 
+### Windows
+
+Windows 版は動作しますが、**ダウンロード版は提供していません**（Windows 用バイナリは公開されません）。ご自身でビルドしてください:
+
+```bash
+fvm flutter build windows --release
+```
+
+出力先は `build/windows/x64/runner/Release/` です。
+
 ## リリース
 
-`main` へのコミットメッセージにリリースプレフィックスが含まれている場合（例：`release: v1.19.1` または `chore(release): bump to version 1.19.1`）、GitHub Actions によって自動的にリリース APK がビルドされます。バージョン履歴の詳細は [CHANGELOG.md](CHANGELOG.md) を参照してください。
+`main` へのコミットメッセージにリリースプレフィックスが含まれている場合（例：`release: v1.19.1` または `chore(release): bump to version 1.19.1`）、GitHub Actions によって自動的にリリース APK（Android のみ） がビルドされます。バージョン履歴の詳細は [CHANGELOG.md](CHANGELOG.md) を参照してください。
 
 ## ライセンス
 
