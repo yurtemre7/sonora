@@ -2,7 +2,7 @@
 
 [![🚀 Flutter Release Build](https://github.com/yurtemre7/sonora/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/yurtemre7/sonora/actions/workflows/release.yml)
 
-*🌐 他の言語で読む: [English](README.md)*
+_🌐 他の言語で読む: [English](README.md)_
 
 Sonora は Flutter で構築された、プライバシーを最優先にしたローカル音楽プレイヤーです。Material 3 Expressive デザインを採用し、アルバムアートおよび Material You（壁紙カラー）から動的にテーマカラーを生成します。ディレクトリベースのライブラリ同期、マルチバンドイコライザー & サウンドエフェクト（MFX）、複数曲の一括操作（マルチセレクト）、シームレスなバックグラウンド再生を実現しており、ファイルのコピーやアップロードは一切行いません。主な対象プラットフォームは Android で、Windows および iOS ビルドにも対応しています（[対応プラットフォーム](#対応プラットフォーム)を参照）。
 
@@ -11,11 +11,11 @@ Sonora は Flutter で構築された、プライバシーを最優先にした�
 
 ## 対応プラットフォーム
 
-| プラットフォーム | 状況 | ダウンロード |
-|---|---|---|
-| Android | 主な対象 | GitHub のリリース APK（[インストール](#インストール)） |
-| iOS | 動作します（シミュレーターでのみ検証） | GitHub リリースに署名なし IPA（[サイドロード](#ipa-のサイドロード)用）。または[ご自身でビルド](#ios) |
-| Windows | 動作します | ダウンロード版なし。[ご自身でビルド](#windows)してください |
+| プラットフォーム | 状況                                   | ダウンロード                                                                                         |
+| ---------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Android          | 主な対象                               | GitHub のリリース APK（[インストール](#インストール)）                                               |
+| iOS              | 動作します（シミュレーターでのみ検証） | GitHub リリースに署名なし IPA（[サイドロード](#ipa-のサイドロード)用）。または[ご自身でビルド](#ios) |
+| Windows          | 動作します                             | ダウンロード版なし。[ご自身でビルド](#windows)してください                                           |
 
 iOS 版を使う方は **[iOS で音楽を追加する方法](#アプリに音楽を追加する)** をご覧ください。iOS アプリは自分専用のフォルダしか読み取れないため、先にそこへ音楽を入れる必要があります。
 
@@ -120,11 +120,11 @@ iOS 版を使う方は **[iOS で音楽を追加する方法](#アプリに音�
 
 **Android**: [最新リリース](https://github.com/yurtemre7/sonora/releases/latest)から端末に合った APK をダウンロードして開きます（ブラウザやファイルマネージャーからのインストールを許可するよう求められます）:
 
-| ファイル | 対象 |
-|---|---|
-| `sonora-arm64-v8a.apk` | ここ 10 年ほどのほぼすべてのスマートフォン（迷ったらこれ） |
-| `sonora-armeabi-v7a.apk` | 古い 32 ビット ARM のスマートフォン |
-| `sonora-x86_64.apk` | エミュレーターと Intel ベースの Chromebook |
+| ファイル                 | 対象                                                       |
+| ------------------------ | ---------------------------------------------------------- |
+| `sonora-arm64-v8a.apk`   | ここ 10 年ほどのほぼすべてのスマートフォン（迷ったらこれ） |
+| `sonora-armeabi-v7a.apk` | 古い 32 ビット ARM のスマートフォン                        |
+| `sonora-x86_64.apk`      | エミュレーターと Intel ベースの Chromebook                 |
 
 Sonora は新しいリリースを GitHub で自動的に確認し、利用可能な場合は適切な APK を案内します。
 
@@ -142,13 +142,13 @@ Sonora は App Store には登録されておらず、iOS アプリは自分専�
 
 - **[AltStore](https://altstore.io/)**: Mac または Windows PC に AltServer をインストールし、iPhone の AltStore で IPA を開きます。同じ Wi-Fi 上にパソコンがあれば、バックグラウンドで自動的に更新されます。
 - **[SideStore](https://sidestore.io/)**: AltStore と同様ですが、初回設定後はパソコンなしで iPhone 上だけで更新できます。
-- **[Sideloadly](https://sideloadly.io/)**: デスクトップツール（Windows / macOS）。iPhone を接続して IPA をドラッグし、Apple ID を入力して *Start* をクリックします。
+- **[Sideloadly](https://sideloadly.io/)**: デスクトップツール（Windows / macOS）。iPhone を接続して IPA をドラッグし、Apple ID を入力して _Start_ をクリックします。
 - **TrollStore**: 期限なしで永続的にインストールできますが、特定の iOS バージョンでのみ利用可能です。
 
 注意点:
 
-- iOS 16 以降では、先に**デベロッパモード**をオンにしてください（*設定 → プライバシーとセキュリティ → デベロッパモード*）。その後 iPhone を再起動します。
-- インストール後、*設定 → 一般 → VPN とデバイス管理* でご自身の Apple ID のプロファイルを信頼してから Sonora を開きます。
+- iOS 16 以降では、先に**デベロッパモード**をオンにしてください（_設定 → プライバシーとセキュリティ → デベロッパモード_）。その後 iPhone を再起動します。
+- インストール後、_設定 → 一般 → VPN とデバイス管理_ でご自身の Apple ID のプロファイルを信頼してから Sonora を開きます。
 - **無料の Apple ID** では同時にサイドロードできるアプリは 3 つまでで、更新しないと **7 日で期限切れ**になります（AltStore と SideStore は自動で更新します）。Apple の有料デベロッパプログラムなら 1 年になります。
 - IPA のバンドル ID は `de.yurtemre.sonora` です。サイドロードツールがご自身の Apple ID 用に書き換えます。
 - 更新は、新しい IPA を上書きインストールします。先にアプリを削除せず、サイドロードツールが同じバンドル ID を使う限り、音楽やライブラリは残るはずです。
@@ -190,7 +190,7 @@ iOS では、Sonora は**アプリ内の `Documents/Music` フォルダ**から�
 
 ### 動作要件
 
-- [FVM](https://fvm.app/) と Flutter **3.47.8**（`.fvmrc` で固定）
+- [FVM](https://fvm.app/) と Flutter **3.47.9**（`.fvmrc` で固定）
 - Dart SDK **^3.13.0**
 - **Android**: Android SDK **24+**（コンパイル/ターゲット SDK 37）、JDK 17 以上、接続済みのデバイスまたはエミュレーター
 - **Windows**（任意）: **C++ によるデスクトップ開発** ワークロードを含む Visual Studio 2022
@@ -239,7 +239,7 @@ Sonora は App Store には登録されていません。GitHub の各リリー�
 fvm flutter run -d "iPhone"
 ```
 
-iPhone 実機で実行する: 一度 Xcode で `ios/Runner.xcworkspace` を開き、*Runner → Signing & Capabilities* で Apple ID のチームを選択します（バンドル ID が使用済みの場合は変更してください）。その後:
+iPhone 実機で実行する: 一度 Xcode で `ios/Runner.xcworkspace` を開き、_Runner → Signing & Capabilities_ で Apple ID のチームを選択します（バンドル ID が使用済みの場合は変更してください）。その後:
 
 ```bash
 fvm flutter run -d <デバイスID> --release
