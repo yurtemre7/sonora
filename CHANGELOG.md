@@ -2,6 +2,17 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.28.0] - 2026-11-05
+### Added
+* Add blurred backgrounds setting and cheaper blur
+* Improve thumbnail generation
+### Changed
+* Docs: Shorten and sharpen agent rules
+* Chore: Separate token on image preflight service
+* Chore: Update dependencies
+* Chore: Update flutter to 3.47.9
+* Chore: Update readme
+
 ## [1.27.0] - 2026-11-01
 ### Added
 * Add iOS support
