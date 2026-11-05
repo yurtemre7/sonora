@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:sonora/services/thumbnail_store.dart';
 
 class AlbumArt extends StatelessWidget {
   const AlbumArt({
@@ -56,6 +57,10 @@ class AlbumArt extends StatelessWidget {
     double devicePixelRatio = 2.0,
   }) {
     var targetDim = cacheDim ?? computeCacheDim(size, devicePixelRatio);
+    if (targetDim == ThumbnailStore.dim) {
+      var thumb = ThumbnailStore.find(artworkPath);
+      if (thumb != null) return FileImage(File(thumb));
+    }
     return ResizeImage.resizeIfNeeded(
       targetDim,
       null,

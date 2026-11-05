@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sonora/app.dart';
 import 'package:sonora/services/audio_handler.dart';
 import 'package:sonora/services/sleep_timer_notification_service.dart';
+import 'package:sonora/services/thumbnail_store.dart';
 import 'package:sonora/services/volume_service.dart';
 
 late SonoraAudioHandler audioHandler;
@@ -14,6 +18,9 @@ Future<void> main() async {
   // Cap Flutter image cache to 150 MB / 250 images to balance memory and scrolling performance.
   PaintingBinding.instance.imageCache.maximumSizeBytes = 150 * 1024 * 1024;
   PaintingBinding.instance.imageCache.maximumSize = 250;
+
+  var cacheDir = await getApplicationCacheDirectory();
+  await ThumbnailStore.init(Directory('${cacheDir.path}/thumbnails'));
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(

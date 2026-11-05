@@ -37,6 +37,7 @@ extension PlayerLibrary on PlayerProvider {
   }
 
   void _startImagePreflight() {
+    unawaited(ImagePreflightService.instance.generateThumbnails(allSongs));
     ImagePreflightService.instance.preflightSongs(allSongs);
     ImagePreflightService.instance.preflightAlbums(cachedAlbums);
     if (queue.isNotEmpty && currentIndex >= 0) {

@@ -27,7 +27,7 @@ class MainActivity : AudioServiceActivity() {
             R.drawable.ic_launcher_monochrome,
         )
 
-        private const val ALBUM_ART_MAX_PX = 1080
+        private const val ALBUM_ART_MAX_PX = 720
     }
 
     private val VOLUME_CHANNEL = "de.yurtemre.sonora/volume"

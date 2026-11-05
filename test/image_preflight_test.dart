@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/song.dart';
 import 'package:sonora/services/image_preflight_service.dart';
+import 'package:sonora/services/thumbnail_store.dart';
 import 'package:sonora/widgets/album_art.dart';
 
 void main() {
@@ -201,5 +203,49 @@ void main() {
       // Clean up temp file
       await tempDir.delete(recursive: true);
     });
+  });
+
+  group('ThumbnailStore', () {
+    test(
+      'generates a thumbnail once and AlbumArt.provider then uses it',
+      () async {
+        var tempDir = await Directory.systemTemp.createTemp(
+          'sonora_thumb_test',
+        );
+        await ThumbnailStore.init(Directory('${tempDir.path}/thumbs'));
+        var art = File('${tempDir.path}/art.png')
+          ..writeAsBytesSync(
+            base64Decode(
+              'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+            ),
+          );
+
+        expect(ThumbnailStore.find(art.path), isNull);
+        await ImagePreflightService().generateThumbnails([
+          Song(
+            id: 1,
+            title: 't',
+            artist: 'a',
+            album: 'b',
+            duration: Duration.zero,
+            filePath: '/x.mp3',
+            artworkPath: art.path,
+            format: 'mp3',
+          ),
+        ]);
+        var thumb = ThumbnailStore.find(art.path);
+        expect(thumb, isNotNull);
+        expect(File(thumb!).existsSync(), isTrue);
+
+        var provider = AlbumArt.provider(art.path, cacheDim: 128);
+        expect(provider, isA<FileImage>());
+        expect((provider as FileImage).file.path, thumb);
+
+        // A restart re-indexes the existing thumbnails.
+        await ThumbnailStore.init(Directory('${tempDir.path}/thumbs'));
+        expect(ThumbnailStore.find(art.path), thumb);
+        await tempDir.delete(recursive: true);
+      },
+    );
   });
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:sonora/models/grouping.dart';
 import 'package:sonora/models/song.dart';
+import 'package:sonora/services/thumbnail_store.dart';
 import 'package:sonora/widgets/album_art.dart';
 
 /// Pre-flight image decoding and caching service.
@@ -20,6 +21,7 @@ class ImagePreflightService {
   // not cancel each other.
   var _songsToken = 0;
   var _albumsToken = 0;
+  var _thumbsToken = 0;
   final _preflightedProviders = <String>{};
 
   /// Decodes and warms up an [ImageProvider] into Flutter's [imageCache].
@@ -39,6 +41,22 @@ class ImagePreflightService {
     );
     stream.addListener(listener);
     return completer.future;
+  }
+
+  /// Creates any missing on-disk thumbnails for every cover in [songs], one at
+  /// a time in the background. Tiles use them from the next provider lookup on.
+  Future<void> generateThumbnails(List<Song> songs) async {
+    var token = ++_thumbsToken;
+    var seen = <String>{};
+    for (var song in songs) {
+      var path = song.artworkPath;
+      if (path == null || path.isEmpty || !seen.add(path)) continue;
+      if (ThumbnailStore.find(path) != null) continue;
+      if (!AlbumArt.checkFileExists(path)) continue;
+      if (token != _thumbsToken) return;
+      await ThumbnailStore.ensure(path);
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+    }
   }
 
   /// Preflights thumbnail artwork for [songs] (default size 48 -> cacheDim 128).
@@ -178,12 +196,14 @@ class ImagePreflightService {
   void cancel() {
     _songsToken++;
     _albumsToken++;
+    _thumbsToken++;
   }
 
   /// Clears the recorded preflight cache (e.g. after sync or clear cache).
   void clearCache() {
     _songsToken++;
     _albumsToken++;
+    _thumbsToken++;
     _preflightedProviders.clear();
     AlbumArt.clearFileCache();
   }
