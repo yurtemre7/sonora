@@ -16,7 +16,10 @@ class ImagePreflightService {
   static final instance = ImagePreflightService._internal();
   factory ImagePreflightService() => instance;
 
-  var _currentToken = 0;
+  // One token per loop: songs and albums preflight run concurrently and must
+  // not cancel each other.
+  var _songsToken = 0;
+  var _albumsToken = 0;
   final _preflightedProviders = <String>{};
 
   /// Decodes and warms up an [ImageProvider] into Flutter's [imageCache].
@@ -49,7 +52,7 @@ class ImagePreflightService {
     int chunkSize = 6,
     double devicePixelRatio = 2.0,
   }) async {
-    var token = ++_currentToken;
+    var token = ++_songsToken;
     var targetDim = AlbumArt.computeCacheDim(size, devicePixelRatio);
 
     var uniquePaths = <String>[];
@@ -69,7 +72,7 @@ class ImagePreflightService {
     if (uniquePaths.isEmpty) return;
 
     for (var i = 0; i < uniquePaths.length; i += chunkSize) {
-      if (token != _currentToken) return;
+      if (token != _songsToken) return;
       var end = (i + chunkSize < uniquePaths.length)
           ? i + chunkSize
           : uniquePaths.length;
@@ -84,7 +87,7 @@ class ImagePreflightService {
       }
 
       await Future.wait(futures);
-      if (token != _currentToken) return;
+      if (token != _songsToken) return;
 
       // Yield frame slot between batches so the UI remains fluid.
       await Future<void>.delayed(const Duration(milliseconds: 16));
@@ -99,7 +102,7 @@ class ImagePreflightService {
     int chunkSize = 4,
     double devicePixelRatio = 2.0,
   }) async {
-    var token = ++_currentToken;
+    var token = ++_albumsToken;
     var targetDim = AlbumArt.computeCacheDim(size, devicePixelRatio);
 
     var uniquePaths = <String>[];
@@ -120,7 +123,7 @@ class ImagePreflightService {
     if (uniquePaths.isEmpty) return;
 
     for (var i = 0; i < uniquePaths.length; i += chunkSize) {
-      if (token != _currentToken) return;
+      if (token != _albumsToken) return;
       var end = (i + chunkSize < uniquePaths.length)
           ? i + chunkSize
           : uniquePaths.length;
@@ -135,7 +138,7 @@ class ImagePreflightService {
       }
 
       await Future.wait(futures);
-      if (token != _currentToken) return;
+      if (token != _albumsToken) return;
 
       await Future<void>.delayed(const Duration(milliseconds: 16));
     }
@@ -173,12 +176,14 @@ class ImagePreflightService {
 
   /// Cancels any active preflight loops.
   void cancel() {
-    _currentToken++;
+    _songsToken++;
+    _albumsToken++;
   }
 
   /// Clears the recorded preflight cache (e.g. after sync or clear cache).
   void clearCache() {
-    _currentToken++;
+    _songsToken++;
+    _albumsToken++;
     _preflightedProviders.clear();
     AlbumArt.clearFileCache();
   }
