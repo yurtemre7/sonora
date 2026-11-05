@@ -19,6 +19,8 @@
   "alreadyOnLatest": "You are already on the latest version.",
   "amoledDark": "AMOLED Pure Black",
   "amoledDarkSubtitle": "Use pitch black backgrounds in dark mode instead of dark gray",
+  "blurredBackgrounds": "Blurred backgrounds",
+  "blurredBackgroundsSubtitle": "Show a blurred cover behind the player and detail screens. Uses more GPU on weak phones",
   "appDescription": "A beautiful local music player for Android, built with Flutter and Material 3 Expressive design.",
   "appLanguage": "App Language",
   "appTitle": "Sonora",

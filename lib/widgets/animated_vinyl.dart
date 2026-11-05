@@ -66,57 +66,59 @@ class _AnimatedVinylState extends State<AnimatedVinyl>
           child: child,
         );
       },
-      child: Center(
-        child: Container(
-          width: widget.size,
-          height: widget.size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.black,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.4),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
-              ),
-            ],
-            // Concentric vinyl grooves
-            border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Groove lines representation
-              _buildGrooves(widget.size),
-
-              // Center label (Album Art)
-              Container(
-                width: widget.size * 0.45,
-                height: widget.size * 0.45,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black,
+      child: RepaintBoundary(
+        child: Center(
+          child: Container(
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
                 ),
-                child: ClipOval(
-                  child: AlbumArt(
-                    artworkPath: widget.artworkPath,
-                    size: widget.size * 0.45,
-                    borderRadius: widget.size * 0.45 / 2,
+              ],
+              // Concentric vinyl grooves
+              border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Groove lines representation
+                _buildGrooves(widget.size),
+
+                // Center label (Album Art)
+                Container(
+                  width: widget.size * 0.45,
+                  height: widget.size * 0.45,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.black,
+                  ),
+                  child: ClipOval(
+                    child: AlbumArt(
+                      artworkPath: widget.artworkPath,
+                      size: widget.size * 0.45,
+                      borderRadius: widget.size * 0.45 / 2,
+                    ),
                   ),
                 ),
-              ),
 
-              // Spindle hole
-              Container(
-                width: widget.size * 0.05,
-                height: widget.size * 0.05,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: theme.colorScheme.surface,
-                  border: Border.all(width: 2),
+                // Spindle hole
+                Container(
+                  width: widget.size * 0.05,
+                  height: widget.size * 0.05,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: theme.colorScheme.surface,
+                    border: Border.all(width: 2),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

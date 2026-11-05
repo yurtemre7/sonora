@@ -49,6 +49,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get amoledDarkSubtitle => 'ダークモード時に、ダークグレーではなく完全な黒背景を使用します';
 
   @override
+  String get blurredBackgrounds => 'ぼかし背景';
+
+  @override
+  String get blurredBackgroundsSubtitle =>
+      'プレーヤーと詳細画面の背後にぼかしたカバーを表示します。低性能な端末ではGPU負荷が高くなります';
+
+  @override
   String get appDescription =>
       'FlutterとMaterial 3 Expressiveデザインで構築された、Android向けの美しいローカル音楽プレーヤーです。';
 

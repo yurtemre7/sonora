@@ -241,6 +241,7 @@ class BackupService {
     'use_dynamic_theme': _PrefType.boolean,
     'use_material_you': _PrefType.boolean,
     'amoled_dark': _PrefType.boolean,
+    'blurred_backgrounds': _PrefType.boolean,
     'dynamic_theme_color': _PrefType.integer,
     'default_theme_color': _PrefType.integer,
     'now_playing_style': _PrefType.string,

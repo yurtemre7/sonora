@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +13,7 @@ import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/utils/image_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
+import 'package:sonora/widgets/blurred_cover_background.dart';
 import 'package:sonora/widgets/confirm_delete_dialog.dart';
 import 'package:sonora/widgets/edit_playlist_description_dialog.dart';
 import 'package:sonora/widgets/multi_select_action_bar.dart';
@@ -196,25 +196,10 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                 if (_playlist.coverImagePath != null ||
                     firstSong?.artworkPath != null)
                   Positioned.fill(
-                    child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: ResizeImage(
-                              FileImage(
-                                File(
-                                  _playlist.coverImagePath ??
-                                      firstSong!.artworkPath!,
-                                ),
-                              ),
-                              width: 120,
-                            ),
-                            fit: BoxFit.cover,
-                            opacity: 0.15,
-                          ),
-                        ),
-                      ),
+                    child: BlurredCoverBackground(
+                      imagePath:
+                          _playlist.coverImagePath ?? firstSong!.artworkPath!,
+                      opacity: 0.15,
                     ),
                   ),
                 CustomScrollView(

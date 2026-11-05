@@ -1,21 +1,16 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
-/// Small on-disk copies of cover art for list tiles.
-///
-/// Decoding the full cover (up to 1080px) for every tile on each cold start is
-/// what makes list covers pop in. A [dim]px PNG decodes almost instantly.
-/// Lookups are in-memory only; [ensure] creates a missing thumbnail.
+/// Small on-disk cover copies for list tiles, so a cold start decodes tiny
+/// files instead of full covers.
 class ThumbnailStore {
   ThumbnailStore._();
 
-  /// Tile cache dimension these thumbnails serve (see AlbumArt.computeCacheDim).
   static const dim = 128;
 
   static String? _dir;
   static final _ready = <String>{};
 
-  /// Points the store at [dir] and indexes the thumbnails already there.
   static Future<void> init(Directory dir) async {
     await dir.create(recursive: true);
     _dir = dir.path;
@@ -30,14 +25,12 @@ class ThumbnailStore {
       );
   }
 
-  /// Thumbnail path for [artworkPath] when it already exists, else null.
   static String? find(String artworkPath) {
     var path = _pathFor(artworkPath);
     return path != null && _ready.contains(path) ? path : null;
   }
 
-  /// Creates the thumbnail for [artworkPath] unless it exists. Failures are
-  /// swallowed: the full cover keeps working without a thumbnail.
+  /// Failures are swallowed: the full cover works without a thumbnail.
   static Future<void> ensure(String artworkPath) async {
     var target = _pathFor(artworkPath);
     if (target == null || _ready.contains(target)) return;
@@ -58,8 +51,7 @@ class ThumbnailStore {
 
   static String? _pathFor(String artworkPath) {
     if (_dir == null) return null;
-    // Two 32-bit FNV-1a hashes with different seeds: stable across runs
-    // (unlike String.hashCode) and collision-safe for a music library.
+    // FNV-1a pair: stable across runs, unlike String.hashCode.
     var h1 = 0x811c9dc5;
     var h2 = 0x01000193;
     for (var unit in artworkPath.codeUnits) {

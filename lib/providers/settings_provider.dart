@@ -16,6 +16,7 @@ class SettingsProvider extends ChangeNotifier {
   var useMaterialYou = false;
   Color? dynamicWallpaperColor;
   var amoledDark = false;
+  var blurredBackgrounds = false;
   var dynamicThemeColor = const Color(0xFF7C4DFF);
   var nowPlayingStyle = 'modern'; // 'modern' | 'vinyl' | 'minimalist'
   var showVisualizer = false;
@@ -75,6 +76,7 @@ class SettingsProvider extends ChangeNotifier {
     useDynamicTheme = await prefs.getBool('use_dynamic_theme') ?? true;
     useMaterialYou = await prefs.getBool('use_material_you') ?? false;
     amoledDark = await prefs.getBool('amoled_dark') ?? false;
+    blurredBackgrounds = await prefs.getBool('blurred_backgrounds') ?? false;
     var colorValue = await prefs.getInt('dynamic_theme_color');
     if (colorValue != null) {
       dynamicThemeColor = Color(colorValue);
@@ -309,6 +311,13 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     var prefs = SharedPreferencesAsync();
     await prefs.setBool('amoled_dark', value);
+  }
+
+  Future<void> setBlurredBackgrounds(bool value) async {
+    blurredBackgrounds = value;
+    notifyListeners();
+    var prefs = SharedPreferencesAsync();
+    await prefs.setBool('blurred_backgrounds', value);
   }
 
   Future<void> setDynamicTheme(bool value) async {

@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'dart:ui';
-
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sonora/models/grouping.dart';
@@ -11,6 +8,7 @@ import 'package:sonora/utils/format_utils.dart';
 import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
+import 'package:sonora/widgets/blurred_cover_background.dart';
 import 'package:sonora/widgets/multi_select_action_bar.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -84,20 +82,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
             // Blurred background
             if (firstSong.artworkPath != null)
               Positioned.fill(
-                child: ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: ResizeImage(
-                          FileImage(File(firstSong.artworkPath!)),
-                          width: 120,
-                        ),
-                        fit: BoxFit.cover,
-                        opacity: 0.15,
-                      ),
-                    ),
-                  ),
+                child: BlurredCoverBackground(
+                  imagePath: firstSong.artworkPath!,
+                  opacity: 0.15,
                 ),
               ),
 

@@ -170,6 +170,18 @@ abstract class AppLocalizations {
   /// **'Use pitch black backgrounds in dark mode instead of dark gray'**
   String get amoledDarkSubtitle;
 
+  /// No description provided for @blurredBackgrounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Blurred backgrounds'**
+  String get blurredBackgrounds;
+
+  /// No description provided for @blurredBackgroundsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show a blurred cover behind the player and detail screens. Uses more GPU on weak phones'**
+  String get blurredBackgroundsSubtitle;
+
   /// No description provided for @appDescription.
   ///
   /// In en, this message translates to:

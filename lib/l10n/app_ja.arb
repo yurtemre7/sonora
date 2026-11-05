@@ -12,6 +12,8 @@
   "alreadyOnLatest": "すでに最新バージョンです。",
   "amoledDark": "AMOLEDピュアブラック",
   "amoledDarkSubtitle": "ダークモード時に、ダークグレーではなく完全な黒背景を使用します",
+  "blurredBackgrounds": "ぼかし背景",
+  "blurredBackgroundsSubtitle": "プレーヤーと詳細画面の背後にぼかしたカバーを表示します。低性能な端末ではGPU負荷が高くなります",
   "appDescription": "FlutterとMaterial 3 Expressiveデザインで構築された、Android向けの美しいローカル音楽プレーヤーです。",
   "appLanguage": "アプリの言語",
   "appTitle": "Sonora",

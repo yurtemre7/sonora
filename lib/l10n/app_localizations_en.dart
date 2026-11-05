@@ -56,6 +56,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use pitch black backgrounds in dark mode instead of dark gray';
 
   @override
+  String get blurredBackgrounds => 'Blurred backgrounds';
+
+  @override
+  String get blurredBackgroundsSubtitle =>
+      'Show a blurred cover behind the player and detail screens. Uses more GPU on weak phones';
+
+  @override
   String get appDescription =>
       'A beautiful local music player for Android, built with Flutter and Material 3 Expressive design.';
 

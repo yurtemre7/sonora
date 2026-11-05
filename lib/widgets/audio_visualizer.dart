@@ -74,13 +74,15 @@ class _AudioVisualizerState extends State<AudioVisualizer>
     return AnimatedBuilder(
       animation: Listenable.merge([_waveController, _amplitudeController]),
       builder: (context, _) {
-        return CustomPaint(
-          size: Size(double.infinity, widget.height),
-          painter: _VisualizerPainter(
-            animationValue: _waveController.value,
-            amplitudeFactor: _amplitudeController.value,
-            color: widget.color,
-            barCount: widget.barCount,
+        return RepaintBoundary(
+          child: CustomPaint(
+            size: Size(double.infinity, widget.height),
+            painter: _VisualizerPainter(
+              animationValue: _waveController.value,
+              amplitudeFactor: _amplitudeController.value,
+              color: widget.color,
+              barCount: widget.barCount,
+            ),
           ),
         );
       },

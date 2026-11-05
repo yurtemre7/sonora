@@ -308,6 +308,14 @@ class AppearanceSettingsScreen extends StatelessWidget {
                       value: settingsProvider.amoledDark,
                       onChanged: (val) => settingsProvider.setAmoledDark(val),
                     ),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.blur_on_rounded),
+                      title: Text(context.l10n.blurredBackgrounds),
+                      subtitle: Text(context.l10n.blurredBackgroundsSubtitle),
+                      value: settingsProvider.blurredBackgrounds,
+                      onChanged: (val) =>
+                          settingsProvider.setBlurredBackgrounds(val),
+                    ),
                   ],
                 );
               },

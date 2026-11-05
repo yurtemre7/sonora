@@ -18,6 +18,7 @@ import 'package:sonora/widgets/animated_favorite_button.dart';
 import 'package:sonora/widgets/animated_vinyl.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
 import 'package:sonora/widgets/audio_visualizer.dart';
+import 'package:sonora/widgets/blurred_cover_background.dart';
 import 'package:sonora/widgets/marquee_text.dart';
 import 'package:sonora/widgets/mfx_bottom_sheet.dart';
 import 'package:sonora/widgets/player_controls.dart';
@@ -53,6 +54,27 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   @override
   void initState() {
     super.initState();
+  }
+
+  Widget _lyricsScrim(ThemeData theme, Widget child) {
+    var dark = theme.brightness == Brightness.dark;
+    if (!SettingsProvider.instance.blurredBackgrounds) {
+      return ColoredBox(
+        color: dark
+            ? Colors.black.withValues(alpha: 0.92)
+            : Colors.white.withValues(alpha: 0.94),
+        child: child,
+      );
+    }
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+      child: ColoredBox(
+        color: dark
+            ? Colors.black.withValues(alpha: 0.75)
+            : Colors.white.withValues(alpha: 0.80),
+        child: child,
+      ),
+    );
   }
 
   @override
@@ -160,20 +182,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             children: [
               // Blurred artwork background
               Positioned.fill(
-                child: song.artworkPath != null
-                    ? ImageFiltered(
-                        imageFilter: ImageFilter.blur(
-                          sigmaX: 50.0,
-                          sigmaY: 50.0,
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: FileImage(File(song.artworkPath!)),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
+                child:
+                    song.artworkPath != null &&
+                        SettingsProvider.instance.blurredBackgrounds
+                    ? BlurredCoverBackground(
+                        imagePath: song.artworkPath!,
+                        opacity: 1,
                       )
                     : Container(
                         decoration: BoxDecoration(
@@ -368,19 +382,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                           ),
                           if (_showLyrics)
                             Positioned.fill(
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(
-                                  sigmaX: 18.0,
-                                  sigmaY: 18.0,
-                                ),
-                                child: Container(
-                                  color: theme.brightness == Brightness.dark
-                                      ? Colors.black.withValues(alpha: 0.75)
-                                      : Colors.white.withValues(alpha: 0.80),
-                                  child: SongLyricsOverlay(
-                                    song: song,
-                                    playerProvider: widget.playerProvider,
-                                  ),
+                              child: _lyricsScrim(
+                                theme,
+                                SongLyricsOverlay(
+                                  song: song,
+                                  playerProvider: widget.playerProvider,
                                 ),
                               ),
                             ),

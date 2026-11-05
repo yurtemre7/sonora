@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -13,6 +12,7 @@ import 'package:sonora/utils/l10n_extension.dart';
 import 'package:sonora/widgets/album_art.dart';
 import 'package:sonora/widgets/animated_favorite_button.dart';
 import 'package:sonora/widgets/artist_avatar.dart';
+import 'package:sonora/widgets/blurred_cover_background.dart';
 import 'package:sonora/widgets/multi_select_action_bar.dart';
 import 'package:sonora/widgets/song_tile.dart';
 
@@ -100,20 +100,9 @@ class _ArtistDetailScreenState extends State<ArtistDetailScreen> {
             // Blurred background
             if (imagePath != null)
               Positioned.fill(
-                child: ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: ResizeImage(
-                          FileImage(File(imagePath)),
-                          width: 120,
-                        ),
-                        fit: BoxFit.cover,
-                        opacity: 0.1,
-                      ),
-                    ),
-                  ),
+                child: BlurredCoverBackground(
+                  imagePath: imagePath,
+                  opacity: 0.1,
                 ),
               ),
 
