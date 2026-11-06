@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.28.1] - 2026-11-07
+### Changed
+* Chore: Update dependencies
+
 ## [1.28.0] - 2026-11-05
 ### Added
 * Add blurred backgrounds setting and cheaper blur
