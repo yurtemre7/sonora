@@ -14,19 +14,19 @@ dependencies:
   audio_session: ^0.2.4
   audio_tags_lofty: ^0.0.9
   cupertino_icons: ^2.0.0
-  file_picker: ^13.3.2
+  file_picker: ^13.3.3
   flutter:
     sdk: flutter
-  flutter_local_notifications: ^23.0.0
+  flutter_local_notifications: ^23.0.2
   flutter_localizations:
     sdk: flutter
   flutter_markdown_plus: ^1.0.12
-  go_router: ^18.1.3
+  go_router: ^18.1.4
   http: ^1.6.0
   intl: ^0.20.2
   just_audio: ^0.10.6
   just_audio_windows: ^0.2.3
-  material_ui: ^1.10.0
+  material_ui: ^1.11.0
   path_provider: ^2.1.5
   permission_handler: ^13.0.2
   shared_preferences: ^2.5.6

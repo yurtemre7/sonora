@@ -18,9 +18,7 @@ Widget testApp(Widget child) {
   return MaterialApp(
     localizationsDelegates: const [
       AppLocalizations.delegate,
-      GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: AppLocalizations.supportedLocales,
     home: child,

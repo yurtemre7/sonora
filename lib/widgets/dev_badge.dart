@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A sleek Material 3 badge indicating a development/debug build.
 class DevBadge extends StatelessWidget {
