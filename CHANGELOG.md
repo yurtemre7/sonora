@@ -2,6 +2,10 @@
 
 All notable changes to the Sonora music player project are documented in this file.
 
+## [1.30.0] - 2026-11-14
+### Changed
+* Chore: Update to flutter 3.50.0 and migrate accordingly
+
 ## [1.28.1] - 2026-11-07
 ### Changed
 * Chore: Update dependencies
