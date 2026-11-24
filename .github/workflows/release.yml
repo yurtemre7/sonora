@@ -107,6 +107,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.1
         with:
           name: sonora-android-apk
+          retention-days: 1
           path: sonora-*.apk
           if-no-files-found: error
 
@@ -151,6 +152,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.1
         with:
           name: sonora-ios-ipa
+          retention-days: 1
           path: sonora-ios.ipa
           if-no-files-found: error
 
